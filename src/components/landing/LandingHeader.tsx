@@ -10,12 +10,15 @@ export const LandingHeader = () => {
         <Link to="/" className="flex items-center gap-3">
           <div className="relative w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
             <div className="relative">
-              <span className="text-primary-foreground font-bold text-lg">A</span>
-              <Cog className="absolute -top-1 -right-1 h-3 w-3 text-primary-foreground/80 animate-spin" style={{ animationDuration: '8s' }} />
+              <span className="text-primary-foreground font-bold text-lg">Az</span>
+              <Cog
+                className="absolute -top-1 -right-1 h-3 w-3 text-primary-foreground/80 animate-spin"
+                style={{ animationDuration: "8s" }}
+              />
             </div>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-primary tracking-tight">azab.services</h1>
+            <h1 className="text-xl font-bold text-primary tracking-tight">UberFix.shop</h1>
             <p className="text-xs text-muted-foreground font-medium">نظام إدارة طلبات الصيانة المتطور</p>
           </div>
         </Link>
@@ -51,9 +54,7 @@ export const LandingHeader = () => {
           </Button>
         </Link>
         <Link to="/register">
-          <Button size="sm">
-            إنشاء حساب
-          </Button>
+          <Button size="sm">إنشاء حساب</Button>
         </Link>
       </div>
     </header>
