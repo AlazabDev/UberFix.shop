@@ -70,6 +70,12 @@ const items = [
     href: "/map"
   },
   {
+    icon: MapPin,
+    label: "خريطة الخدمات",
+    href: "/service-map",
+    badge: "جديد"
+  },
+  {
     icon: FileText,
     label: "التوثيق",
     href: "/documentation"

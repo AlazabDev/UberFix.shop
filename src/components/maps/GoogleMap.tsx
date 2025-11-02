@@ -84,9 +84,9 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
       const loader = new Loader({
         apiKey: apiKey,
         version: 'weekly',
-        libraries: ['places'],
+        libraries: ['places', 'marker'],
         language: 'ar',
-        region: 'EG'
+        region: 'SA'
       });
 
       const google = await loader.load();
@@ -150,8 +150,8 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
 
   const addMarkers = (mapInstance: google.maps.Map, google: any) => {
     markers.forEach(marker => {
-      // استخدام AdvancedMarkerElement بدلاً من Marker القديم
-      const mapMarker = new google.maps.marker.AdvancedMarkerElement({
+      // استخدام Marker العادي لضمان التوافق
+      const mapMarker = new google.maps.Marker({
         position: { lat: marker.lat, lng: marker.lng },
         map: mapInstance,
         title: marker.title,
@@ -159,7 +159,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
       });
 
       const infoWindow = new google.maps.InfoWindow({
-        content: `<div><strong>${marker.title}</strong></div>`
+        content: `<div style="padding: 8px;"><strong>${marker.title}</strong></div>`
       });
 
       mapMarker.addListener('click', () => {
