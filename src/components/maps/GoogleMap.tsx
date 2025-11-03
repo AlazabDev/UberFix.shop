@@ -49,23 +49,34 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
 
   const fetchApiKey = async () => {
     try {
+      console.log('🗺️ Fetching Google Maps API key...');
+      
       // جلب API key من Supabase Edge Function فقط (آمن)
       const response = await supabase.functions.invoke('get-maps-key');
+      
+      console.log('📡 Edge Function Response:', {
+        hasData: !!response.data,
+        hasError: !!response.error,
+        data: response.data,
+        error: response.error
+      });
+      
       if (response.data && response.data.apiKey) {
+        console.log('✅ API Key loaded successfully');
         setApiKey(response.data.apiKey);
       } else {
-        console.error('Failed to fetch API key from Supabase function:', response.error);
+        console.error('❌ Failed to fetch API key from Supabase function:', response.error);
         toast({
           title: "خطأ في تحميل مفتاح API",
-          description: "فشل في جلب مفتاح Google Maps. تواصل مع المدير.",
+          description: `فشل في جلب مفتاح Google Maps: ${response.error?.message || 'خطأ غير معروف'}`,
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error fetching API key from Supabase:', error);
+      console.error('❌ Error fetching API key from Supabase:', error);
       toast({
         title: "خطأ في الاتصال",
-        description: "فشل الاتصال بالخادم. حاول مرة أخرى.",
+        description: `فشل الاتصال بالخادم: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
         variant: "destructive",
       });
     }
@@ -80,6 +91,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   const initializeMap = async () => {
     try {
       setIsLoading(true);
+      console.log('🗺️ Initializing Google Maps...');
       
       // استخدام مكتبة places فقط لضمان التوافق الكامل
       const loader = new Loader({
@@ -90,7 +102,9 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
         region: 'EG'
       });
 
+      console.log('📦 Loading Google Maps API...');
       const google = await loader.load();
+      console.log('✅ Google Maps API loaded successfully');
       
       const mapInstance = new google.maps.Map(mapRef.current!, {
         center: { lat: latitude, lng: longitude },
@@ -139,11 +153,16 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
 
       setIsLoading(false);
     } catch (error) {
-      console.error('Error loading Google Maps:', error);
+      console.error('❌ Error loading Google Maps:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
       setIsLoading(false);
+      
       toast({
-        title: "خطأ",
-        description: "فشل في تحميل الخريطة. تأكد من صحة API Key.",
+        title: "خطأ في تحميل الخريطة",
+        description: error instanceof Error ? error.message : "تأكد من صحة API Key ومن تفعيل Google Maps API.",
         variant: "destructive",
       });
     }
