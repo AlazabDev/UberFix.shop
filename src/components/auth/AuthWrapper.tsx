@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
-import { LoginForm } from './LoginForm';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -50,7 +49,9 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   if (!user) {
-    return <LoginForm />;
+    // توجيه المستخدم غير المسجل إلى صفحة اختيار الدور
+    navigate('/role-selection', { replace: true });
+    return null;
   }
 
   return <>{children}</>;

@@ -48,12 +48,12 @@ export const LandingHeader = () => {
 
       {/* Auth Buttons */}
       <div className="flex items-center gap-4">
-        <Link to="/login">
+        <Link to="/role-selection">
           <Button variant="outline" size="sm">
             تسجيل الدخول
           </Button>
         </Link>
-        <Link to="/register">
+        <Link to="/role-selection">
           <Button size="sm">إنشاء حساب</Button>
         </Link>
       </div>
