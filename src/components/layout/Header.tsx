@@ -112,12 +112,12 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
             </div>
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-xl font-bold text-primary tracking-tight">azab.services</h1>
+            <h1 className="text-xl font-bold text-primary tracking-tight">UberFix.shop</h1>
             <p className="text-xs text-muted-foreground font-medium">نظام إدارة طلبات الصيانة المتطور</p>
           </div>
           {/* Mobile Logo Text */}
           <div className="block sm:hidden">
-            <h1 className="text-sm font-bold text-primary tracking-tight">azab.services</h1>
+            <h1 className="text-sm font-bold text-primary tracking-tight">UberFix.shop</h1>
           </div>
         </div>
       </div>

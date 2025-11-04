@@ -150,7 +150,7 @@ export function AppSidebar() {
           {state !== "collapsed" && (
             <div className="text-xs text-muted-foreground text-center space-y-1">
               <p className="font-medium">نسخة 1.0.0</p>
-              <p>© 2024 azab.services</p>
+              <p>© 2024 UberFix.shop</p>
             </div>
           )}
         </div>

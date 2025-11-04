@@ -48,7 +48,7 @@ export const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4" />
-                <span className="text-sm">info@azab.services</span>
+                <span className="text-sm">info@uberfix.shop</span>
               </div>
               <div className="flex items-center gap-3">
                 <MapPin className="h-4 w-4" />
@@ -151,7 +151,7 @@ export const Footer = () => {
       <div className="border-t border-primary-foreground/20">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-primary-foreground/70">© 2024 azab.services. جميع الحقوق محفوظة.</div>
+            <div className="text-sm text-primary-foreground/70">© 2024 UberFix.shop. جميع الحقوق محفوظة.</div>
 
             {/* Social Links */}
             <div className="flex items-center gap-4">

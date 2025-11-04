@@ -26,8 +26,8 @@ export default function Login() {
       bgGradient: "from-purple-50/50 to-background dark:from-purple-950/20"
     },
     vendor: {
-      title: "الموظفين",
-      description: "تسجيل الدخول لحساب الموظفين",
+      title: "الفنيون",
+      description: "تسجيل الدخول لحساب الفنيون",
       icon: Wrench,
       color: "green",
       bgGradient: "from-green-50/50 to-background dark:from-green-950/20"
@@ -105,7 +105,7 @@ export default function Login() {
               </div>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-primary tracking-tight">azab.services</h1>
+          <h1 className="text-2xl font-bold text-primary tracking-tight">UberFix.shop</h1>
           <p className="text-muted-foreground mt-2">نظام إدارة طلبات الصيانة المتطور</p>
         </div>
 

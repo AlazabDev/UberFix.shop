@@ -104,7 +104,7 @@ export default function Register() {
               </div>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-primary tracking-tight">azab.services</h1>
+          <h1 className="text-2xl font-bold text-primary tracking-tight">UberFix.shop</h1>
           <p className="text-muted-foreground mt-2">نظام إدارة طلبات الصيانة المتطور</p>
         </div>
 

@@ -16,9 +16,9 @@ export default function RoleSelection() {
             </div>
           </div>
         </div>
-        <h1 className="text-4xl font-bold text-primary mb-2">Al-Azab Construction ERP</h1>
-        <p className="text-xl text-muted-foreground mb-1">نظام تخطيط موارد المؤسسة المتكامل</p>
-        <p className="text-sm text-primary/70 mb-8">نظام تخطيط موارد المؤسسة المتكامل</p>
+        <h1 className="text-4xl font-bold text-primary mb-2">UberFix.shop</h1>
+        <p className="text-xl text-muted-foreground mb-1">نظام إدارة طلبات الصيانة المتطور</p>
+        <p className="text-sm text-primary/70 mb-8">النظام الشامل لإدارة الصيانة والعقارات</p>
         
         <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
           <Shield className="h-4 w-4 text-primary" />
@@ -62,9 +62,9 @@ export default function RoleSelection() {
               <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
                 <Wrench className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
-              <CardTitle className="text-2xl">الموظفين</CardTitle>
+              <CardTitle className="text-2xl">الفنيون</CardTitle>
               <CardDescription className="text-base">
-                للموظفين والوصول إلى أدوات العمل الوصفية وإدارة المهام والمناهات
+                للفنيون والوصول إلى أدوات العمل الوصفية وإدارة المهام والمواعيد
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -75,7 +75,7 @@ export default function RoleSelection() {
               </ul>
               <Link to="/login?role=vendor" className="block">
                 <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
-                  تسجيل الدخول كـ الموظفين
+                  تسجيل الدخول كـ الفنيون
                 </Button>
               </Link>
             </CardContent>

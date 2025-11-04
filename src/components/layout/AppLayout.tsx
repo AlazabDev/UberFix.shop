@@ -114,7 +114,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   </div>
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-lg font-bold text-primary">azab.services</h1>
+                  <h1 className="text-lg font-bold text-primary">UberFix.shop</h1>
                   <p className="text-xs text-muted-foreground">إدارة الصيانة</p>
                 </div>
               </div>

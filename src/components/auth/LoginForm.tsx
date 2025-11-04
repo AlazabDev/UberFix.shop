@@ -152,7 +152,7 @@ export function LoginForm() {
           <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-lg flex items-center justify-center mb-4">
             <Building2 className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold">azab.services</CardTitle>
+          <CardTitle className="text-2xl font-bold">UberFix.shop</CardTitle>
           <p className="text-muted-foreground">نظام إدارة طلبات الصيانة</p>
         </CardHeader>
         <CardContent>
@@ -164,7 +164,7 @@ export function LoginForm() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@azab.services"
+                placeholder="admin@uberfix.shop"
                 required
               />
             </div>
@@ -238,7 +238,7 @@ export function LoginForm() {
               <strong>خطوات البدء:</strong><br />
               1. اضغط "إنشاء حساب" لإنشاء حساب جديد<br />
               2. ثم سجل الدخول بنفس البيانات<br />
-              <strong>مثال:</strong> admin@azab.services
+              <strong>مثال:</strong> admin@uberfix.shop
             </p>
           </div>
         </CardContent>

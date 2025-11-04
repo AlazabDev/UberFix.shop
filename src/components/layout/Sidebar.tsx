@@ -102,7 +102,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">A</span>
           </div>
-          <span className="font-semibold text-foreground">azab.services</span>
+          <span className="font-semibold text-foreground">UberFix.shop</span>
         </div>
         <Button
           variant="ghost"
@@ -147,7 +147,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
       <div className="p-4 border-t border-border mt-auto">
         <div className="text-xs text-muted-foreground text-center space-y-1">
           <p className="font-medium">نسخة 1.0.0</p>
-          <p>© 2024 azab.services</p>
+          <p>© 2024 UberFix.shop</p>
         </div>
       </div>
     </aside>
