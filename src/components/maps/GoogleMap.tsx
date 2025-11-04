@@ -40,6 +40,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   const [searchValue, setSearchValue] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [apiKey, setApiKey] = useState('');
+  const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -83,17 +84,23 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   };
 
   useEffect(() => {
-    if (!apiKey || !mapRef.current) return;
+    if (!apiKey || !mapRef.current || map) return;
 
     initializeMap();
-  }, [apiKey, latitude, longitude]);
+  }, [apiKey]);
+
+  useEffect(() => {
+    if (map && (latitude !== 24.7136 || longitude !== 46.6753)) {
+      map.setCenter({ lat: latitude, lng: longitude });
+      map.setZoom(zoom);
+    }
+  }, [map, latitude, longitude, zoom]);
 
   const initializeMap = async () => {
     try {
       setIsLoading(true);
       console.log('🗺️ Initializing Google Maps...');
       
-      // استخدام مكتبة places فقط لضمان التوافق الكامل
       const loader = new Loader({
         apiKey: apiKey,
         version: 'weekly',
@@ -103,7 +110,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
       });
 
       console.log('📦 Loading Google Maps API...');
-      const google = await loader.load();
+      await loader.load();
       console.log('✅ Google Maps API loaded successfully');
       
       const mapInstance = new google.maps.Map(mapRef.current!, {
@@ -126,7 +133,9 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
       setMap(mapInstance);
 
       // إضافة الماركرز
-      addMarkers(mapInstance, google);
+      if (markers.length > 0) {
+        addMarkers(mapInstance);
+      }
 
       // إضافة إمكانية النقر على الخريطة لتحديد الموقع
       if (onLocationSelect && interactive) {
@@ -168,9 +177,20 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
     }
   };
 
-  const addMarkers = (mapInstance: google.maps.Map, google: any) => {
+  useEffect(() => {
+    if (map && markers.length > 0) {
+      addMarkers(map);
+    }
+  }, [map, markers]);
+
+  const addMarkers = (mapInstance: google.maps.Map) => {
+    // Clear existing markers
+    mapMarkers.forEach(marker => marker.setMap(null));
+    setMapMarkers([]);
+
+    const newMarkers: google.maps.Marker[] = [];
+
     markers.forEach(marker => {
-      // استخدام Marker العادي لضمان التوافق
       const mapMarker = new google.maps.Marker({
         position: { lat: marker.lat, lng: marker.lng },
         map: mapInstance,
@@ -185,7 +205,11 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
       mapMarker.addListener('click', () => {
         infoWindow.open(mapInstance, mapMarker);
       });
+
+      newMarkers.push(mapMarker);
     });
+
+    setMapMarkers(newMarkers);
   };
 
   const getMarkerIcon = (type?: string) => {
