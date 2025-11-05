@@ -56,16 +56,7 @@ export default function ServiceMap() {
 
   const fetchApiKey = async () => {
     try {
-      // استخدام المفتاح من .env مباشرة (public key)
-      const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      
-      if (envKey) {
-        console.log('✅ Google Maps API Key loaded from environment');
-        setApiKey(envKey);
-        return;
-      }
-
-      // Fallback: محاولة جلب من cache
+      // محاولة جلب من cache أولاً
       const cachedKey = getCachedApiKey();
       if (cachedKey) {
         console.log('✅ Google Maps API Key loaded from cache');
@@ -75,17 +66,25 @@ export default function ServiceMap() {
 
       console.log('🗺️ Fetching Google Maps API key from server...');
       
-      // Fallback: جلب من Edge Function
+      // جلب من Edge Function
       const response = await supabase.functions.invoke('get-maps-key');
       if (response.data?.apiKey) {
         const key = response.data.apiKey;
+        console.log('✅ API Key loaded successfully');
         
         // حفظ في cache
         setCachedApiKey(key);
         setApiKey(key);
+      } else {
+        console.error('❌ Failed to fetch API key:', response.error);
+        toast({
+          title: 'خطأ',
+          description: 'فشل تحميل مفتاح الخريطة',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
-      console.error('Error fetching API key:', error);
+      console.error('❌ Error fetching API key:', error);
       toast({
         title: 'خطأ',
         description: 'فشل تحميل مفتاح الخريطة',
