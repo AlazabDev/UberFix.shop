@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { MapPin, Navigation, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getCachedApiKey, setCachedApiKey } from '@/lib/mapsCache';
 
 // إضافة تعريفات TypeScript لـ Google Maps
 /// <reference types="google.maps" />
@@ -50,23 +51,27 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
 
   const fetchApiKey = async () => {
     try {
-      console.log('🗺️ Fetching Google Maps API key...');
+      // محاولة جلب API key من cache أولاً
+      const cachedKey = getCachedApiKey();
+      if (cachedKey) {
+        setApiKey(cachedKey);
+        return;
+      }
+
+      console.log('🗺️ Fetching Google Maps API key from server...');
       
-      // جلب API key من Supabase Edge Function فقط (آمن)
+      // جلب API key من Supabase Edge Function
       const response = await supabase.functions.invoke('get-maps-key');
-      
-      console.log('📡 Edge Function Response:', {
-        hasData: !!response.data,
-        hasError: !!response.error,
-        data: response.data,
-        error: response.error
-      });
       
       if (response.data && response.data.apiKey) {
         console.log('✅ API Key loaded successfully');
-        setApiKey(response.data.apiKey);
+        const key = response.data.apiKey;
+        
+        // حفظ في cache
+        setCachedApiKey(key);
+        setApiKey(key);
       } else {
-        console.error('❌ Failed to fetch API key from Supabase function:', response.error);
+        console.error('❌ Failed to fetch API key:', response.error);
         toast({
           title: "خطأ في تحميل مفتاح API",
           description: `فشل في جلب مفتاح Google Maps: ${response.error?.message || 'خطأ غير معروف'}`,
@@ -74,7 +79,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
         });
       }
     } catch (error) {
-      console.error('❌ Error fetching API key from Supabase:', error);
+      console.error('❌ Error fetching API key:', error);
       toast({
         title: "خطأ في الاتصال",
         description: `فشل الاتصال بالخادم: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,

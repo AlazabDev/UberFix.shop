@@ -21,6 +21,7 @@ import { ServiceRequestDialog } from '@/components/maps/ServiceRequestDialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { getCachedApiKey, setCachedApiKey } from '@/lib/mapsCache';
 
 export default function ServiceMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -58,9 +59,22 @@ export default function ServiceMap() {
 
   const fetchApiKey = async () => {
     try {
+      // محاولة جلب API key من cache أولاً
+      const cachedKey = getCachedApiKey();
+      if (cachedKey) {
+        setApiKey(cachedKey);
+        return;
+      }
+
+      console.log('🗺️ Fetching Google Maps API key from server...');
+      
       const response = await supabase.functions.invoke('get-maps-key');
       if (response.data?.apiKey) {
-        setApiKey(response.data.apiKey);
+        const key = response.data.apiKey;
+        
+        // حفظ في cache
+        setCachedApiKey(key);
+        setApiKey(key);
       }
     } catch (error) {
       console.error('Error fetching API key:', error);
