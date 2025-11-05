@@ -24,6 +24,7 @@ import AddProperty from "./pages/properties/AddProperty";
 import Appointments from "./pages/Appointments";
 import Invoices from "./pages/Invoices";
 import Map from "./pages/Map";
+import PropertiesMap from "./pages/PropertiesMap";
 import ServiceMap from "./pages/ServiceMap";
 import Documentation from "./pages/Documentation";
 import UserGuide from "./pages/UserGuide";
@@ -199,6 +200,14 @@ const App = () => {
                   <AuthWrapper>
                     <AppLayout>
                       <Map />
+                    </AppLayout>
+                  </AuthWrapper>
+                } />
+                
+                <Route path="/properties-map" element={
+                  <AuthWrapper>
+                    <AppLayout>
+                      <PropertiesMap />
                     </AppLayout>
                   </AuthWrapper>
                 } />

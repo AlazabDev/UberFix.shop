@@ -9,6 +9,7 @@ import { MaintenanceRequestDetails } from "@/components/maintenance/MaintenanceR
 import { RequestLifecycleTracker } from "@/components/maintenance/RequestLifecycleTracker";
 import { RequestWorkflowControls } from "@/components/maintenance/RequestWorkflowControls";
 import { WorkflowDiagram } from "@/components/workflow/WorkflowDiagram";
+import { WorkflowTimeline } from "@/components/requests/WorkflowTimeline";
 import { ApprovalManager } from "@/components/workflow/ApprovalManager";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,7 +155,18 @@ export default function RequestDetails() {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
-          <MaintenanceRequestDetails request={request} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <MaintenanceRequestDetails request={request} />
+            </div>
+            <div>
+              <Card className="p-6">
+                <WorkflowTimeline 
+                  currentStage={request.workflow_stage || 'submitted'} 
+                />
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         {/* Lifecycle Tab */}
