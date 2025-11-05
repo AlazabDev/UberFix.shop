@@ -23,69 +23,70 @@ export const SimpleServiceCard = ({
 }: SimpleServiceCardProps) => {
   const navigate = useNavigate();
 
-  const handleRequestService = () => {
-    navigate(`/emergency-service/${technicianId}`, {
-      state: { 
-        technicianName: name,
-        specialization,
-        rating,
-        status
-      }
-    });
+  const handleRequestService = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // إغلاق المنبثقة أولاً
+    if (onClose) {
+      onClose();
+    }
+    
+    // الانتقال للصفحة
+    setTimeout(() => {
+      navigate(`/emergency-service/${technicianId}`, {
+        state: { 
+          technicianName: name,
+          specialization,
+          rating,
+          status: status === 'available' ? 'available' : 'busy'
+        }
+      });
+    }, 100);
   };
 
   return (
-    <Card className="w-[280px] shadow-2xl border-0 rounded-2xl overflow-hidden bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm">
-      <CardContent className="p-0">
-        {/* Header with gradient */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 p-4 text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/icons/pattern.svg')] opacity-10" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-bold text-lg">{name}</h3>
-              <button
-                onClick={onClose}
-                className="text-white/80 hover:text-white transition-colors"
-                aria-label="إغلاق"
-              >
-                ✕
-              </button>
-            </div>
+    <Card className="w-[280px] shadow-2xl border-0 rounded-xl overflow-hidden bg-card">
+      <CardContent className="p-4 space-y-3">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="font-bold text-lg mb-1">{name}</h3>
             {specialization && (
-              <p className="text-sm text-white/90">{specialization}</p>
+              <p className="text-sm text-muted-foreground">{specialization}</p>
             )}
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 space-y-3">
-          {/* Status and Rating */}
-          <div className="flex items-center justify-between">
-            <Badge 
-              variant={status === 'available' ? 'default' : 'secondary'}
-              className={status === 'available' 
-                ? 'bg-[#f5bf23] text-[#111] hover:bg-[#f5bf23]/90 px-3 py-1' 
-                : 'bg-muted text-muted-foreground px-3 py-1'}
-            >
-              {status === 'available' ? '✓ متاح الآن' : '○ مشغول'}
-            </Badge>
-            <div className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-full">
-              <Star className="w-4 h-4 fill-[#f5bf23] text-[#f5bf23]" />
-              <span className="text-sm font-semibold">{rating}</span>
-            </div>
-          </div>
-
-          {/* Action Button */}
-          <Button 
-            onClick={handleRequestService}
-            className="w-full bg-[#111] hover:bg-[#111]/90 text-white font-semibold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
-            size="lg"
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onClose) onClose();
+            }}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="إغلاق"
           >
-            <Phone className="w-5 h-5 ml-2" />
-            طلب صيانة طارئة
-            <ArrowLeft className="w-4 h-4 mr-2" />
-          </Button>
+            ✕
+          </button>
         </div>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1">
+          {[...Array(5)].map((_, i) => (
+            <Star 
+              key={i} 
+              className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-[#f5bf23] text-[#f5bf23]' : 'text-muted'}`} 
+            />
+          ))}
+          <span className="text-sm font-semibold mr-2">{rating}</span>
+        </div>
+
+        {/* Action Button */}
+        <Button 
+          onClick={handleRequestService}
+          className="w-full bg-[#f5bf23] hover:bg-[#f5bf23]/90 text-[#111] font-bold py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
+          size="lg"
+        >
+          طلب صيانة طارئة
+        </Button>
       </CardContent>
     </Card>
   );

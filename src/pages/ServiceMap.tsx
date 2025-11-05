@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useBranches2, Branch2 } from '@/hooks/useBranches2';
 import { useTechnicians, Technician } from '@/hooks/useTechnicians';
+import { BRANCH_LOCATIONS } from '@/data/branch_locations';
 
 import { SimpleServiceCard } from '@/components/maps/SimpleServiceCard';
 import { BranchInfoWindow } from '@/components/maps/BranchInfoWindow';
@@ -31,7 +32,6 @@ export default function ServiceMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState<string | undefined>();
   const [selectedBranch, setSelectedBranch] = useState<Branch2 | null>(null);
-  const [selectedTechnician, setSelectedTechnician] = useState<Technician | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; address?: string } | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   
@@ -147,6 +147,47 @@ export default function ServiceMap() {
     const newMarkers: google.maps.Marker[] = [];
     const bounds = new google.maps.LatLngBounds();
 
+    // Add customer location markers (from branch_locations)
+    const customerIcon = '/pin-pro/customers.svg';
+    BRANCH_LOCATIONS.forEach((location) => {
+      if (!location.mapUrl || location.name === 'nan') return;
+      
+      const coords = parseMapUrl(location.mapUrl);
+      if (!coords) return;
+
+      const position = { lat: coords.lat, lng: coords.lng };
+      
+      const marker = new google.maps.Marker({
+        map,
+        position,
+        title: location.name,
+        icon: {
+          url: customerIcon,
+          scaledSize: new google.maps.Size(60, 72),
+          anchor: new google.maps.Point(30, 72),
+        },
+        optimized: false,
+        animation: google.maps.Animation.DROP,
+      });
+
+      marker.addListener('click', () => {
+        const infoWindow = new google.maps.InfoWindow({
+          content: `
+            <div style="padding: 8px;">
+              <h3 style="font-weight: bold; margin-bottom: 4px;">${location.name}</h3>
+              <a href="${location.mapUrl}" target="_blank" style="color: #f5bf23; text-decoration: underline;">عرض على الخريطة</a>
+            </div>
+          `
+        });
+        infoWindow.open(map, marker);
+        map.panTo(position);
+        map.setZoom(15);
+      });
+
+      newMarkers.push(marker);
+      bounds.extend(position);
+    });
+
     // Add branch markers (from branches2)
     branches.forEach((branch) => {
       // Parse location from map_url or skip if no coordinates
@@ -189,7 +230,6 @@ export default function ServiceMap() {
         infoWindow.open(map, marker);
         
         setSelectedBranch(branch);
-        setSelectedTechnician(null);
         map.panTo(position);
         map.setZoom(15);
       });
@@ -253,7 +293,6 @@ export default function ServiceMap() {
         });
         infoWindow.open(map, marker);
         
-        setSelectedTechnician(tech);
         setSelectedBranch(null);
         map.panTo(position);
         map.setZoom(15);
@@ -477,35 +516,6 @@ export default function ServiceMap() {
             <ZoomOut className="h-5 w-5" />
           </Button>
         </div>
-
-        {/* Selected Technician Info */}
-        {selectedTechnician && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 max-w-md">
-            <Card className="w-80 shadow-xl">
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-bold text-lg">{selectedTechnician.name}</h3>
-                    <p className="text-sm text-muted-foreground">{selectedTechnician.specialization}</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSelectedTechnician(null)}
-                  >
-                    ✕
-                  </Button>
-                </div>
-                <Button 
-                  onClick={() => handleRequestService(selectedTechnician.id)}
-                  className="w-full"
-                >
-                  طلب خدمة
-                </Button>
-              </div>
-            </Card>
-          </div>
-        )}
 
         {/* Selected Branch Info */}
         {selectedBranch && (
