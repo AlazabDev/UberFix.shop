@@ -1,10 +1,12 @@
-import { Star } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
+import { formatDistance } from '@/utils/distanceCalculator';
 
 interface TechnicianInfoWindowProps {
   name: string;
   specialization?: string;
   rating?: number;
   phone?: string;
+  distance?: number;
   onRequestService?: () => void;
 }
 
@@ -13,6 +15,7 @@ export const TechnicianInfoWindow = ({
   specialization, 
   rating = 5,
   phone,
+  distance,
   onRequestService
 }: TechnicianInfoWindowProps) => {
   return (
@@ -48,6 +51,13 @@ export const TechnicianInfoWindow = ({
       </div>
       {phone && (
         <p className="text-sm text-gray-600 mb-3">{phone}</p>
+      )}
+      {distance !== undefined && (
+        <div className="flex items-center gap-1 mb-3 text-sm">
+          <MapPin className="w-4 h-4 text-primary" />
+          <span className="text-gray-700 font-medium">{formatDistance(distance)}</span>
+          <span className="text-gray-500">من موقعك</span>
+        </div>
       )}
       {onRequestService && (
         <button

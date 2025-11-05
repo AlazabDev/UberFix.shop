@@ -23,6 +23,7 @@ export interface Technician {
   service_area_radius?: number | null;
   is_active: boolean;
   is_verified: boolean;
+  distance?: number; // Calculated distance from user location
 }
 
 export interface SpecializationIcon {

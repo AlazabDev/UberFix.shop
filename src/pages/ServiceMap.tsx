@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Search, 
   Navigation, 
@@ -12,7 +13,8 @@ import {
   ZoomIn,
   ZoomOut,
   Store,
-  Users
+  Users,
+  MapPin
 } from 'lucide-react';
 import { useBranches2, Branch2 } from '@/hooks/useBranches2';
 import { useTechnicians, Technician } from '@/hooks/useTechnicians';
@@ -24,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getCachedApiKey, setCachedApiKey } from '@/lib/mapsCache';
 import { getBranchIcon, getTechnicianIcon } from '@/utils/mapIconHelper';
+import { calculateDistance, formatDistance } from '@/utils/distanceCalculator';
 
 export default function ServiceMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -37,6 +40,7 @@ export default function ServiceMap() {
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [currentInfoWindow, setCurrentInfoWindow] = useState<google.maps.InfoWindow | null>(null);
   const [showServiceRequest, setShowServiceRequest] = useState(false);
+  const [maxDistance, setMaxDistance] = useState<number | undefined>(undefined);
   
   const { branches, loading: branchesLoading, refetch: refetchBranches } = useBranches2();
   const { technicians, specializationIcons, loading: techniciansLoading, refetch: refetchTechnicians } = useTechnicians();
@@ -58,7 +62,33 @@ export default function ServiceMap() {
     if (map && (branches.length > 0 || technicians.length > 0)) {
       updateMarkers();
     }
-  }, [map, branches, technicians, selectedSpecialization]);
+  }, [map, branches, technicians, selectedSpecialization, userLocation, maxDistance]);
+
+  // Calculate technicians with distances
+  const techniciansWithDistance = useMemo(() => {
+    if (!userLocation) return technicians;
+
+    return technicians
+      .map(tech => {
+        if (!tech.current_latitude || !tech.current_longitude) {
+          return { ...tech, distance: undefined };
+        }
+        
+        const distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          tech.current_latitude,
+          tech.current_longitude
+        );
+        
+        return { ...tech, distance };
+      })
+      .sort((a, b) => {
+        if (a.distance === undefined) return 1;
+        if (b.distance === undefined) return -1;
+        return a.distance - b.distance;
+      });
+  }, [technicians, userLocation]);
 
   const fetchApiKey = async () => {
     try {
@@ -203,10 +233,15 @@ export default function ServiceMap() {
       bounds.extend(position);
     });
 
-    // Add technician markers
-    const filteredTechs = selectedSpecialization 
-      ? technicians.filter(t => t.specialization === selectedSpecialization)
-      : technicians;
+    // Add technician markers with distance filtering
+    let filteredTechs = selectedSpecialization 
+      ? techniciansWithDistance.filter(t => t.specialization === selectedSpecialization)
+      : techniciansWithDistance;
+
+    // Apply distance filter if set
+    if (maxDistance !== undefined && userLocation) {
+      filteredTechs = filteredTechs.filter(t => t.distance !== undefined && t.distance <= maxDistance);
+    }
 
     filteredTechs.forEach((tech) => {
       if (!tech.current_latitude || !tech.current_longitude) return;
@@ -247,12 +282,16 @@ export default function ServiceMap() {
           }
         };
 
+        // Get distance from tech object if available
+        const distance = tech.distance;
+
         root.render(
           <TechnicianInfoWindow
             name={tech.name}
             specialization={tech.specialization || 'فني صيانة'}
             rating={5}
             phone={tech.phone || ''}
+            distance={distance}
             onRequestService={handleRequestService}
           />
         );
@@ -395,9 +434,9 @@ export default function ServiceMap() {
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search & Distance Filter Bar */}
       <div className="bg-card px-4 py-3 border-b">
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-2">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -412,6 +451,25 @@ export default function ServiceMap() {
             <Search className="h-4 w-4" />
           </Button>
         </div>
+        
+        {/* Distance Filter */}
+        {userLocation && (
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+            <Select value={maxDistance?.toString() || 'all'} onValueChange={(v) => setMaxDistance(v === 'all' ? undefined : Number(v))}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="نطاق البحث" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الفنيين</SelectItem>
+                <SelectItem value="5">ضمن 5 كم</SelectItem>
+                <SelectItem value="10">ضمن 10 كم</SelectItem>
+                <SelectItem value="20">ضمن 20 كم</SelectItem>
+                <SelectItem value="50">ضمن 50 كم</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Specialization Filters */}
