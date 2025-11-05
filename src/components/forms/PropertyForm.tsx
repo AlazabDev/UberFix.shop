@@ -85,7 +85,8 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
       type: "residential",
       country_code: "EG",
       temp_contact_country_code: "+20"
-    }
+    },
+    mode: "onChange" // Enable validation on change
   });
 
   const propertyType = watch("type");
@@ -130,34 +131,52 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
   }, [selectedCity]);
 
   const onSubmit = async (data: PropertyFormData) => {
+    // Validate required fields
+    if (!data.name || data.name.trim().length < 3) {
+      toast({
+        variant: "destructive",
+        title: "خطأ في البيانات",
+        description: "يرجى إدخال اسم العقار (3 أحرف على الأقل)",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        throw new Error("يجب تسجيل الدخول أولاً");
+        toast({
+          variant: "destructive",
+          title: "خطأ",
+          description: "يجب تسجيل الدخول أولاً",
+        });
+        return;
       }
 
-      // إنشاء العقار مع حفظ إحداثيات الخريطة (بدون region_id لأنه غير موجود في الجدول)
+      // إنشاء العقار مع حفظ إحداثيات الخريطة
       const { error: insertError } = await supabase
         .from("properties")
         .insert([{
-          name: data.name,
+          name: data.name.trim(),
           type: data.type,
-          address: data.address || location?.address || '',
+          address: data.address?.trim() || location?.address || '',
           area: data.area || null,
           rooms: data.rooms || null,
-          description: data.description || null,
+          description: data.description?.trim() || null,
           latitude: location?.latitude || null,
           longitude: location?.longitude || null,
           status: "active",
           manager_id: user.id,
         }]);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error("Insert error:", insertError);
+        throw new Error(insertError.message || "حدث خطأ أثناء إضافة العقار");
+      }
 
       toast({
-        title: "تم بنجاح",
+        title: "تم بنجاح ✓",
         description: "تم إضافة العقار بنجاح",
       });
 
@@ -167,10 +186,11 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
         navigate("/properties");
       }
     } catch (error: any) {
+      console.error("Submit error:", error);
       toast({
         variant: "destructive",
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء إضافة العقار",
+        title: "خطأ في الإضافة",
+        description: error.message || "حدث خطأ أثناء إضافة العقار. يرجى المحاولة مرة أخرى",
       });
     } finally {
       setIsSubmitting(false);

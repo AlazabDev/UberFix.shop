@@ -49,20 +49,23 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <GoogleMap
-          latitude={selectedLocation?.lat || 24.7136}
-          longitude={selectedLocation?.lng || 46.6753}
-          onLocationSelect={handleLocationSelect}
-          markers={selectedLocation ? [{
-            id: 'selected',
-            lat: selectedLocation.lat,
-            lng: selectedLocation.lng,
-            title: 'الموقع المحدد',
-            type: 'user'
-          }] : []}
-          height="300px"
-          interactive={true}
-        />
+        <div className="relative" style={{ minHeight: "300px" }}>
+          <GoogleMap
+            latitude={selectedLocation?.lat || 30.0444}
+            longitude={selectedLocation?.lng || 31.2357}
+            zoom={12}
+            onLocationSelect={handleLocationSelect}
+            markers={selectedLocation ? [{
+              id: 'selected',
+              lat: selectedLocation.lat,
+              lng: selectedLocation.lng,
+              title: 'الموقع المحدد',
+              type: 'user'
+            }] : []}
+            height="300px"
+            interactive={true}
+          />
+        </div>
         
         {selectedLocation && (
           <div className="space-y-4">
