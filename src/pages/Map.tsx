@@ -5,8 +5,6 @@ import { useState, useMemo } from "react";
 import { useBranches2 } from "@/hooks/useBranches2";
 import { useTechnicians } from "@/hooks/useTechnicians";
 import { parseLocation } from "@/utils/mapIconHelper";
-import { BranchMarkerInfo } from "@/components/maps/BranchMarkerInfo";
-import { TechnicianMarkerInfo } from "@/components/maps/TechnicianMarkerInfo";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -213,23 +211,38 @@ export default function Map() {
             {/* Technician Info Card */}
             {selectedTechnician && (
               <div className="absolute top-4 left-4 z-10 max-w-sm animate-in slide-in-from-left duration-300">
-                <TechnicianMarkerInfo
-                  technician={selectedTechnician}
-                  specializationNameAr={selectedTechnician.specializationNameAr}
-                  onRequestService={handleRequestService}
-                  onClose={() => setSelectedTechnician(null)}
-                />
+                <div className="bg-background p-4 rounded-lg shadow-xl border-2 border-primary">
+                  <h3 className="font-bold text-lg">{selectedTechnician.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedTechnician.specializationNameAr}</p>
+                  <button 
+                    onClick={() => handleRequestService(selectedTechnician.id)}
+                    className="mt-2 w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90"
+                  >
+                    طلب خدمة
+                  </button>
+                  <button 
+                    onClick={() => setSelectedTechnician(null)}
+                    className="mt-2 w-full bg-muted text-muted-foreground px-4 py-2 rounded-lg hover:bg-muted/80"
+                  >
+                    إغلاق
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Branch Info Card */}
             {selectedBranch && (
               <div className="absolute top-4 left-4 z-10 max-w-sm animate-in slide-in-from-left duration-300">
-                <BranchMarkerInfo
-                  branch={selectedBranch}
-                  onRequestService={handleRequestService}
-                  onClose={() => setSelectedBranch(null)}
-                />
+                <div className="bg-background p-4 rounded-lg shadow-xl border-2 border-blue-500">
+                  <h3 className="font-bold text-lg">{selectedBranch.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedBranch.location}</p>
+                  <button 
+                    onClick={() => setSelectedBranch(null)}
+                    className="mt-2 w-full bg-muted text-muted-foreground px-4 py-2 rounded-lg hover:bg-muted/80"
+                  >
+                    إغلاق
+                  </button>
+                </div>
               </div>
             )}
 

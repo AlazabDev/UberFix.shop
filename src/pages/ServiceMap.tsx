@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useBranches2, Branch2 } from '@/hooks/useBranches2';
 import { useTechnicians, Technician } from '@/hooks/useTechnicians';
-import { TechnicianMarkerInfo } from '@/components/maps/TechnicianMarkerInfo';
+
 import { TechnicianInfoWindow } from '@/components/maps/TechnicianInfoWindow';
 import { BranchInfoWindow } from '@/components/maps/BranchInfoWindow';
 import { useToast } from '@/hooks/use-toast';
@@ -477,11 +477,29 @@ export default function ServiceMap() {
         {/* Selected Technician Info */}
         {selectedTechnician && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 max-w-md">
-            <TechnicianMarkerInfo
-              technician={selectedTechnician}
-              onRequestService={handleRequestService}
-              onClose={() => setSelectedTechnician(null)}
-            />
+            <Card className="w-80 shadow-xl">
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="font-bold text-lg">{selectedTechnician.name}</h3>
+                    <p className="text-sm text-muted-foreground">{selectedTechnician.specialization}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setSelectedTechnician(null)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <Button 
+                  onClick={() => handleRequestService(selectedTechnician.id)}
+                  className="w-full"
+                >
+                  طلب خدمة
+                </Button>
+              </div>
+            </Card>
           </div>
         )}
 

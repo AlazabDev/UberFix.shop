@@ -19,7 +19,9 @@ import {
   Download,
   RefreshCw
 } from "lucide-react";
-import { useStats } from "@/hooks/useSupabaseData";
+import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
+import { useProjects } from "@/hooks/useProjects";
+import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SystemMetrics {
@@ -41,7 +43,28 @@ interface DatabaseMetrics {
 export default function ProductionReport() {
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
-  const stats = useStats();
+  const { requests } = useMaintenanceRequests();
+  const { projects } = useProjects();
+  
+  const stats = useMemo(() => ({
+    pendingRequests: requests.filter(r => r.status === 'pending').length,
+    todayRequests: requests.filter(r => {
+      const today = new Date().toDateString();
+      return new Date(r.created_at).toDateString() === today;
+    }).length,
+    completedRequests: requests.filter(r => r.status === 'completed').length,
+    totalRequests: requests.length,
+    thisMonthRequests: requests.filter(r => {
+      const thisMonth = new Date().getMonth();
+      const thisYear = new Date().getFullYear();
+      const requestDate = new Date(r.created_at);
+      return requestDate.getMonth() === thisMonth && requestDate.getFullYear() === thisYear;
+    }).length,
+    totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
+    actualCost: projects.reduce((sum, p) => sum + (p.actual_cost || 0), 0),
+    activeProjects: projects.filter(p => p.status === 'planning' || p.status === 'design').length,
+    completedProjects: projects.filter(p => p.status === 'completed').length,
+  }), [requests, projects]);
   
   // System metrics simulation (replace with real metrics from your monitoring)
   const [systemMetrics] = useState<SystemMetrics>({

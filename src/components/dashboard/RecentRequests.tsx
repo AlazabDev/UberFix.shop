@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, MapPin, Clock, User, Loader2, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useMaintenanceRequests } from "@/hooks/useSupabaseData";
+import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "معلق", className: "bg-warning text-warning-foreground" },
@@ -49,7 +49,7 @@ export const RecentRequests = () => {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-destructive">
-            {error}
+            {error?.message || 'حدث خطأ في تحميل البيانات'}
           </div>
         </CardContent>
       </Card>
