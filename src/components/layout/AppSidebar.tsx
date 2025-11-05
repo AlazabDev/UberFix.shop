@@ -11,8 +11,10 @@ import {
   Calendar,
   DollarSign,
   PlayCircle,
-  Activity
+  Activity,
+  ListChecks
 } from "lucide-react";
+import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 
 import {
   Sidebar,
@@ -36,8 +38,13 @@ const items = [
   {
     icon: ClipboardList,
     label: "طلبات الصيانة",
-    href: "/requests",
-    badge: "2"
+    href: "/requests"
+  },
+  {
+    icon: ListChecks,
+    label: "كل الطلبات",
+    href: "/all-requests",
+    showBadge: true
   },
   {
     icon: Users,
@@ -106,6 +113,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { requests } = useMaintenanceRequests();
 
   const isActive = (path: string) => currentPath === path;
   const isExpanded = items.some((i) => isActive(i.href));
@@ -132,6 +140,11 @@ export function AppSidebar() {
                           {item.badge && (
                             <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full font-semibold mr-auto">
                               {item.badge}
+                            </span>
+                          )}
+                          {item.showBadge && requests.length > 0 && (
+                            <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-semibold mr-auto">
+                              {requests.length}
                             </span>
                           )}
                         </>

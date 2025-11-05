@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Requests from "./pages/Requests";
+import AllRequests from "./pages/AllRequests";
 import RequestDetails from "./pages/RequestDetails";
 import Vendors from "./pages/Vendors";
 import Reports from "./pages/Reports";
@@ -102,6 +103,14 @@ const App = () => {
                   <AuthWrapper>
                     <AppLayout>
                       <Requests />
+                    </AppLayout>
+                  </AuthWrapper>
+                } />
+                
+                <Route path="/all-requests" element={
+                  <AuthWrapper>
+                    <AppLayout>
+                      <AllRequests />
                     </AppLayout>
                   </AuthWrapper>
                 } />
