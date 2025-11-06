@@ -164,8 +164,8 @@ export default function ServiceMap() {
         title: name,
         icon: {
           url: customerIcon,
-          scaledSize: new google.maps.Size(40, 48),
-          anchor: new google.maps.Point(20, 48),
+          scaledSize: new google.maps.Size(50, 60),
+          anchor: new google.maps.Point(25, 60),
           origin: new google.maps.Point(0, 0),
         },
         optimized: false,

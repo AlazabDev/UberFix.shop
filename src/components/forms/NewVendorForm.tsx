@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { IconSelector } from "./IconSelector";
 
 interface NewVendorFormProps {
   onClose: () => void;
@@ -25,7 +26,8 @@ export const NewVendorForm = ({ onClose, onSuccess }: NewVendorFormProps) => {
     address: "",
     unit_rate: "",
     experience_years: "",
-    notes: ""
+    notes: "",
+    map_icon: null as string | null
   });
   
   const [certifications, setCertifications] = useState<string[]>([]);
@@ -254,6 +256,12 @@ export const NewVendorForm = ({ onClose, onSuccess }: NewVendorFormProps) => {
               ))}
             </div>
           </div>
+
+          <IconSelector
+            value={formData.map_icon}
+            onChange={(iconPath) => setFormData(prev => ({ ...prev, map_icon: iconPath }))}
+            specialization={formData.specialization[0]}
+          />
 
           <div>
             <Label htmlFor="notes">ملاحظات</Label>
