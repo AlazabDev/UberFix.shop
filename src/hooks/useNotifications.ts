@@ -86,7 +86,20 @@ export const useNotifications = () => {
     }
   };
 
-  const createNotification = async (notification: Omit<Notification, 'id' | 'created_at' | 'updated_at'>) => {
+  const createNotification = async (
+    notification: Omit<Notification, 'id' | 'created_at' | 'updated_at'>,
+    sendEmail: boolean = false,
+    emailData?: {
+      recipient_email: string;
+      recipient_name: string;
+      notification_type: 'request_created' | 'status_update' | 'vendor_assigned' | 'request_completed';
+      request_id: string;
+      request_title: string;
+      request_status?: string;
+      vendor_name?: string;
+      notes?: string;
+    }
+  ) => {
     try {
       const { data, error } = await supabase
         .from('notifications')
@@ -95,6 +108,19 @@ export const useNotifications = () => {
         .single();
 
       if (error) throw error;
+
+      // إرسال بريد إلكتروني إذا كان مطلوباً
+      if (sendEmail && emailData) {
+        try {
+          await supabase.functions.invoke('send-email-notification', {
+            body: emailData
+          });
+        } catch (emailError) {
+          console.error('Error sending email notification:', emailError);
+          // لا نريد فشل الإشعار بسبب فشل البريد
+        }
+      }
+
       return { success: true, data };
     } catch (err) {
       return { success: false, error: err instanceof Error ? err.message : 'خطأ في إرسال الإشعار' };

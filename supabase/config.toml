@@ -57,3 +57,9 @@ verify_jwt = true
 
 [functions.get-maps-key]
 verify_jwt = true
+
+[functions.send-email-notification]
+verify_jwt = false
+
+[functions.send-invoice-email]
+verify_jwt = false
