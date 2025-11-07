@@ -74,18 +74,13 @@ const items = [
   {
     icon: MapPin,
     label: "الخريطة",
-    href: "/map"
-  },
-  {
-    icon: MapPin,
-    label: "خريطة العقارات",
-    href: "/properties-map"
+    href: "/map",
+    badge: "جديد"
   },
   {
     icon: MapPin,
     label: "خريطة الخدمات",
-    href: "/service-map",
-    badge: "جديد"
+    href: "/service-map"
   },
   {
     icon: FileText,
