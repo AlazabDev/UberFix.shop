@@ -23,10 +23,7 @@ import {
   Menu,
   ArrowRight
 } from 'lucide-react';
-import { useBranches2, Branch2 } from '@/hooks/useBranches2';
 import { useTechnicians, Technician } from '@/hooks/useTechnicians';
-import { BRANCH_LOCATIONS } from '@/data/branch_locations';
-
 import { SimpleServiceCard } from '@/components/maps/SimpleServiceCard';
 import { EnhancedServiceCard } from '@/components/maps/EnhancedServiceCard';
 import { BranchInfoWindow } from '@/components/maps/BranchInfoWindow';
@@ -43,17 +40,17 @@ export default function ServiceMap() {
   const [apiKey, setApiKey] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState<string | undefined>();
-  const [selectedBranch, setSelectedBranch] = useState<Branch2 | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<any | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; address?: string } | null>(null);
   const [markerClusterer, setMarkerClusterer] = useState<MarkerClusterer | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
   
-  const { branches, loading: branchesLoading, refetch: refetchBranches } = useBranches2();
+  const [branches, setBranches] = useState<any[]>([]);
   const { technicians, specializationIcons, loading: techniciansLoading, refetch: refetchTechnicians } = useTechnicians();
   const { toast } = useToast();
   
-  const loading = branchesLoading || techniciansLoading;
+  const loading = techniciansLoading;
 
   useEffect(() => {
     fetchApiKey();
@@ -202,86 +199,9 @@ export default function ServiceMap() {
       bounds.extend(position);
     };
     
-    // Process all branch locations with geocoding
-    BRANCH_LOCATIONS.forEach((location, index) => {
-      if (!location.mapUrl || location.name === 'nan') return;
-      
-      // Try to extract coordinates from URL first
-      const coords = parseMapUrl(location.mapUrl);
-      if (coords) {
-        addCustomerMarker(coords, location.name);
-      } else {
-        // Extract place name from URL and geocode it
-        const placeMatch = location.mapUrl.match(/q=([^&]+)/);
-        if (placeMatch) {
-          const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
-          
-          // Add delay to avoid hitting API rate limits
-          setTimeout(() => {
-            geocoder.geocode({ address: placeName + ', مصر' }, (results, status) => {
-              if (status === 'OK' && results && results[0]) {
-                const position = {
-                  lat: results[0].geometry.location.lat(),
-                  lng: results[0].geometry.location.lng()
-                };
-                addCustomerMarker(position, location.name);
-              }
-            });
-          }, index * 100); // 100ms delay between requests
-        }
-      }
-    });
+    // Branch locations feature removed - was using deprecated BRANCH_LOCATIONS data
 
-    // Add branch markers (from branches2)
-    branches.forEach((branch) => {
-      // Parse location from map_url or skip if no coordinates
-      if (!branch.map_url) return;
-      
-      const coords = parseMapUrl(branch.map_url);
-      if (!coords) return;
-
-      const position = { lat: coords.lat, lng: coords.lng };
-      const branchIcon = getBranchIcon();
-      
-      const marker = new google.maps.Marker({
-        map,
-        position,
-        title: branch.name,
-        icon: {
-          url: branchIcon.icon,
-          scaledSize: new google.maps.Size(50, 60),
-          anchor: new google.maps.Point(25, 60),
-          origin: new google.maps.Point(0, 0),
-        },
-        optimized: false,
-        animation: google.maps.Animation.DROP,
-      });
-
-      marker.addListener('click', () => {
-        const infoDiv = document.createElement('div');
-        const root = createRoot(infoDiv);
-        root.render(
-          <BranchInfoWindow
-            name={branch.name}
-            address={branch.location || ''}
-            phone={branch.phone || ''}
-            openingHours=""
-          />
-        );
-
-        const infoWindow = new google.maps.InfoWindow({
-          content: infoDiv
-        });
-        infoWindow.open(map, marker);
-        
-        setSelectedBranch(branch);
-        map.panTo(position);
-        map.setZoom(15);
-      });
-
-      newMarkers.push(marker);
-      bounds.extend(position);
-    });
+    // Add branch markers - currently disabled (branches feature removed)
 
     // Add technician markers
     const filteredTechs = selectedSpecialization 
@@ -403,7 +323,7 @@ export default function ServiceMap() {
     }
   };
 
-  // Helper to parse map_url from branches2 or branch_locations
+  // Helper to parse map_url - currently disabled
   const parseMapUrl = (mapUrl: string): { lat: number; lng: number } | null => {
     try {
       // Try to extract coordinates from Google Maps URL patterns
@@ -478,7 +398,6 @@ export default function ServiceMap() {
   };
 
   const handleRefresh = () => {
-    refetchBranches();
     refetchTechnicians();
   };
 
@@ -531,10 +450,6 @@ export default function ServiceMap() {
             <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 px-4 py-2">
               <Users className="h-4 w-4 ml-2" />
               {technicians.filter(t => t.status === 'online').length} فني نشط
-            </Badge>
-            <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 px-4 py-2">
-              <Store className="h-4 w-4 ml-2" />
-              {branches.length} فرع
             </Badge>
           </div>
         </div>

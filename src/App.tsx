@@ -47,7 +47,6 @@ import ExpenseReports from "./pages/ExpenseReports";
 import MaintenanceReports from "./pages/MaintenanceReports";
 import UserManagement from "./pages/admin/UserManagement";
 import EditProperty from "./pages/properties/EditProperty";
-import LifecycleTesting from "./pages/LifecycleTesting";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -292,14 +291,6 @@ const App = () => {
                   <AuthWrapper>
                     <AppLayout>
                       <MaintenanceReports />
-                    </AppLayout>
-                  </AuthWrapper>
-                } />
-                
-                <Route path="/lifecycle-testing" element={
-                  <AuthWrapper>
-                    <AppLayout>
-                      <LifecycleTesting />
                     </AppLayout>
                   </AuthWrapper>
                 } />
