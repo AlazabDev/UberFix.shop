@@ -1281,8 +1281,11 @@ export type Database = {
           amenities: string[] | null
           area: number | null
           bathrooms: number | null
+          city_id: number | null
+          code: string | null
           created_at: string
           description: string | null
+          district_id: number | null
           floors: number | null
           icon_url: string | null
           id: string
@@ -1308,8 +1311,11 @@ export type Database = {
           amenities?: string[] | null
           area?: number | null
           bathrooms?: number | null
+          city_id?: number | null
+          code?: string | null
           created_at?: string
           description?: string | null
+          district_id?: number | null
           floors?: number | null
           icon_url?: string | null
           id?: string
@@ -1335,8 +1341,11 @@ export type Database = {
           amenities?: string[] | null
           area?: number | null
           bathrooms?: number | null
+          city_id?: number | null
+          code?: string | null
           created_at?: string
           description?: string | null
+          district_id?: number | null
           floors?: number | null
           icon_url?: string | null
           id?: string
@@ -1357,7 +1366,29 @@ export type Database = {
           updated_at?: string
           value?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "properties_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "vw_cities_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quick_maintenance_requests: {
         Row: {

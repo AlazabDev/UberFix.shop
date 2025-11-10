@@ -284,6 +284,46 @@ export const reviewFormSchema = z.object({
   }),
 });
 
+/**
+ * Property Form Schema
+ */
+export const propertyFormSchema = z.object({
+  code: z.string()
+    .trim()
+    .min(1, { message: "كود العقار مطلوب" })
+    .max(50, { message: "كود العقار يجب ألا يتجاوز 50 حرف" }),
+  name: titleSchema,
+  type: z.string()
+    .refine(val => ["residential", "commercial", "industrial", "office", "retail", "mixed_use"].includes(val), {
+      message: "نوع العقار غير صحيح",
+    }),
+  city_id: z.string()
+    .min(1, { message: "المدينة مطلوبة" }),
+  district_id: z.string()
+    .min(1, { message: "الحي مطلوب" }),
+  address: addressSchema,
+  area: z.number()
+    .positive({ message: "المساحة يجب أن تكون رقم موجب" })
+    .optional(),
+  rooms: z.number()
+    .int({ message: "عدد الغرف يجب أن يكون رقم صحيح" })
+    .nonnegative({ message: "عدد الغرف يجب أن يكون 0 أو أكثر" })
+    .optional(),
+  bathrooms: z.number()
+    .int({ message: "عدد الحمامات يجب أن يكون رقم صحيح" })
+    .nonnegative({ message: "عدد الحمامات يجب أن يكون 0 أو أكثر" })
+    .optional(),
+  floors: z.number()
+    .int({ message: "عدد الطوابق يجب أن يكون رقم صحيح" })
+    .positive({ message: "عدد الطوابق يجب أن يكون رقم موجب" })
+    .optional(),
+  description: z.string()
+    .trim()
+    .max(2000, { message: "الوصف يجب ألا يتجاوز 2000 حرف" })
+    .optional()
+    .or(z.literal("")),
+});
+
 // ==================== Utility Functions ====================
 
 /**

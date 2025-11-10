@@ -2,7 +2,6 @@ import { useState } from "react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,39 +15,15 @@ import {
 } from "@/components/ui/select";
 import { LocationPicker } from "./LocationPicker";
 import { ImageUpload } from "./ImageUpload";
-import { IconPicker } from "@/components/ui/icon-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { propertyFormSchema } from "@/lib/validationSchemas";
+import { getPropertyIcon } from "@/lib/propertyIcons";
+import type { z } from "zod";
 
-const propertySchema = z.object({
-  name: z.string().min(3, "اسم العقار يجب أن يكون 3 أحرف على الأقل"),
-  type: z.string()
-    .refine(
-      (val) => [
-        "residential",
-        "commercial",
-        "industrial",
-        "office",
-        "retail",
-        "mixed_use",
-      ].includes(val),
-      { message: "يرجى اختيار نوع العقار" }
-    )
-    .default("residential"),
-  address: z.string().min(1, "العنوان مطلوب"),
-  area: z.number().optional(),
-  rooms: z.number().optional(),
-  bathrooms: z.number().optional(),
-  floors: z.number().optional(),
-  parking_spaces: z.number().optional(),
-  description: z.string().optional(),
-  amenities: z.array(z.string()).optional(),
-  region_id: z.string().optional(),
-});
-
-type PropertyFormData = z.infer<typeof propertySchema>;
+type PropertyFormData = z.infer<typeof propertyFormSchema>;
 
 interface PropertyFormProps {
   skipNavigation?: boolean;
@@ -66,7 +41,6 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
   const [cities, setCities] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>("");
-  const [selectedIcon, setSelectedIcon] = useState<string>("");
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -78,26 +52,27 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
     setValue,
     watch,
   } = useForm<PropertyFormData>({
-    resolver: zodResolver(propertySchema),
+    resolver: zodResolver(propertyFormSchema),
     defaultValues: {
       type: "residential",
       address: "",
-      name: ""
+      name: "",
+      code: "",
+      city_id: "",
+      district_id: ""
     },
     mode: "onChange"
   });
 
   const propertyType = watch("type");
 
-  // Fetch cities (level 1 regions)
+  // Fetch cities
   React.useEffect(() => {
     const fetchCities = async () => {
       const { data, error } = await supabase
-        .from('regions')
+        .from('cities')
         .select('*')
-        .eq('level', 1)
-        .eq('is_active', true)
-        .order('name');
+        .order('name_ar');
 
       if (!error && data) {
         setCities(data);
@@ -115,11 +90,10 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
       }
 
       const { data, error } = await supabase
-        .from('regions')
+        .from('districts')
         .select('*')
-        .eq('parent_id', selectedCity)
-        .eq('is_active', true)
-        .order('name');
+        .eq('city_id', parseInt(selectedCity))
+        .order('name_ar');
 
       if (!error && data) {
         setDistricts(data);
@@ -129,16 +103,6 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
   }, [selectedCity]);
 
   const onSubmit = async (data: PropertyFormData) => {
-    // Validate required fields
-    if (!data.name || data.name.trim().length < 3) {
-      toast({
-        variant: "destructive",
-        title: "خطأ في البيانات",
-        description: "يرجى إدخال اسم العقار (3 أحرف على الأقل)",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -152,24 +116,32 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
         return;
       }
 
+      // Get auto-generated icon based on property type
+      const iconUrl = getPropertyIcon(data.type);
+
+      // Generate QR code URL
+      const qrCodeData = `${window.location.origin}/quick-request/property-${data.code}`;
+
       // إنشاء العقار مع حفظ إحداثيات الخريطة
       const { error: insertError } = await supabase
         .from("properties")
         .insert([{
+          code: data.code.trim(),
           name: data.name.trim(),
           type: data.type,
-          address: data.address?.trim() || location?.address || '',
+          city_id: parseInt(data.city_id),
+          district_id: parseInt(data.district_id),
+          address: data.address.trim(),
           area: data.area || null,
           rooms: data.rooms || null,
           bathrooms: data.bathrooms || null,
           floors: data.floors || null,
-          parking_spaces: data.parking_spaces || null,
           description: data.description?.trim() || null,
-          amenities: data.amenities || [],
-          region_id: data.region_id || null,
           latitude: location?.latitude || null,
           longitude: location?.longitude || null,
-          icon_url: selectedIcon || null,
+          icon_url: iconUrl,
+          qr_code_data: qrCodeData,
+          qr_code_generated_at: new Date().toISOString(),
           status: "active",
           manager_id: user.id,
         }]);
@@ -237,8 +209,21 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
         )}
       </div>
 
-      {/* اسم ورقم العقار */}
+      {/* كود واسم العقار */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="code">كود العقار *</Label>
+          <Input
+            id="code"
+            {...register("code")}
+            placeholder="مثال: PROP-001"
+            className={errors.code ? "border-destructive" : ""}
+          />
+          {errors.code && (
+            <p className="text-sm text-destructive">{errors.code.message}</p>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="name">اسم العقار *</Label>
           <Input
@@ -251,19 +236,6 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
             <p className="text-sm text-destructive">{errors.name.message}</p>
           )}
         </div>
-
-      </div>
-
-      {/* أيقونة العقار */}
-      <div className="space-y-2">
-        <Label>أيقونة العقار على الخريطة</Label>
-        <IconPicker 
-          value={selectedIcon} 
-          onValueChange={setSelectedIcon}
-        />
-        <p className="text-xs text-muted-foreground">
-          اختر أيقونة تظهر على الخريطة لتمييز هذا العقار
-        </p>
       </div>
 
       {/* صورة العقار */}
@@ -274,32 +246,65 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
           onImagesChange={setImages}
           maxImages={5}
         />
+        <p className="text-xs text-muted-foreground">
+          سيتم اختيار أيقونة العقار تلقائياً حسب نوع العقار
+        </p>
       </div>
 
       {/* تفاصيل الموقع */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">تفاصيل الموقع</h3>
 
-        <div className="space-y-2">
-          <Label>المنطقة</Label>
-          <Select
-            value={selectedCity}
-            onValueChange={(value) => {
-              setSelectedCity(value);
-              setValue("region_id", value);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر المنطقة" />
-            </SelectTrigger>
-            <SelectContent>
-              {cities.map((city) => (
-                <SelectItem key={city.id} value={city.id}>
-                  {city.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="city">المدينة *</Label>
+            <Select
+              value={selectedCity}
+              onValueChange={(value) => {
+                setSelectedCity(value);
+                setValue("city_id", value);
+                setValue("district_id", ""); // Reset district when city changes
+                setDistricts([]); // Clear districts
+              }}
+            >
+              <SelectTrigger className={errors.city_id ? "border-destructive" : ""}>
+                <SelectValue placeholder="اختر المدينة" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((city) => (
+                  <SelectItem key={city.id} value={city.id.toString()}>
+                    {city.name_ar}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.city_id && (
+              <p className="text-sm text-destructive">{errors.city_id.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="district">الحي *</Label>
+            <Select
+              value={watch("district_id")}
+              onValueChange={(value) => setValue("district_id", value)}
+              disabled={!selectedCity || districts.length === 0}
+            >
+              <SelectTrigger className={errors.district_id ? "border-destructive" : ""}>
+                <SelectValue placeholder={selectedCity ? "اختر الحي" : "اختر المدينة أولاً"} />
+              </SelectTrigger>
+              <SelectContent>
+                {districts.map((district) => (
+                  <SelectItem key={district.id} value={district.id.toString()}>
+                    {district.name_ar}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.district_id && (
+              <p className="text-sm text-destructive">{errors.district_id.message}</p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -384,19 +389,6 @@ export function PropertyForm({ skipNavigation = false, onSuccess }: PropertyForm
               type="number"
               min="0"
               {...register("floors", { 
-                setValueAs: v => v === '' ? undefined : parseInt(v)
-              })}
-              placeholder="1"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="parking_spaces">المواقف</Label>
-            <Input
-              id="parking_spaces"
-              type="number"
-              min="0"
-              {...register("parking_spaces", { 
                 setValueAs: v => v === '' ? undefined : parseInt(v)
               })}
               placeholder="1"
