@@ -12,6 +12,18 @@ interface WhatsAppRequest {
   media_url?: string;
 }
 
+// التحقق من صحة رقم الهاتف (صيغة دولية)
+function validatePhoneNumber(phone: string): boolean {
+  // يجب أن يبدأ بـ + ويحتوي على 10-15 رقم
+  const phoneRegex = /^\+[1-9]\d{9,14}$/;
+  return phoneRegex.test(phone);
+}
+
+// التحقق من طول الرسالة (WhatsApp max: 4096 حرف)
+function validateMessage(msg: string): boolean {
+  return msg.length > 0 && msg.length <= 4096;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -45,6 +57,31 @@ Deno.serve(async (req) => {
 
     if (!to || !message) {
       throw new Error('Missing required fields: to, message');
+    }
+
+    // التحقق من صحة رقم الهاتف
+    if (!validatePhoneNumber(to)) {
+      throw new Error('Invalid phone number format. Use international format: +201234567890');
+    }
+
+    // التحقق من طول الرسالة
+    if (!validateMessage(message)) {
+      throw new Error('Message must be between 1 and 4096 characters');
+    }
+
+    // Rate limiting: التحقق من عدد الرسائل المرسلة في آخر دقيقة
+    const { data: recentMessages, error: rateLimitError } = await supabase
+      .from('whatsapp_messages')
+      .select('created_at')
+      .eq('sender_id', user.id)
+      .gte('created_at', new Date(Date.now() - 60000).toISOString());
+
+    if (rateLimitError) {
+      console.error('⚠️ Error checking rate limit:', rateLimitError);
+    }
+
+    if (recentMessages && recentMessages.length >= 5) {
+      throw new Error('Rate limit exceeded. Maximum 5 messages per minute.');
     }
 
     console.log('📤 Sending WhatsApp message to:', to);
