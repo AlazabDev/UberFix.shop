@@ -22,6 +22,8 @@ import Vendors from "./pages/Vendors";
 import Reports from "./pages/Reports";
 import Properties from "./pages/Properties";
 import AddProperty from "./pages/properties/AddProperty";
+import EditProperty from "./pages/properties/EditProperty";
+import PropertyDetails from "./pages/properties/PropertyDetails";
 import Appointments from "./pages/Appointments";
 import Invoices from "./pages/Invoices";
 import ServiceMap from "./pages/ServiceMap";
@@ -47,7 +49,6 @@ import QuickRequest from "./pages/QuickRequest";
 import ExpenseReports from "./pages/ExpenseReports";
 import MaintenanceReports from "./pages/MaintenanceReports";
 import UserManagement from "./pages/admin/UserManagement";
-import EditProperty from "./pages/properties/EditProperty";
 import WhatsAppMessages from "./pages/WhatsAppMessages";
 
 const queryClient = new QueryClient({
@@ -161,6 +162,14 @@ const App = () => {
                   <AuthWrapper>
                     <AppLayout>
                       <AddProperty />
+                    </AppLayout>
+                  </AuthWrapper>
+                } />
+                
+                <Route path="/properties/:id" element={
+                  <AuthWrapper>
+                    <AppLayout>
+                      <PropertyDetails />
                     </AppLayout>
                   </AuthWrapper>
                 } />

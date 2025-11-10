@@ -145,7 +145,11 @@ export default function Properties() {
               </Card>
             ) : (
               filteredProperties.map((property) => (
-                <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <Card 
+                  key={property.id} 
+                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/properties/${property.id}`)}
+                >
                   {/* Property Image */}
                   <div className="relative h-48 bg-gradient-to-br from-muted to-muted/50">
                     {property.images && property.images.length > 0 ? (
@@ -205,7 +209,10 @@ export default function Properties() {
                       <Button 
                         className="flex-1 bg-primary hover:bg-primary/90 min-w-0"
                         size="sm"
-                        onClick={() => setSelectedProperty({id: property.id, name: property.name})}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedProperty({id: property.id, name: property.name});
+                        }}
                       >
                         <span className="truncate">طلب صيانة جديد</span>
                       </Button>
@@ -213,7 +220,10 @@ export default function Properties() {
                         variant="outline" 
                         size="sm"
                         className="flex-shrink-0"
-                        onClick={() => navigate(`/properties/edit/${property.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/properties/edit/${property.id}`);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
