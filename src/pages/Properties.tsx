@@ -176,18 +176,18 @@ export default function Properties() {
                     </div>
                   </div>
 
-                  <CardContent className="p-4 space-y-3">
+                  <CardContent className="p-4 space-y-4">
                     {/* Property Name with Icon */}
                     <div className="flex items-center gap-2">
                       {property.icon_url && (
                         <img 
                           src={property.icon_url} 
                           alt="" 
-                          className="h-5 w-5"
+                          className="h-5 w-5 flex-shrink-0"
                         />
                       )}
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{property.name}</h3>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg truncate">{property.name}</h3>
                         <p className="text-sm text-muted-foreground">
                           {typeConfig[property.type as keyof typeof typeConfig]?.label || property.type}
                         </p>
@@ -201,17 +201,18 @@ export default function Properties() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2">
                       <Button 
-                        className="flex-1 bg-primary hover:bg-primary/90"
+                        className="flex-1 bg-primary hover:bg-primary/90 min-w-0"
                         size="sm"
                         onClick={() => setSelectedProperty({id: property.id, name: property.name})}
                       >
-                        طلب صيانة جديد
+                        <span className="truncate">طلب صيانة جديد</span>
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm"
+                        className="flex-shrink-0"
                         onClick={() => navigate(`/properties/edit/${property.id}`)}
                       >
                         <Edit className="h-4 w-4" />
