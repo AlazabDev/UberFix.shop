@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, MapPin, Calendar, DollarSign, Search, Plus, Eye, Edit, MoreVertical } from "lucide-react";
+import { Building2, Search, Plus, Edit } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useProperties } from "@/hooks/useProperties";
 import { useNavigate } from "react-router-dom";
@@ -194,10 +194,10 @@ export default function Properties() {
                       </div>
                     </div>
 
-                    {/* Phone */}
+                    {/* Property Code */}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>📞</span>
-                      <span>{property.code || '+201092750351'}</span>
+                      <span>🔖</span>
+                      <span className="font-medium">{property.code || 'لا يوجد كود'}</span>
                     </div>
 
                     {/* Action Buttons */}
@@ -212,9 +212,9 @@ export default function Properties() {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setSelectedProperty({id: property.id, name: property.name})}
+                        onClick={() => navigate(`/properties/edit/${property.id}`)}
                       >
-                        الإجراءات
+                        <Edit className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardContent>
@@ -229,12 +229,7 @@ export default function Properties() {
           {/* Property Settings */}
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">إعدادات العقارات</CardTitle>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
+              <CardTitle className="text-base">إعدادات العقارات</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
