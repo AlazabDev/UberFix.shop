@@ -2798,6 +2798,65 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_messages: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          error_code: string | null
+          error_message: string | null
+          id: string
+          media_url: string | null
+          message_body: string
+          message_sid: string
+          read_at: string | null
+          recipient_phone: string
+          request_id: string | null
+          sender_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          message_body: string
+          message_sid: string
+          read_at?: string | null
+          recipient_phone: string
+          request_id?: string | null
+          sender_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          message_body?: string
+          message_sid?: string
+          read_at?: string | null
+          recipient_phone?: string
+          request_id?: string | null
+          sender_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_tasks: {
         Row: {
           actual_duration: number | null
