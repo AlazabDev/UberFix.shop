@@ -216,7 +216,7 @@ export const VendorsList = ({ onVendorSelect }: VendorsListProps) => {
         </SheetHeader>
 
         <div className="p-4">
-          <ScrollArea className="h-[calc(4*220px)]">
+          <ScrollArea className="max-h-[800px]">
             <div className="space-y-3 pr-2">
               {vendors.map((vendor) => (
               <div
