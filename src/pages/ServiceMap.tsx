@@ -504,25 +504,25 @@ export default function ServiceMap() {
       <div className="flex-1 relative flex">
         {/* Technicians Sidebar */}
         {showSidebar && (
-          <div className="w-80 border-l bg-card overflow-hidden flex flex-col">
-            <div className="p-4 border-b bg-card/95 backdrop-blur-sm">
+          <div className="w-48 border-l bg-card overflow-hidden flex flex-col">
+            <div className="px-2 py-3 border-b bg-card/95 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="font-bold text-base flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  الفنيون المتاحون ({technicians.filter(t => t.current_latitude && t.current_longitude).length})
+                <h3 className="font-semibold text-xs flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  الفنيون ({technicians.filter(t => t.current_latitude && t.current_longitude).length})
                 </h3>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-6 w-6"
                   onClick={() => setShowSidebar(false)}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
             </div>
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-2">
+            <ScrollArea className="flex-1 p-2">
+              <div className="space-y-1.5">
                 {technicians
                   .filter(t => t.current_latitude && t.current_longitude)
                   .filter(t => !selectedSpecialization || t.specialization === selectedSpecialization)
@@ -553,48 +553,48 @@ export default function ServiceMap() {
                           }
                         }}
                       >
-                        <CardContent className="p-3">
-                          <div className="space-y-2">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-bold text-sm">{tech.name}</h4>
-                                <p className="text-xs text-muted-foreground">{tech.specialization}</p>
+                        <CardContent className="p-2">
+                          <div className="space-y-1.5">
+                            <div className="flex items-start justify-between gap-1">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-xs truncate">{tech.name}</h4>
+                                <p className="text-[10px] text-muted-foreground truncate">{tech.specialization}</p>
                               </div>
                               <Badge 
                                 variant={tech.status === 'online' ? 'default' : 'secondary'}
-                                className="text-xs"
+                                className="text-[9px] px-1.5 py-0 shrink-0"
                               >
                                 {tech.status === 'online' ? 'متاح' : 'مشغول'}
                               </Badge>
                             </div>
                             
-                            <div className="flex items-center gap-3 text-xs">
+                            <div className="flex flex-col gap-1 text-[10px]">
                               <div className="flex items-center gap-1">
-                                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                                <Star className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
                                 <span className="font-medium">{tech.rating.toFixed(1)}</span>
                               </div>
                               
                               {distance && (
                                 <div className="flex items-center gap-1 text-muted-foreground">
-                                  <MapPin className="h-3 w-3" />
+                                  <MapPin className="h-2.5 w-2.5" />
                                   <span>{distance} كم</span>
                                 </div>
                               )}
                               
                               {tech.hourly_rate && tech.hourly_rate > 0 && (
                                 <div className="flex items-center gap-1 text-muted-foreground">
-                                  <DollarSign className="h-3 w-3" />
+                                  <DollarSign className="h-2.5 w-2.5" />
                                   <span>{tech.hourly_rate} ج.م/س</span>
                                 </div>
                               )}
                             </div>
                             
                             {tech.phone && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Phone className="h-3 w-3" />
+                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <Phone className="h-2.5 w-2.5" />
                                 <a 
                                   href={`tel:${tech.phone}`}
-                                  className="text-primary hover:underline"
+                                  className="text-primary hover:underline truncate"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {tech.phone}
