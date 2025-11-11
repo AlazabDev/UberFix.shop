@@ -75,3 +75,6 @@ verify_jwt = true
 
 [functions.send-twilio-message]
 verify_jwt = false
+
+[functions.calculate-route]
+verify_jwt = true

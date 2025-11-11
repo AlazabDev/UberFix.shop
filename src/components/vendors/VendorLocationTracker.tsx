@@ -37,30 +37,13 @@ export const VendorLocationTracker = ({
       : null
   );
   const [loading, setLoading] = useState(false);
-  const [mapsApiKey, setMapsApiKey] = useState<string>("");
 
-  // Fetch Google Maps API key
-  useEffect(() => {
-    const fetchApiKey = async () => {
-      try {
-        const { data } = await supabase.functions.invoke('get-maps-key');
-        if (data?.apiKey) {
-          setMapsApiKey(data.apiKey);
-        }
-      } catch (error) {
-        console.error('Error fetching maps key:', error);
-      }
-    };
-    fetchApiKey();
-  }, []);
-
-  // Calculate route and ETA
+  // Calculate route and ETA using edge function
   const { routeInfo, loading: routeLoading } = useVendorRouting({
     vendorLat: location?.lat || null,
     vendorLng: location?.lng || null,
     destinationLat: destinationLatitude || null,
     destinationLng: destinationLongitude || null,
-    apiKey: mapsApiKey,
   });
 
   useEffect(() => {
@@ -204,7 +187,7 @@ export const VendorLocationTracker = ({
                       <div>
                         <p className="text-xs text-muted-foreground">الوقت المتوقع للوصول</p>
                         <p className="text-lg font-bold text-primary">
-                          {format(routeInfo.eta, 'HH:mm', { locale: ar })}
+                          {format(new Date(routeInfo.eta), 'HH:mm', { locale: ar })}
                         </p>
                       </div>
                     </div>

@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RouteInfo {
   distance: string;
   duration: string;
   durationValue: number;
-  eta: Date;
+  eta: string;
   polyline: string;
+  distanceValue: number;
+  startAddress: string;
+  endAddress: string;
 }
 
 interface UseVendorRoutingProps {
@@ -13,7 +17,6 @@ interface UseVendorRoutingProps {
   vendorLng: number | null;
   destinationLat: number | null;
   destinationLng: number | null;
-  apiKey: string;
 }
 
 export const useVendorRouting = ({
@@ -21,14 +24,13 @@ export const useVendorRouting = ({
   vendorLng,
   destinationLat,
   destinationLng,
-  apiKey,
 }: UseVendorRoutingProps) => {
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!vendorLat || !vendorLng || !destinationLat || !destinationLng || !apiKey) {
+    if (!vendorLat || !vendorLng || !destinationLat || !destinationLng) {
       return;
     }
 
@@ -37,34 +39,28 @@ export const useVendorRouting = ({
       setError(null);
 
       try {
-        if (!window.google?.maps?.DirectionsService) {
-          throw new Error('Google Maps not loaded');
-        }
-
-        const directionsService = new google.maps.DirectionsService();
+        console.log('🚗 Calculating route via edge function...');
         
-        const result = await directionsService.route({
-          origin: { lat: vendorLat, lng: vendorLng },
-          destination: { lat: destinationLat, lng: destinationLng },
-          travelMode: google.maps.TravelMode.DRIVING,
+        const { data, error: functionError } = await supabase.functions.invoke('calculate-route', {
+          body: {
+            origin: { lat: vendorLat, lng: vendorLng },
+            destination: { lat: destinationLat, lng: destinationLng },
+          },
         });
 
-        if (result.routes[0]?.legs[0]) {
-          const leg = result.routes[0].legs[0];
-          const durationInSeconds = leg.duration?.value || 0;
-          const eta = new Date(Date.now() + durationInSeconds * 1000);
-
-          setRouteInfo({
-            distance: leg.distance?.text || '',
-            duration: leg.duration?.text || '',
-            durationValue: durationInSeconds,
-            eta,
-            polyline: result.routes[0].overview_polyline,
-          });
+        if (functionError) {
+          throw functionError;
         }
+
+        if (data.error) {
+          throw new Error(data.message || 'فشل حساب المسار');
+        }
+
+        console.log('✅ Route calculated:', data);
+        setRouteInfo(data);
       } catch (err) {
         console.error('Error calculating route:', err);
-        setError('فشل حساب المسار');
+        setError(err instanceof Error ? err.message : 'فشل حساب المسار');
       } finally {
         setLoading(false);
       }
@@ -72,11 +68,11 @@ export const useVendorRouting = ({
 
     calculateRoute();
     
-    // Recalculate every 30 seconds
+    // Recalculate every 30 seconds for real-time updates
     const interval = setInterval(calculateRoute, 30000);
     
     return () => clearInterval(interval);
-  }, [vendorLat, vendorLng, destinationLat, destinationLng, apiKey]);
+  }, [vendorLat, vendorLng, destinationLat, destinationLng]);
 
   return { routeInfo, loading, error };
 };
