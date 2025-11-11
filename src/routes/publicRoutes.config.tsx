@@ -16,6 +16,7 @@ const Projects = lazy(() => import("@/pages/Projects"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const BlogPost = lazy(() => import("@/pages/BlogPost"));
 const QuickRequest = lazy(() => import("@/pages/QuickRequest"));
+const Map = lazy(() => import("@/pages/Map"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
@@ -37,5 +38,6 @@ export const publicRoutes = [
   { path: "/blog", element: <Blog /> },
   { path: "/blog/:slug", element: <BlogPost /> },
   { path: "/quick-request/:propertyId", element: <QuickRequest /> },
+  { path: "/map", element: <Map /> },
   { path: "*", element: <NotFound /> },
 ];
