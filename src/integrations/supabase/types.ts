@@ -2476,6 +2476,39 @@ export type Database = {
           },
         ]
       }
+      technician_locations: {
+        Row: {
+          created_at: string | null
+          icon: string | null
+          id: string
+          latitude: string | null
+          longitude: string | null
+          name: string
+          specialization: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          icon?: string | null
+          id: string
+          latitude?: string | null
+          longitude?: string | null
+          name: string
+          specialization?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          latitude?: string | null
+          longitude?: string | null
+          name?: string
+          specialization?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       technician_progress: {
         Row: {
           created_at: string | null
