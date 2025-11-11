@@ -6,6 +6,8 @@ interface LocationData {
   latitude: number;
   longitude: number;
   accuracy?: number;
+  speed?: number;
+  heading?: number;
 }
 
 export const useVendorLocationTracking = (vendorId: string, enabled: boolean = false) => {
@@ -16,18 +18,7 @@ export const useVendorLocationTracking = (vendorId: string, enabled: boolean = f
   // تحديث الموقع في قاعدة البيانات
   const updateLocation = useCallback(async (location: LocationData) => {
     try {
-      const { error: updateError } = await supabase
-        .from('vendors')
-        .update({
-          current_latitude: location.latitude,
-          current_longitude: location.longitude,
-          location_updated_at: new Date().toISOString(),
-        })
-        .eq('id', vendorId);
-
-      if (updateError) throw updateError;
-
-      // حفظ في سجل المواقع
+      // حفظ في سجل المواقع (سيتم تحديث vendors تلقائياً عبر trigger)
       const { error: historyError } = await supabase
         .from('vendor_location_history')
         .insert({
@@ -35,10 +26,12 @@ export const useVendorLocationTracking = (vendorId: string, enabled: boolean = f
           latitude: location.latitude,
           longitude: location.longitude,
           accuracy: location.accuracy,
-          recorded_at: new Date().toISOString(),
+          speed: location.speed,
+          heading: location.heading,
+          is_moving: location.speed ? location.speed > 0.5 : false,
         });
 
-      if (historyError) console.error('Error saving location history:', historyError);
+      if (historyError) throw historyError;
 
       setCurrentLocation(location);
     } catch (err) {
@@ -65,6 +58,8 @@ export const useVendorLocationTracking = (vendorId: string, enabled: boolean = f
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           accuracy: position.coords.accuracy,
+          speed: position.coords.speed || undefined,
+          heading: position.coords.heading || undefined,
         };
         updateLocation(locationData);
       },
@@ -89,7 +84,10 @@ export const useVendorLocationTracking = (vendorId: string, enabled: boolean = f
     // تحديث حالة التتبع في قاعدة البيانات
     supabase
       .from('vendors')
-      .update({ is_tracking_enabled: true })
+      .update({ 
+        is_tracking_enabled: true,
+        tracking_started_at: new Date().toISOString(),
+      })
       .eq('id', vendorId)
       .then(({ error }) => {
         if (error) console.error('Error enabling tracking:', error);

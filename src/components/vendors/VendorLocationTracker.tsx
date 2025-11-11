@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Navigation, RefreshCw } from "lucide-react";
+import { MapPin, Navigation, RefreshCw, Clock, Route } from "lucide-react";
 import { GoogleMap } from "@/components/maps/GoogleMap";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { useVendorRouting } from "@/hooks/useVendorRouting";
 
 interface VendorLocationTrackerProps {
   vendorId: string;
   currentLatitude: number | null;
   currentLongitude: number | null;
   isTrackingEnabled: boolean;
+  destinationLatitude?: number | null;
+  destinationLongitude?: number | null;
 }
 
 export const VendorLocationTracker = ({
@@ -21,6 +24,8 @@ export const VendorLocationTracker = ({
   currentLatitude,
   currentLongitude,
   isTrackingEnabled,
+  destinationLatitude,
+  destinationLongitude,
 }: VendorLocationTrackerProps) => {
   const [location, setLocation] = useState<{
     lat: number;
@@ -32,6 +37,31 @@ export const VendorLocationTracker = ({
       : null
   );
   const [loading, setLoading] = useState(false);
+  const [mapsApiKey, setMapsApiKey] = useState<string>("");
+
+  // Fetch Google Maps API key
+  useEffect(() => {
+    const fetchApiKey = async () => {
+      try {
+        const { data } = await supabase.functions.invoke('get-maps-key');
+        if (data?.apiKey) {
+          setMapsApiKey(data.apiKey);
+        }
+      } catch (error) {
+        console.error('Error fetching maps key:', error);
+      }
+    };
+    fetchApiKey();
+  }, []);
+
+  // Calculate route and ETA
+  const { routeInfo, loading: routeLoading } = useVendorRouting({
+    vendorLat: location?.lat || null,
+    vendorLng: location?.lng || null,
+    destinationLat: destinationLatitude || null,
+    destinationLng: destinationLongitude || null,
+    apiKey: mapsApiKey,
+  });
 
   useEffect(() => {
     if (!vendorId) return;
@@ -163,11 +193,56 @@ export const VendorLocationTracker = ({
           </div>
         </CardHeader>
         <CardContent>
+          {/* Route and ETA Information */}
+          {routeInfo && destinationLatitude && destinationLongitude && (
+            <div className="mb-4 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Card className="bg-primary/5 border-primary/20">
+                  <CardContent className="pt-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">الوقت المتوقع للوصول</p>
+                        <p className="text-lg font-bold text-primary">
+                          {format(routeInfo.eta, 'HH:mm', { locale: ar })}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-secondary/5 border-secondary/20">
+                  <CardContent className="pt-4">
+                    <div className="flex items-center gap-2">
+                      <Route className="h-5 w-5 text-secondary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">المسافة</p>
+                        <p className="text-lg font-bold">{routeInfo.distance}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-accent/5 border-accent/20">
+                  <CardContent className="pt-4">
+                    <div className="flex items-center gap-2">
+                      <Navigation className="h-5 w-5 text-accent" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">مدة الرحلة</p>
+                        <p className="text-lg font-bold">{routeInfo.duration}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
           <div className="rounded-lg overflow-hidden border">
             <GoogleMap
               latitude={location.lat}
               longitude={location.lng}
-              zoom={15}
+              zoom={14}
               height="500px"
               interactive={true}
               markers={[
@@ -179,20 +254,40 @@ export const VendorLocationTracker = ({
                   type: "vendor",
                   color: "green",
                 },
+                ...(destinationLatitude && destinationLongitude
+                  ? [
+                      {
+                        id: "destination",
+                        lat: destinationLatitude,
+                        lng: destinationLongitude,
+                        title: "موقع العميل",
+                        type: "request" as const,
+                        color: "blue",
+                      },
+                    ]
+                  : []),
               ]}
             />
           </div>
-          <div className="mt-4 p-4 bg-muted rounded-lg">
+          
+          <div className="mt-4 p-4 bg-muted rounded-lg space-y-3">
             <div className="flex items-start gap-2">
               <MapPin className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <p className="font-medium">الإحداثيات</p>
+              <div className="flex-1">
+                <p className="font-medium">موقع الفني الحالي</p>
                 <p className="text-sm text-muted-foreground">
                   خط العرض: {location.lat.toFixed(6)} | خط الطول:{" "}
                   {location.lng.toFixed(6)}
                 </p>
               </div>
             </div>
+            
+            {routeLoading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                <span>جاري حساب المسار...</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
