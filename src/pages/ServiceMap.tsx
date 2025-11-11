@@ -453,8 +453,9 @@ export default function ServiceMap() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="bg-card px-4 py-3 border-b">
+      {/* Search Bar & Filters */}
+      <div className="bg-card px-4 py-3 border-b space-y-3">
+        {/* Search */}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -470,12 +471,10 @@ export default function ServiceMap() {
             <Search className="h-4 w-4" />
           </Button>
         </div>
-      </div>
-
-      {/* Specialization Filters */}
-      {specializationIcons.length > 0 && (
-        <div className="absolute top-4 right-4 z-10 max-w-md">
-          <Card className="p-3 bg-card/95 backdrop-blur-sm">
+        
+        {/* Specialization Filters */}
+        {specializationIcons.length > 0 && (
+          <div>
             <p className="text-xs font-semibold mb-2 text-muted-foreground">التخصصات:</p>
             <div className="flex flex-wrap gap-2">
               <Badge
@@ -497,34 +496,21 @@ export default function ServiceMap() {
                 </Badge>
               ))}
             </div>
-          </Card>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
-      {/* Sidebar Toggle Button */}
-      {!showSidebar && (
-        <div className="absolute top-32 left-4 z-10">
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full shadow-lg"
-            onClick={() => setShowSidebar(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
-
-      {/* Technicians Sidebar */}
-      {showSidebar && (
-        <div className="absolute top-32 left-4 z-10 w-80 max-h-[calc(100vh-200px)]">
-          <Card className="shadow-xl bg-card/98 backdrop-blur-sm">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
+      {/* Main Content Area */}
+      <div className="flex-1 relative flex">
+        {/* Technicians Sidebar */}
+        {showSidebar && (
+          <div className="w-80 border-l bg-card overflow-hidden flex flex-col">
+            <div className="p-4 border-b bg-card/95 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="font-bold text-base flex items-center gap-2">
                   <Users className="h-5 w-5" />
                   الفنيون المتاحون ({technicians.filter(t => t.current_latitude && t.current_longitude).length})
-                </CardTitle>
+                </h3>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -534,189 +520,201 @@ export default function ServiceMap() {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[calc(100vh-280px)]">
-                <div className="space-y-2 p-4">
-                  {technicians
-                    .filter(t => t.current_latitude && t.current_longitude)
-                    .filter(t => !selectedSpecialization || t.specialization === selectedSpecialization)
-                    .map((tech) => {
-                      const specIcon = specializationIcons.find(s => s.name === tech.specialization);
-                      
-                      // Calculate distance if user location is available
-                      let distance = null;
-                      if (userLocation && tech.current_latitude && tech.current_longitude) {
-                        const R = 6371;
-                        const dLat = (tech.current_latitude - userLocation.lat) * Math.PI / 180;
-                        const dLng = (tech.current_longitude - userLocation.lng) * Math.PI / 180;
-                        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                                  Math.cos(userLocation.lat * Math.PI / 180) * Math.cos(tech.current_latitude * Math.PI / 180) *
-                                  Math.sin(dLng/2) * Math.sin(dLng/2);
-                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                        distance = (R * c).toFixed(1);
-                      }
-                      
-                      return (
-                        <Card
-                          key={tech.id}
-                          className="cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
-                          onClick={() => {
-                            if (tech.current_latitude && tech.current_longitude && map) {
-                              map.panTo({ lat: tech.current_latitude, lng: tech.current_longitude });
-                              map.setZoom(15);
-                            }
-                          }}
-                        >
-                          <CardContent className="p-3">
-                            <div className="space-y-2">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-bold text-sm">{tech.name}</h4>
-                                  <p className="text-xs text-muted-foreground">{tech.specialization}</p>
-                                </div>
-                                <Badge 
-                                  variant={tech.status === 'online' ? 'default' : 'secondary'}
-                                  className="text-xs"
-                                >
-                                  {tech.status === 'online' ? 'متاح' : 'مشغول'}
-                                </Badge>
+            </div>
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-2">
+                {technicians
+                  .filter(t => t.current_latitude && t.current_longitude)
+                  .filter(t => !selectedSpecialization || t.specialization === selectedSpecialization)
+                  .map((tech) => {
+                    const specIcon = specializationIcons.find(s => s.name === tech.specialization);
+                    
+                    // Calculate distance if user location is available
+                    let distance = null;
+                    if (userLocation && tech.current_latitude && tech.current_longitude) {
+                      const R = 6371;
+                      const dLat = (tech.current_latitude - userLocation.lat) * Math.PI / 180;
+                      const dLng = (tech.current_longitude - userLocation.lng) * Math.PI / 180;
+                      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                Math.cos(userLocation.lat * Math.PI / 180) * Math.cos(tech.current_latitude * Math.PI / 180) *
+                                Math.sin(dLng/2) * Math.sin(dLng/2);
+                      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                      distance = (R * c).toFixed(1);
+                    }
+                    
+                    return (
+                      <Card
+                        key={tech.id}
+                        className="cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
+                        onClick={() => {
+                          if (tech.current_latitude && tech.current_longitude && map) {
+                            map.panTo({ lat: tech.current_latitude, lng: tech.current_longitude });
+                            map.setZoom(15);
+                          }
+                        }}
+                      >
+                        <CardContent className="p-3">
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-bold text-sm">{tech.name}</h4>
+                                <p className="text-xs text-muted-foreground">{tech.specialization}</p>
+                              </div>
+                              <Badge 
+                                variant={tech.status === 'online' ? 'default' : 'secondary'}
+                                className="text-xs"
+                              >
+                                {tech.status === 'online' ? 'متاح' : 'مشغول'}
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 text-xs">
+                              <div className="flex items-center gap-1">
+                                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                                <span className="font-medium">{tech.rating.toFixed(1)}</span>
                               </div>
                               
-                              <div className="flex items-center gap-3 text-xs">
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                                  <span className="font-medium">{tech.rating.toFixed(1)}</span>
+                              {distance && (
+                                <div className="flex items-center gap-1 text-muted-foreground">
+                                  <MapPin className="h-3 w-3" />
+                                  <span>{distance} كم</span>
                                 </div>
-                                
-                                {distance && (
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <MapPin className="h-3 w-3" />
-                                    <span>{distance} كم</span>
-                                  </div>
-                                )}
-                                
-                                {tech.hourly_rate && tech.hourly_rate > 0 && (
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <DollarSign className="h-3 w-3" />
-                                    <span>{tech.hourly_rate} ج.م/س</span>
-                                  </div>
-                                )}
-                              </div>
+                              )}
                               
-                              {tech.phone && (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Phone className="h-3 w-3" />
-                                  <a 
-                                    href={`tel:${tech.phone}`}
-                                    className="text-primary hover:underline"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {tech.phone}
-                                  </a>
+                              {tech.hourly_rate && tech.hourly_rate > 0 && (
+                                <div className="flex items-center gap-1 text-muted-foreground">
+                                  <DollarSign className="h-3 w-3" />
+                                  <span>{tech.hourly_rate} ج.م/س</span>
                                 </div>
                               )}
                             </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Map Container */}
-      <div className="flex-1 relative">
-        <div ref={mapRef} className="w-full h-full" />
-
-        {/* Map Controls */}
-        <div className="absolute bottom-20 left-4 flex flex-col gap-2">
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full shadow-lg bg-card hover:bg-accent"
-            onClick={handleGetCurrentLocation}
-          >
-            <Navigation className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full shadow-lg bg-card hover:bg-accent"
-            onClick={handleRefresh}
-          >
-            <RefreshCw className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* Zoom Controls */}
-        <div className="absolute bottom-20 right-4 flex flex-col gap-2">
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full shadow-lg bg-card hover:bg-accent"
-            onClick={handleZoomIn}
-          >
-            <ZoomIn className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full shadow-lg bg-card hover:bg-accent"
-            onClick={handleZoomOut}
-          >
-            <ZoomOut className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* Selected Branch Info */}
-        {selectedBranch && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 max-w-md">
-            <Card className="w-80 shadow-xl">
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-bold text-lg">{selectedBranch.name}</h3>
-                    {selectedBranch.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{selectedBranch.description}</p>
-                    )}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSelectedBranch(null)}
-                  >
-                    ✕
-                  </Button>
-                </div>
-                
-                {selectedBranch.location && (
-                  <p className="text-sm text-muted-foreground mb-2">📍 {selectedBranch.location}</p>
-                )}
-                
-                {selectedBranch.phone && (
-                  <p className="text-sm">📞 {selectedBranch.phone}</p>
-                )}
-                
-                {selectedBranch.email && (
-                  <p className="text-sm">✉️ {selectedBranch.email}</p>
-                )}
+                            
+                            {tech.phone && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Phone className="h-3 w-3" />
+                                <a 
+                                  href={`tel:${tech.phone}`}
+                                  className="text-primary hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {tech.phone}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
               </div>
-            </Card>
+            </ScrollArea>
           </div>
         )}
 
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
-            <div className="text-center">
-              <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-              <p className="text-sm text-muted-foreground">جاري تحميل مزودي الخدمات...</p>
+        {/* Map Container */}
+        <div className="flex-1 relative">
+          <div ref={mapRef} className="w-full h-full" />
+
+          {/* Sidebar Toggle Button - When Hidden */}
+          {!showSidebar && (
+            <div className="absolute top-4 left-4 z-10">
+              <Button
+                size="icon"
+                variant="secondary"
+                className="rounded-full shadow-lg"
+                onClick={() => setShowSidebar(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
             </div>
+          )}
+
+          {/* Map Controls */}
+          <div className="absolute bottom-20 left-4 flex flex-col gap-2">
+            <Button
+              size="icon"
+              variant="secondary"
+              className="rounded-full shadow-lg bg-card hover:bg-accent"
+              onClick={handleGetCurrentLocation}
+            >
+              <Navigation className="h-5 w-5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="secondary"
+              className="rounded-full shadow-lg bg-card hover:bg-accent"
+              onClick={handleRefresh}
+            >
+              <RefreshCw className="h-5 w-5" />
+            </Button>
           </div>
-        )}
+
+          {/* Zoom Controls */}
+          <div className="absolute bottom-20 right-4 flex flex-col gap-2">
+            <Button
+              size="icon"
+              variant="secondary"
+              className="rounded-full shadow-lg bg-card hover:bg-accent"
+              onClick={handleZoomIn}
+            >
+              <ZoomIn className="h-5 w-5" />
+            </Button>
+            <Button
+              size="icon"
+              variant="secondary"
+              className="rounded-full shadow-lg bg-card hover:bg-accent"
+              onClick={handleZoomOut}
+            >
+              <ZoomOut className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Selected Branch Info */}
+          {selectedBranch && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 max-w-md">
+              <Card className="w-80 shadow-xl">
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-bold text-lg">{selectedBranch.name}</h3>
+                      {selectedBranch.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{selectedBranch.description}</p>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setSelectedBranch(null)}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                  
+                  {selectedBranch.location && (
+                    <p className="text-sm text-muted-foreground mb-2">📍 {selectedBranch.location}</p>
+                  )}
+                  
+                  {selectedBranch.phone && (
+                    <p className="text-sm">📞 {selectedBranch.phone}</p>
+                  )}
+                  
+                  {selectedBranch.email && (
+                    <p className="text-sm">✉️ {selectedBranch.email}</p>
+                  )}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-30">
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                <p className="text-sm text-muted-foreground">جاري تحميل مزودي الخدمات...</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
     </div>
