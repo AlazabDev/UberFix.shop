@@ -215,9 +215,10 @@ export const VendorsList = ({ onVendorSelect }: VendorsListProps) => {
           </p>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-120px)]">
-          <div className="p-4 space-y-3">
-            {vendors.map((vendor) => (
+        <div className="p-4">
+          <ScrollArea className="h-[calc(4*220px)]">
+            <div className="space-y-3 pr-2">
+              {vendors.map((vendor) => (
               <div
                 key={vendor.id}
                 onClick={() => onVendorSelect?.(vendor)}
@@ -295,9 +296,10 @@ export const VendorsList = ({ onVendorSelect }: VendorsListProps) => {
                 {/* Hover Effect */}
                 <div className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </div>
-            ))}
-          </div>
-        </ScrollArea>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
       </SheetContent>
     </Sheet>
   );
