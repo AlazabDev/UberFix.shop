@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
 import { Loader2 } from "lucide-react";
+import { registerServiceWorker } from "@/lib/registerServiceWorker";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,6 +20,7 @@ const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000,
       retry: 3,
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      networkMode: 'offlineFirst',
     },
   },
 });
@@ -32,6 +34,10 @@ const LoadingFallback = () => (
 
 const App = () => {
   useProductionOptimizations();
+
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   return (
     <ErrorBoundary>
