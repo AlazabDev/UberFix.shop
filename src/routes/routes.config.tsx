@@ -31,6 +31,7 @@ const ProjectDetails = lazy(() => import("@/pages/ProjectDetails"));
 const ExpenseReports = lazy(() => import("@/pages/ExpenseReports"));
 const MaintenanceReports = lazy(() => import("@/pages/MaintenanceReports"));
 const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
+const AdminControlCenter = lazy(() => import("@/pages/admin/AdminControlCenter"));
 const WhatsAppMessages = lazy(() => import("@/pages/WhatsAppMessages"));
 const MessageLogs = lazy(() => import("@/pages/MessageLogs"));
 const Inbox = lazy(() => import("@/pages/Inbox"));
@@ -70,6 +71,7 @@ export const protectedRoutes = [
   { path: "/production-monitor", element: <ProductionMonitor />, withLayout: true },
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
+  { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
   { path: "/pwa-settings", element: <PWASettings />, withLayout: true },
