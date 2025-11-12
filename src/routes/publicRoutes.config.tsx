@@ -24,6 +24,7 @@ const UberQuickRequest = lazy(() => import("@/modules/uber-map/pages/QuickReques
 const TrackOrders = lazy(() => import("@/modules/uber-map/pages/TrackOrders"));
 const UberInvoices = lazy(() => import("@/modules/uber-map/pages/Invoices"));
 const CompletedServices = lazy(() => import("@/modules/uber-map/pages/CompletedServices"));
+const PWASettings = lazy(() => import("@/pages/PWASettings"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
@@ -53,5 +54,6 @@ export const publicRoutes = [
   { path: "/uber-map/track-orders", element: <TrackOrders /> },
   { path: "/uber-map/invoices", element: <UberInvoices /> },
   { path: "/uber-map/completed-services", element: <CompletedServices /> },
+  { path: "/pwa-settings", element: <PWASettings /> },
   { path: "*", element: <NotFound /> },
 ];
