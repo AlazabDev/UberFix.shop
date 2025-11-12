@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_control: {
+        Row: {
+          id: string
+          is_locked: boolean
+          message: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          is_locked?: boolean
+          message?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          is_locked?: boolean
+          message?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           allow_edit_after_start: boolean | null

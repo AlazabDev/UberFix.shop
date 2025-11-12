@@ -12,6 +12,8 @@ import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
 import { Loader2 } from "lucide-react";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { useMaintenanceLock } from "@/hooks/useMaintenanceLock";
+import { MaintenanceOverlay } from "@/components/MaintenanceOverlay";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,43 +40,59 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <PWAInstallPrompt />
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  {/* المسارات العامة (Public Routes) */}
-                  {publicRoutes.map(({ path, element }) => (
-                    <Route key={path} path={path} element={element} />
-                  ))}
-
-                  {/* المسارات المحمية (Protected Routes) */}
-                  {protectedRoutes.map(({ path, element, withLayout }) => (
-                    <Route
-                      key={path}
-                      path={path}
-                      element={
-                        <ProtectedRoute withLayout={withLayout}>
-                          {element}
-                        </ProtectedRoute>
-                      }
-                    />
-                  ))}
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ThemeProvider>
+        <MaintenanceLockWrapper />
       </QueryClientProvider>
     </ErrorBoundary>
+  );
+};
+
+const MaintenanceLockWrapper = () => {
+  const { data: lockStatus, isLoading } = useMaintenanceLock();
+
+  if (isLoading) {
+    return <LoadingFallback />;
+  }
+
+  if (lockStatus?.isLocked) {
+    return <MaintenanceOverlay message={lockStatus.message} />;
+  }
+
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <TooltipProvider>
+        <PWAInstallPrompt />
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              {/* المسارات العامة (Public Routes) */}
+              {publicRoutes.map(({ path, element }) => (
+                <Route key={path} path={path} element={element} />
+              ))}
+
+              {/* المسارات المحمية (Protected Routes) */}
+              {protectedRoutes.map(({ path, element, withLayout }) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                    <ProtectedRoute withLayout={withLayout}>
+                      {element}
+                    </ProtectedRoute>
+                  }
+                />
+              ))}
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   );
 };
 
