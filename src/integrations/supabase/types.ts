@@ -35,6 +35,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_control_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          is_locked: boolean
+          message: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          is_locked: boolean
+          message?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          message?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           allow_edit_after_start: boolean | null

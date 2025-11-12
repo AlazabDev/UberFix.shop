@@ -34,6 +34,8 @@ const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
 const WhatsAppMessages = lazy(() => import("@/pages/WhatsAppMessages"));
 const MessageLogs = lazy(() => import("@/pages/MessageLogs"));
 const Inbox = lazy(() => import("@/pages/Inbox"));
+const PWASettings = lazy(() => import("@/pages/PWASettings"));
+const MaintenanceLockAdmin = lazy(() => import("@/pages/MaintenanceLockAdmin"));
 
 /**
  * تكوين المسارات المحمية (تتطلب تسجيل دخول)
@@ -70,6 +72,8 @@ export const protectedRoutes = [
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
+  { path: "/pwa-settings", element: <PWASettings />, withLayout: true },
+  { path: "/maintenance-lock-admin", element: <MaintenanceLockAdmin />, withLayout: true },
   
   // صفحات بدون Layout
   { path: "/service-map", element: <ServiceMap />, withLayout: false },
