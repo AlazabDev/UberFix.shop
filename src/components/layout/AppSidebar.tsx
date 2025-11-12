@@ -14,7 +14,8 @@ import {
   Activity,
   ListChecks,
   Clock,
-  Mail
+  Mail,
+  Map
 } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 
@@ -84,9 +85,9 @@ const items = [
     href: "/service-map"
   },
   {
-    icon: MapPin,
+    icon: Map,
     label: "خريطة أوبر",
-    href: "/uber-map-test"
+    href: "/uber-map"
   },
   {
     icon: FileText,
