@@ -27,22 +27,38 @@ export default function ServiceMap() {
   const { technicians, loading } = useTechnicians();
 
   useEffect(() => {
+    let mounted = true;
+    
     const initMap = async () => {
       try {
+        console.log("🗺️ Starting map initialization...");
+        
         const { data, error } = await supabase.functions.invoke("get-maps-key");
         
-        if (error || !data?.apiKey) {
-          console.error("Failed to get API key:", error);
-          setMapError(true);
+        if (error) {
+          console.error("❌ Failed to get API key:", error);
+          if (mounted) setMapError(true);
+          return;
+        }
+        
+        if (!data?.apiKey) {
+          console.error("❌ No API key returned");
+          if (mounted) setMapError(true);
           return;
         }
 
+        console.log("✅ API key received, loading Google Maps...");
         await loadGoogleMaps(data.apiKey);
+        console.log("✅ Google Maps loaded successfully");
 
-        if (mapRef.current && !mapInstanceRef.current) {
+        if (mapRef.current && !mapInstanceRef.current && mounted) {
+          console.log("✅ Creating map instance...");
           mapInstanceRef.current = new google.maps.Map(mapRef.current, {
             center: { lat: 30.0444, lng: 31.2357 },
-            zoom: 12,
+            zoom: 13,
+            mapTypeControl: false,
+            fullscreenControl: false,
+            streetViewControl: false,
             styles: [
               {
                 featureType: "poi",
@@ -50,16 +66,18 @@ export default function ServiceMap() {
               },
             ],
           });
+          console.log("✅ Map instance created successfully");
         }
       } catch (error) {
-        console.error("Map loading error:", error);
-        setMapError(true);
+        console.error("❌ Map loading error:", error);
+        if (mounted) setMapError(true);
       }
     };
 
     initMap();
 
     return () => {
+      mounted = false;
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
     };
@@ -160,20 +178,23 @@ export default function ServiceMap() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - Technicians List */}
-        <aside className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
-          <div className="p-4">
+        <aside className="w-64 bg-white border-l border-gray-200 flex flex-col">
+          <div className="p-4 flex-shrink-0">
             <h2 className="text-lg font-bold text-[#0B0B3B] mb-1">
               الخدمات المتاحة ({filteredTechnicians.length})
             </h2>
             <p className="text-sm text-gray-500 mb-4">
               اختر فني من القائمة أدناه
             </p>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            <div className="space-y-3">
 
-            {loading ? (
-              <div className="text-center py-8 text-gray-500">جاري التحميل...</div>
-            ) : (
-              <div className="space-y-3">
-                {filteredTechnicians.map((tech) => (
+              {loading ? (
+                <div className="text-center py-8 text-gray-500">جاري التحميل...</div>
+              ) : filteredTechnicians.length > 0 ? (
+                filteredTechnicians.map((tech) => (
                   <Card key={tech.id} className="p-4 hover:shadow-md transition-shadow">
                     <div className="flex gap-3">
                       <Avatar className="w-12 h-12">
@@ -242,15 +263,13 @@ export default function ServiceMap() {
                       </div>
                     </div>
                   </Card>
-                ))}
-
-                {!loading && filteredTechnicians.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    لا توجد خدمات متاحة حالياً
-                  </div>
-                )}
-              </div>
-            )}
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  لا توجد خدمات متاحة حالياً
+                </div>
+              )}
+            </div>
           </div>
         </aside>
 
