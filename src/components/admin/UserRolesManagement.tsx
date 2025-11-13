@@ -47,6 +47,18 @@ const ROLE_LABELS: Record<AppRole, string> = {
   finance: 'مالي',
 };
 
+interface UserRoleWithProfile {
+  user_id: string;
+  role: string;
+  created_at: string;
+  assigned_at?: string;
+  profiles?: {
+    id: string;
+    email: string;
+    full_name: string;
+  };
+}
+
 export function UserRolesManagement() {
   const [searchEmail, setSearchEmail] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -56,11 +68,11 @@ export function UserRolesManagement() {
   const queryClient = useQueryClient();
 
   // Fetch all user roles
-  const { data: userRoles, isLoading } = useQuery({
+  const { data: userRoles, isLoading } = useQuery<UserRoleWithProfile[]>({
     queryKey: ['admin-user-roles'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('user_roles' as any)
         .select(`
           *,
           profiles:user_id (
@@ -69,10 +81,10 @@ export function UserRolesManagement() {
             full_name
           )
         `)
-        .order('created_at', { ascending: false });
+        .order('assigned_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return (data || []) as unknown as UserRoleWithProfile[];
     },
   });
 
@@ -98,8 +110,8 @@ export function UserRolesManagement() {
   const addRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
       const { error } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userId, role });
+        .from('user_roles' as any)
+        .insert({ user_id: userId, role: role as any });
 
       if (error) throw error;
     },
@@ -126,10 +138,10 @@ export function UserRolesManagement() {
   const deleteRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
       const { error } = await supabase
-        .from('user_roles')
+        .from('user_roles' as any)
         .delete()
         .eq('user_id', userId)
-        .eq('role', role);
+        .eq('role', role as any);
 
       if (error) throw error;
     },
@@ -266,7 +278,7 @@ export function UserRolesManagement() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {new Date(userRole.created_at).toLocaleDateString('ar-EG')}
+                      {new Date(userRole.assigned_at || userRole.created_at).toLocaleDateString('ar-EG')}
                     </TableCell>
                     <TableCell>
                       <Button

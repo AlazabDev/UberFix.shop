@@ -36,17 +36,25 @@ const PERMISSION_LABELS: Record<string, string> = {
   'audit.view': 'عرض سجل المراجعة',
 };
 
+interface RolePermission {
+  id: string;
+  role: AppRole;
+  resource: string;
+  action: string;
+  created_at?: string;
+}
+
 export function PermissionsManagement() {
-  const { data: permissions, isLoading } = useQuery({
+  const { data: permissions, isLoading } = useQuery<RolePermission[]>({
     queryKey: ['role-permissions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('role_permissions')
+        .from('role_permissions' as any)
         .select('*')
         .order('role');
 
       if (error) throw error;
-      return data;
+      return (data || []) as unknown as RolePermission[];
     },
   });
 
