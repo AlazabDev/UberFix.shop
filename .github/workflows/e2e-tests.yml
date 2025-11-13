@@ -6,11 +6,11 @@ on:
   pull_request:
     branches: [main, develop]
   schedule:
-    # Run E2E tests daily at 2 AM UTC
-    - cron: "0 2 * * *"
+    # تشغيل يومي الساعة 2 صباحًا UTC
+    - cron: '0 2 * * *'
 
 jobs:
-  e2e-tests:
+  e2e-desktop:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
@@ -22,28 +22,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: 20
+          cache: pnpm
 
-      - uses: pnpm/action-setup@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
         with:
           version: latest
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
-      - name: Build application
-        run: pnpm run build
-
+      # Playwright سيشغّل dev server تلقائيًا من playwright.config.ts (npm run dev)
       - name: Run E2E tests
         run: pnpm exec playwright test --project=${{ matrix.browser }}
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:8080
+          CI: true
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
@@ -68,26 +70,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: 20
+          cache: pnpm
 
-      - uses: pnpm/action-setup@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
         with:
           version: latest
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
-
-      - name: Build application
-        run: pnpm run build
 
       - name: Run Mobile E2E tests
         run: pnpm exec playwright test --project="Mobile Chrome"
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:8080
+          CI: true
 
       - name: Upload Mobile Test Report
         uses: actions/upload-artifact@v4
