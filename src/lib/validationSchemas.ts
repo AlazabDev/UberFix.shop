@@ -302,21 +302,22 @@ export const propertyFormSchema = z.object({
   district_id: z.string()
     .min(1, { message: "الحي مطلوب" }),
   address: addressSchema,
-  area: z.number()
-    .positive({ message: "المساحة يجب أن تكون رقم موجب" })
-    .optional(),
-  rooms: z.number()
-    .int({ message: "عدد الغرف يجب أن يكون رقم صحيح" })
-    .nonnegative({ message: "عدد الغرف يجب أن يكون 0 أو أكثر" })
-    .optional(),
-  bathrooms: z.number()
-    .int({ message: "عدد الحمامات يجب أن يكون رقم صحيح" })
-    .nonnegative({ message: "عدد الحمامات يجب أن يكون 0 أو أكثر" })
-    .optional(),
-  floors: z.number()
-    .int({ message: "عدد الطوابق يجب أن يكون رقم صحيح" })
-    .positive({ message: "عدد الطوابق يجب أن يكون رقم موجب" })
-    .optional(),
+  area: z.preprocess(
+    (val) => val === "" || val === null || val === undefined ? undefined : Number(val),
+    z.number().positive({ message: "المساحة يجب أن تكون رقم موجب" }).optional()
+  ),
+  rooms: z.preprocess(
+    (val) => val === "" || val === null || val === undefined ? undefined : Number(val),
+    z.number().int({ message: "عدد الغرف يجب أن يكون رقم صحيح" }).nonnegative({ message: "عدد الغرف يجب أن يكون 0 أو أكثر" }).optional()
+  ),
+  bathrooms: z.preprocess(
+    (val) => val === "" || val === null || val === undefined ? undefined : Number(val),
+    z.number().int({ message: "عدد الحمامات يجب أن يكون رقم صحيح" }).nonnegative({ message: "عدد الحمامات يجب أن يكون 0 أو أكثر" }).optional()
+  ),
+  floors: z.preprocess(
+    (val) => val === "" || val === null || val === undefined ? undefined : Number(val),
+    z.number().int({ message: "عدد الطوابق يجب أن يكون رقم صحيح" }).positive({ message: "عدد الطوابق يجب أن يكون رقم موجب" }).optional()
+  ),
   description: z.string()
     .trim()
     .max(2000, { message: "الوصف يجب ألا يتجاوز 2000 حرف" })
