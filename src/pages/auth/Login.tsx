@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Cog, Shield, Users, Wrench } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
+import { useFacebookAuth } from "@/hooks/useFacebookAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -17,6 +19,7 @@ export default function Login() {
   const selectedRole = searchParams.get("role") || "customer";
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { loginWithFacebook, isLoading: isFBLoading, isFBReady } = useFacebookAuth();
 
   const roleConfig = {
     admin: {
@@ -220,6 +223,21 @@ export default function Login() {
               >
                 <FcGoogle className="ml-2 h-5 w-5" />
                 تسجيل الدخول باستخدام Google
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-[#1877f2] hover:bg-[#166fe5] text-white border-0"
+                onClick={loginWithFacebook}
+                disabled={isFBLoading || !isFBReady}
+              >
+                {isFBLoading ? (
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <FaFacebook className="ml-2 h-5 w-5" />
+                )}
+                {!isFBReady ? 'جاري التحميل...' : 'تسجيل الدخول بـ Facebook'}
               </Button>
               
               <Button 

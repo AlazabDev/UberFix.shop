@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Cog } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
+import { useFacebookAuth } from "@/hooks/useFacebookAuth";
 import { registerFormSchema } from "@/lib/validationSchemas";
 
 type RegisterFormData = z.infer<typeof registerFormSchema>;
@@ -21,6 +23,7 @@ export default function Register() {
   const selectedRole = searchParams.get("role") || "customer";
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { loginWithFacebook, isLoading: isFBLoading, isFBReady } = useFacebookAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
@@ -255,6 +258,21 @@ export default function Register() {
               >
                 <FcGoogle className="ml-2 h-5 w-5" />
                 التسجيل باستخدام Google
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-[#1877f2] hover:bg-[#166fe5] text-white border-0"
+                onClick={loginWithFacebook}
+                disabled={isFBLoading || !isFBReady}
+              >
+                {isFBLoading ? (
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <FaFacebook className="ml-2 h-5 w-5" />
+                )}
+                {!isFBReady ? 'جاري التحميل...' : 'التسجيل بـ Facebook'}
               </Button>
             </form>
           </Form>
