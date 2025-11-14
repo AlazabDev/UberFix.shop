@@ -85,11 +85,6 @@ const items = [
     href: "/service-map"
   },
   {
-    icon: Map,
-    label: "خريطة أوبر",
-    href: "/uber-map"
-  },
-  {
     icon: FileText,
     label: "التوثيق",
     href: "/documentation"
