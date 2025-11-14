@@ -260,20 +260,21 @@ export default function Register() {
                 التسجيل باستخدام Google
               </Button>
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full bg-[#1877f2] hover:bg-[#166fe5] text-white border-0"
-                onClick={loginWithFacebook}
-                disabled={isFBLoading || !isFBReady}
-              >
-                {isFBLoading ? (
-                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                ) : (
-                  <FaFacebook className="ml-2 h-5 w-5" />
-                )}
-                {!isFBReady ? 'جاري التحميل...' : 'التسجيل بـ Facebook'}
-              </Button>
+              <div 
+                className="w-full"
+                dangerouslySetInnerHTML={{
+                  __html: `<fb:login-button 
+                    scope="public_profile,email"
+                    onlogin="checkLoginState()"
+                    data-size="large"
+                    data-button-type="continue_with"
+                    data-layout="default"
+                    data-auto-logout-link="false"
+                    data-use-continue-as="false"
+                    data-width="100%">
+                  </fb:login-button>`
+                }}
+              />
             </form>
           </Form>
             
