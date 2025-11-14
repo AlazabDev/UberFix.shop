@@ -3,8 +3,8 @@
  * يخزن API key في localStorage لمدة 24 ساعة لتقليل استدعاءات Edge Function
  */
 
-const CACHE_KEY = 'google_maps_api_key';
-const CACHE_EXPIRY_KEY = 'google_maps_api_key_expiry';
+const CACHE_KEY = 'google_maps_api_key_v2'; // تغيير لفرض تحديث Cache
+const CACHE_EXPIRY_KEY = 'google_maps_api_key_expiry_v2';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 ساعة
 
 interface CachedApiKey {
