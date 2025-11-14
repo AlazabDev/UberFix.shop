@@ -9,24 +9,17 @@ import { InfoIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const PlatformSettings = () => {
-  const { preferences, permissions, updatePreferences, updatePermissions } = useUserSettings();
-  const [monthlyBudget, setMonthlyBudget] = useState<string>("");
-
-  useEffect(() => {
-    if (preferences?.monthly_budget) {
-      setMonthlyBudget(preferences.monthly_budget.toString());
-    }
-  }, [preferences]);
+  const { preferences, permissions } = useUserSettings();
+  const [monthlyBudget, setMonthlyBudget] = useState<string>("0");
 
   const handleBudgetSave = () => {
-    const budget = Number(monthlyBudget);
-    if (!isNaN(budget) && budget > 0) {
-      updatePreferences({ monthly_budget: budget });
-    }
+    // Budget settings removed
   };
 
   const togglePermission = (key: keyof import("@/hooks/useUserSettings").PlatformPermissions) => 
-    (val: boolean) => updatePermissions({ [key]: val });
+    (val: boolean) => {
+      // Permissions are read-only based on role
+    };
 
   return (
     <div className="space-y-6">
