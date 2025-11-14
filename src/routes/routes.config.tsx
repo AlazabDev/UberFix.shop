@@ -1,42 +1,57 @@
 import { lazy } from "react";
 
-// Lazy load pages for better performance
+// Dashboard & Core
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const SLADashboard = lazy(() => import("@/pages/SLADashboard"));
-const Requests = lazy(() => import("@/pages/Requests"));
-const AllRequests = lazy(() => import("@/pages/AllRequests"));
-const RequestDetails = lazy(() => import("@/pages/RequestDetails"));
-const RequestLifecycleJourney = lazy(() => import("@/pages/RequestLifecycleJourney"));
-const Vendors = lazy(() => import("@/pages/Vendors"));
-const VendorDetails = lazy(() => import("@/pages/VendorDetails"));
-const Reports = lazy(() => import("@/pages/Reports"));
-const Properties = lazy(() => import("@/pages/Properties"));
+const Documentation = lazy(() => import("@/pages/Documentation"));
+
+// Maintenance
+const Requests = lazy(() => import("@/pages/maintenance/Requests"));
+const AllRequests = lazy(() => import("@/pages/maintenance/AllRequests"));
+const RequestDetails = lazy(() => import("@/pages/maintenance/RequestDetails"));
+const RequestLifecycleJourney = lazy(() => import("@/pages/maintenance/RequestLifecycleJourney"));
+const ServiceRequest = lazy(() => import("@/pages/maintenance/ServiceRequest"));
+const ServiceMap = lazy(() => import("@/pages/maintenance/ServiceMap"));
+const EmergencyService = lazy(() => import("@/pages/maintenance/EmergencyService"));
+const MaintenanceProcedures = lazy(() => import("@/pages/maintenance/MaintenanceProcedures"));
+
+// Properties
+const Properties = lazy(() => import("@/pages/properties/Properties"));
 const AddProperty = lazy(() => import("@/pages/properties/AddProperty"));
 const EditProperty = lazy(() => import("@/pages/properties/EditProperty"));
 const PropertyDetails = lazy(() => import("@/pages/properties/PropertyDetails"));
-const Appointments = lazy(() => import("@/pages/Appointments"));
-const Invoices = lazy(() => import("@/pages/Invoices"));
-const ServiceMap = lazy(() => import("@/pages/ServiceMap"));
-const EmergencyService = lazy(() => import("@/pages/EmergencyService"));
-const Documentation = lazy(() => import("@/pages/Documentation"));
-const UserGuide = lazy(() => import("@/pages/UserGuide"));
-const FAQ = lazy(() => import("@/pages/FAQ"));
-const MaintenanceProcedures = lazy(() => import("@/pages/MaintenanceProcedures"));
-const Settings = lazy(() => import("@/pages/Settings"));
-const Testing = lazy(() => import("@/pages/Testing"));
-const ProductionReport = lazy(() => import("@/pages/ProductionReport"));
-const ProductionMonitor = lazy(() => import("@/pages/ProductionMonitor"));
-const ServiceRequest = lazy(() => import("@/pages/ServiceRequest"));
-const ProjectDetails = lazy(() => import("@/pages/ProjectDetails"));
-const ExpenseReports = lazy(() => import("@/pages/ExpenseReports"));
-const MaintenanceReports = lazy(() => import("@/pages/MaintenanceReports"));
+
+// Reports
+const Reports = lazy(() => import("@/pages/reports/Reports"));
+const SLADashboard = lazy(() => import("@/pages/reports/SLADashboard"));
+const ExpenseReports = lazy(() => import("@/pages/reports/ExpenseReports"));
+const MaintenanceReports = lazy(() => import("@/pages/reports/MaintenanceReports"));
+const ProductionReport = lazy(() => import("@/pages/reports/ProductionReport"));
+
+// Admin
 const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
 const AdminControlCenter = lazy(() => import("@/pages/admin/AdminControlCenter"));
-const WhatsAppMessages = lazy(() => import("@/pages/WhatsAppMessages"));
-const MessageLogs = lazy(() => import("@/pages/MessageLogs"));
-const Inbox = lazy(() => import("@/pages/Inbox"));
-const PWASettings = lazy(() => import("@/pages/PWASettings"));
-const MaintenanceLockAdmin = lazy(() => import("@/pages/MaintenanceLockAdmin"));
+const MaintenanceLockAdmin = lazy(() => import("@/pages/admin/MaintenanceLockAdmin"));
+const ProductionMonitor = lazy(() => import("@/pages/admin/ProductionMonitor"));
+const Testing = lazy(() => import("@/pages/admin/Testing"));
+
+// Messages
+const Inbox = lazy(() => import("@/pages/messages/Inbox"));
+const WhatsAppMessages = lazy(() => import("@/pages/messages/WhatsAppMessages"));
+const MessageLogs = lazy(() => import("@/pages/messages/MessageLogs"));
+
+// Projects
+const ProjectDetails = lazy(() => import("@/pages/projects/ProjectDetails"));
+
+// Settings
+const Settings = lazy(() => import("@/pages/settings/Settings"));
+
+// Vendors
+const Vendors = lazy(() => import("@/pages/Vendors"));
+const VendorDetails = lazy(() => import("@/pages/VendorDetails"));
+
+// Other
+const Appointments = lazy(() => import("@/pages/Appointments"));
+const Invoices = lazy(() => import("@/pages/Invoices"));
 
 /**
  * تكوين المسارات المحمية (تتطلب تسجيل دخول)
@@ -62,8 +77,6 @@ export const protectedRoutes = [
   { path: "/appointments", element: <Appointments />, withLayout: true },
   { path: "/invoices", element: <Invoices />, withLayout: true },
   { path: "/documentation", element: <Documentation />, withLayout: true },
-  { path: "/user-guide", element: <UserGuide />, withLayout: true },
-  { path: "/faq", element: <FAQ />, withLayout: true },
   { path: "/maintenance-procedures", element: <MaintenanceProcedures />, withLayout: true },
   { path: "/settings", element: <Settings />, withLayout: true },
   { path: "/testing", element: <Testing />, withLayout: true },
@@ -74,7 +87,6 @@ export const protectedRoutes = [
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
-  { path: "/pwa-settings", element: <PWASettings />, withLayout: true },
   { path: "/maintenance-lock-admin", element: <MaintenanceLockAdmin />, withLayout: true },
   
   // صفحات بدون Layout
