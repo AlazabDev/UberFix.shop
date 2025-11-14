@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LocationPicker } from "./LocationPicker";
+import { MapLocationPicker } from "@/components/maps/MapLocationPicker";
 import { ImageUpload } from "./ImageUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -417,15 +417,25 @@ export function PropertyForm({ skipNavigation = false, onSuccess, initialData, p
       </div>
 
       {/* إحداثيات الخريطة */}
-      <div className="space-y-2">
-        <Label>تحديد الموقع على الخريطة (اختياري)</Label>
-        <LocationPicker
-          onLocationSelect={handleLocationSelect}
-          initialLatitude={location?.latitude}
-          initialLongitude={location?.longitude}
-          initialAddress={location?.address}
-        />
-      </div>
+      <MapLocationPicker
+        defaultLatitude={location?.latitude}
+        defaultLongitude={location?.longitude}
+        onLocationSelect={(data) => {
+          setLocation({
+            latitude: data.lat,
+            longitude: data.lng,
+            address: data.address || ""
+          });
+          if (data.address) {
+            setValue("address", data.address);
+          }
+        }}
+        label="تحديد الموقع على الخريطة (اختياري)"
+        description="اضغط على الخريطة لتحديد الموقع أو استخدم البحث"
+        height="400px"
+        showSearch={true}
+        showCurrentLocation={true}
+      />
 
       {/* العنوان التفصيلي */}
       <div className="space-y-2">
