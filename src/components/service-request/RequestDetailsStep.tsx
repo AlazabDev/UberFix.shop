@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Loader2, MapPin } from "lucide-react";
 import { ImageUpload } from "@/components/forms/ImageUpload";
-import { LocationPicker } from "@/components/forms/LocationPicker";
+import { MapLocationPicker } from "@/components/maps/MapLocationPicker";
 import type { Service } from "@/hooks/useServices";
 
 const formSchema = z.object({
@@ -51,7 +51,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
   const [images, setImages] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -101,16 +101,15 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
     if (data) setProperties(data);
   };
 
-  const handleLocationSelect = (lat: number, lng: number, address?: string) => {
-    form.setValue('latitude', lat);
-    form.setValue('longitude', lng);
-    if (address) {
-      form.setValue('location', address);
+  const handleLocationSelect = (data: { lat: number; lng: number; address?: string }) => {
+    form.setValue('latitude', data.lat);
+    form.setValue('longitude', data.lng);
+    if (data.address) {
+      form.setValue('location', data.address);
     }
-    setShowLocationPicker(false);
     toast({
       title: "تم تحديد الموقع",
-      description: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+      description: data.address || `${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}`,
     });
   };
 
@@ -369,24 +368,15 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
-                      <Dialog open={showLocationPicker} onOpenChange={setShowLocationPicker}>
-                        <DialogTrigger asChild>
-                          <Button type="button" variant="outline" size="icon">
-                            <MapPin className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl">
-                          <DialogHeader>
-                            <DialogTitle>تحديد الموقع على الخريطة</DialogTitle>
-                          </DialogHeader>
-                          <LocationPicker 
-                            onLocationSelect={handleLocationSelect}
-                            initialLatitude={form.watch('latitude')}
-                            initialLongitude={form.watch('longitude')}
-                          />
-                        </DialogContent>
-                      </Dialog>
                     </div>
+                    <MapLocationPicker
+                      defaultLatitude={form.watch('latitude')}
+                      defaultLongitude={form.watch('longitude')}
+                      onLocationSelect={handleLocationSelect}
+                      height="300px"
+                      showSearch={true}
+                      showCurrentLocation={true}
+                    />
                   </FormItem>
                 )}
               />
