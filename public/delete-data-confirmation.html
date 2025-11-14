@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تأكيد حذف البيانات - UberFix</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+    }
+    .icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 40px;
+    }
+    .icon.error {
+      background: #ef4444;
+    }
+    h1 {
+      color: #1f2937;
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    p {
+      color: #6b7280;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .code {
+      background: #f3f4f6;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #374151;
+      margin: 20px 0;
+      word-break: break-all;
+    }
+    .footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e7eb;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon" id="icon">✓</div>
+    <h1 id="title">تم حذف بياناتك بنجاح</h1>
+    <p id="message">
+      تم معالجة طلب حذف بياناتك من Facebook بنجاح. جميع المعلومات المرتبطة بحسابك على Facebook تم حذفها من نظامنا.
+    </p>
+    <div class="code" id="codeBox" style="display: none;">
+      <strong>رمز التأكيد:</strong><br>
+      <span id="confirmationCode"></span>
+    </div>
+    <p style="margin-top: 24px;">
+      إذا كان لديك أي استفسارات، يرجى التواصل معنا عبر: <a href="mailto:support@uberfix.shop">support@uberfix.shop</a>
+    </p>
+    <div class="footer">
+      <p>© 2025 UberFix. جميع الحقوق محفوظة.</p>
+      <p style="margin-top: 8px;">
+        <a href="/">العودة إلى الصفحة الرئيسية</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const status = urlParams.get('status');
+
+    const icon = document.getElementById('icon');
+    const title = document.getElementById('title');
+    const message = document.getElementById('message');
+    const codeBox = document.getElementById('codeBox');
+    const confirmationCode = document.getElementById('confirmationCode');
+
+    if (status === 'not_found') {
+      icon.classList.add('error');
+      icon.textContent = '✕';
+      title.textContent = 'المستخدم غير موجود';
+      message.textContent = 'لم نتمكن من العثور على بيانات مرتبطة بحساب Facebook الخاص بك في نظامنا.';
+    } else if (code) {
+      codeBox.style.display = 'block';
+      confirmationCode.textContent = code;
+    } else {
+      icon.classList.add('error');
+      icon.textContent = '✕';
+      title.textContent = 'رمز تأكيد غير صالح';
+      message.textContent = 'الرجاء التحقق من الرابط والمحاولة مرة أخرى.';
+    }
+  </script>
+</body>
+</html>
