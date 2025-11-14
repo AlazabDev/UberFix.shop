@@ -17,13 +17,6 @@ const Blog = lazy(() => import("@/pages/Blog"));
 const BlogPost = lazy(() => import("@/pages/BlogPost"));
 const QuickRequest = lazy(() => import("@/pages/QuickRequest"));
 const Map = lazy(() => import("@/pages/Map"));
-const UberMapTest = lazy(() => import("@/pages/UberMapTest"));
-const UberMapApp = lazy(() => import("@/modules/uber-map/App"));
-const RegisterService = lazy(() => import("@/modules/uber-map/pages/RegisterService"));
-const UberQuickRequest = lazy(() => import("@/modules/uber-map/pages/QuickRequest"));
-const TrackOrders = lazy(() => import("@/modules/uber-map/pages/TrackOrders"));
-const UberInvoices = lazy(() => import("@/modules/uber-map/pages/Invoices"));
-const CompletedServices = lazy(() => import("@/modules/uber-map/pages/CompletedServices"));
 const PWASettings = lazy(() => import("@/pages/PWASettings"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
@@ -47,13 +40,6 @@ export const publicRoutes = [
   { path: "/blog/:slug", element: <BlogPost /> },
   { path: "/quick-request/:propertyId", element: <QuickRequest /> },
   { path: "/map", element: <Map /> },
-  { path: "/uber-map-test", element: <UberMapTest /> },
-  { path: "/uber-map", element: <UberMapApp /> },
-  { path: "/uber-map/register-service", element: <RegisterService /> },
-  { path: "/uber-map/quick-request", element: <UberQuickRequest /> },
-  { path: "/uber-map/track-orders", element: <TrackOrders /> },
-  { path: "/uber-map/invoices", element: <UberInvoices /> },
-  { path: "/uber-map/completed-services", element: <CompletedServices /> },
   { path: "/pwa-settings", element: <PWASettings /> },
   { path: "*", element: <NotFound /> },
 ];
