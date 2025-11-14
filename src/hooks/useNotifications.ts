@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
@@ -15,11 +15,50 @@ export interface Notification {
   updated_at: string;
 }
 
+interface SendNotificationOptions {
+  type: 'request_created' | 'status_updated' | 'vendor_assigned' | 'sla_warning' | 'request_completed';
+  request_id: string;
+  recipient_id: string;
+  recipient_email?: string;
+  recipient_phone?: string;
+  channels?: ('email' | 'sms' | 'whatsapp' | 'in_app')[];
+  data?: {
+    request_title?: string;
+    request_status?: string;
+    old_status?: string;
+    new_status?: string;
+    vendor_name?: string;
+    property_name?: string;
+    sla_deadline?: string;
+    notes?: string;
+  };
+}
+
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      
+      const notificationsData = (data || []) as Notification[];
+      setNotifications(notificationsData);
+      setUnreadCount(notificationsData.filter(n => !n.read_at).length);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'خطأ في تحميل الإشعارات');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchNotifications();
@@ -38,27 +77,7 @@ export const useNotifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
-
-  const fetchNotifications = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      
-      const notificationsData = (data || []) as Notification[];
-      setNotifications(notificationsData);
-      setUnreadCount(notificationsData.filter(n => !n.read_at).length);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل الإشعارات');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [fetchNotifications]);
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -68,6 +87,7 @@ export const useNotifications = () => {
         .eq('id', notificationId);
 
       if (error) throw error;
+      await fetchNotifications();
     } catch (err) {
       console.error('Error marking notification as read:', err);
     }
@@ -81,49 +101,35 @@ export const useNotifications = () => {
         .is('read_at', null);
 
       if (error) throw error;
+      await fetchNotifications();
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
     }
   };
 
-  const createNotification = async (
-    notification: Omit<Notification, 'id' | 'created_at' | 'updated_at'>,
-    sendEmail: boolean = false,
-    emailData?: {
-      recipient_email: string;
-      recipient_name: string;
-      notification_type: 'request_created' | 'status_update' | 'vendor_assigned' | 'request_completed';
-      request_id: string;
-      request_title: string;
-      request_status?: string;
-      vendor_name?: string;
-      notes?: string;
-    }
-  ) => {
+  const sendNotification = async (options: SendNotificationOptions) => {
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .insert([notification])
-        .select()
-        .single();
+      console.log('Sending unified notification:', options);
+
+      // استدعاء Edge Function الموحد
+      const { data, error } = await supabase.functions.invoke('send-unified-notification', {
+        body: options
+      });
 
       if (error) throw error;
 
-      // إرسال بريد إلكتروني إذا كان مطلوباً
-      if (sendEmail && emailData) {
-        try {
-          await supabase.functions.invoke('send-email-notification', {
-            body: emailData
-          });
-        } catch (emailError) {
-          console.error('Error sending email notification:', emailError);
-          // لا نريد فشل الإشعار بسبب فشل البريد
-        }
-      }
-
+      console.log('Notification sent successfully:', data);
+      
+      // تحديث القائمة
+      await fetchNotifications();
+      
       return { success: true, data };
     } catch (err) {
-      return { success: false, error: err instanceof Error ? err.message : 'خطأ في إرسال الإشعار' };
+      console.error('Error sending notification:', err);
+      return { 
+        success: false, 
+        error: err instanceof Error ? err.message : 'خطأ في إرسال الإشعار' 
+      };
     }
   };
 
@@ -134,7 +140,7 @@ export const useNotifications = () => {
     unreadCount,
     markAsRead, 
     markAllAsRead,
-    createNotification,
+    sendNotification,
     refetch: fetchNotifications 
   };
 };
