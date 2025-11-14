@@ -15,7 +15,6 @@ import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { useToast } from "@/hooks/use-toast";
 import { LocationPicker } from "@/components/forms/LocationPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { useRequestLifecycle } from "@/hooks/useRequestLifecycle";
 import { useProperties } from "@/hooks/useProperties";
 import { PropertyForm } from "./PropertyForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -30,7 +29,6 @@ type MaintenanceRequestFormData = z.infer<typeof maintenanceRequestFormSchema>;
 
 export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
   const { createRequest } = useMaintenanceRequests();
-  const { addLifecycleEvent } = useRequestLifecycle();
   const { properties, loading: propertiesLoading } = useProperties();
   const { toast } = useToast();
   const [showPropertyForm, setShowPropertyForm] = useState(false);
@@ -84,34 +82,17 @@ export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
       
       const result = await createRequest(requestPayload);
       if (result) {
-        // إنشاء حدث دورة حياة للطلب الجديد
-        try {
-          await addLifecycleEvent(
-            result.id,
-            'submitted',
-            'status_change',
-            'تم إنشاء الطلب بنجاح',
-            { 
-              service_type: data.service_type,
-              priority: data.priority,
-              has_location: !!(data.latitude && data.longitude)
-            }
-          );
-
-          // إنشاء إشعار للمستخدم
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            await supabase.from('notifications').insert({
-              recipient_id: user.id,
-              title: 'تم استلام طلبك',
-              message: `تم استلام طلب الصيانة: ${data.title}`,
-              type: 'success',
-              entity_type: 'maintenance_request',
-              entity_id: result.id
-            });
-          }
-        } catch (lifecycleError) {
-          console.error('Error creating lifecycle event:', lifecycleError);
+        // إنشاء إشعار للمستخدم
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from('notifications').insert({
+            recipient_id: user.id,
+            title: 'تم استلام طلبك',
+            message: `تم استلام طلب الصيانة: ${data.title}`,
+            type: 'success',
+            entity_type: 'maintenance_request',
+            entity_id: result.id
+          });
         }
 
         toast({

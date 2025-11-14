@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal, Edit, Trash2, UserCheck, DollarSign, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useRequestLifecycle } from "@/hooks/useRequestLifecycle";
 
 interface MaintenanceRequestActionsProps {
   request: any;
@@ -18,7 +17,6 @@ interface MaintenanceRequestActionsProps {
 
 export function MaintenanceRequestActions({ request }: MaintenanceRequestActionsProps) {
   const { toast } = useToast();
-  const { addLifecycleEvent } = useRequestLifecycle();
   const [isUpdating, setIsUpdating] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showVendorDialog, setShowVendorDialog] = useState(false);
