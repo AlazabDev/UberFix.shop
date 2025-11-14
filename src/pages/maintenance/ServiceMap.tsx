@@ -45,25 +45,35 @@ export default function ServiceMap() {
             setTimeout(() => initMap(), 2000);
             return;
           }
-          if (mounted) setMapError(true);
+          if (mounted) {
+            setMapError(true);
+            console.error("❌ Max retries reached, showing error message");
+          }
           return;
         }
         
         if (!data?.apiKey) {
-          console.error("❌ No API key returned");
+          console.error("❌ No API key returned from edge function");
           if (mounted) setMapError(true);
           return;
         }
+        
+        console.log("✅ API key received successfully:", data.apiKey.substring(0, 15) + "...");
 
-        console.log("✅ API key received:", data.apiKey.substring(0, 10) + "...");
         
         // تحقق من وجود Google Maps
         if (typeof window.google !== 'undefined' && window.google.maps) {
-          console.log("✅ Google Maps already loaded");
+          console.log("✅ Google Maps already loaded, reusing instance");
         } else {
-          console.log("📦 Loading Google Maps script...");
-          await loadGoogleMaps(data.apiKey);
-          console.log("✅ Google Maps script loaded");
+          console.log("📦 Loading Google Maps script with key...");
+          try {
+            await loadGoogleMaps(data.apiKey);
+            console.log("✅ Google Maps script loaded successfully");
+          } catch (loadError) {
+            console.error("❌ Error loading Google Maps script:", loadError);
+            if (mounted) setMapError(true);
+            return;
+          }
         }
 
         // انتظر قليلاً للتأكد من تحميل Google Maps
@@ -213,17 +223,17 @@ export default function ServiceMap() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - Technicians List */}
-        <aside className="w-64 bg-white border-l border-gray-200 flex flex-col">
-          <div className="p-4 flex-shrink-0">
+        <aside className="w-80 bg-white border-l border-gray-200 flex flex-col max-h-[calc(100vh-200px)]">
+          <div className="p-4 flex-shrink-0 border-b border-gray-100">
             <h2 className="text-lg font-bold text-[#0B0B3B] mb-1">
               الخدمات المتاحة ({filteredTechnicians.length})
             </h2>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500">
               اختر فني من القائمة أدناه
             </p>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <div className="space-y-3">
 
               {loading ? (
@@ -284,12 +294,17 @@ export default function ServiceMap() {
                           </span>
                           <Button
                             size="sm"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               if (tech.phone) {
-                                window.location.href = `tel:${tech.phone}`;
+                                console.log("📞 Calling technician:", tech.name, tech.phone);
+                                window.open(`tel:${tech.phone}`, '_self');
+                              } else {
+                                console.warn("⚠️ No phone number for technician:", tech.name);
                               }
                             }}
-                            className="bg-[#0B0B3B] hover:bg-[#0B0B3B]/90 text-white h-8"
+                            className="bg-[#0B0B3B] hover:bg-[#0B0B3B]/90 text-white h-8 cursor-pointer"
                           >
                             <Phone className="w-3 h-3 ml-1" />
                             اتصل
