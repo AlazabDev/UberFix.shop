@@ -123,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const { data, error } = await resend.emails.send({
-      from: "UberFix <onboarding@resend.dev>",
+      from: "UberFix <hello@tx.uberfix.shop>",
       to: [approverEmail],
       subject: `طلب موافقة - صيانة #${requestNumber}`,
       html: emailHtml,

@@ -64,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
     const subject = subjectMap[emailData.notification_type] || 'إشعار صيانة - UberFix';
 
     const emailResponse = await resend.emails.send({
-      from: "UberFix <onboarding@resend.dev>",
+      from: "UberFix <hello@tx.uberfix.shop>",
       to: [emailData.recipient_email],
       subject: subject,
       html: htmlContent,

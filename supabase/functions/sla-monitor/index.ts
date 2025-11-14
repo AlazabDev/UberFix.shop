@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
         if (profile?.email) {
           emailPromises.push(
             resend.emails.send({
-              from: 'UberFix.shop <onboarding@resend.dev>',
+              from: 'UberFix <hello@tx.uberfix.shop>',
               to: [profile.email],
               subject: title,
               html: `

@@ -60,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailHtml = await generateInvoiceHTML(invoice);
 
     const emailResponse = await resend.emails.send({
-      from: "UberFix <onboarding@resend.dev>",
+      from: "UberFix <hello@tx.uberfix.shop>",
       to: [customer_email],
       subject: `فاتورة #${invoice.invoice_number} - UberFix`,
       html: emailHtml,

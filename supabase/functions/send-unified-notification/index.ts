@@ -151,7 +151,7 @@ const sendEmailNotification = async (
 ) => {
   try {
     const result = await resend.emails.send({
-      from: 'UberFix <notifications@uberfix.shop>',
+      from: 'UberFix <hello@tx.uberfix.shop>',
       to: [email],
       subject,
       html
