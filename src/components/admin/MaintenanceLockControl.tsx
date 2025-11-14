@@ -35,20 +35,8 @@ export function MaintenanceLockControl() {
     },
   });
 
-  // Fetch lock history
-  const { data: lockHistory } = useQuery({
-    queryKey: ['maintenance-lock-history'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('app_control_history')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Lock history removed - table deleted
+  const lockHistory = [];
 
   // Toggle lock mutation
   const toggleLockMutation = useMutation({

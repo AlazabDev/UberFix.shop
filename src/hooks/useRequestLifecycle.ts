@@ -68,25 +68,9 @@ export function useRequestLifecycle(requestId?: string) {
       if (lifecycleError) throw lifecycleError;
       setLifecycleEvents(lifecycleData || []);
 
-      // جلب مهام العمل
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('work_tasks')
-        .select('*')
-        .eq('request_id', id)
-        .order('sort_order', { ascending: true });
-
-      if (tasksError) throw tasksError;
-      setWorkTasks(tasksData || []);
-
-      // جلب التقييمات
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('request_reviews')
-        .select('*')
-        .eq('request_id', id)
-        .order('created_at', { ascending: false });
-
-      if (reviewsError) throw reviewsError;
-      setReviews(reviewsData || []);
+      // Tables deleted - work_tasks and request_reviews
+      setWorkTasks([]);
+      setReviews([]);
 
     } catch (err) {
       setError(err as Error);
