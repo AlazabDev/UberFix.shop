@@ -78,3 +78,12 @@ verify_jwt = false
 
 [functions.calculate-route]
 verify_jwt = true
+
+[functions.meta-deauthorize]
+verify_jwt = false
+
+[functions.meta-delete-data]
+verify_jwt = false
+
+[functions.twilio-fallback]
+verify_jwt = false
