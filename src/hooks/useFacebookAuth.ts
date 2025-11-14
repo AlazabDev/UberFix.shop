@@ -17,6 +17,7 @@ declare global {
   interface Window {
     FB: any;
     fbAsyncInit: () => void;
+    checkLoginState: () => void;
   }
 }
 
@@ -33,13 +34,27 @@ export function useFacebookAuth() {
         setIsFBReady(true);
         clearInterval(checkFBReady);
         
+        // إتاحة checkLoginState للاستخدام من قبل Facebook Button
+        window.checkLoginState = checkLoginState;
+        
         // التحقق من حالة تسجيل الدخول عند التحميل
         checkLoginStatus();
       }
     }, 100);
 
-    return () => clearInterval(checkFBReady);
+    return () => {
+      clearInterval(checkFBReady);
+      delete window.checkLoginState;
+    };
   }, []);
+
+  const checkLoginState = () => {
+    if (!window.FB) return;
+
+    window.FB.getLoginStatus((response: FacebookAuthResponse) => {
+      handleFacebookResponse(response);
+    });
+  };
 
   const checkLoginStatus = () => {
     if (!window.FB) return;
