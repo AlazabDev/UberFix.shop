@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { MapPin, Phone, Loader2, Building2, Plus } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { useToast } from "@/hooks/use-toast";
-import { LocationPicker } from "@/components/forms/LocationPicker";
+import { MapLocationPicker } from "@/components/maps/MapLocationPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { useProperties } from "@/hooks/useProperties";
 import { PropertyForm } from "./PropertyForm";
@@ -32,7 +32,7 @@ export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
   const { properties, loading: propertiesLoading } = useProperties();
   const { toast } = useToast();
   const [showPropertyForm, setShowPropertyForm] = useState(false);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  
 
   const form = useForm<MaintenanceRequestFormData>({
     resolver: zodResolver(maintenanceRequestFormSchema),
@@ -167,13 +167,12 @@ export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
     }
   };
 
-  const handleLocationSelect = (lat: number, lng: number, address?: string) => {
-    form.setValue('latitude', lat);
-    form.setValue('longitude', lng);
-    if (address) {
-      form.setValue('location', address);
+  const handleLocationSelect = (data: { lat: number; lng: number; address?: string }) => {
+    form.setValue('latitude', data.lat);
+    form.setValue('longitude', data.lng);
+    if (data.address) {
+      form.setValue('location', data.address);
     }
-    setShowLocationPicker(false);
     toast({
       title: "تم تحديد الموقع",
       description: "تم حفظ موقعك بنجاح",
@@ -349,25 +348,15 @@ export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
                         <Input placeholder="العنوان التفصيلي" className="pr-10" {...field} />
                       </div>
                     </FormControl>
-                    <Dialog open={showLocationPicker} onOpenChange={setShowLocationPicker}>
-                      <DialogTrigger asChild>
-                        <Button type="button" variant="outline" size="icon">
-                          <MapPin className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl">
-                        <DialogHeader>
-                          <DialogTitle>تحديد الموقع على الخريطة</DialogTitle>
-                        </DialogHeader>
-                        <LocationPicker 
-                          onLocationSelect={handleLocationSelect}
-                          initialLatitude={form.watch('latitude') || undefined}
-                          initialLongitude={form.watch('longitude') || undefined}
-                          initialAddress={field.value}
-                        />
-                      </DialogContent>
-                    </Dialog>
                   </div>
+                  <MapLocationPicker
+                    defaultLatitude={form.watch('latitude') || undefined}
+                    defaultLongitude={form.watch('longitude') || undefined}
+                    onLocationSelect={handleLocationSelect}
+                    height="300px"
+                    showSearch={true}
+                    showCurrentLocation={true}
+                  />
                   {form.watch('latitude') && form.watch('longitude') && (
                     <p className="text-sm text-green-600">
                       ✓ تم تحديد الموقع على الخريطة
