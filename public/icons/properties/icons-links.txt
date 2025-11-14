@@ -1,0 +1,5 @@
+https://al-azab.co/img/residential.svg
+https://al-azab.co/img/commercial.svg
+https://al-azab.co/img/Industrial.svg
+https://al-azab.co/img/office.svg
+https://al-azab.co/img/retail.svg
