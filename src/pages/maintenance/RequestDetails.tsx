@@ -1,12 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, FileText, Settings, Package, CheckSquare, FileBarChart, Archive, AlertCircle } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { MaintenanceRequestDetails } from "@/components/maintenance/MaintenanceRequestDetails";
-import { RequestLifecycleTracker } from "@/components/maintenance/RequestLifecycleTracker";
 import { RequestWorkflowControls } from "@/components/maintenance/RequestWorkflowControls";
 import { WorkflowDiagram } from "@/components/workflow/WorkflowDiagram";
 import { WorkflowTimeline } from "@/components/requests/WorkflowTimeline";
@@ -171,11 +170,14 @@ export default function RequestDetails() {
 
         {/* Lifecycle Tab */}
         <TabsContent value="lifecycle" className="space-y-4">
-          <RequestLifecycleTracker 
-            requestId={request.id}
-            requestStatus={request.workflow_stage || request.status}
-            requestTitle={request.title}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>دورة الحياة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">تم إزالة هذه الميزة مؤقتاً</p>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Workflow Tab */}

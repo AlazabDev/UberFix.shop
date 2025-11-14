@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, DollarSign, MapPin, Phone, User, FileText, Image as ImageIcon, AlertCircle, TrendingUp } from "lucide-react";
-import { RequestLifecycleTracker } from "./RequestLifecycleTracker";
 import { SLAIndicator } from "./SLAIndicator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestStatusTimeline } from "./RequestStatusTimeline";
@@ -300,11 +299,14 @@ export function MaintenanceRequestDetails({ request }: MaintenanceRequestDetails
         </TabsContent>
         
         <TabsContent value="lifecycle" className="mt-6">
-          <RequestLifecycleTracker 
-            requestId={request.id}
-            requestStatus={request.status}
-            requestTitle={request.title}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>سير العمل</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">تم إزالة هذه الميزة مؤقتاً</p>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Workflow Tab */}

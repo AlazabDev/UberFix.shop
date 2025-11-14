@@ -30,7 +30,6 @@ const ProductionReport = lazy(() => import("@/pages/reports/ProductionReport"));
 // Admin
 const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
 const AdminControlCenter = lazy(() => import("@/pages/admin/AdminControlCenter"));
-const MaintenanceLockAdmin = lazy(() => import("@/pages/admin/MaintenanceLockAdmin"));
 const ProductionMonitor = lazy(() => import("@/pages/admin/ProductionMonitor"));
 const Testing = lazy(() => import("@/pages/admin/Testing"));
 
@@ -87,7 +86,6 @@ export const protectedRoutes = [
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
-  { path: "/maintenance-lock-admin", element: <MaintenanceLockAdmin />, withLayout: true },
   
   // صفحات بدون Layout
   { path: "/service-map", element: <ServiceMap />, withLayout: false },

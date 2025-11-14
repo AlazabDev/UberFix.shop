@@ -16,9 +16,6 @@ export interface UserProfile {
 }
 
 export interface UserPreferences {
-  user_id: string;
-  monthly_budget: number | null;
-  timezone: string;
   notifications_enabled: boolean;
   email_notifications: boolean;
 }
@@ -52,7 +49,6 @@ export const useUserSettings = () => {
 
       if (error) throw error;
       
-      // إنشاء ملف تعريف إذا لم يكن موجوداً
       if (!data) {
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
@@ -75,23 +71,11 @@ export const useUserSettings = () => {
     },
   });
 
-  // Fetch user preferences
-  const { data: preferences, isLoading: preferencesLoading } = useQuery({
-    queryKey: ["user-preferences"],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase
-        .from("user_preferences")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data as UserPreferences | null;
-    },
-  });
+  // Simple preferences (not from DB)
+  const preferences: UserPreferences = {
+    notifications_enabled: true,
+    email_notifications: true
+  };
 
   // Fetch platform permissions based on user role
   const { data: permissions, isLoading: permissionsLoading } = useQuery({
@@ -100,7 +84,6 @@ export const useUserSettings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // الحصول على دور المستخدم
       const { data: roleData } = await supabase
         .from("user_roles")
         .select("role")
@@ -110,7 +93,6 @@ export const useUserSettings = () => {
       const role = roleData?.role || 'customer';
       const isAdmin = role === 'admin' || role === 'manager';
       
-      // إرجاع صلاحيات بناءً على الدور
       const defaultPermissions: PlatformPermissions = {
         user_id: user.id,
         can_choose_appointment_date: true,
@@ -131,68 +113,18 @@ export const useUserSettings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update(updates)
-        .eq("id", user.id)
-        .select()
-        .single();
+        .eq("id", user.id);
 
       if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       toast({
-        title: "تم التحديث",
-        description: "تم تحديث البيانات الشخصية بنجاح",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "خطأ",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update preferences mutation
-  const updatePreferencesMutation = useMutation({
-    mutationFn: async (updates: Partial<UserPreferences>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data: existing } = await supabase
-        .from("user_preferences")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (existing) {
-        const { data, error } = await supabase
-          .from("user_preferences")
-          .update(updates)
-          .eq("user_id", user.id)
-          .select()
-          .single();
-        if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await supabase
-          .from("user_preferences")
-          .insert({ user_id: user.id, ...updates })
-          .select()
-          .single();
-        if (error) throw error;
-        return data;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-preferences"] });
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث الإعدادات بنجاح",
+        title: "تم التحديث بنجاح",
+        description: "تم تحديث بيانات الملف الشخصي",
       });
     },
     onError: (error: Error) => {
@@ -208,7 +140,7 @@ export const useUserSettings = () => {
   const updatePasswordMutation = useMutation({
     mutationFn: async ({ newPassword }: { newPassword: string }) => {
       const { error } = await supabase.auth.updateUser({
-        password: newPassword,
+        password: newPassword
       });
       if (error) throw error;
     },
@@ -227,38 +159,14 @@ export const useUserSettings = () => {
     },
   });
 
-  // Update permissions mutation (simplified - permissions based on role now)
-  const updatePermissionsMutation = useMutation({
-    mutationFn: async (updates: Partial<PlatformPermissions>) => {
-      // الصلاحيات الآن تعتمد على الدور فقط
-      // لا حاجة لتحديث في جدول منفصل
-      console.log('Permissions update requested:', updates);
-      // يمكن إضافة logic هنا لتغيير الدور إذا لزم الأمر
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["platform-permissions"] });
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث الصلاحيات بنجاح",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "خطأ",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
   return {
     profile,
     preferences,
     permissions,
-    isLoading: profileLoading || preferencesLoading || permissionsLoading,
+    isLoading: profileLoading || permissionsLoading,
     updateProfile: updateProfileMutation.mutate,
-    updatePreferences: updatePreferencesMutation.mutate,
+    updatePreferences: () => {},
+    updatePermissions: () => {},
     updatePassword: updatePasswordMutation.mutate,
-    updatePermissions: updatePermissionsMutation.mutate,
   };
 };

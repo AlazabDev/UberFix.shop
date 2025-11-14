@@ -40,7 +40,7 @@ export const AccountSettings = () => {
 
   const handleNotificationsChange = (enabled: boolean) => {
     setNotificationsEnabled(enabled);
-    updatePreferences({ notifications_enabled: enabled });
+    // Notifications settings removed
   };
 
   return (
