@@ -56,6 +56,7 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
     let mounted = true;
     let clickListener: google.maps.MapsEventListener | null = null;
+    let mapInstance: google.maps.Map | null = null;
 
     const initMap = async () => {
       try {
@@ -65,22 +66,28 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
         // Load Google Maps API
         await googleMapsLoader.load();
 
-        if (!mounted || !mapRef.current) return;
+        if (!mounted || !mapRef.current) {
+          setIsLoading(false);
+          return;
+        }
 
         // Create map instance
-        const mapInstance = new google.maps.Map(mapRef.current, {
+        mapInstance = new google.maps.Map(mapRef.current, {
           center,
           zoom,
           ...MAPS_CONFIG.defaultOptions,
           ...mapOptions,
         });
 
-        if (!mounted) return;
+        if (!mounted) {
+          setIsLoading(false);
+          return;
+        }
 
         setMap(mapInstance);
 
         // Add click listener
-        if (onMapClick) {
+        if (onMapClick && mapInstance) {
           clickListener = mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
             if (e.latLng) {
               onMapClick(e.latLng.lat(), e.latLng.lng());
@@ -103,22 +110,34 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
     return () => {
       mounted = false;
       
-      // Remove click listener
-      if (clickListener) {
-        google.maps.event.removeListener(clickListener);
+      // Remove click listener safely
+      if (clickListener && window.google?.maps?.event) {
+        try {
+          google.maps.event.removeListener(clickListener);
+        } catch (e) {
+          console.error('Error removing listener:', e);
+        }
       }
       
-      // Clear markers safely
-      try {
-        markersRef.current.forEach((marker) => {
-          if (marker && marker.setMap) {
-            marker.setMap(null);
+      // Clear markers safely with better error handling
+      if (markersRef.current.size > 0) {
+        const markers = Array.from(markersRef.current.values());
+        markersRef.current.clear();
+        
+        markers.forEach((marker) => {
+          try {
+            if (marker && typeof marker.setMap === 'function') {
+              marker.setMap(null);
+            }
+          } catch (e) {
+            // Silently ignore individual marker cleanup errors
           }
         });
-        markersRef.current.clear();
-      } catch (error) {
-        console.error('Error cleaning up markers:', error);
       }
+
+      // Clear map instance
+      mapInstance = null;
+      setMap(null);
     };
   }, []);
 
