@@ -164,7 +164,7 @@ class Analytics {
       // إعادة الأحداث للطابور في حالة الفشل
       this.eventQueue.unshift(...eventsToSend);
       errorHandler.logError({
-        level: 'warn',
+        level: 'warning',
         message: 'Failed to send analytics events',
         url: window.location.href,
         metadata: { 

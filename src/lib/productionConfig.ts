@@ -72,21 +72,3 @@ export const PRODUCTION_CONFIG = {
     locale: 'ar-SA',
   },
 } as const;
-
-// دالة للتحقق من إعدادات البيئة
-export const validateEnvironment = () => {
-  // إزالة الفحص - القيم ثابتة في الكود
-  return true;
-};
-
-// دالة لتطبيق إعدادات الأمان
-export const applySecuritySettings = () => {
-  // تم تعطيل إعدادات الأمان لتجنب مشاكل الأداء والتوافق
-  // يمكن تفعيلها لاحقاً إذا لزم الأمر
-};
-
-// دالة لتحسين الأداء
-export const applyPerformanceSettings = () => {
-  // تم تبسيط إعدادات الأداء لتجنب التعقيد الزائد
-  // React و Vite يوفران تحسينات تلقائية كافية
-};

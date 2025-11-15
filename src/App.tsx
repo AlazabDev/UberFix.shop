@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { useProductionOptimizations } from "@/hooks/useProductionOptimizations";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
@@ -35,8 +34,6 @@ const LoadingFallback = () => (
 );
 
 const App = () => {
-  useProductionOptimizations();
-
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
