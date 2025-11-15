@@ -90,33 +90,30 @@ class ErrorHandler {
     if (process.env.NODE_ENV === 'development') {
       switch (errorLog.level) {
         case 'error':
-          console.error('[Error]', errorLog.message, errorLog);
+          console.error('[Error]', errorLog.message);
           break;
         case 'warn':
-          console.warn('[Warning]', errorLog.message, errorLog);
+          console.warn('[Warning]', errorLog.message);
           break;
         case 'info':
-          console.info('[Info]', errorLog.message);
+          console.log('[Info]', errorLog.message);
           break;
       }
     }
 
-    // إضافة للطابور
-    this.errorQueue.push(errorLog);
-    
-    // الحفاظ على حد أقصى من الأخطاء
-    if (this.errorQueue.length > this.maxErrors) {
-      this.errorQueue.shift();
-    }
+    // إضافة للطابور فقط إذا كان خطأ حقيقي (error level)
+    if (errorLog.level === 'error') {
+      this.errorQueue.push(errorLog);
+      
+      // الحفاظ على حد أقصى من الأخطاء
+      if (this.errorQueue.length > this.maxErrors) {
+        this.errorQueue.shift();
+      }
 
-    // إرسال فوري إذا كان الاتصال متاح
-    if (this.isOnline) {
-      await this.flushErrorQueue();
-    }
-
-    // طباعة في وضع التطوير
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error logged:', errorLog);
+      // إرسال فوري إذا كان الاتصال متاح
+      if (this.isOnline) {
+        await this.flushErrorQueue();
+      }
     }
   }
 
