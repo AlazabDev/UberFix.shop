@@ -56,7 +56,6 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
     let mounted = true;
     let clickListener: google.maps.MapsEventListener | null = null;
-    let mapInstance: google.maps.Map | null = null;
 
     const initMap = async () => {
       try {
@@ -72,7 +71,7 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
         }
 
         // Create map instance
-        mapInstance = new google.maps.Map(mapRef.current, {
+        const mapInstance = new google.maps.Map(mapRef.current, {
           center,
           zoom,
           ...MAPS_CONFIG.defaultOptions,
@@ -110,33 +109,32 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
     return () => {
       mounted = false;
       
-      // Remove click listener safely
-      if (clickListener && window.google?.maps?.event) {
-        try {
-          google.maps.event.removeListener(clickListener);
-        } catch (e) {
-          console.error('Error removing listener:', e);
-        }
-      }
-      
-      // Clear markers safely with better error handling
+      // First: Clear all markers before removing map
       if (markersRef.current.size > 0) {
-        const markers = Array.from(markersRef.current.values());
+        const markersArray = Array.from(markersRef.current.values());
         markersRef.current.clear();
         
-        markers.forEach((marker) => {
+        markersArray.forEach((marker) => {
           try {
             if (marker && typeof marker.setMap === 'function') {
               marker.setMap(null);
             }
           } catch (e) {
-            // Silently ignore individual marker cleanup errors
+            // Silent cleanup error
           }
         });
       }
+      
+      // Second: Remove click listener
+      if (clickListener && window.google?.maps?.event) {
+        try {
+          google.maps.event.removeListener(clickListener);
+        } catch (e) {
+          // Silent cleanup error
+        }
+      }
 
-      // Clear map instance
-      mapInstance = null;
+      // Finally: Clear map reference
       setMap(null);
     };
   }, []);
@@ -232,6 +230,8 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
   useEffect(() => {
     if (!map) return;
 
+    let mounted = true;
+
     // Clear existing markers first
     const currentMarkers = Array.from(markersRef.current.values());
     markersRef.current.clear();
@@ -246,10 +246,12 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
       }
     });
 
-    // Add new markers only if we have any
-    if (markers.length > 0) {
+    // Add new markers only if component is still mounted and we have markers
+    if (mounted && markers.length > 0) {
       markers.forEach((markerData) => {
         try {
+          if (!mounted) return; // Double check before creating marker
+          
           const markerInstance = new google.maps.Marker({
             position: { lat: markerData.lat, lng: markerData.lng },
             map,
@@ -270,12 +272,18 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
             });
           }
 
-          markersRef.current.set(markerData.id, markerInstance);
+          if (mounted) {
+            markersRef.current.set(markerData.id, markerInstance);
+          }
         } catch (e) {
           console.error('Error adding marker:', e);
         }
       });
     }
+
+    return () => {
+      mounted = false;
+    };
   }, [map, markers]);
 
   return {
