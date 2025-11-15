@@ -49,53 +49,44 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
+  const isMountedRef = useRef(true);
 
   // Initialize map
   useEffect(() => {
     if (!mapRef.current) return;
 
-    let mounted = true;
+    isMountedRef.current = true;
     let clickListener: google.maps.MapsEventListener | null = null;
-    let mapInstance: google.maps.Map | null = null;
 
     const initMap = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        // Load Google Maps API
         await googleMapsLoader.load();
 
-        if (!mounted || !mapRef.current) {
+        if (!isMountedRef.current || !mapRef.current) {
           setIsLoading(false);
           return;
         }
 
-        // Verify the map container is still in the DOM
-        if (!mapRef.current.isConnected) {
-          setIsLoading(false);
-          return;
-        }
-
-        // Create map instance
-        mapInstance = new google.maps.Map(mapRef.current, {
+        const mapInstance = new google.maps.Map(mapRef.current, {
           center,
           zoom,
           ...MAPS_CONFIG.defaultOptions,
           ...mapOptions,
         });
 
-        if (!mounted) {
+        if (!isMountedRef.current) {
           setIsLoading(false);
           return;
         }
 
         setMap(mapInstance);
 
-        // Add click listener
-        if (onMapClick && mapInstance) {
+        if (onMapClick) {
           clickListener = mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
-            if (e.latLng) {
+            if (e.latLng && isMountedRef.current) {
               onMapClick(e.latLng.lat(), e.latLng.lng());
             }
           });
@@ -103,7 +94,7 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
         setIsLoading(false);
       } catch (err) {
-        if (!mounted) return;
+        if (!isMountedRef.current) return;
         console.error('Error initializing map:', err);
         setError(err instanceof Error ? err.message : 'فشل تحميل الخريطة');
         setIsLoading(false);
@@ -112,212 +103,90 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
     initMap();
 
-    // Cleanup
     return () => {
-      mounted = false;
+      isMountedRef.current = false;
       
-      // Clean up markers BEFORE unmounting map
-      try {
-        markersRef.current.forEach((marker) => {
-          try {
-            if (marker && typeof marker.setMap === 'function') {
-              marker.setMap(null); // Remove from map, not DOM
-            }
-          } catch (e) {
-            // Ignore individual marker cleanup errors
-          }
-        });
-        markersRef.current.clear();
-      } catch (e) {
-        // Ignore cleanup errors
-      }
+      markersRef.current.forEach((marker) => {
+        if (marker?.setMap) marker.setMap(null);
+      });
+      markersRef.current.clear();
       
-      // Remove click listener
       if (clickListener) {
-        try {
-          google.maps.event.removeListener(clickListener);
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-        clickListener = null;
+        google.maps.event.removeListener(clickListener);
       }
       
-      // Clear map reference - don't touch DOM
-      mapInstance = null;
       setMap(null);
     };
-  }, []);
+  }, [center.lat, center.lng, zoom, onMapClick, mapOptions]);
 
-  // Add marker function
   const addMarker = useCallback((marker: MapMarker): google.maps.Marker | null => {
-    if (!map || !mapRef.current?.isConnected) {
-      console.warn('Cannot add marker: map not initialized or disconnected');
-      return null;
+    if (!map || !isMountedRef.current) return null;
+
+    const existingMarker = markersRef.current.get(marker.id);
+    if (existingMarker) {
+      existingMarker.setMap(null);
+      markersRef.current.delete(marker.id);
     }
 
-    try {
-      // Remove existing marker with same ID
-      if (markersRef.current.has(marker.id)) {
-        const existingMarker = markersRef.current.get(marker.id);
-        if (existingMarker && typeof existingMarker.setMap === 'function') {
-          try {
-            existingMarker.setMap(null);
-          } catch (e) {
-            console.warn('Error removing existing marker:', e);
-          }
-        }
-        markersRef.current.delete(marker.id);
-      }
+    const googleMarker = new google.maps.Marker({
+      position: { lat: marker.lat, lng: marker.lng },
+      map,
+      title: marker.title,
+      icon: marker.icon,
+    });
 
-      const markerInstance = new google.maps.Marker({
-        position: { lat: marker.lat, lng: marker.lng },
-        map,
-        title: marker.title,
-        icon: marker.icon,
+    if (marker.onClick) {
+      googleMarker.addListener('click', marker.onClick);
+    }
+
+    if (marker.content) {
+      const infoWindow = new google.maps.InfoWindow({
+        content: marker.content,
       });
-
-      if (marker.onClick) {
-        markerInstance.addListener('click', marker.onClick);
-      }
-
-      if (marker.content) {
-        const infoWindow = new google.maps.InfoWindow({
-          content: marker.content,
-        });
-        markerInstance.addListener('click', () => {
-          infoWindow.open(map, markerInstance);
-        });
-      }
-
-      markersRef.current.set(marker.id, markerInstance);
-      return markerInstance;
-    } catch (error) {
-      console.error('Error adding marker:', error);
-      return null;
+      googleMarker.addListener('click', () => {
+        infoWindow.open(map, googleMarker);
+      });
     }
+
+    markersRef.current.set(marker.id, googleMarker);
+    return googleMarker;
   }, [map]);
 
-  // Remove marker function
   const removeMarker = useCallback((markerId: string) => {
     const marker = markersRef.current.get(markerId);
     if (marker) {
-      try {
-        if (marker.setMap) {
-          marker.setMap(null);
-        }
-        markersRef.current.delete(markerId);
-      } catch (error) {
-        console.error('Error removing marker:', error);
-        markersRef.current.delete(markerId);
-      }
+      marker.setMap(null);
+      markersRef.current.delete(markerId);
     }
   }, []);
 
-  // Clear all markers
   const clearMarkers = useCallback(() => {
-    if (!mapRef.current?.isConnected) {
-      markersRef.current.clear();
-      return;
-    }
+    if (!isMountedRef.current) return;
     
-    try {
-      markersRef.current.forEach((marker, id) => {
-        try {
-          if (marker && typeof marker.setMap === 'function') {
-            marker.setMap(null);
-          }
-        } catch (e) {
-          // Ignore individual marker errors
-          console.warn(`Error clearing marker ${id}:`, e);
-        }
-      });
-      markersRef.current.clear();
-    } catch (error) {
-      console.error('Error clearing markers:', error);
-      // Force clear even if errors occurred
-      markersRef.current.clear();
-    }
+    markersRef.current.forEach((marker) => {
+      if (marker?.setMap) marker.setMap(null);
+    });
+    markersRef.current.clear();
   }, []);
 
-  // Set center
   const setCenter = useCallback((lat: number, lng: number) => {
-    if (map) {
+    if (map && isMountedRef.current) {
       map.setCenter({ lat, lng });
     }
   }, [map]);
 
-  // Set zoom
   const setZoom = useCallback((newZoom: number) => {
-    if (map) {
+    if (map && isMountedRef.current) {
       map.setZoom(newZoom);
     }
   }, [map]);
 
-  // Update markers when markers prop changes
   useEffect(() => {
-    if (!map || !mapRef.current?.isConnected) return;
+    if (!map || !isMountedRef.current) return;
 
-    let mounted = true;
-
-    try {
-      // Clear existing markers first
-      const currentMarkers = Array.from(markersRef.current.values());
-      markersRef.current.clear();
-      
-      currentMarkers.forEach((marker) => {
-        try {
-          if (marker && typeof marker.setMap === 'function') {
-            marker.setMap(null);
-          }
-        } catch (e) {
-          // Silent cleanup error
-        }
-      });
-
-      // Add new markers only if component is still mounted and we have markers
-      if (mounted && markers.length > 0 && mapRef.current?.isConnected) {
-        markers.forEach((markerData) => {
-          try {
-            if (!mounted || !mapRef.current?.isConnected) return;
-            
-            const markerInstance = new google.maps.Marker({
-              position: { lat: markerData.lat, lng: markerData.lng },
-              map,
-              title: markerData.title,
-              icon: markerData.icon,
-            });
-
-            if (markerData.onClick) {
-              markerInstance.addListener('click', () => {
-                markerData.onClick?.();
-              });
-            }
-
-            if (markerData.content) {
-              const infoWindow = new google.maps.InfoWindow({
-                content: markerData.content,
-              });
-              markerInstance.addListener('click', () => {
-                infoWindow.open(map, markerInstance);
-              });
-            }
-
-            if (mounted && mapRef.current?.isConnected) {
-              markersRef.current.set(markerData.id, markerInstance);
-            }
-          } catch (e) {
-            console.error('Error adding marker:', e);
-          }
-        });
-      }
-    } catch (e) {
-      console.error('Error updating markers:', e);
-    }
-
-    return () => {
-      mounted = false;
-    };
-  }, [map, markers]);
+    clearMarkers();
+    markers.forEach((marker) => addMarker(marker));
+  }, [markers, map, addMarker, clearMarkers]);
 
   return {
     mapRef,
