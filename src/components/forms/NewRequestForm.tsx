@@ -251,9 +251,9 @@ export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Dialog>
+                      <Dialog>
                       <DialogTrigger asChild>
-                        <Button type="button" variant="outline" size="icon">
+                        <Button type="button" variant="outline" size="icon" aria-label="إضافة عقار جديد">
                           <Plus className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>

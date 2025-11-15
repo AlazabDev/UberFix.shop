@@ -175,12 +175,13 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
               onChange={(e) => setSearchValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               className="flex-1"
+              aria-label="البحث عن موقع على الخريطة"
             />
-            <Button onClick={handleSearch} size="icon">
+            <Button onClick={handleSearch} size="icon" aria-label="بحث">
               <Search className="h-4 w-4" />
             </Button>
             {showCurrentLocation && (
-              <Button onClick={getCurrentLocation} size="icon" variant="outline">
+              <Button onClick={getCurrentLocation} size="icon" variant="outline" aria-label="استخدام الموقع الحالي">
                 <Navigation className="h-4 w-4" />
               </Button>
             )}
