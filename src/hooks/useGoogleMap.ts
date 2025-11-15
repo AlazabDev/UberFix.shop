@@ -116,10 +116,23 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
     return () => {
       mounted = false;
       
-      // Don't try to manipulate DOM during React cleanup - causes conflicts
-      // Just clear references and let React handle DOM removal
-      markersRef.current.clear();
+      // Clean up markers BEFORE unmounting map
+      try {
+        markersRef.current.forEach((marker) => {
+          try {
+            if (marker && typeof marker.setMap === 'function') {
+              marker.setMap(null); // Remove from map, not DOM
+            }
+          } catch (e) {
+            // Ignore individual marker cleanup errors
+          }
+        });
+        markersRef.current.clear();
+      } catch (e) {
+        // Ignore cleanup errors
+      }
       
+      // Remove click listener
       if (clickListener) {
         try {
           google.maps.event.removeListener(clickListener);
@@ -129,6 +142,7 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
         clickListener = null;
       }
       
+      // Clear map reference - don't touch DOM
       mapInstance = null;
       setMap(null);
     };
@@ -136,14 +150,21 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
   // Add marker function
   const addMarker = useCallback((marker: MapMarker): google.maps.Marker | null => {
-    if (!map) return null;
+    if (!map || !mapRef.current?.isConnected) {
+      console.warn('Cannot add marker: map not initialized or disconnected');
+      return null;
+    }
 
     try {
       // Remove existing marker with same ID
       if (markersRef.current.has(marker.id)) {
         const existingMarker = markersRef.current.get(marker.id);
         if (existingMarker && typeof existingMarker.setMap === 'function') {
-          existingMarker.setMap(null);
+          try {
+            existingMarker.setMap(null);
+          } catch (e) {
+            console.warn('Error removing existing marker:', e);
+          }
         }
         markersRef.current.delete(marker.id);
       }
@@ -194,15 +215,26 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
   // Clear all markers
   const clearMarkers = useCallback(() => {
+    if (!mapRef.current?.isConnected) {
+      markersRef.current.clear();
+      return;
+    }
+    
     try {
-      markersRef.current.forEach((marker) => {
-        if (marker && marker.setMap) {
-          marker.setMap(null);
+      markersRef.current.forEach((marker, id) => {
+        try {
+          if (marker && typeof marker.setMap === 'function') {
+            marker.setMap(null);
+          }
+        } catch (e) {
+          // Ignore individual marker errors
+          console.warn(`Error clearing marker ${id}:`, e);
         }
       });
       markersRef.current.clear();
     } catch (error) {
       console.error('Error clearing markers:', error);
+      // Force clear even if errors occurred
       markersRef.current.clear();
     }
   }, []);
