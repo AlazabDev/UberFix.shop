@@ -41,6 +41,14 @@ export const InteractiveMap = () => {
   useEffect(() => {
     const fetchApiKey = async () => {
       try {
+        // Try to get API key from environment variable first
+        const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (envKey) {
+          setApiKey(envKey);
+          return;
+        }
+        
+        // Fallback to Supabase function
         const { data, error } = await supabase.functions.invoke('get-maps-key');
         if (error) throw error;
         if (data?.apiKey) {
