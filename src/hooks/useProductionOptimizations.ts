@@ -63,22 +63,22 @@ export const useProductionOptimizations = () => {
     };
   }, []);
 
-  // مراقبة التغييرات في حالة الرؤية
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        errorHandler.logInfo('Application hidden/minimized');
-      } else {
-        errorHandler.logInfo('Application visible/restored');
-      }
-    };
+  // مراقبة التغييرات في حالة الرؤية - معطلة لتقليل الضوضاء في السجلات
+  // useEffect(() => {
+  //   const handleVisibilityChange = () => {
+  //     if (document.hidden) {
+  //       errorHandler.logInfo('Application hidden/minimized');
+  //     } else {
+  //       errorHandler.logInfo('Application visible/restored');
+  //     }
+  //   };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener('visibilitychange', handleVisibilityChange);
+  //   };
+  // }, []);
 
   // مراقبة أخطاء الموارد
   useEffect(() => {

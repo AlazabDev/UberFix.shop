@@ -86,6 +86,21 @@ class ErrorHandler {
       // تجاهل خطأ الحصول على المستخدم
     }
 
+    // طباعة في console حسب المستوى - فقط في التطوير
+    if (process.env.NODE_ENV === 'development') {
+      switch (errorLog.level) {
+        case 'error':
+          console.error('[Error]', errorLog.message, errorLog);
+          break;
+        case 'warn':
+          console.warn('[Warning]', errorLog.message, errorLog);
+          break;
+        case 'info':
+          console.info('[Info]', errorLog.message);
+          break;
+      }
+    }
+
     // إضافة للطابور
     this.errorQueue.push(errorLog);
     
