@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useGoogleMap } from '@/hooks/useGoogleMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Navigation, Search } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { MapPin, Navigation } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface MapMarker {
@@ -33,76 +33,31 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   longitude = 31.2357,
   onLocationSelect,
   markers = [],
-  zoom = 10,
   height = '400px',
   interactive = true,
-  onMarkerClick
 }) => {
-  const [searchValue, setSearchValue] = useState('');
+  const [lat, setLat] = useState(latitude.toString());
+  const [lng, setLng] = useState(longitude.toString());
   const { toast } = useToast();
 
-  const { mapRef, isLoading, error } = useGoogleMap({
-    center: { lat: latitude, lng: longitude },
-    zoom,
-    markers: markers.map(m => ({
-      id: m.id,
-      lat: m.lat,
-      lng: m.lng,
-      title: m.title,
-      icon: m.icon,
-      onClick: () => onMarkerClick?.(m),
-    })),
-    onMapClick: async (lat, lng) => {
-      if (!interactive || !onLocationSelect) return;
-      
-      try {
-        const geocoder = new google.maps.Geocoder();
-        const response = await geocoder.geocode({ location: { lat, lng } });
-        const address = response.results[0]?.formatted_address;
-        onLocationSelect(lat, lng, address);
-      } catch (error) {
-        console.error('Error geocoding:', error);
-        onLocationSelect(lat, lng);
-      }
-    },
-  });
-
-  const handleSearch = async () => {
-    if (!searchValue.trim()) {
+  const handleLocationUpdate = () => {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    
+    if (isNaN(latNum) || isNaN(lngNum)) {
       toast({
         title: "خطأ",
-        description: "الرجاء إدخال عنوان للبحث",
+        description: "الرجاء إدخال أرقام صحيحة",
         variant: "destructive",
       });
       return;
     }
-
-    try {
-      const geocoder = new google.maps.Geocoder();
-      const response = await geocoder.geocode({ address: searchValue });
-      
-      if (response.results && response.results.length > 0) {
-        const location = response.results[0].geometry.location;
-        const lat = location.lat();
-        const lng = location.lng();
-        
-        if (onLocationSelect) {
-          onLocationSelect(lat, lng, response.results[0].formatted_address);
-        }
-        
-        toast({
-          title: "تم العثور على الموقع",
-          description: response.results[0].formatted_address,
-        });
-      }
-    } catch (error) {
-      console.error('Error searching:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل البحث عن الموقع",
-        variant: "destructive",
-      });
-    }
+    
+    onLocationSelect?.(latNum, lngNum);
+    toast({
+      title: "تم تحديث الموقع",
+      description: `${latNum.toFixed(6)}, ${lngNum.toFixed(6)}`,
+    });
   };
 
   const getCurrentLocation = () => {
@@ -117,80 +72,91 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        
-        if (onLocationSelect) {
-          onLocationSelect(lat, lng);
-        }
-        
+        const newLat = position.coords.latitude;
+        const newLng = position.coords.longitude;
+        setLat(newLat.toString());
+        setLng(newLng.toString());
+        onLocationSelect?.(newLat, newLng);
         toast({
-          title: "تم تحديد موقعك",
-          description: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+          title: "تم تحديد الموقع",
+          description: `${newLat.toFixed(6)}, ${newLng.toFixed(6)}`,
         });
       },
       (error) => {
         console.error('Error getting location:', error);
         toast({
           title: "خطأ",
-          description: "فشل الحصول على موقعك الحالي",
+          description: "فشل تحديد الموقع الحالي",
           variant: "destructive",
         });
       }
     );
   };
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-destructive">
-            <MapPin className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p className="font-semibold">خطأ في تحميل الخريطة</p>
-            <p className="text-sm text-muted-foreground mt-1">{error}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
-      <CardContent className="p-0">
+      <CardContent className="pt-6 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="map-latitude">خط العرض</Label>
+            <Input
+              id="map-latitude"
+              type="number"
+              step="0.000001"
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              disabled={!interactive}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="map-longitude">خط الطول</Label>
+            <Input
+              id="map-longitude"
+              type="number"
+              step="0.000001"
+              value={lng}
+              onChange={(e) => setLng(e.target.value)}
+              disabled={!interactive}
+            />
+          </div>
+        </div>
+
         {interactive && (
-          <div className="p-4 border-b space-y-2">
-            <div className="flex gap-2">
-              <Input
-                placeholder="ابحث عن موقع..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1"
-              />
-              <Button onClick={handleSearch} size="icon">
-                <Search className="h-4 w-4" />
-              </Button>
-              <Button onClick={getCurrentLocation} size="icon" variant="outline">
-                <Navigation className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleLocationUpdate} 
+              className="flex-1"
+              variant="outline"
+            >
+              <MapPin className="h-4 w-4 ml-2" />
+              تحديث
+            </Button>
+            <Button 
+              onClick={getCurrentLocation} 
+              variant="outline"
+              className="gap-2"
+            >
+              <Navigation className="h-4 w-4" />
+              موقعي
+            </Button>
           </div>
         )}
-        
-        <div 
-          ref={mapRef} 
-          style={{ height, width: '100%' }}
-          className="relative"
-        >
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                <p className="text-sm text-muted-foreground">جاري تحميل الخريطة...</p>
-              </div>
-            </div>
-          )}
-        </div>
+
+        {markers.length > 0 && (
+          <div className="p-3 rounded-md bg-muted text-sm">
+            <p className="font-medium mb-2">المواقع المحددة ({markers.length}):</p>
+            {markers.slice(0, 3).map(marker => (
+              <p key={marker.id} className="text-xs text-muted-foreground">
+                • {marker.title}
+              </p>
+            ))}
+            {markers.length > 3 && (
+              <p className="text-xs text-muted-foreground mt-1">
+                +{markers.length - 3} موقع آخر
+              </p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
