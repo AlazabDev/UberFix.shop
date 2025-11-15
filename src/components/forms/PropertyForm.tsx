@@ -208,6 +208,9 @@ export function PropertyForm({ skipNavigation = false, onSuccess, initialData, p
         // Only update images if new ones were uploaded
         if (imageUrls.length > 0) {
           updateData.images = imageUrls;
+        } else if (initialData?.images) {
+          // Keep existing images if no new ones uploaded
+          updateData.images = initialData.images;
         }
 
         const { error: updateError } = await supabase
