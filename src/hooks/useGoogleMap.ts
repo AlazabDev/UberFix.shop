@@ -54,6 +54,9 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
   useEffect(() => {
     if (!mapRef.current) return;
 
+    let mounted = true;
+    let clickListener: google.maps.MapsEventListener | null = null;
+
     const initMap = async () => {
       try {
         setIsLoading(true);
@@ -62,7 +65,7 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
         // Load Google Maps API
         await googleMapsLoader.load();
 
-        if (!mapRef.current) return;
+        if (!mounted || !mapRef.current) return;
 
         // Create map instance
         const mapInstance = new google.maps.Map(mapRef.current, {
@@ -72,11 +75,13 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
           ...mapOptions,
         });
 
+        if (!mounted) return;
+
         setMap(mapInstance);
 
         // Add click listener
         if (onMapClick) {
-          mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
+          clickListener = mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
             if (e.latLng) {
               onMapClick(e.latLng.lat(), e.latLng.lng());
             }
@@ -85,6 +90,7 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
         setIsLoading(false);
       } catch (err) {
+        if (!mounted) return;
         console.error('Error initializing map:', err);
         setError(err instanceof Error ? err.message : 'فشل تحميل الخريطة');
         setIsLoading(false);
@@ -95,7 +101,24 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
     // Cleanup
     return () => {
-      clearMarkers();
+      mounted = false;
+      
+      // Remove click listener
+      if (clickListener) {
+        google.maps.event.removeListener(clickListener);
+      }
+      
+      // Clear markers safely
+      try {
+        markersRef.current.forEach((marker) => {
+          if (marker && marker.setMap) {
+            marker.setMap(null);
+          }
+        });
+        markersRef.current.clear();
+      } catch (error) {
+        console.error('Error cleaning up markers:', error);
+      }
     };
   }, []);
 
@@ -136,17 +159,31 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
   const removeMarker = useCallback((markerId: string) => {
     const marker = markersRef.current.get(markerId);
     if (marker) {
-      marker.setMap(null);
-      markersRef.current.delete(markerId);
+      try {
+        if (marker.setMap) {
+          marker.setMap(null);
+        }
+        markersRef.current.delete(markerId);
+      } catch (error) {
+        console.error('Error removing marker:', error);
+        markersRef.current.delete(markerId);
+      }
     }
   }, []);
 
   // Clear all markers
   const clearMarkers = useCallback(() => {
-    markersRef.current.forEach((marker) => {
-      marker.setMap(null);
-    });
-    markersRef.current.clear();
+    try {
+      markersRef.current.forEach((marker) => {
+        if (marker && marker.setMap) {
+          marker.setMap(null);
+        }
+      });
+      markersRef.current.clear();
+    } catch (error) {
+      console.error('Error clearing markers:', error);
+      markersRef.current.clear();
+    }
   }, []);
 
   // Set center
