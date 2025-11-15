@@ -19,39 +19,8 @@ class ErrorHandler {
   private isOnline = navigator.onLine;
 
   constructor() {
-    this.setupGlobalErrorHandlers();
     this.setupNetworkListeners();
-  }
-
-  private setupGlobalErrorHandlers() {
-    // معالج الأخطاء الشامل
-    window.addEventListener('error', (event) => {
-      this.logError({
-        level: 'error',
-        message: event.message || 'Unknown error',
-        stack: event.error?.stack,
-        url: event.filename || window.location.href,
-        metadata: {
-          line: event.lineno,
-          column: event.colno,
-          type: 'javascript'
-        }
-      });
-    });
-
-    // معالج أخطاء Promise غير المعالجة
-    window.addEventListener('unhandledrejection', (event) => {
-      this.logError({
-        level: 'error',
-        message: event.reason?.message || 'Unhandled Promise Rejection',
-        stack: event.reason?.stack,
-        url: window.location.href,
-        metadata: {
-          type: 'promise',
-          reason: event.reason
-        }
-      });
-    });
+    // تم تعطيل setupGlobalErrorHandlers لتجنب حلقات الأخطاء
   }
 
   private setupNetworkListeners() {

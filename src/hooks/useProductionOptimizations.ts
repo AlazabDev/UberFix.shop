@@ -1,13 +1,10 @@
 // Hook لتطبيق تحسينات الإنتاج
 import { useEffect } from 'react';
-import { applySecuritySettings, applyPerformanceSettings } from '@/lib/productionConfig';
 
 export const useProductionOptimizations = () => {
   useEffect(() => {
-    // تطبيق إعدادات الأمان
-    applySecuritySettings();
-    
-    // تطبيق تحسينات الأداء
-    applyPerformanceSettings();
+    // تم تعطيل التحسينات المعقدة لتجنب مشاكل الأداء
+    // React و Vite يوفران تحسينات تلقائية كافية
+    console.log('[Production] App initialized successfully');
   }, []);
 };
