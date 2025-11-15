@@ -116,51 +116,56 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
     return () => {
       mounted = false;
       
-      try {
-        // Only attempt cleanup if the container still exists in DOM
-        if (!mapRef.current || !mapRef.current.isConnected) {
-          setMap(null);
-          return;
-        }
+      // Schedule cleanup for next tick to avoid React DOM conflicts
+      setTimeout(() => {
+        try {
+          // Only attempt cleanup if the container still exists in DOM
+          if (!mapRef.current || !mapRef.current.isConnected) {
+            setMap(null);
+            return;
+          }
 
-        // Clear all markers
-        if (markersRef.current.size > 0) {
-          const markersArray = Array.from(markersRef.current.values());
-          markersRef.current.clear();
-          
-          markersArray.forEach((marker) => {
-            try {
-              if (marker && typeof marker.setMap === 'function') {
-                marker.setMap(null);
+          // Clear all markers first
+          if (markersRef.current.size > 0) {
+            const markersArray = Array.from(markersRef.current.values());
+            markersRef.current.clear();
+            
+            markersArray.forEach((marker) => {
+              try {
+                if (marker && typeof marker.setMap === 'function') {
+                  marker.setMap(null);
+                }
+              } catch (e) {
+                // Silent cleanup error
               }
+            });
+          }
+          
+          // Remove click listener
+          if (clickListener && window.google?.maps?.event) {
+            try {
+              google.maps.event.removeListener(clickListener);
+              clickListener = null;
             } catch (e) {
               // Silent cleanup error
             }
-          });
-        }
-        
-        // Remove click listener
-        if (clickListener && window.google?.maps?.event) {
-          try {
-            google.maps.event.removeListener(clickListener);
-          } catch (e) {
-            // Silent cleanup error
           }
-        }
 
-        // Clear map instance
-        if (mapInstance) {
-          try {
-            mapInstance.unbindAll();
-          } catch (e) {
-            // Silent cleanup error
+          // Clear map instance
+          if (mapInstance && typeof mapInstance.unbindAll === 'function') {
+            try {
+              mapInstance.unbindAll();
+              mapInstance = null;
+            } catch (e) {
+              // Silent cleanup error
+            }
           }
+        } catch (e) {
+          // Silent cleanup error
+        } finally {
+          setMap(null);
         }
-      } catch (e) {
-        // Silent cleanup error
-      } finally {
-        setMap(null);
-      }
+      }, 0);
     };
   }, []);
 
