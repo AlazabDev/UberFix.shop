@@ -144,20 +144,26 @@ export class PushNotificationManager {
    */
   private async sendSubscriptionToServer(subscription: PushSubscription): Promise<void> {
     try {
-      // TODO: Implement server endpoint to store subscription
-      const response = await fetch('/api/push/subscribe', {
-        method: 'POST',
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase.functions.invoke('push-subscribe', {
+        body: subscription.toJSON(),
         headers: {
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify(subscription),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send subscription to server');
-      }
+      if (error) throw error;
+      
+      console.log('✅ Push subscription stored successfully');
     } catch (error) {
-      console.error('Error sending subscription to server:', error);
+      console.error('❌ Failed to store push subscription:', error);
+      throw error;
     }
   }
 
