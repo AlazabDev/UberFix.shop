@@ -46,9 +46,13 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
   });
 
   const handleLocationSelect = async (lat: number, lng: number) => {
+    console.log('📍 Location selected:', { lat, lng });
     setSelectedLocation({ lat, lng });
     
+    console.log('🧹 Clearing existing markers');
     clearMarkers();
+    
+    console.log('📌 Adding new marker');
     addMarker({
       id: 'selected-location',
       lat,

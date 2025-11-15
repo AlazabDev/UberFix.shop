@@ -114,29 +114,43 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
 
     // Cleanup
     return () => {
+      console.log('🧹 Map cleanup started');
       mounted = false;
       
       // Schedule cleanup for next tick to avoid React DOM conflicts
       setTimeout(() => {
         try {
+          console.log('🔍 Cleanup timeout executing');
+          
           // Only attempt cleanup if the container still exists in DOM
-          if (!mapRef.current || !mapRef.current.isConnected) {
+          if (!mapRef.current) {
+            console.log('⚠️ mapRef.current is null, skipping cleanup');
+            setMap(null);
+            return;
+          }
+          
+          if (!mapRef.current.isConnected) {
+            console.log('⚠️ mapRef not connected to DOM, skipping cleanup');
             setMap(null);
             return;
           }
 
+          console.log('✅ Map container still in DOM, proceeding with cleanup');
+
           // Clear all markers first
           if (markersRef.current.size > 0) {
+            console.log(`🗑️ Clearing ${markersRef.current.size} markers`);
             const markersArray = Array.from(markersRef.current.values());
             markersRef.current.clear();
             
-            markersArray.forEach((marker) => {
+            markersArray.forEach((marker, index) => {
               try {
                 if (marker && typeof marker.setMap === 'function') {
                   marker.setMap(null);
+                  console.log(`✓ Marker ${index + 1} cleared`);
                 }
               } catch (e) {
-                // Silent cleanup error
+                console.error(`✗ Error clearing marker ${index + 1}:`, e);
               }
             });
           }
@@ -144,26 +158,33 @@ export function useGoogleMap(options: UseGoogleMapOptions = {}): UseGoogleMapRet
           // Remove click listener
           if (clickListener && window.google?.maps?.event) {
             try {
+              console.log('🔇 Removing click listener');
               google.maps.event.removeListener(clickListener);
               clickListener = null;
+              console.log('✓ Click listener removed');
             } catch (e) {
-              // Silent cleanup error
+              console.error('✗ Error removing click listener:', e);
             }
           }
 
           // Clear map instance
           if (mapInstance && typeof mapInstance.unbindAll === 'function') {
             try {
+              console.log('🗺️ Unbinding map instance');
               mapInstance.unbindAll();
               mapInstance = null;
+              console.log('✓ Map instance unbound');
             } catch (e) {
-              // Silent cleanup error
+              console.error('✗ Error unbinding map:', e);
             }
           }
+          
+          console.log('✅ Map cleanup completed successfully');
         } catch (e) {
-          // Silent cleanup error
+          console.error('❌ Critical error during cleanup:', e);
         } finally {
           setMap(null);
+          console.log('🏁 Cleanup finalized');
         }
       }, 0);
     };
