@@ -29,12 +29,12 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleRefresh = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
     window.location.reload();
   };
 
   private handleRetry = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+    // Force complete remount by reloading
+    window.location.reload();
   };
 
   public render() {

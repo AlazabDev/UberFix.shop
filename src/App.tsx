@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import React from "react";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
