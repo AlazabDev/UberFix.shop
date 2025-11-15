@@ -217,9 +217,9 @@ export default function Properties() {
               </div>
             </div>
 
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-start justify-between gap-2">
-                <span className="truncate flex-1">{property.name}</span>
+            <CardHeader className="pb-3 px-4">
+              <CardTitle className="text-lg flex items-start justify-between gap-3">
+                <span className="line-clamp-2 flex-1 text-right leading-tight">{property.name}</span>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
@@ -242,35 +242,35 @@ export default function Properties() {
                   </DialogContent>
                 </Dialog>
               </CardTitle>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4 shrink-0" />
-                <span className="truncate">{property.address}</span>
+              <div className="flex items-start gap-2 text-sm text-muted-foreground mt-2">
+                <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                <span className="line-clamp-2 flex-1 text-right leading-relaxed">{property.address}</span>
               </div>
             </CardHeader>
 
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 px-4 pb-4">
               <div className="flex gap-2 mb-4">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 min-w-0"
                   onClick={() => navigate(`/properties/edit/${property.id}`)}
                 >
-                  <Edit className="h-4 w-4 ml-1" />
-                  تعديل
+                  <Edit className="h-4 w-4 ml-1 shrink-0" />
+                  <span className="truncate">تعديل</span>
                 </Button>
                 <Button
                   variant="default"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 min-w-0"
                   onClick={() => setSelectedProperty({id: property.id, name: property.name})}
                 >
-                  طلب صيانة
+                  <span className="truncate">طلب صيانة</span>
                 </Button>
               </div>
 
               {property.area && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground text-right">
                   المساحة: {property.area} م²
                 </p>
               )}
