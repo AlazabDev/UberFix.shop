@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { FormErrorBoundary } from "@/components/error-boundaries/FormErrorBoundary";
 
 export default function AddProperty() {
   const navigate = useNavigate();
@@ -27,7 +28,9 @@ export default function AddProperty() {
           <CardTitle>بيانات العقار</CardTitle>
         </CardHeader>
         <CardContent>
-          <PropertyForm />
+          <FormErrorBoundary>
+            <PropertyForm />
+          </FormErrorBoundary>
         </CardContent>
       </Card>
     </div>

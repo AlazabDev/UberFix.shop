@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { NewRequestForm } from "./NewRequestForm";
 import { Plus } from "lucide-react";
+import { FormErrorBoundary } from "@/components/error-boundaries/FormErrorBoundary";
 
 interface NewRequestFormDialogProps {
   trigger?: React.ReactNode;
@@ -31,10 +32,12 @@ export function NewRequestFormDialog({ trigger, onSuccess }: NewRequestFormDialo
         <DialogHeader>
           <DialogTitle className="text-xl">إنشاء طلب صيانة جديد</DialogTitle>
         </DialogHeader>
-        <NewRequestForm 
-          onSuccess={handleSuccess} 
-          onCancel={() => setIsOpen(false)} 
-        />
+        <FormErrorBoundary>
+          <NewRequestForm 
+            onSuccess={handleSuccess} 
+            onCancel={() => setIsOpen(false)} 
+          />
+        </FormErrorBoundary>
       </DialogContent>
     </Dialog>
   );
