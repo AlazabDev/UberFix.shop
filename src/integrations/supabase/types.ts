@@ -678,12 +678,15 @@ export type Database = {
           due_date: string | null
           id: string
           invoice_number: string
+          is_locked: boolean
           issue_date: string
+          last_modified_by: string | null
           notes: string | null
           payment_method: string | null
           payment_reference: string | null
           status: string
           updated_at: string
+          version: number
         }
         Insert: {
           amount: number
@@ -696,12 +699,15 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number: string
+          is_locked?: boolean
           issue_date?: string
+          last_modified_by?: string | null
           notes?: string | null
           payment_method?: string | null
           payment_reference?: string | null
           status?: string
           updated_at?: string
+          version?: number
         }
         Update: {
           amount?: number
@@ -714,12 +720,15 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number?: string
+          is_locked?: boolean
           issue_date?: string
+          last_modified_by?: string | null
           notes?: string | null
           payment_method?: string | null
           payment_reference?: string | null
           status?: string
           updated_at?: string
+          version?: number
         }
         Relationships: []
       }
@@ -742,6 +751,7 @@ export type Database = {
           description: string | null
           estimated_cost: number | null
           id: string
+          last_modified_by: string | null
           latitude: number | null
           location: string | null
           longitude: number | null
@@ -760,6 +770,7 @@ export type Database = {
           title: string
           updated_at: string | null
           vendor_notes: string | null
+          version: number
           workflow_stage: string | null
         }
         Insert: {
@@ -780,6 +791,7 @@ export type Database = {
           description?: string | null
           estimated_cost?: number | null
           id?: string
+          last_modified_by?: string | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
@@ -798,6 +810,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           vendor_notes?: string | null
+          version?: number
           workflow_stage?: string | null
         }
         Update: {
@@ -818,6 +831,7 @@ export type Database = {
           description?: string | null
           estimated_cost?: number | null
           id?: string
+          last_modified_by?: string | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
@@ -836,6 +850,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           vendor_notes?: string | null
+          version?: number
           workflow_stage?: string | null
         }
         Relationships: [
@@ -872,6 +887,53 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_requests_audit: {
+        Row: {
+          change_summary: string | null
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation: string
+          request_id: string
+          version: number
+          workflow_transition: string | null
+        }
+        Insert: {
+          change_summary?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation: string
+          request_id: string
+          version: number
+          workflow_transition?: string | null
+        }
+        Update: {
+          change_summary?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation?: string
+          request_id?: string
+          version?: number
+          workflow_transition?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_requests_audit_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -1057,6 +1119,7 @@ export type Database = {
           id: string
           iframe_key: string | null
           is_deleted: boolean | null
+          last_modified_by: string | null
           last_name: string | null
           link_3d: string | null
           name: string
@@ -1068,6 +1131,7 @@ export type Database = {
           role: string
           updated_at: string | null
           updated_by: string | null
+          version: number
         }
         Insert: {
           avatar_url?: string | null
@@ -1081,6 +1145,7 @@ export type Database = {
           id?: string
           iframe_key?: string | null
           is_deleted?: boolean | null
+          last_modified_by?: string | null
           last_name?: string | null
           link_3d?: string | null
           name: string
@@ -1092,6 +1157,7 @@ export type Database = {
           role: string
           updated_at?: string | null
           updated_by?: string | null
+          version?: number
         }
         Update: {
           avatar_url?: string | null
@@ -1105,6 +1171,7 @@ export type Database = {
           id?: string
           iframe_key?: string | null
           is_deleted?: boolean | null
+          last_modified_by?: string | null
           last_name?: string | null
           link_3d?: string | null
           name?: string
@@ -1116,6 +1183,7 @@ export type Database = {
           role?: string
           updated_at?: string | null
           updated_by?: string | null
+          version?: number
         }
         Relationships: [
           {
@@ -1139,6 +1207,7 @@ export type Database = {
           end_date: string | null
           gallery_url: string | null
           id: string
+          last_modified_by: string | null
           latitude: number | null
           location: string | null
           longitude: number | null
@@ -1151,6 +1220,7 @@ export type Database = {
           start_date: string | null
           status: string
           updated_at: string | null
+          version: number
         }
         Insert: {
           actual_cost?: number | null
@@ -1163,6 +1233,7 @@ export type Database = {
           end_date?: string | null
           gallery_url?: string | null
           id: string
+          last_modified_by?: string | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
@@ -1175,6 +1246,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           updated_at?: string | null
+          version?: number
         }
         Update: {
           actual_cost?: number | null
@@ -1187,6 +1259,7 @@ export type Database = {
           end_date?: string | null
           gallery_url?: string | null
           id?: string
+          last_modified_by?: string | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
@@ -1199,6 +1272,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           updated_at?: string | null
+          version?: number
         }
         Relationships: []
       }
@@ -1219,6 +1293,7 @@ export type Database = {
           id: string
           images: string[] | null
           last_inspection_date: string | null
+          last_modified_by: string | null
           latitude: number | null
           longitude: number | null
           maintenance_schedule: string | null
@@ -1234,6 +1309,7 @@ export type Database = {
           type: string
           updated_at: string
           value: number | null
+          version: number
         }
         Insert: {
           address: string
@@ -1251,6 +1327,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           last_inspection_date?: string | null
+          last_modified_by?: string | null
           latitude?: number | null
           longitude?: number | null
           maintenance_schedule?: string | null
@@ -1266,6 +1343,7 @@ export type Database = {
           type: string
           updated_at?: string
           value?: number | null
+          version?: number
         }
         Update: {
           address?: string
@@ -1283,6 +1361,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           last_inspection_date?: string | null
+          last_modified_by?: string | null
           latitude?: number | null
           longitude?: number | null
           maintenance_schedule?: string | null
@@ -1298,6 +1377,7 @@ export type Database = {
           type?: string
           updated_at?: string
           value?: number | null
+          version?: number
         }
         Relationships: [
           {
@@ -1319,6 +1399,50 @@ export type Database = {
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      properties_audit: {
+        Row: {
+          change_summary: string | null
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation: string
+          property_id: string
+          version: number
+        }
+        Insert: {
+          change_summary?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation: string
+          property_id: string
+          version: number
+        }
+        Update: {
+          change_summary?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation?: string
+          property_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_audit_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
@@ -1961,6 +2085,7 @@ export type Database = {
           experience_years: number | null
           id: string
           is_tracking_enabled: boolean | null
+          last_modified_by: string | null
           location_updated_at: string | null
           map_icon: string | null
           name: string
@@ -1973,6 +2098,7 @@ export type Database = {
           tracking_started_at: string | null
           unit_rate: number | null
           updated_at: string
+          version: number
         }
         Insert: {
           address?: string | null
@@ -1984,6 +2110,7 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_tracking_enabled?: boolean | null
+          last_modified_by?: string | null
           location_updated_at?: string | null
           map_icon?: string | null
           name: string
@@ -1996,6 +2123,7 @@ export type Database = {
           tracking_started_at?: string | null
           unit_rate?: number | null
           updated_at?: string
+          version?: number
         }
         Update: {
           address?: string | null
@@ -2007,6 +2135,7 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_tracking_enabled?: boolean | null
+          last_modified_by?: string | null
           location_updated_at?: string | null
           map_icon?: string | null
           name?: string
@@ -2019,6 +2148,7 @@ export type Database = {
           tracking_started_at?: string | null
           unit_rate?: number | null
           updated_at?: string
+          version?: number
         }
         Relationships: []
       }
