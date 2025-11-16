@@ -1,14 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Edit, Plus, Wrench, Archive } from "lucide-react";
-import { PropertyQRCode } from "./PropertyQRCode";
+import { Edit, Plus, Wrench, QrCode, Archive } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { PropertyQRDialog } from "./PropertyQRDialog";
 
 interface PropertyActionsDialogProps {
   propertyId: string;
@@ -21,76 +16,91 @@ export function PropertyActionsDialog({
   propertyId,
   propertyName,
   open,
-  onOpenChange,
+  onOpenChange
 }: PropertyActionsDialogProps) {
   const navigate = useNavigate();
-
-  const handleEditProperty = () => {
-    navigate(`/properties/edit/${propertyId}`);
-    onOpenChange(false);
-  };
-
-  const handleNewMaintenanceRequest = () => {
-    navigate(`/requests/new?propertyId=${propertyId}`);
-    onOpenChange(false);
-  };
-
-  const handleAddSubProperty = () => {
-    navigate(`/properties/add?parentId=${propertyId}`);
-    onOpenChange(false);
-  };
-
-  const handleArchiveProperty = () => {
-    // TODO: Implement archive functionality
-    onOpenChange(false);
-  };
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center">{propertyName}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 py-4">
-          <Button
-            onClick={handleEditProperty}
-            variant="outline"
-            className="w-full justify-start gap-3 h-12"
-          >
-            <Edit className="h-4 w-4" />
-            تعديل بيانات العقار
-          </Button>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg">إجراءات العقار</DialogTitle>
+            <div className="text-center">
+              <p className="font-semibold text-base">{propertyName}</p>
+              <p className="text-sm text-muted-foreground">المشروع</p>
+            </div>
+          </DialogHeader>
+          
+          <div className="space-y-2 py-4">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-12 hover:bg-accent border border-transparent hover:border-border"
+              onClick={() => {
+                navigate(`/properties/edit/${propertyId}`);
+                onOpenChange(false);
+              }}
+            >
+              <Edit className="h-5 w-5 text-primary" />
+              <span>تعديل العقار</span>
+            </Button>
 
-          <Button
-            onClick={handleNewMaintenanceRequest}
-            variant="outline"
-            className="w-full justify-start gap-3 h-12"
-          >
-            <Wrench className="h-4 w-4" />
-            طلب صيانة جديد
-          </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-12 hover:bg-accent border border-transparent hover:border-border"
+              onClick={() => {
+                navigate(`/properties/add?parentId=${propertyId}`);
+                onOpenChange(false);
+              }}
+            >
+              <Plus className="h-5 w-5 text-success" />
+              <span>إضافة عقار فرعي</span>
+            </Button>
 
-          <Button
-            onClick={handleAddSubProperty}
-            variant="outline"
-            className="w-full justify-start gap-3 h-12"
-          >
-            <Plus className="h-4 w-4" />
-            إضافة عقار فرعي
-          </Button>
+            <Button
+              className="w-full justify-start gap-3 h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => {
+                navigate(`/requests/new?propertyId=${propertyId}`);
+                onOpenChange(false);
+              }}
+            >
+              <Wrench className="h-5 w-5" />
+              <span>طلب صيانة جديد</span>
+            </Button>
 
-          <PropertyQRCode propertyId={propertyId} propertyName={propertyName} />
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-12 hover:bg-accent border border-transparent hover:border-border"
+              onClick={() => {
+                setQrDialogOpen(true);
+              }}
+            >
+              <QrCode className="h-5 w-5 text-info" />
+              <span>تصدير رمز QR لطلب الصيانة</span>
+            </Button>
 
-          <Button
-            onClick={handleArchiveProperty}
-            variant="outline"
-            className="w-full justify-start gap-3 h-12 text-destructive hover:text-destructive"
-          >
-            <Archive className="h-4 w-4" />
-            أرشفة العقار
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 h-12 text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive"
+              onClick={() => {
+                // TODO: Implement archive
+                onOpenChange(false);
+              }}
+            >
+              <Archive className="h-5 w-5" />
+              <span>أرشفة العقار</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <PropertyQRDialog
+        propertyId={propertyId}
+        propertyName={propertyName}
+        open={qrDialogOpen}
+        onOpenChange={setQrDialogOpen}
+      />
+    </>
   );
 }

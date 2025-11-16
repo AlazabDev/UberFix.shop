@@ -6,22 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { getPropertyIcon } from "@/lib/propertyIcons";
+import { Loader2, X, MapPin } from "lucide-react";
 import type { Property } from "@/hooks/useProperties";
+import { PropertyFormTabs } from "./PropertyFormTabs";
+import { useNavigate } from "react-router-dom";
 
 const propertyFormSchema = z.object({
-  name: z.string().min(2, "يجب أن يكون الاسم 2 أحرف على الأقل"),
   code: z.string().optional(),
+  name: z.string().min(2, "يجب أن يكون الاسم 2 أحرف على الأقل"),
   type: z.string().min(1, "نوع العقار مطلوب"),
   status: z.string().min(1, "حالة العقار مطلوبة"),
   address: z.string().min(5, "العنوان مطلوب"),
@@ -29,12 +25,8 @@ const propertyFormSchema = z.object({
   district_id: z.number().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  area: z.number().optional(),
-  rooms: z.number().optional(),
-  bathrooms: z.number().optional(),
-  floors: z.number().optional(),
-  parking_spaces: z.number().optional(),
   description: z.string().optional(),
+  manager_id: z.string().optional(),
 });
 
 type PropertyFormData = z.infer<typeof propertyFormSchema>;
@@ -42,21 +34,19 @@ type PropertyFormData = z.infer<typeof propertyFormSchema>;
 interface PropertyFormProps {
   initialData?: Partial<Property>;
   propertyId?: string;
-  onSuccess?: (property: Property) => void;
-  skipNavigation?: boolean;
 }
 
-export function PropertyForm({
-  initialData,
-  propertyId,
-  onSuccess,
-  skipNavigation = false,
-}: PropertyFormProps) {
+export function PropertyForm({ initialData, propertyId }: PropertyFormProps) {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [cities, setCities] = useState<{ id: number; name_ar: string }[]>([]);
   const [districts, setDistricts] = useState<{ id: number; name_ar: string }[]>([]);
-  const [images, setImages] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [enableContact, setEnableContact] = useState(false);
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [selectedType, setSelectedType] = useState(initialData?.type || "residential");
 
   const {
     register,
@@ -66,11 +56,18 @@ export function PropertyForm({
     watch,
   } = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      ...initialData,
+      type: selectedType,
+      status: initialData?.status || "active"
+    },
   });
 
   const selectedCityId = watch("city_id");
-  const selectedType = watch("type");
+
+  useEffect(() => {
+    setValue("type", selectedType);
+  }, [selectedType, setValue]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -95,10 +92,27 @@ export function PropertyForm({
   }, [selectedCityId]);
 
   useEffect(() => {
-    if (initialData?.images) {
-      setExistingImages(initialData.images);
+    if (initialData?.images && initialData.images.length > 0) {
+      setImagePreview(initialData.images[0]);
     }
   }, [initialData]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImage(null);
+    setImagePreview(null);
+  };
 
   const onSubmit = async (data: PropertyFormData) => {
     try {
@@ -110,68 +124,56 @@ export function PropertyForm({
         return;
       }
 
-      let uploadedImages: string[] = [...existingImages];
+      let uploadedImages: string[] = initialData?.images || [];
 
-      if (images.length > 0) {
-        for (const image of images) {
-          const fileExt = image.name.split(".").pop();
-          const fileName = `${Math.random()}.${fileExt}`;
-          const filePath = `properties/${fileName}`;
+      if (image) {
+        const fileExt = image.name.split(".").pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `properties/${fileName}`;
 
-          const { error: uploadError } = await supabase.storage
-            .from("property-images")
-            .upload(filePath, image);
+        const { error: uploadError } = await supabase.storage
+          .from("property-images")
+          .upload(filePath, image);
 
-          if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-          const { data: { publicUrl } } = supabase.storage
-            .from("property-images")
-            .getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage
+          .from("property-images")
+          .getPublicUrl(filePath);
 
-          uploadedImages.push(publicUrl);
-        }
+        uploadedImages = [publicUrl];
       }
 
       const qrCodeData = `${window.location.origin}/quick-request/${propertyId || "new"}`;
-      const iconUrl = getPropertyIcon(data.type);
 
       const propertyData = {
         ...data,
         images: uploadedImages,
-        icon_url: iconUrl,
         qr_code_data: qrCodeData,
         qr_code_generated_at: new Date().toISOString(),
         created_by: user.id,
       };
 
       if (propertyId) {
-        const { data: updatedProperty, error } = await supabase
+        const { error } = await supabase
           .from("properties")
           .update(propertyData)
-          .eq("id", propertyId)
-          .select()
-          .single();
+          .eq("id", propertyId);
 
         if (error) throw error;
-
+        
         toast.success("تم تحديث العقار بنجاح");
-        if (onSuccess) onSuccess(updatedProperty);
       } else {
-        const { data: newProperty, error } = await supabase
+        const { error } = await supabase
           .from("properties")
-          .insert([propertyData])
-          .select()
-          .single();
+          .insert([propertyData]);
 
         if (error) throw error;
-
-        toast.success("تمت إضافة العقار بنجاح");
-        if (onSuccess) onSuccess(newProperty);
+        
+        toast.success("تم إنشاء العقار بنجاح");
       }
 
-      if (!skipNavigation) {
-        window.location.href = "/properties";
-      }
+      navigate("/properties");
     } catch (error) {
       console.error("Error:", error);
       toast.error("حدث خطأ أثناء حفظ العقار");
@@ -182,55 +184,92 @@ export function PropertyForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Property Type Tabs */}
+      <div>
+        <Label className="mb-2 block">تصنيف العقار *</Label>
+        <PropertyFormTabs selectedType={selectedType} onTypeChange={setSelectedType} />
+      </div>
+
+      {/* Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="type" required>نوع العقار</Label>
-          <Select onValueChange={(value) => setValue("type", value)} defaultValue={initialData?.type}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر نوع العقار" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="residential">سكني</SelectItem>
-              <SelectItem value="commercial">تجاري</SelectItem>
-              <SelectItem value="industrial">صناعي</SelectItem>
-              <SelectItem value="office">مكتبي</SelectItem>
-              <SelectItem value="retail">تجزئة</SelectItem>
-              <SelectItem value="mixed_use">متعدد الاستخدام</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
+          <Label htmlFor="code">رمز الدخول</Label>
+          <Input {...register("code")} placeholder="543945" />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="code">كود العقار</Label>
-          <Input {...register("code")} placeholder="كود فريد للعقار" />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="name" required>اسم العقار</Label>
-          <Input {...register("name")} placeholder="اسم العقار" />
+          <Label htmlFor="name" required>اسم العقار *</Label>
+          <Input {...register("name")} placeholder="Alazabco" />
           {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
         </div>
+      </div>
 
+      {/* Image Upload */}
+      <div className="space-y-2">
+        <Label>صورة العقار</Label>
+        <div className="flex items-start gap-4">
+          {imagePreview ? (
+            <div className="relative">
+              <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg" />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute -top-2 -left-2 h-6 w-6 rounded-full"
+                onClick={removeImage}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="w-32 h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center">
+              <span className="text-xs text-muted-foreground">لا توجد صورة</span>
+            </div>
+          )}
+          <div>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="max-w-xs"
+            />
+            <p className="text-xs text-muted-foreground mt-1">اختر صورة للعقار</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Client & Warranty */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="status" required>حالة العقار</Label>
-          <Select onValueChange={(value) => setValue("status", value)} defaultValue={initialData?.status || "active"}>
+          <Label>العميل</Label>
+          <Input placeholder="Alazabco" />
+        </div>
+        <div className="space-y-2">
+          <Label>تاريخ انتهاء الضمان</Label>
+          <Input type="date" defaultValue="2027-11-23" />
+          <p className="text-xs text-muted-foreground">حدد التاريخ الذي ينتهي فيه ضمان العقار.</p>
+        </div>
+      </div>
+
+      {/* Location Details */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-2">
+          <Label>الدولة</Label>
+          <Select defaultValue="EG">
             <SelectTrigger>
-              <SelectValue placeholder="اختر الحالة" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">نشط</SelectItem>
-              <SelectItem value="inactive">غير نشط</SelectItem>
-              <SelectItem value="maintenance">تحت الصيانة</SelectItem>
+              <SelectItem value="EG">جمهورية مصر العربية</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="city_id">المدينة</Label>
+          <Label>المدينة</Label>
           <Select onValueChange={(value) => setValue("city_id", parseInt(value))}>
             <SelectTrigger>
-              <SelectValue placeholder="اختر المدينة" />
+              <SelectValue placeholder="القاهرة" />
             </SelectTrigger>
             <SelectContent>
               {cities.map((city) => (
@@ -243,10 +282,10 @@ export function PropertyForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="district_id">الحي</Label>
+          <Label>الحي</Label>
           <Select onValueChange={(value) => setValue("district_id", parseInt(value))} disabled={!selectedCityId}>
             <SelectTrigger>
-              <SelectValue placeholder="اختر الحي" />
+              <SelectValue placeholder="الحورة" />
             </SelectTrigger>
             <SelectContent>
               {districts.map((district) => (
@@ -257,64 +296,129 @@ export function PropertyForm({
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="address" required>العنوان التفصيلي</Label>
-          <Textarea {...register("address")} placeholder="العنوان الكامل للعقار" />
-          {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="area">المساحة (م²)</Label>
+      {/* Address */}
+      <div className="space-y-2">
+        <Label htmlFor="address">إحداثيات الخريطة</Label>
+        <div className="flex gap-2">
           <Input 
-            type="number" 
-            {...register("area", { valueAsNumber: true })} 
-            placeholder="المساحة بالمتر المربع" 
+            {...register("address")} 
+            placeholder="2HW5+G6F, محافظة القاهرة, ,2HW5+G6F مصر" 
+            className="flex-1"
           />
+          <Button type="button" variant="outline">
+            <MapPin className="h-4 w-4" />
+          </Button>
         </div>
+        <p className="text-xs text-muted-foreground">
+          قم بإدخال عنوان الموقع من خلال النقر على الخريطة أو استخدام Google Maps.
+        </p>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="rooms">عدد الغرف</Label>
-          <Input type="number" {...register("rooms", { valueAsNumber: true })} placeholder="عدد الغرف" />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="bathrooms">عدد دورات المياه</Label>
-          <Input type="number" {...register("bathrooms", { valueAsNumber: true })} placeholder="عدد دورات المياه" />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="floors">عدد الطوابق</Label>
-          <Input type="number" {...register("floors", { valueAsNumber: true })} placeholder="عدد الطوابق" />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="parking_spaces">مواقف السيارات</Label>
-          <Input 
-            type="number" 
-            {...register("parking_spaces", { valueAsNumber: true })} 
-            placeholder="عدد مواقف السيارات" 
-          />
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="description">الوصف</Label>
-          <Textarea {...register("description")} placeholder="وصف تفصيلي للعقار" rows={4} />
+      {/* Map Placeholder */}
+      <div className="h-64 bg-muted rounded-lg flex items-center justify-center border-2 border-dashed border-border">
+        <div className="text-center text-muted-foreground">
+          <MapPin className="h-12 w-12 mx-auto mb-2" />
+          <p className="text-sm">الموقع على الخريطة</p>
+          <Button type="button" variant="link" size="sm">
+            استخدام موقعي الحالي
+          </Button>
         </div>
       </div>
 
-      <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => window.history.back()}
-          disabled={loading}
-        >
-          إلغاء
-        </Button>
-        <Button type="submit" disabled={loading}>
+      {/* Detailed Address */}
+      <div className="space-y-2">
+        <Label>العنوان التفصيلي</Label>
+        <Input placeholder="(ادخل العنوان التفصيلي الاختياري)" />
+      </div>
+
+      {/* Property Managers */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label>مدير الصيانة</Label>
+          <Button type="button" variant="outline" className="w-full justify-start">
+            تحديد مدير للصيانة
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            متاح لجميع مديري الصيانة
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>مشرف العقار</Label>
+          <Button type="button" variant="outline" className="w-full justify-start">
+            تحديد مشرف العقار
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            متاح لجميع مشرفي العقارات
+          </p>
+        </div>
+      </div>
+
+      {/* Contact Info */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>إضافة بيانات تواصل موثّقة</Label>
+          <Switch checked={enableContact} onCheckedChange={setEnableContact} />
+        </div>
+        
+        {enableContact && (
+          <>
+            <p className="text-xs text-muted-foreground">
+              هذه البيانات الخاصة بالضيافة والاستقبال. فقط للذا تحب مراجعة بيانات موثقة للطلبات.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label>رمز الدولة</Label>
+                <Select defaultValue="+966">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="+20">جمهورية مصر العربية +20</SelectItem>
+                    <SelectItem value="+966">+966</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>رقم الجوال للتواصل المؤقت</Label>
+                <Input 
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  placeholder="01004006620"
+                  dir="ltr"
+                />
+                <p className="text-xs text-muted-foreground">
+                  أدخل رقم الجوال، يجب بدون رمز الدولة
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>اسم الشخص للتواصل المؤقت</Label>
+              <Input 
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                placeholder="Mohamed Azab"
+              />
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Form Actions */}
+      <div className="flex gap-4 pt-6">
+        <Button type="submit" disabled={loading} className="flex-1">
           {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-          {propertyId ? "تحديث العقار" : "إضافة العقار"}
+          حفظ البيانات
+        </Button>
+        <Button 
+          type="button" 
+          variant="outline"
+          onClick={() => navigate("/properties")}
+          className="flex-1"
+        >
+          حفظ وإنشاء جديد
         </Button>
       </div>
     </form>

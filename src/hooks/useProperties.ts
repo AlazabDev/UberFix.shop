@@ -28,6 +28,8 @@ export interface Property {
   created_by: string | null;
   last_modified_by: string | null;
   version: number;
+  manager_id: string | null;
+  region_id: string | null;
 }
 
 export function useProperties() {
@@ -74,51 +76,10 @@ export function useProperties() {
     };
   }, []);
 
-  const addProperty = async (propertyData: Omit<Property, "id" | "created_at" | "updated_at" | "version">) => {
-    try {
-      const { data, error } = await supabase
-        .from("properties")
-        .insert([propertyData])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast.success("تمت إضافة العقار بنجاح");
-      await fetchProperties();
-      return data;
-    } catch (err) {
-      toast.error("فشل إضافة العقار");
-      throw err;
-    }
-  };
-
-  const updateProperty = async (id: string, updates: Partial<Property>) => {
-    try {
-      const { data, error } = await supabase
-        .from("properties")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast.success("تم تحديث العقار بنجاح");
-      await fetchProperties();
-      return data;
-    } catch (err) {
-      toast.error("فشل تحديث العقار");
-      throw err;
-    }
-  };
-
   return {
     properties,
     loading,
     error,
-    addProperty,
-    updateProperty,
     refetch: fetchProperties,
   };
 }
