@@ -1,9 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { PropertyForm } from "@/components/forms/PropertyForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { FormErrorBoundary } from "@/components/error-boundaries/FormErrorBoundary";
 
 export default function AddProperty() {
   const navigate = useNavigate();
@@ -19,7 +18,7 @@ export default function AddProperty() {
           <ArrowRight className="h-4 w-4 ml-2" />
           الرجوع إلى القائمة
         </Button>
-        
+
         <h1 className="text-3xl font-bold text-foreground">إضافة عقار جديد</h1>
       </div>
 
@@ -28,9 +27,7 @@ export default function AddProperty() {
           <CardTitle>بيانات العقار</CardTitle>
         </CardHeader>
         <CardContent>
-          <FormErrorBoundary>
-            <PropertyForm />
-          </FormErrorBoundary>
+          <PropertyForm />
         </CardContent>
       </Card>
     </div>

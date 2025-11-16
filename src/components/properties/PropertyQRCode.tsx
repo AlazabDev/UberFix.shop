@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Download, QrCode } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,11 +18,11 @@ interface PropertyQRCodeProps {
 
 export function PropertyQRCode({ propertyId, propertyName }: PropertyQRCodeProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const qrCodeUrl = `${window.location.origin}/quick-request/${propertyId}`;
 
   const downloadQRCode = () => {
-    const svg = document.getElementById(`qr-${propertyId}`) as any;
+    const svg = document.getElementById(`qr-${propertyId}`);
     if (!svg) return;
 
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -28,13 +34,13 @@ export function PropertyQRCode({ propertyId, propertyName }: PropertyQRCodeProps
       canvas.width = img.width;
       canvas.height = img.height;
       ctx?.drawImage(img, 0, 0);
-      
+
       const pngFile = canvas.toDataURL("image/png");
       const downloadLink = document.createElement("a");
       downloadLink.download = `QR-${propertyName}.png`;
       downloadLink.href = pngFile;
       downloadLink.click();
-      
+
       toast.success("تم تحميل رمز QR بنجاح");
     };
 
@@ -44,9 +50,9 @@ export function PropertyQRCode({ propertyId, propertyName }: PropertyQRCodeProps
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-3 h-12">
-          <QrCode className="h-4 w-4" />
-          رمز QR للعقار
+        <Button variant="outline" size="sm">
+          <QrCode className="h-4 w-4 ml-2" />
+          رمز QR
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

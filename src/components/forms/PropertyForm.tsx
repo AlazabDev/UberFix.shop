@@ -1,11 +1,11 @@
-import { useState } from "react";
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -13,39 +13,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapLocationPicker } from "@/components/maps/MapLocationPicker";
-import { ImageUpload } from "./ImageUpload";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { propertyFormSchema } from "@/lib/validationSchemas";
-import { getPropertyIcon, getPropertyTypes } from "@/lib/propertyIcons";
-import type { z } from "zod";
+import { getPropertyIcon } from "@/lib/propertyIcons";
+import type { Property } from "@/hooks/useProperties";
+
+const propertyFormSchema = z.object({
+  name: z.string().min(2, "يجب أن يكون الاسم 2 أحرف على الأقل"),
+  code: z.string().optional(),
+  type: z.string().min(1, "نوع العقار مطلوب"),
+  status: z.string().min(1, "حالة العقار مطلوبة"),
+  address: z.string().min(5, "العنوان مطلوب"),
+  city_id: z.number().optional(),
+  district_id: z.number().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  area: z.number().optional(),
+  rooms: z.number().optional(),
+  bathrooms: z.number().optional(),
+  floors: z.number().optional(),
+  parking_spaces: z.number().optional(),
+  description: z.string().optional(),
+});
 
 type PropertyFormData = z.infer<typeof propertyFormSchema>;
 
 interface PropertyFormProps {
-  skipNavigation?: boolean;
-  onSuccess?: () => void;
-  initialData?: any;
+  initialData?: Partial<Property>;
   propertyId?: string;
+  onSuccess?: (property: Property) => void;
+  skipNavigation?: boolean;
 }
 
-export function PropertyForm({ skipNavigation = false, onSuccess, initialData, propertyId }: PropertyFormProps = {}) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-    address: string;
-  } | null>(null);
-  const [propertyImages, setPropertyImages] = useState<File[]>([]);
-  const [cities, setCities] = useState<any[]>([]);
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [selectedCity, setSelectedCity] = useState<string>("");
-
-  const { toast } = useToast();
-  const navigate = useNavigate();
+export function PropertyForm({
+  initialData,
+  propertyId,
+  onSuccess,
+  skipNavigation = false,
+}: PropertyFormProps) {
+  const [loading, setLoading] = useState(false);
+  const [cities, setCities] = useState<{ id: number; name_ar: string }[]>([]);
+  const [districts, setDistricts] = useState<{ id: number; name_ar: string }[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   const {
     register,
@@ -53,512 +64,257 @@ export function PropertyForm({ skipNavigation = false, onSuccess, initialData, p
     formState: { errors },
     setValue,
     watch,
-    reset,
   } = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
-    defaultValues: {
-      type: "residential",
-      address: "",
-      name: "",
-      code: "",
-      city_id: "",
-      district_id: ""
-    },
-    mode: "onChange"
+    defaultValues: initialData,
   });
 
-  const propertyType = watch("type");
+  const selectedCityId = watch("city_id");
+  const selectedType = watch("type");
 
-  // Load initial data for editing
-  React.useEffect(() => {
-    if (initialData) {
-      reset({
-        type: initialData.type || "residential",
-        code: initialData.code || "",
-        name: initialData.name || "",
-        address: initialData.address || "",
-        city_id: initialData.city_id?.toString() || "",
-        district_id: initialData.district_id?.toString() || "",
-        area: initialData.area,
-        rooms: initialData.rooms,
-        bathrooms: initialData.bathrooms,
-        floors: initialData.floors,
-        description: initialData.description,
-      });
-      
-      if (initialData.city_id) {
-        setSelectedCity(initialData.city_id.toString());
-      }
-      
-      if (initialData.latitude && initialData.longitude) {
-        setLocation({
-          latitude: initialData.latitude,
-          longitude: initialData.longitude,
-          address: initialData.address,
-        });
-      }
-    }
-  }, [initialData, reset]);
-
-  // Fetch cities
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchCities = async () => {
-      const { data, error } = await supabase
-        .from('cities')
-        .select('*')
-        .order('name_ar');
-
-      if (!error && data) {
-        setCities(data);
-      }
+      const { data } = await supabase.from("cities").select("*").order("name_ar");
+      if (data) setCities(data);
     };
     fetchCities();
   }, []);
 
-  // Fetch districts when city changes
-  React.useEffect(() => {
-    const fetchDistricts = async () => {
-      if (!selectedCity) {
-        setDistricts([]);
-        return;
-      }
+  useEffect(() => {
+    if (selectedCityId) {
+      const fetchDistricts = async () => {
+        const { data } = await supabase
+          .from("districts")
+          .select("*")
+          .eq("city_id", selectedCityId)
+          .order("name_ar");
+        if (data) setDistricts(data);
+      };
+      fetchDistricts();
+    }
+  }, [selectedCityId]);
 
-      const { data, error } = await supabase
-        .from('districts')
-        .select('*')
-        .eq('city_id', parseInt(selectedCity))
-        .order('name_ar');
-
-      if (!error && data) {
-        setDistricts(data);
-      }
-    };
-    fetchDistricts();
-  }, [selectedCity]);
+  useEffect(() => {
+    if (initialData?.images) {
+      setExistingImages(initialData.images);
+    }
+  }, [initialData]);
 
   const onSubmit = async (data: PropertyFormData) => {
-    setIsSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      setLoading(true);
 
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast({
-          variant: "destructive",
-          title: "خطأ",
-          description: "يجب تسجيل الدخول أولاً",
-        });
+        toast.error("يجب تسجيل الدخول أولاً");
         return;
       }
 
-      // Get auto-generated icon based on property type
-      const iconUrl = getPropertyIcon(data.type);
+      let uploadedImages: string[] = [...existingImages];
 
-      // Generate QR code URL
-      const qrCodeData = `${window.location.origin}/quick-request/property-${data.code}`;
-
-      // Upload images if any
-      let imageUrls: string[] = [];
-      if (propertyImages.length > 0) {
-        const uploadPromises = propertyImages.map(async (file, index) => {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${data.code}_${index}_${Date.now()}.${fileExt}`;
+      if (images.length > 0) {
+        for (const image of images) {
+          const fileExt = image.name.split(".").pop();
+          const fileName = `${Math.random()}.${fileExt}`;
           const filePath = `properties/${fileName}`;
 
           const { error: uploadError } = await supabase.storage
-            .from('property-images')
-            .upload(filePath, file);
+            .from("property-images")
+            .upload(filePath, image);
 
-          if (uploadError) {
-            console.error('Upload error:', uploadError);
-            return null;
-          }
+          if (uploadError) throw uploadError;
 
-          const { data: urlData } = supabase.storage
-            .from('property-images')
+          const { data: { publicUrl } } = supabase.storage
+            .from("property-images")
             .getPublicUrl(filePath);
 
-          return urlData.publicUrl;
-        });
-
-        const results = await Promise.all(uploadPromises);
-        imageUrls = results.filter((url): url is string => url !== null);
+          uploadedImages.push(publicUrl);
+        }
       }
 
-      // Check if this is an update or insert
+      const qrCodeData = `${window.location.origin}/quick-request/${propertyId || "new"}`;
+      const iconUrl = getPropertyIcon(data.type);
+
+      const propertyData = {
+        ...data,
+        images: uploadedImages,
+        icon_url: iconUrl,
+        qr_code_data: qrCodeData,
+        qr_code_generated_at: new Date().toISOString(),
+        created_by: user.id,
+      };
+
       if (propertyId) {
-        // Update existing property
-        const updateData: any = {
-          name: data.name.trim(),
-          code: data.code.trim(),
-          type: data.type,
-          address: data.address.trim(),
-          city_id: parseInt(data.city_id),
-          district_id: parseInt(data.district_id),
-          area: data.area || null,
-          rooms: data.rooms || null,
-          bathrooms: data.bathrooms || null,
-          floors: data.floors || null,
-          description: data.description?.trim() || null,
-          latitude: location?.latitude || null,
-          longitude: location?.longitude || null,
-          icon_url: iconUrl,
-          updated_at: new Date().toISOString(),
-          manager_id: user.id,
-        };
-
-        // Only update images if new ones were uploaded
-        if (imageUrls.length > 0) {
-          updateData.images = imageUrls;
-        } else if (initialData?.images) {
-          // Keep existing images if no new ones uploaded
-          updateData.images = initialData.images;
-        }
-
-        const { error: updateError } = await supabase
+        const { data: updatedProperty, error } = await supabase
           .from("properties")
-          .update(updateData)
-          .eq("id", propertyId);
+          .update(propertyData)
+          .eq("id", propertyId)
+          .select()
+          .single();
 
-        if (updateError) {
-          console.error("Update error:", updateError);
-          const errorMsg = updateError.message.includes('duplicate') || updateError.message.includes('unique')
-            ? "عقار بنفس الاسم أو الكود موجود بالفعل. يرجى تغيير الاسم أو الكود"
-            : updateError.message || "حدث خطأ أثناء تحديث العقار";
-          throw new Error(errorMsg);
-        }
+        if (error) throw error;
 
-        toast({
-          title: "تم بنجاح ✓",
-          description: "تم تحديث العقار بنجاح",
-        });
+        toast.success("تم تحديث العقار بنجاح");
+        if (onSuccess) onSuccess(updatedProperty);
       } else {
-        // Insert new property
-        const { error: insertError } = await supabase
+        const { data: newProperty, error } = await supabase
           .from("properties")
-          .insert([{
-            code: data.code.trim(),
-            name: data.name.trim(),
-            type: data.type,
-            city_id: parseInt(data.city_id),
-            district_id: parseInt(data.district_id),
-            address: data.address.trim(),
-            area: data.area || null,
-            rooms: data.rooms || null,
-            bathrooms: data.bathrooms || null,
-            floors: data.floors || null,
-            description: data.description?.trim() || null,
-            latitude: location?.latitude || null,
-            longitude: location?.longitude || null,
-            icon_url: iconUrl,
-            images: imageUrls.length > 0 ? imageUrls : null,
-            qr_code_data: qrCodeData,
-            qr_code_generated_at: new Date().toISOString(),
-            status: "active",
-            manager_id: user.id,
-            created_by: user.id,
-          }]);
+          .insert([propertyData])
+          .select()
+          .single();
 
-        if (insertError) {
-          console.error("Insert error:", insertError);
-          const errorMsg = insertError.message.includes('duplicate') || insertError.message.includes('unique')
-            ? "عقار بنفس الاسم أو الكود موجود بالفعل. يرجى تغيير الاسم أو الكود"
-            : insertError.message || "حدث خطأ أثناء إضافة العقار";
-          throw new Error(errorMsg);
-        }
+        if (error) throw error;
 
-        toast({
-          title: "تم بنجاح ✓",
-          description: "تم إضافة العقار بنجاح",
-        });
+        toast.success("تمت إضافة العقار بنجاح");
+        if (onSuccess) onSuccess(newProperty);
       }
 
-      if (onSuccess) {
-        onSuccess();
-      } else if (!skipNavigation) {
-        navigate("/properties");
+      if (!skipNavigation) {
+        window.location.href = "/properties";
       }
-    } catch (error: any) {
-      console.error("Submit error:", error);
-      toast({
-        variant: "destructive",
-        title: "خطأ في الحفظ",
-        description: error.message || "حدث خطأ أثناء حفظ العقار. يرجى المحاولة مرة أخرى",
-      });
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("حدث خطأ أثناء حفظ العقار");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const handleLocationSelect = (lat: number, lng: number, address: string) => {
-    setLocation({ latitude: lat, longitude: lng, address });
-    setValue("address", address);
-  };
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* نوع العقار */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">نوع العقار *</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {getPropertyTypes().map((type) => (
-            <button
-              key={type.value}
-              type="button"
-              onClick={() => setValue("type", type.value as any)}
-              className={`p-4 rounded-lg border-2 text-center transition-all flex flex-col items-center gap-2 ${
-                propertyType === type.value
-                  ? "border-primary bg-primary/10 text-primary font-semibold"
-                  : "border-border hover:border-primary/50"
-              }`}
-            >
-              <img 
-                src={type.icon} 
-                alt={type.label} 
-                className="w-12 h-12 object-contain"
-              />
-              <span>{type.label}</span>
-            </button>
-          ))}
-        </div>
-        {errors.type && (
-          <p className="text-sm text-destructive">{errors.type.message}</p>
-        )}
-      </div>
-
-      {/* كود واسم العقار */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="code">كود العقار *</Label>
-          <Input
-            id="code"
-            {...register("code")}
-            placeholder="مثال: PROP-001"
-            className={errors.code ? "border-destructive" : ""}
-          />
-          {errors.code && (
-            <p className="text-sm text-destructive">{errors.code.message}</p>
-          )}
+          <Label htmlFor="type" required>نوع العقار</Label>
+          <Select onValueChange={(value) => setValue("type", value)} defaultValue={initialData?.type}>
+            <SelectTrigger>
+              <SelectValue placeholder="اختر نوع العقار" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="residential">سكني</SelectItem>
+              <SelectItem value="commercial">تجاري</SelectItem>
+              <SelectItem value="industrial">صناعي</SelectItem>
+              <SelectItem value="office">مكتبي</SelectItem>
+              <SelectItem value="retail">تجزئة</SelectItem>
+              <SelectItem value="mixed_use">متعدد الاستخدام</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name">اسم العقار *</Label>
-          <Input
-            id="name"
-            {...register("name")}
-            placeholder="مثال: عمارة أكتوبر"
-            className={errors.name ? "border-destructive" : ""}
+          <Label htmlFor="code">كود العقار</Label>
+          <Input {...register("code")} placeholder="كود فريد للعقار" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="name" required>اسم العقار</Label>
+          <Input {...register("name")} placeholder="اسم العقار" />
+          {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status" required>حالة العقار</Label>
+          <Select onValueChange={(value) => setValue("status", value)} defaultValue={initialData?.status || "active"}>
+            <SelectTrigger>
+              <SelectValue placeholder="اختر الحالة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">نشط</SelectItem>
+              <SelectItem value="inactive">غير نشط</SelectItem>
+              <SelectItem value="maintenance">تحت الصيانة</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="city_id">المدينة</Label>
+          <Select onValueChange={(value) => setValue("city_id", parseInt(value))}>
+            <SelectTrigger>
+              <SelectValue placeholder="اختر المدينة" />
+            </SelectTrigger>
+            <SelectContent>
+              {cities.map((city) => (
+                <SelectItem key={city.id} value={city.id.toString()}>
+                  {city.name_ar}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="district_id">الحي</Label>
+          <Select onValueChange={(value) => setValue("district_id", parseInt(value))} disabled={!selectedCityId}>
+            <SelectTrigger>
+              <SelectValue placeholder="اختر الحي" />
+            </SelectTrigger>
+            <SelectContent>
+              {districts.map((district) => (
+                <SelectItem key={district.id} value={district.id.toString()}>
+                  {district.name_ar}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="address" required>العنوان التفصيلي</Label>
+          <Textarea {...register("address")} placeholder="العنوان الكامل للعقار" />
+          {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="area">المساحة (م²)</Label>
+          <Input 
+            type="number" 
+            {...register("area", { valueAsNumber: true })} 
+            placeholder="المساحة بالمتر المربع" 
           />
-          {errors.name && (
-            <p className="text-sm text-destructive">{errors.name.message}</p>
-          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="rooms">عدد الغرف</Label>
+          <Input type="number" {...register("rooms", { valueAsNumber: true })} placeholder="عدد الغرف" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bathrooms">عدد دورات المياه</Label>
+          <Input type="number" {...register("bathrooms", { valueAsNumber: true })} placeholder="عدد دورات المياه" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="floors">عدد الطوابق</Label>
+          <Input type="number" {...register("floors", { valueAsNumber: true })} placeholder="عدد الطوابق" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="parking_spaces">مواقف السيارات</Label>
+          <Input 
+            type="number" 
+            {...register("parking_spaces", { valueAsNumber: true })} 
+            placeholder="عدد مواقف السيارات" 
+          />
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="description">الوصف</Label>
+          <Textarea {...register("description")} placeholder="وصف تفصيلي للعقار" rows={4} />
         </div>
       </div>
 
-      {/* صور العقار */}
-      <div className="space-y-2">
-        <Label>صور العقار</Label>
-        <p className="text-sm text-muted-foreground mb-2">
-          يمكنك إضافة صور للعقار (الصور تظهر في الواجهة الرئيسية، الأيقونة تستخدم للخرائط وبجانب اسم العقار)
-        </p>
-        <ImageUpload
-          images={propertyImages}
-          onImagesChange={setPropertyImages}
-          maxImages={10}
-        />
-        <p className="text-xs text-muted-foreground">
-          سيتم اختيار أيقونة العقار تلقائياً حسب نوع العقار
-        </p>
-      </div>
-
-      {/* تفاصيل الموقع */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">تفاصيل الموقع</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="city">المدينة *</Label>
-            <Select
-              value={selectedCity}
-              onValueChange={(value) => {
-                setSelectedCity(value);
-                setValue("city_id", value);
-                setValue("district_id", ""); // Reset district when city changes
-                setDistricts([]); // Clear districts
-              }}
-            >
-              <SelectTrigger className={errors.city_id ? "border-destructive" : ""}>
-                <SelectValue placeholder="اختر المدينة" />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.id.toString()}>
-                    {city.name_ar}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.city_id && (
-              <p className="text-sm text-destructive">{errors.city_id.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="district">الحي *</Label>
-            <Select
-              value={watch("district_id")}
-              onValueChange={(value) => setValue("district_id", value)}
-              disabled={!selectedCity || districts.length === 0}
-            >
-              <SelectTrigger className={errors.district_id ? "border-destructive" : ""}>
-                <SelectValue placeholder={selectedCity ? "اختر الحي" : "اختر المدينة أولاً"} />
-              </SelectTrigger>
-              <SelectContent>
-                {districts.map((district) => (
-                  <SelectItem key={district.id} value={district.id.toString()}>
-                    {district.name_ar}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.district_id && (
-              <p className="text-sm text-destructive">{errors.district_id.message}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* إحداثيات الخريطة */}
-      <MapLocationPicker
-        defaultLatitude={location?.latitude}
-        defaultLongitude={location?.longitude}
-        onLocationSelect={(data) => {
-          setLocation({
-            latitude: data.lat,
-            longitude: data.lng,
-            address: data.address || ""
-          });
-          if (data.address) {
-            setValue("address", data.address);
-          }
-        }}
-        label="تحديد الموقع على الخريطة (اختياري)"
-        description="اضغط على الخريطة لتحديد الموقع أو استخدم البحث"
-        height="400px"
-        showSearch={true}
-        showCurrentLocation={true}
-      />
-
-      {/* العنوان التفصيلي */}
-      <div className="space-y-2">
-        <Label htmlFor="address">العنوان التفصيلي *</Label>
-        <Textarea
-          id="address"
-          {...register("address")}
-          placeholder="نادي وادي دجلة أكتوبر"
-          rows={3}
-          className={errors.address ? "border-destructive" : ""}
-        />
-        {errors.address && (
-          <p className="text-sm text-destructive">{errors.address.message}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          تفاصيل إضافية للعنوان: مثل رقم الطابق، الطريق، رقم الشقة، إلخ
-        </p>
-      </div>
-
-      {/* المواصفات الأساسية */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">المواصفات الأساسية</h3>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="area">المساحة (م²)</Label>
-            <Input
-              id="area"
-              type="number"
-              step="0.01"
-              min="0"
-              {...register("area", { 
-                setValueAs: v => v === '' ? undefined : parseFloat(v)
-              })}
-              placeholder="50"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="rooms">الغرف</Label>
-            <Input
-              id="rooms"
-              type="number"
-              min="0"
-              {...register("rooms", { 
-                setValueAs: v => v === '' ? undefined : parseInt(v)
-              })}
-              placeholder="2"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="bathrooms">الحمامات</Label>
-            <Input
-              id="bathrooms"
-              type="number"
-              min="0"
-              {...register("bathrooms", { 
-                setValueAs: v => v === '' ? undefined : parseInt(v)
-              })}
-              placeholder="1"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="floors">الطوابق</Label>
-            <Input
-              id="floors"
-              type="number"
-              min="0"
-              {...register("floors", { 
-                setValueAs: v => v === '' ? undefined : parseInt(v)
-              })}
-              placeholder="1"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* الوصف */}
-      <div className="space-y-2">
-        <Label htmlFor="description">الوصف</Label>
-        <Textarea
-          id="description"
-          {...register("description")}
-          placeholder="أدخل وصفاً تفصيلياً للعقار..."
-          rows={4}
-        />
-      </div>
-
-
-      {/* أزرار الحفظ */}
-      <div className="flex gap-3 justify-end pt-6 border-t">
-        {!skipNavigation && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/properties")}
-            disabled={isSubmitting}
-          >
-            إلغاء
-          </Button>
-        )}
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              جاري الحفظ...
-            </>
-          ) : (
-            "حفظ البيانات"
-          )}
+      <div className="flex justify-end gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => window.history.back()}
+          disabled={loading}
+        >
+          إلغاء
+        </Button>
+        <Button type="submit" disabled={loading}>
+          {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+          {propertyId ? "تحديث العقار" : "إضافة العقار"}
         </Button>
       </div>
     </form>

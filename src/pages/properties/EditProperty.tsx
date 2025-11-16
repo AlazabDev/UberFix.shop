@@ -55,7 +55,7 @@ export default function EditProperty() {
           <ArrowRight className="h-4 w-4 ml-2" />
           الرجوع إلى القائمة
         </Button>
-        
+
         <h1 className="text-3xl font-bold text-foreground">تعديل بيانات العقار</h1>
       </div>
 
@@ -64,7 +64,7 @@ export default function EditProperty() {
           <CardTitle>بيانات العقار</CardTitle>
         </CardHeader>
         <CardContent>
-          <PropertyForm 
+          <PropertyForm
             initialData={propertyData}
             propertyId={id}
             skipNavigation={false}

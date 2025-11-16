@@ -1,300 +1,240 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { useProperties } from "@/hooks/useProperties";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Search, Plus, Edit, MapPin, Maximize } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { QRCodeSVG } from "qrcode.react";
-import { useProperties } from "@/hooks/useProperties";
-import { useNavigate } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Search, Building2, Loader2, MapPin, MoreVertical } from "lucide-react";
 import { PropertyActionsDialog } from "@/components/properties/PropertyActionsDialog";
-import { getPropertyIcon } from "@/lib/propertyIcons";
-
+import { getPropertyTypeLabel } from "@/lib/propertyIcons";
 
 export default function Properties() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedProperty, setSelectedProperty] = useState<{id: string, name: string} | null>(null);
   const navigate = useNavigate();
-  
-  const { properties, loading, error } = useProperties();
-
-  const filteredProperties = properties.filter(property => {
-    const matchesSearch = property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         property.address.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === "all" || property.type === typeFilter;
-    const matchesStatus = statusFilter === "all" || property.status === statusFilter;
-    
-    return matchesSearch && matchesType && matchesStatus;
-  });
+  const { properties, loading } = useProperties();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [selectedProperty, setSelectedProperty] = useState<{ id: string; name: string } | null>(null);
 
   const statusConfig = {
-    active: { label: "نشط", className: "bg-green-500 text-white" },
-    maintenance: { label: "تحت الصيانة", className: "bg-yellow-500 text-white" },
-    inactive: { label: "غير نشط", className: "bg-gray-500 text-white" }
+    active: { label: "نشط", class: "bg-success/10 text-success border-success/20" },
+    inactive: { label: "غير نشط", class: "bg-muted text-muted-foreground border-border" },
+    maintenance: { label: "تحت الصيانة", class: "bg-warning/10 text-warning border-warning/20" },
   };
 
   const typeConfig = {
-    commercial: { label: "تجاري", className: "bg-blue-500 text-white" },
-    residential: { label: "سكني", className: "bg-green-500 text-white" },
-    industrial: { label: "صناعي", className: "bg-orange-500 text-white" },
-    office: { label: "مكتبي", className: "bg-purple-500 text-white" },
-    retail: { label: "تجزئة", className: "bg-teal-500 text-white" }
+    residential: { label: "سكني", class: "bg-primary/10 text-primary border-primary/20" },
+    commercial: { label: "تجاري", class: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
+    industrial: { label: "صناعي", class: "bg-orange-500/10 text-orange-600 border-orange-500/20" },
+    office: { label: "مكتبي", class: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
+    retail: { label: "تجزئة", class: "bg-green-500/10 text-green-600 border-green-500/20" },
+    mixed_use: { label: "متعدد الاستخدام", class: "bg-teal-500/10 text-teal-600 border-teal-500/20" },
   };
 
-  const propertyTypeStats = {
-    all: properties.length,
-    commercial: properties.filter(p => p.type === "commercial").length,
-    residential: properties.filter(p => p.type === "residential").length,
-    industrial: properties.filter(p => p.type === "industrial").length,
-    office: properties.filter(p => p.type === "office").length,
-  };
+  const filteredProperties = properties.filter((property) => {
+    const matchesSearch =
+      property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.code?.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const propertyStatusStats = {
-    all: properties.length,
-    active: properties.filter(p => p.status === "active").length,
-    maintenance: properties.filter(p => p.status === "maintenance").length,
-    inactive: properties.filter(p => p.status === "inactive").length,
-  };
+    const matchesType = filterType === "all" || property.type === filterType;
+    const matchesStatus = filterStatus === "all" || property.status === filterStatus;
+
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
+  const propertyTypeStats = properties.reduce(
+    (acc, prop) => {
+      acc[prop.type] = (acc[prop.type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
+  const propertyStatusStats = properties.reduce(
+    (acc, prop) => {
+      acc[prop.status] = (acc[prop.status] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">جاري تحميل العقارات...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-center text-destructive">خطأ في تحميل العقارات: {error}</p>
-        </CardContent>
-      </Card>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">نظام إدارة العقارات</h1>
-          <p className="text-muted-foreground">إدارة ومتابعة العقارات والممتلكات</p>
+          <h1 className="text-3xl font-bold text-foreground">العقارات</h1>
+          <p className="text-muted-foreground mt-1">إدارة ومتابعة جميع العقارات</p>
         </div>
-        <Button 
-          className="bg-primary hover:bg-primary/90"
-          onClick={() => navigate("/properties/add")}
-        >
+        <Button onClick={() => navigate("/properties/add")}>
           <Plus className="h-4 w-4 ml-2" />
-          عقار جديد
+          إضافة عقار جديد
         </Button>
       </div>
 
-      {/* Statistics Cards - Horizontal */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setTypeFilter("all")}>
-          <CardContent className="p-4 text-center">
-            <Building2 className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <p className="text-2xl font-bold text-foreground">{propertyTypeStats.all}</p>
-            <p className="text-sm text-muted-foreground">كافة العقارات</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-foreground">{properties.length}</div>
+            <p className="text-sm text-muted-foreground">إجمالي العقارات</p>
           </CardContent>
         </Card>
-        
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setStatusFilter("active")}>
-          <CardContent className="p-4 text-center">
-            <div className="h-8 w-8 rounded-full bg-green-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-foreground">{propertyStatusStats.active}</p>
-            <p className="text-sm text-muted-foreground">النشطة</p>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-success">{propertyStatusStats.active || 0}</div>
+            <p className="text-sm text-muted-foreground">عقارات نشطة</p>
           </CardContent>
         </Card>
-
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setStatusFilter("maintenance")}>
-          <CardContent className="p-4 text-center">
-            <div className="h-8 w-8 rounded-full bg-yellow-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-foreground">{propertyStatusStats.maintenance}</p>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-warning">{propertyStatusStats.maintenance || 0}</div>
             <p className="text-sm text-muted-foreground">تحت الصيانة</p>
           </CardContent>
         </Card>
-
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setStatusFilter("inactive")}>
-          <CardContent className="p-4 text-center">
-            <div className="h-8 w-8 rounded-full bg-gray-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-foreground">{propertyStatusStats.inactive}</p>
-            <p className="text-sm text-muted-foreground">غير نشطة</p>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-primary">{propertyTypeStats.residential || 0}</div>
+            <p className="text-sm text-muted-foreground">عقارات سكنية</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="ابحث عن عقار بالاسم أو العنوان..."
+                placeholder="ابحث عن عقار..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pr-10"
               />
             </div>
-            
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="كل الأنواع" />
+                <SelectValue placeholder="نوع العقار" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل الأنواع</SelectItem>
-                <SelectItem value="commercial">تجاري</SelectItem>
+                <SelectItem value="all">جميع الأنواع</SelectItem>
                 <SelectItem value="residential">سكني</SelectItem>
+                <SelectItem value="commercial">تجاري</SelectItem>
                 <SelectItem value="industrial">صناعي</SelectItem>
                 <SelectItem value="office">مكتبي</SelectItem>
                 <SelectItem value="retail">تجزئة</SelectItem>
+                <SelectItem value="mixed_use">متعدد الاستخدام</SelectItem>
               </SelectContent>
             </Select>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="كل الحالات" />
+                <SelectValue placeholder="الحالة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل الحالات</SelectItem>
+                <SelectItem value="all">جميع الحالات</SelectItem>
                 <SelectItem value="active">نشط</SelectItem>
-                <SelectItem value="maintenance">تحت الصيانة</SelectItem>
                 <SelectItem value="inactive">غير نشط</SelectItem>
+                <SelectItem value="maintenance">تحت الصيانة</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Properties Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.map((property) => (
-          <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-              {property.images && property.images.length > 0 ? (
-                <img 
-                  src={property.images[0]} 
-                  alt={property.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.parentElement!.innerHTML = `
-                      <div class="w-full h-full flex items-center justify-center">
-                        <img src="${property.icon_url || getPropertyIcon(property.type)}" alt="${property.name}" class="w-24 h-24 object-contain opacity-30" />
-                      </div>
-                    `;
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <img 
-                    src={property.icon_url || getPropertyIcon(property.type)} 
-                    alt={property.name}
-                    className="w-24 h-24 object-contain opacity-30"
-                  />
-                </div>
-              )}
-              <div className="absolute top-3 right-3 flex gap-2">
-                <Badge className={statusConfig[property.status as keyof typeof statusConfig]?.className}>
-                  {statusConfig[property.status as keyof typeof statusConfig]?.label}
-                </Badge>
-              </div>
-              <div className="absolute top-3 left-3">
-                <Badge className={typeConfig[property.type as keyof typeof typeConfig]?.className}>
-                  {typeConfig[property.type as keyof typeof typeConfig]?.label}
-                </Badge>
-              </div>
-            </div>
-
-            <CardHeader className="pb-3 px-4">
-              <CardTitle className="text-lg flex items-start justify-between gap-3">
-                <span className="line-clamp-2 flex-1 text-right leading-tight">{property.name}</span>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
-                      <Maximize className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                      <DialogTitle>رمز QR للعقار</DialogTitle>
-                    </DialogHeader>
-                    <div className="flex flex-col items-center gap-4 p-4">
-                      <QRCodeSVG
-                        id={`qr-${property.id}`}
-                        value={property.qr_code_data || `${window.location.origin}/quick-request/property-${property.code}`}
-                        size={256}
-                        level="H"
-                      />
-                      <p className="text-sm text-center text-muted-foreground">{property.name}</p>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </CardTitle>
-              <div className="flex items-start gap-2 text-sm text-muted-foreground mt-2">
-                <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                <span className="line-clamp-2 flex-1 text-right leading-relaxed">{property.address}</span>
-              </div>
-            </CardHeader>
-
-            <CardContent className="pt-0 px-4 pb-4">
-              <div className="flex gap-2 mb-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 min-w-0"
-                  onClick={() => navigate(`/properties/edit/${property.id}`)}
-                >
-                  <Edit className="h-4 w-4 ml-1 shrink-0" />
-                  <span className="truncate">تعديل</span>
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="flex-1 min-w-0"
-                  onClick={() => setSelectedProperty({id: property.id, name: property.name})}
-                >
-                  <span className="truncate">طلب صيانة</span>
-                </Button>
-              </div>
-
-              {property.area && (
-                <p className="text-xs text-muted-foreground text-right">
-                  المساحة: {property.area} م²
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredProperties.length === 0 && (
+      {filteredProperties.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-            <p className="text-muted-foreground">لا توجد عقارات مطابقة للبحث</p>
+          <CardContent className="pt-6 text-center py-12">
+            <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">لا توجد عقارات تطابق البحث</p>
           </CardContent>
         </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProperties.map((property) => (
+            <Card
+              key={property.id}
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => navigate(`/properties/${property.id}`)}
+            >
+              <CardContent className="p-0">
+                {property.images && property.images.length > 0 ? (
+                  <img
+                    src={property.images[0]}
+                    alt={property.name}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-muted flex items-center justify-center rounded-t-lg">
+                    <Building2 className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-lg text-foreground">{property.name}</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProperty({ id: property.id, name: property.name });
+                      }}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {property.code && (
+                    <p className="text-sm text-muted-foreground mb-2">كود: {property.code}</p>
+                  )}
+                  <div className="flex gap-2 mb-3">
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full border ${
+                        statusConfig[property.status as keyof typeof statusConfig]?.class
+                      }`}
+                    >
+                      {statusConfig[property.status as keyof typeof statusConfig]?.label}
+                    </span>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full border ${
+                        typeConfig[property.type as keyof typeof typeConfig]?.class
+                      }`}
+                    >
+                      {getPropertyTypeLabel(property.type)}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="line-clamp-2">{property.address}</p>
+                  </div>
+                  {property.area && (
+                    <p className="text-sm text-muted-foreground mt-2">المساحة: {property.area} م²</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
-      {/* Property Actions Dialog */}
       {selectedProperty && (
         <PropertyActionsDialog
-          open={!!selectedProperty}
-          onOpenChange={(open) => !open && setSelectedProperty(null)}
           propertyId={selectedProperty.id}
           propertyName={selectedProperty.name}
+          open={!!selectedProperty}
+          onOpenChange={(open) => !open && setSelectedProperty(null)}
         />
       )}
     </div>

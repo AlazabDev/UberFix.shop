@@ -1,46 +1,68 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export interface Property {
   id: string;
   name: string;
-  code?: string;
+  code: string | null;
   type: string;
   status: string;
   address: string;
-  latitude?: number;
-  longitude?: number;
-  area?: number;
-  rooms?: number;
-  manager_id?: string;
-  region_id?: string;
-  description?: string;
-  amenities?: string[];
-  maintenance_schedule?: string;
-  last_inspection_date?: string;
-  next_inspection_date?: string;
-  icon_url?: string;
-  qr_code_data?: string;
-  city_id?: number;
-  district_id?: number;
-  images?: string[];
+  city_id: number | null;
+  district_id: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  area: number | null;
+  rooms: number | null;
+  bathrooms: number | null;
+  floors: number | null;
+  parking_spaces: number | null;
+  description: string | null;
+  images: string[] | null;
+  icon_url: string | null;
+  qr_code_data: string | null;
+  qr_code_generated_at: string | null;
   created_at: string;
   updated_at: string;
+  created_by: string | null;
+  last_modified_by: string | null;
+  version: number;
 }
 
-export const useProperties = () => {
+export function useProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setProperties(data || []);
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+      toast.error("فشل تحميل العقارات");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchProperties();
 
-    // Subscribe to real-time updates
-    const channel = supabase
-      .channel('properties-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'properties' },
+    const subscription = supabase
+      .channel("properties_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "properties" },
         () => {
           fetchProperties();
         }
@@ -48,62 +70,55 @@ export const useProperties = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      subscription.unsubscribe();
     };
   }, []);
 
-  const fetchProperties = async () => {
+  const addProperty = async (propertyData: Omit<Property, "id" | "created_at" | "updated_at" | "version">) => {
     try {
       const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProperties((data || []) as Property[]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل البيانات');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addProperty = async (propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      console.log('Adding property with data:', propertyData);
-      const { data, error } = await supabase
-        .from('properties')
+        .from("properties")
         .insert([propertyData])
         .select()
         .single();
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-      console.log('Property added successfully:', data);
-      return { success: true, data };
+      if (error) throw error;
+
+      toast.success("تمت إضافة العقار بنجاح");
+      await fetchProperties();
+      return data;
     } catch (err) {
-      console.error('Add property error:', err);
-      return { success: false, error: err instanceof Error ? err.message : 'خطأ في إضافة العقار' };
+      toast.error("فشل إضافة العقار");
+      throw err;
     }
   };
 
   const updateProperty = async (id: string, updates: Partial<Property>) => {
     try {
       const { data, error } = await supabase
-        .from('properties')
+        .from("properties")
         .update(updates)
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
-      return { success: true, data };
+
+      toast.success("تم تحديث العقار بنجاح");
+      await fetchProperties();
+      return data;
     } catch (err) {
-      return { success: false, error: err instanceof Error ? err.message : 'خطأ في تحديث العقار' };
+      toast.error("فشل تحديث العقار");
+      throw err;
     }
   };
 
-  return { properties, loading, error, addProperty, updateProperty, refetch: fetchProperties };
-};
+  return {
+    properties,
+    loading,
+    error,
+    addProperty,
+    updateProperty,
+    refetch: fetchProperties,
+  };
+}
