@@ -74,13 +74,21 @@ export function InteractiveMap({
 
         <div 
           style={{ height, width: "100%" }}
-          className="rounded-lg bg-muted border-2 border-dashed flex items-center justify-center relative overflow-hidden"
+          className="rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border border-border flex items-center justify-center relative overflow-hidden"
         >
-          <div className="text-center">
-            <MapPin className="h-16 w-16 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-1">الموقع على الخريطة</p>
-            <p className="text-xs text-muted-foreground">
-              Lat: {parseFloat(lat).toFixed(6)}, Lng: {parseFloat(lng).toFixed(6)}
+          <div className="text-center p-6">
+            <div className="relative inline-block">
+              <MapPin className="h-20 w-20 mx-auto mb-3 text-primary animate-pulse" />
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+            </div>
+            <p className="text-sm font-medium text-foreground mb-2">📍 الموقع الجغرافي</p>
+            <div className="bg-background/80 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
+              <p className="text-xs font-mono text-muted-foreground">
+                {parseFloat(lat).toFixed(6)}°, {parseFloat(lng).toFixed(6)}°
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              استخدم الحقول أدناه لتحديد الموقع بدقة
             </p>
           </div>
         </div>
