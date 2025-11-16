@@ -196,15 +196,16 @@ export function AddReviewDialog({
                     <div key={idx} className="relative group">
                       <img
                         src={URL.createObjectURL(file)}
-                        alt={`Preview ${idx + 1}`}
+                        alt={`صورة التقييم ${idx + 1}`}
                         className="w-full h-20 object-cover rounded-lg border"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(idx)}
                         className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label={`حذف الصورة ${idx + 1}`}
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-3 w-3" aria-hidden="true" />
                       </button>
                     </div>
                   ))}
@@ -220,12 +221,13 @@ export function AddReviewDialog({
                     multiple
                     onChange={handleImageSelect}
                     className="hidden"
+                    aria-label="اختر صور التقييم"
                   />
                   <Label
                     htmlFor="images"
                     className="flex items-center justify-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-accent transition-colors"
                   >
-                    <Upload className="h-5 w-5" />
+                    <Upload className="h-5 w-5" aria-hidden="true" />
                     <span>اختر صور لرفعها</span>
                   </Label>
                 </div>
