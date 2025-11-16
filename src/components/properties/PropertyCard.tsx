@@ -71,28 +71,27 @@ export function PropertyCard({ property, onActionsClick }: PropertyCardProps) {
         )}
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-2">
           <Button
-            variant="ghost"
             size="sm"
-            className="flex-1 border border-border"
+            className="flex-1 bg-primary hover:bg-primary/90 gap-1 h-9"
+            onClick={() => navigate(`/requests/new?propertyId=${property.id}`)}
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            طلب
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 px-3"
             onClick={(e) => {
               e.stopPropagation();
               onActionsClick({ id: property.id, name: property.name });
             }}
           >
-            <MoreVertical className="h-4 w-4 ml-2" />
-            الإجراءات
-          </Button>
-          <Button
-            size="sm"
-            className="flex-1 bg-primary hover:bg-primary/90"
-            onClick={() => navigate(`/requests/new?propertyId=${property.id}`)}
-          >
-            <svg className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            طلب صيانة جديد
+            <MoreVertical className="h-4 w-4" />
           </Button>
         </div>
       </div>

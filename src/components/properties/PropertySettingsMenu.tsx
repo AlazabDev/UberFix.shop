@@ -5,9 +5,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, LayoutGrid, Upload, QrCode, FileDown } from "lucide-react";
+import { Settings, LayoutGrid, Upload, QrCode, FileDown, Archive } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function PropertySettingsMenu() {
+  const navigate = useNavigate();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,6 +37,10 @@ export function PropertySettingsMenu() {
         <DropdownMenuItem>
           <FileDown className="h-4 w-4 ml-2" />
           تحميل رمز QR لطلبات الصيانة للعملاء
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/properties/archived")}>
+          <Archive className="h-4 w-4 ml-2" />
+          العقارات المؤرشفة
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

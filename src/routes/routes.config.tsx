@@ -19,6 +19,7 @@ const Properties = lazy(() => import("@/pages/properties/Properties"));
 const AddProperty = lazy(() => import("@/pages/properties/AddProperty"));
 const EditProperty = lazy(() => import("@/pages/properties/EditProperty"));
 const PropertyDetails = lazy(() => import("@/pages/properties/PropertyDetails"));
+const ArchivedProperties = lazy(() => import("@/pages/properties/ArchivedProperties"));
 
 // Reports
 const Reports = lazy(() => import("@/pages/reports/Reports"));
@@ -71,6 +72,7 @@ export const protectedRoutes = [
   { path: "/reports/maintenance", element: <MaintenanceReports />, withLayout: true },
   { path: "/properties", element: <Properties />, withLayout: true },
   { path: "/properties/add", element: <AddProperty />, withLayout: true },
+  { path: "/properties/archived", element: <ArchivedProperties />, withLayout: true },
   { path: "/properties/:id", element: <PropertyDetails />, withLayout: true },
   { path: "/properties/edit/:id", element: <EditProperty />, withLayout: true },
   { path: "/appointments", element: <Appointments />, withLayout: true },

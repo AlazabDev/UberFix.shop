@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, X, MapPin } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import { InteractiveMap } from "@/components/maps/InteractiveMap";
 import type { Property } from "@/hooks/useProperties";
 import { PropertyFormTabs } from "./PropertyFormTabs";
 import { useNavigate } from "react-router-dom";
@@ -34,9 +35,11 @@ type PropertyFormData = z.infer<typeof propertyFormSchema>;
 interface PropertyFormProps {
   initialData?: Partial<Property>;
   propertyId?: string;
+  skipNavigation?: boolean;
+  onSuccess?: () => void;
 }
 
-export function PropertyForm({ initialData, propertyId }: PropertyFormProps) {
+export function PropertyForm({ initialData, propertyId, skipNavigation, onSuccess }: PropertyFormProps) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [cities, setCities] = useState<{ id: number; name_ar: string }[]>([]);
@@ -173,7 +176,11 @@ export function PropertyForm({ initialData, propertyId }: PropertyFormProps) {
         toast.success("تم إنشاء العقار بنجاح");
       }
 
-      navigate("/properties");
+      if (onSuccess) {
+        onSuccess();
+      } else if (!skipNavigation) {
+        navigate("/properties");
+      }
     } catch (error) {
       console.error("Error:", error);
       toast.error("حدث خطأ أثناء حفظ العقار");
@@ -300,32 +307,32 @@ export function PropertyForm({ initialData, propertyId }: PropertyFormProps) {
 
       {/* Address */}
       <div className="space-y-2">
-        <Label htmlFor="address">إحداثيات الخريطة</Label>
-        <div className="flex gap-2">
-          <Input 
-            {...register("address")} 
-            placeholder="2HW5+G6F, محافظة القاهرة, ,2HW5+G6F مصر" 
-            className="flex-1"
-          />
-          <Button type="button" variant="outline">
-            <MapPin className="h-4 w-4" />
-          </Button>
-        </div>
+        <Label htmlFor="address">العنوان التفصيلي</Label>
+        <Input 
+          {...register("address")} 
+          placeholder="مثال: 8st 500 maadi Cairo" 
+        />
+        {errors.address && (
+          <p className="text-sm text-destructive">{errors.address.message}</p>
+        )}
         <p className="text-xs text-muted-foreground">
-          قم بإدخال عنوان الموقع من خلال النقر على الخريطة أو استخدام Google Maps.
+          يمكنك النقر على الخريطة أدناه لتحديد الموقع بدقة
         </p>
       </div>
 
-      {/* Map Placeholder */}
-      <div className="h-64 bg-muted rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-        <div className="text-center text-muted-foreground">
-          <MapPin className="h-12 w-12 mx-auto mb-2" />
-          <p className="text-sm">الموقع على الخريطة</p>
-          <Button type="button" variant="link" size="sm">
-            استخدام موقعي الحالي
-          </Button>
-        </div>
-      </div>
+      {/* Interactive Map */}
+      <InteractiveMap
+        latitude={watch("latitude") || 30.0444}
+        longitude={watch("longitude") || 31.2357}
+        onLocationChange={(lat, lng, address) => {
+          setValue("latitude", lat);
+          setValue("longitude", lng);
+          if (address) {
+            setValue("address", address);
+          }
+        }}
+        height="320px"
+      />
 
       {/* Detailed Address */}
       <div className="space-y-2">
