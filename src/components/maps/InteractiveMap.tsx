@@ -85,46 +85,47 @@ export function InteractiveMap({
 
         {/* خريطة تفاعلية مرئية */}
         <div 
-          style={{ height, width: "100%" }}
-          className="rounded-lg border-2 border-primary/20 overflow-hidden relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950"
+          style={{ height, minHeight: "300px", width: "100%" }}
+          className="rounded-lg border-2 border-primary/20 overflow-hidden relative bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5"
         >
           {/* شبكة الخريطة */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="grid grid-cols-8 grid-rows-8 h-full w-full">
-              {Array.from({ length: 64 }).map((_, i) => (
-                <div key={i} className="border border-primary/30"></div>
+          <div className="absolute inset-0 opacity-20">
+            <div className="grid grid-cols-10 grid-rows-10 h-full w-full">
+              {Array.from({ length: 100 }).map((_, i) => (
+                <div key={i} className="border border-primary/20"></div>
               ))}
             </div>
           </div>
 
           {/* المحتوى المركزي */}
-          <div className="relative h-full flex flex-col items-center justify-center p-6">
-            <div className="relative mb-4">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse"></div>
-              <MapPin className="h-16 w-16 text-primary relative z-10 drop-shadow-lg" />
+          <div className="relative h-full min-h-[300px] flex flex-col items-center justify-center p-6">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-primary rounded-full blur-3xl opacity-30 animate-pulse"></div>
+              <MapPin className="h-20 w-20 text-primary relative z-10 drop-shadow-2xl" />
             </div>
             
-            <div className="bg-background/95 backdrop-blur-md rounded-lg px-6 py-3 shadow-lg border border-primary/10">
-              <p className="text-sm font-semibold text-primary mb-1">📍 الإحداثيات الجغرافية</p>
-              <div className="flex items-center gap-3 text-xs font-mono">
-                <span className="text-muted-foreground">
-                  <span className="font-semibold">العرض:</span> {parseFloat(lat).toFixed(6)}°
-                </span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-muted-foreground">
-                  <span className="font-semibold">الطول:</span> {parseFloat(lng).toFixed(6)}°
-                </span>
+            <div className="bg-card border-2 border-primary/20 rounded-xl px-8 py-4 shadow-xl">
+              <p className="text-base font-bold text-primary mb-2 text-center">📍 الموقع الحالي</p>
+              <div className="flex flex-col gap-2 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="font-bold text-foreground">خط العرض:</span>
+                  <span className="font-mono">{parseFloat(lat).toFixed(6)}°</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="font-bold text-foreground">خط الطول:</span>
+                  <span className="font-mono">{parseFloat(lng).toFixed(6)}°</span>
+                </div>
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground mt-4 text-center max-w-xs">
-              استخدم زر "موقعي الحالي" أعلاه لتحديد موقعك تلقائياً
+            <p className="text-sm text-muted-foreground mt-6 text-center max-w-md bg-background/50 backdrop-blur-sm rounded-lg px-4 py-2">
+              📱 اضغط على زر "موقعي الحالي" لتحديد موقعك تلقائياً
             </p>
           </div>
 
           {/* علامات الاتجاهات */}
-          <div className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm rounded px-2 py-1 text-xs font-semibold text-muted-foreground">
-            شمال ↑
+          <div className="absolute top-3 left-3 bg-card border border-primary/20 rounded-lg px-3 py-2 text-sm font-bold text-primary shadow-md">
+            ⬆️ شمال
           </div>
         </div>
       </div>

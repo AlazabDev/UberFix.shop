@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Property } from "@/hooks/useProperties";
 import { Button } from "@/components/ui/button";
 import { Building2, Phone, MoreVertical } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { NewRequestForm } from "@/components/forms/NewRequestForm";
 
 interface PropertyCardProps {
   property: Property;
@@ -9,7 +11,7 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, onActionsClick }: PropertyCardProps) {
-  const navigate = useNavigate();
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
 
   const getTypeIcon = (type: string) => {
     const icons: Record<string, string> = {
@@ -77,7 +79,7 @@ export function PropertyCard({ property, onActionsClick }: PropertyCardProps) {
             className="flex-1 bg-primary hover:bg-primary/90 gap-1"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/service-request?propertyId=${property.id}`);
+              setIsRequestDialogOpen(true);
             }}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,6 +89,19 @@ export function PropertyCard({ property, onActionsClick }: PropertyCardProps) {
           </Button>
         </div>
       </div>
+
+      {/* Modal طلب الصيانة الموحد */}
+      <Dialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">طلب صيانة جديد - {property.name}</DialogTitle>
+          </DialogHeader>
+          <NewRequestForm 
+            onSuccess={() => setIsRequestDialogOpen(false)}
+            initialPropertyId={property.id}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

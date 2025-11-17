@@ -24,11 +24,12 @@ import { getPropertyIcon } from "@/lib/propertyIcons";
 interface NewRequestFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
+  initialPropertyId?: string;
 }
 
 type MaintenanceRequestFormData = z.infer<typeof maintenanceRequestFormSchema>;
 
-export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
+export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRequestFormProps) {
   const { createRequest } = useMaintenanceRequests();
   const { properties, loading: propertiesLoading } = useProperties();
   const { toast } = useToast();
@@ -51,7 +52,7 @@ export function NewRequestForm({ onSuccess, onCancel }: NewRequestFormProps) {
       customer_notes: "",
       latitude: null,
       longitude: null,
-      property_id: "",
+      property_id: initialPropertyId || "",
     },
   });
 
