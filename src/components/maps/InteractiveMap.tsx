@@ -150,12 +150,32 @@ export function InteractiveMap({
 
     return () => {
       isMounted = false;
-      if (markerInstance) {
-        google.maps.event.clearInstanceListeners(markerInstance);
-        markerInstance.setMap(null);
+      
+      // Safe cleanup with try-catch to prevent DOM errors
+      try {
+        if (markerInstance) {
+          google.maps.event.clearInstanceListeners(markerInstance);
+          markerInstance.setMap(null);
+        }
+      } catch (error) {
+        console.warn("Error cleaning up marker:", error);
       }
-      if (mapInstance) {
-        google.maps.event.clearInstanceListeners(mapInstance);
+      
+      try {
+        if (mapInstance) {
+          google.maps.event.clearInstanceListeners(mapInstance);
+        }
+      } catch (error) {
+        console.warn("Error cleaning up map:", error);
+      }
+      
+      // Clear the map container to prevent DOM issues
+      try {
+        if (mapRef.current) {
+          mapRef.current.innerHTML = '';
+        }
+      } catch (error) {
+        console.warn("Error clearing map container:", error);
       }
     };
   }, []);
