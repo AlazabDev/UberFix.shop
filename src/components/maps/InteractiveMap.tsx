@@ -32,33 +32,40 @@ export function InteractiveMap({
   }, [latitude, longitude]);
 
   useEffect(() => {
-    const initMap = async () => {
-      try {
-        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        
-        if (!apiKey) {
-          toast.error("مفتاح Google Maps غير موجود");
-          setIsLoading(false);
+    let isMounted = true;
+    let mapInstance: google.maps.Map | null = null;
+    let markerInstance: google.maps.Marker | null = null;
+
+    const loadGoogleMaps = (): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        if (window.google?.maps) {
+          resolve();
           return;
         }
 
-        // Load Google Maps script
-        if (!window.google) {
-          const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-          script.async = true;
-          script.defer = true;
-          
-          await new Promise((resolve, reject) => {
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-          });
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!apiKey) {
+          reject(new Error("Google Maps API key not found"));
+          return;
         }
-        
-        if (!mapRef.current) return;
 
-        const mapInstance = new google.maps.Map(mapRef.current, {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&v=weekly`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("Failed to load Google Maps"));
+        document.head.appendChild(script);
+      });
+    };
+
+    const initMap = async () => {
+      try {
+        await loadGoogleMaps();
+        
+        if (!isMounted || !mapRef.current) return;
+
+        mapInstance = new google.maps.Map(mapRef.current, {
           center: { lat: currentLat, lng: currentLng },
           zoom: 15,
           mapTypeControl: true,
@@ -67,7 +74,7 @@ export function InteractiveMap({
           zoomControl: true,
         });
 
-        const markerInstance = new google.maps.Marker({
+        markerInstance = new google.maps.Marker({
           position: { lat: currentLat, lng: currentLng },
           map: mapInstance,
           draggable: true,
@@ -76,14 +83,13 @@ export function InteractiveMap({
 
         // Handle marker drag
         markerInstance.addListener("dragend", async () => {
-          const position = markerInstance.getPosition();
-          if (position) {
+          const position = markerInstance?.getPosition();
+          if (position && isMounted) {
             const lat = position.lat();
             const lng = position.lng();
             setCurrentLat(lat);
             setCurrentLng(lng);
             
-            // Get address from coordinates
             const geocoder = new google.maps.Geocoder();
             try {
               const response = await geocoder.geocode({ location: { lat, lng } });
@@ -99,7 +105,7 @@ export function InteractiveMap({
 
         // Handle map click
         mapInstance.addListener("click", async (e: google.maps.MapMouseEvent) => {
-          if (e.latLng) {
+          if (e.latLng && isMounted && markerInstance && mapInstance) {
             const lat = e.latLng.lat();
             const lng = e.latLng.lng();
             
@@ -108,7 +114,6 @@ export function InteractiveMap({
             setCurrentLat(lat);
             setCurrentLng(lng);
             
-            // Get address from coordinates
             const geocoder = new google.maps.Geocoder();
             try {
               const response = await geocoder.geocode({ location: { lat, lng } });
@@ -122,17 +127,32 @@ export function InteractiveMap({
           }
         });
 
-        setMap(mapInstance);
-        setMarker(markerInstance);
-        setIsLoading(false);
+        if (isMounted) {
+          setMap(mapInstance);
+          setMarker(markerInstance);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error("Error loading map:", error);
-        toast.error("فشل تحميل الخريطة");
-        setIsLoading(false);
+        if (isMounted) {
+          toast.error("فشل تحميل الخريطة - تأكد من وجود مفتاح Google Maps");
+          setIsLoading(false);
+        }
       }
     };
 
     initMap();
+
+    return () => {
+      isMounted = false;
+      if (markerInstance) {
+        google.maps.event.clearInstanceListeners(markerInstance);
+        markerInstance.setMap(null);
+      }
+      if (mapInstance) {
+        google.maps.event.clearInstanceListeners(mapInstance);
+      }
+    };
   }, []);
 
   // Update marker position when latitude/longitude props change
