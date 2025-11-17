@@ -36,6 +36,7 @@ export function InteractiveMap({
     let isMounted = true;
     let mapInstance: google.maps.Map | null = null;
     let markerInstance: google.maps.Marker | null = null;
+    let isCleanedUp = false;
 
     const loadGoogleMaps = async (): Promise<void> => {
       if (window.google?.maps) {
@@ -47,7 +48,7 @@ export function InteractiveMap({
         
         if (error) throw error;
         
-        const apiKey = data?.apiKey || 'AIzaSyBEYvdlK9TjbO1JtHZ0F3eF5X_example'; // fallback key
+        const apiKey = data?.apiKey || 'AIzaSyBEYvdlK9TjbO1JtHZ0F3eF5X_example';
         
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
@@ -68,7 +69,7 @@ export function InteractiveMap({
       try {
         await loadGoogleMaps();
         
-        if (!isMounted || !mapRef.current) return;
+        if (!isMounted || !mapRef.current || isCleanedUp) return;
 
         mapInstance = new google.maps.Map(mapRef.current, {
           center: { lat: currentLat, lng: currentLng },
@@ -86,8 +87,8 @@ export function InteractiveMap({
           animation: google.maps.Animation.DROP,
         });
 
-        // Handle marker drag
         markerInstance.addListener("dragend", async () => {
+          if (isCleanedUp) return;
           const position = markerInstance?.getPosition();
           if (position && isMounted) {
             const lat = position.lat();
@@ -108,8 +109,8 @@ export function InteractiveMap({
           }
         });
 
-        // Handle map click
         mapInstance.addListener("click", async (e: google.maps.MapMouseEvent) => {
+          if (isCleanedUp) return;
           if (e.latLng && isMounted && markerInstance && mapInstance) {
             const lat = e.latLng.lat();
             const lng = e.latLng.lng();
@@ -132,14 +133,14 @@ export function InteractiveMap({
           }
         });
 
-        if (isMounted) {
+        if (isMounted && !isCleanedUp) {
           setMap(mapInstance);
           setMarker(markerInstance);
           setIsLoading(false);
         }
       } catch (error) {
         console.error("Error loading map:", error);
-        if (isMounted) {
+        if (isMounted && !isCleanedUp) {
           toast.error("فشل تحميل الخريطة - تأكد من وجود مفتاح Google Maps");
           setIsLoading(false);
         }
@@ -150,33 +151,34 @@ export function InteractiveMap({
 
     return () => {
       isMounted = false;
+      isCleanedUp = true;
       
-      // Safe cleanup with try-catch to prevent DOM errors
-      try {
-        if (markerInstance) {
-          google.maps.event.clearInstanceListeners(markerInstance);
-          markerInstance.setMap(null);
+      setTimeout(() => {
+        try {
+          if (markerInstance && window.google?.maps) {
+            google.maps.event.clearInstanceListeners(markerInstance);
+            markerInstance.setMap(null);
+          }
+        } catch (error) {
+          // Ignore cleanup errors
         }
-      } catch (error) {
-        console.warn("Error cleaning up marker:", error);
-      }
-      
-      try {
-        if (mapInstance) {
-          google.maps.event.clearInstanceListeners(mapInstance);
+        
+        try {
+          if (mapInstance && window.google?.maps) {
+            google.maps.event.clearInstanceListeners(mapInstance);
+          }
+        } catch (error) {
+          // Ignore cleanup errors
         }
-      } catch (error) {
-        console.warn("Error cleaning up map:", error);
-      }
-      
-      // Clear the map container to prevent DOM issues
-      try {
-        if (mapRef.current) {
-          mapRef.current.innerHTML = '';
+        
+        try {
+          if (mapRef.current) {
+            mapRef.current.innerHTML = '';
+          }
+        } catch (error) {
+          // Ignore cleanup errors
         }
-      } catch (error) {
-        console.warn("Error clearing map container:", error);
-      }
+      }, 0);
     };
   }, []);
 
