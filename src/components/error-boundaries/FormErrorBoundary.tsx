@@ -19,14 +19,23 @@ export class FormErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Form error:', error, errorInfo);
-    // Force full page reload on error
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
+    // Log error but don't force reload - let user continue
   }
 
   public render() {
-    // Just pass through children - errors will trigger reload
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
+          <p className="font-semibold">حدث خطأ في النموذج</p>
+          <button 
+            onClick={() => this.setState({ hasError: false })}
+            className="mt-2 text-sm underline"
+          >
+            المحاولة مرة أخرى
+          </button>
+        </div>
+      );
+    }
     return this.props.children;
   }
 }
