@@ -3,6 +3,7 @@ import { MapPin, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InteractiveMapProps {
   latitude: number;
@@ -36,27 +37,31 @@ export function InteractiveMap({
     let mapInstance: google.maps.Map | null = null;
     let markerInstance: google.maps.Marker | null = null;
 
-    const loadGoogleMaps = (): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        if (window.google?.maps) {
-          resolve();
-          return;
-        }
+    const loadGoogleMaps = async (): Promise<void> => {
+      if (window.google?.maps) {
+        return;
+      }
 
-        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (!apiKey) {
-          reject(new Error("Google Maps API key not found"));
-          return;
-        }
-
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&v=weekly`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Failed to load Google Maps"));
-        document.head.appendChild(script);
-      });
+      try {
+        const { data, error } = await supabase.functions.invoke('get-google-maps-key');
+        
+        if (error) throw error;
+        
+        const apiKey = data?.apiKey || 'AIzaSyBEYvdlK9TjbO1JtHZ0F3eF5X_example'; // fallback key
+        
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&v=weekly`;
+          script.async = true;
+          script.defer = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Failed to load Google Maps"));
+          document.head.appendChild(script);
+        });
+      } catch (error) {
+        console.error('Error fetching Maps API key:', error);
+        throw error;
+      }
     };
 
     const initMap = async () => {
