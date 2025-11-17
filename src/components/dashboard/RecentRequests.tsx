@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, MapPin, Clock, User, Loader2, DollarSign } from "lucide-react";
+import { Eye, MapPin, Clock, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 

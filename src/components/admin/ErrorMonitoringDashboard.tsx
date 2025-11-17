@@ -16,7 +16,7 @@ interface ErrorLog {
   user_id?: string;
   user_agent?: string;
   level: 'error' | 'warning' | 'info';
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   error_hash?: string;
   count: number;
   first_seen_at: string;
@@ -34,7 +34,7 @@ export function ErrorMonitoringDashboard() {
 
   useEffect(() => {
     fetchErrors();
-  }, [filter]);
+  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchErrors = async () => {
     try {

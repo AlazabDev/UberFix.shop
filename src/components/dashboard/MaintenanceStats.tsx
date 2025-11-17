@@ -3,8 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { 
-  TrendingUp, 
-  TrendingDown, 
+  TrendingUp,
   AlertTriangle, 
   CheckCircle2,
   Clock,

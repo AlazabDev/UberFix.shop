@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Building2, UserPlus } from 'lucide-react';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
 import { smartSignup, smartLogin } from '@/lib/smartAuth';
-import { loginFormSchema, registerFormSchema } from '@/lib/validationSchemas';
+import { loginFormSchema } from '@/lib/validationSchemas';
 import { z } from 'zod';
 
 type LoginFormData = z.infer<typeof loginFormSchema>;
@@ -51,7 +51,7 @@ export function LoginForm() {
           variant: result.mode === 'error' ? "destructive" : "default",
         });
       }
-    } catch (error: any) {
+    } catch (_error) {
       toast({
         title: "خطأ في تسجيل الدخول",
         description: "حدث خطأ غير متوقع",
@@ -99,7 +99,7 @@ export function LoginForm() {
           variant: result.mode === 'error' ? "destructive" : "default",
         });
       }
-    } catch (error: any) {
+    } catch (_error) {
       toast({
         title: "خطأ في إنشاء الحساب",
         description: "حدث خطأ غير متوقع",
@@ -120,7 +120,7 @@ export function LoginForm() {
       });
       
       if (error) throw error;
-    } catch (error: any) {
+    } catch (_error) {
       toast({
         title: "خطأ في تسجيل الدخول",
         description: "تعذر تسجيل الدخول بجوجل",
@@ -139,7 +139,7 @@ export function LoginForm() {
       });
       
       if (error) throw error;
-    } catch (error: any) {
+    } catch (_error) {
       toast({
         title: "خطأ في تسجيل الدخول",
         description: "تعذر تسجيل الدخول بفيسبوك",

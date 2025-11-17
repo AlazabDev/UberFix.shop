@@ -2,14 +2,16 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock localStorage
-const localStorageMock = {
+const localStorageMock: Storage = {
+  length: 0,
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
+  key: vi.fn(),
 };
 
-global.localStorage = localStorageMock as any;
+global.localStorage = localStorageMock;
 
 // Mock navigator.onLine
 Object.defineProperty(global.navigator, 'onLine', {

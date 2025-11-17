@@ -49,7 +49,7 @@ export function PermissionsManagement() {
     queryKey: ['role-permissions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('role_permissions' as any)
+        .from('role_permissions')
         .select('*')
         .order('role');
 
