@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -72,7 +73,7 @@ export function UserRolesManagement() {
     queryKey: ['admin-user-roles'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('user_roles' as any)
+        .from('user_roles')
         .select(`
           *,
           profiles:user_id (
@@ -110,8 +111,8 @@ export function UserRolesManagement() {
   const addRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
       const { error } = await supabase
-        .from('user_roles' as any)
-        .insert({ user_id: userId, role: role as any });
+        .from('user_roles')
+        .insert([{ user_id: userId, role: role as Database['public']['Enums']['app_role'] }]);
 
       if (error) throw error;
     },
@@ -125,7 +126,7 @@ export function UserRolesManagement() {
       setSelectedRole('');
       setSearchEmail('');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'خطأ',
         description: error.message || 'فشل في إضافة الدور',
@@ -138,7 +139,7 @@ export function UserRolesManagement() {
   const deleteRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
       const { error } = await supabase
-        .from('user_roles' as any)
+        .from('user_roles')
         .delete()
         .eq('user_id', userId)
         .eq('role', role as any);
@@ -153,7 +154,7 @@ export function UserRolesManagement() {
       });
       setDeleteTarget(null);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'خطأ',
         description: error.message || 'فشل في حذف الدور',

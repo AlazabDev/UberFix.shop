@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Calendar, Users, Download, BarChart3 } from "lucide-react";
+import { Plus, FileText, Users, Download, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -58,7 +58,6 @@ export const QuickActions = () => {
   const [isNewRequestOpen, setIsNewRequestOpen] = useState(false);
 
   const handleActionClick = (index: number) => {
-    const action = quickActions[index];
     
     switch (index) {
       case 0: // طلب صيانة جديد
