@@ -131,14 +131,20 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
       if (image) {
         const fileExt = image.name.split(".").pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `properties/${fileName}`;
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = fileName;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError, data: uploadData } = await supabase.storage
           .from("property-images")
-          .upload(filePath, image);
+          .upload(filePath, image, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          throw new Error(`فشل تحميل الصورة: ${uploadError.message}`);
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from("property-images")
@@ -181,9 +187,9 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       } else if (!skipNavigation) {
         navigate("/properties");
       }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("حدث خطأ أثناء حفظ العقار");
+    } catch (error: any) {
+      console.error("Error saving property:", error);
+      toast.error(error?.message || "حدث خطأ أثناء حفظ العقار");
     } finally {
       setLoading(false);
     }
