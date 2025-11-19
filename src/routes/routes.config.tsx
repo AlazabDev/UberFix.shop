@@ -8,36 +8,62 @@ const Documentation = lazy(() => import("@/pages/Documentation"));
 const Requests = lazy(() => import("@/pages/maintenance/Requests"));
 const AllRequests = lazy(() => import("@/pages/maintenance/AllRequests"));
 const RequestDetails = lazy(() => import("@/pages/maintenance/RequestDetails"));
-const RequestLifecycleJourney = lazy(() => import("@/pages/maintenance/RequestLifecycleJourney"));
+const RequestLifecycleJourney = lazy(
+  () => import("@/pages/maintenance/RequestLifecycleJourney")
+);
 const ServiceRequest = lazy(() => import("@/pages/maintenance/ServiceRequest"));
 const ServiceMap = lazy(() => import("@/pages/maintenance/ServiceMap"));
-const EmergencyService = lazy(() => import("@/pages/maintenance/EmergencyService"));
-const MaintenanceProcedures = lazy(() => import("@/pages/maintenance/MaintenanceProcedures"));
+const EmergencyService = lazy(
+  () => import("@/pages/maintenance/EmergencyService")
+);
+const MaintenanceProcedures = lazy(
+  () => import("@/pages/maintenance/MaintenanceProcedures")
+);
 
 // Properties
 const Properties = lazy(() => import("@/pages/properties/Properties"));
 const AddProperty = lazy(() => import("@/pages/properties/AddProperty"));
 const EditProperty = lazy(() => import("@/pages/properties/EditProperty"));
-const PropertyDetails = lazy(() => import("@/pages/properties/PropertyDetails"));
-const ArchivedProperties = lazy(() => import("@/pages/properties/ArchivedProperties"));
+const PropertyDetails = lazy(
+  () => import("@/pages/properties/PropertyDetails")
+);
+const ArchivedProperties = lazy(
+  () => import("@/pages/properties/ArchivedProperties")
+);
 
 // Reports
 const Reports = lazy(() => import("@/pages/reports/Reports"));
 const SLADashboard = lazy(() => import("@/pages/reports/SLADashboard"));
-const ExpenseReports = lazy(() => import("@/pages/reports/ExpenseReports"));
-const MaintenanceReports = lazy(() => import("@/pages/reports/MaintenanceReports"));
-const ProductionReport = lazy(() => import("@/pages/reports/ProductionReport"));
+const ExpenseReports = lazy(
+  () => import("@/pages/reports/ExpenseReports")
+);
+const MaintenanceReports = lazy(
+  () => import("@/pages/reports/MaintenanceReports")
+); // الأصلية
+const ProductionReport = lazy(
+  () => import("@/pages/reports/ProductionReport")
+);
 
 // Admin
-const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
-const AdminControlCenter = lazy(() => import("@/pages/admin/AdminControlCenter"));
-const ProductionMonitor = lazy(() => import("@/pages/admin/ProductionMonitor"));
+const UserManagement = lazy(
+  () => import("@/pages/admin/UserManagement")
+);
+const AdminControlCenter = lazy(
+  () => import("@/pages/admin/AdminControlCenter")
+);
+const ProductionMonitor = lazy(
+  () => import("@/pages/admin/ProductionMonitor")
+);
 const Testing = lazy(() => import("@/pages/admin/Testing"));
 
 // Messages
 const Inbox = lazy(() => import("@/pages/messages/Inbox"));
-const WhatsAppMessages = lazy(() => import("@/pages/messages/WhatsAppMessages"));
-const MessageLogs = lazy(() => import("@/pages/messages/MessageLogs"));
+const WhatsAppMessages = lazy(
+  () => import("@/pages/messages/WhatsAppMessages")
+);
+const MessageLogs = lazy(
+  () => import("@/pages/messages/MessageLogs")
+);
 
 // Projects
 const ProjectDetails = lazy(() => import("@/pages/projects/ProjectDetails"));
@@ -54,19 +80,30 @@ const Appointments = lazy(() => import("@/pages/Appointments"));
 const Invoices = lazy(() => import("@/pages/Invoices"));
 
 /**
- * تكوين المسارات المحمية (تتطلب تسجيل دخول)
- * withLayout: false للصفحات التي لا تحتاج Sidebar (مثل الخريطة)
+ * صفحات جديدة تحت قسم Maintenance
+ * (بعد التصحيح — تم إعادة تسمية المتغيّر الثاني فقط)
  */
-// Maintenance - New Pages
-const MaintenanceRequestDetail = lazy(() => import("@/pages/maintenance/MaintenanceRequestDetail"));
-const MaintenanceReports = lazy(() => import("@/pages/maintenance/MaintenanceReports"));
-const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
-const MaintenanceList = lazy(() => import("@/pages/maintenance/MaintenanceList"));
-const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
+const MaintenanceRequestDetail = lazy(
+  () => import("@/pages/maintenance/MaintenanceRequestDetail")
+);
+const MaintenanceReportsPage = lazy(
+  () => import("@/pages/maintenance/MaintenanceReports")
+); // ← هذه كانت سبب المشكلة
+const CreateMaintenanceRequest = lazy(
+  () => import("@/pages/maintenance/CreateMaintenanceRequest")
+);
+const MaintenanceList = lazy(
+  () => import("@/pages/maintenance/MaintenanceList")
+);
+const MaintenanceOverview = lazy(
+  () => import("@/pages/maintenance/MaintenanceOverview")
+);
 
 export const protectedRoutes = [
   { path: "/dashboard", element: <Dashboard />, withLayout: true },
   { path: "/sla-dashboard", element: <SLADashboard />, withLayout: true },
+
+  // Maintenance
   { path: "/requests", element: <Requests />, withLayout: true },
   { path: "/all-requests", element: <AllRequests />, withLayout: true },
   { path: "/requests/:id", element: <RequestDetails />, withLayout: true },
@@ -76,16 +113,25 @@ export const protectedRoutes = [
   { path: "/maintenance/list", element: <MaintenanceList />, withLayout: true },
   { path: "/maintenance/create", element: <CreateMaintenanceRequest />, withLayout: true },
   { path: "/maintenance/:id", element: <MaintenanceRequestDetail />, withLayout: true },
+
+  // Vendors
   { path: "/vendors", element: <Vendors />, withLayout: true },
   { path: "/vendors/:id", element: <VendorDetails />, withLayout: true },
+
+  // Reports
   { path: "/reports", element: <Reports />, withLayout: true },
   { path: "/reports/expenses", element: <ExpenseReports />, withLayout: true },
-  { path: "/reports/maintenance", element: <MaintenanceReports />, withLayout: true },
+  { path: "/reports/maintenance", element: <MaintenanceReports />, withLayout: true }, // الأصلية
+  { path: "/maintenance/reports", element: <MaintenanceReportsPage />, withLayout: true }, // ← الجديدة بعد التصحيح
+
+  // Properties
   { path: "/properties", element: <Properties />, withLayout: true },
   { path: "/properties/add", element: <AddProperty />, withLayout: true },
   { path: "/properties/archived", element: <ArchivedProperties />, withLayout: true },
   { path: "/properties/:id", element: <PropertyDetails />, withLayout: true },
   { path: "/properties/edit/:id", element: <EditProperty />, withLayout: true },
+
+  // Other
   { path: "/appointments", element: <Appointments />, withLayout: true },
   { path: "/invoices", element: <Invoices />, withLayout: true },
   { path: "/documentation", element: <Documentation />, withLayout: true },
@@ -97,11 +143,13 @@ export const protectedRoutes = [
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
+
+  // Messages
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
-  
-  // صفحات بدون Layout
+
+  // No layout
   { path: "/service-map", element: <ServiceMap />, withLayout: false },
   { path: "/emergency-service/:technicianId", element: <EmergencyService />, withLayout: false },
-  { path: "/inbox", element: <Inbox />, withLayout: false },
+  { path: "/inbox", element: <Inbox />, withLayout: false }
 ];
