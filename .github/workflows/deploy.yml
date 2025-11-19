@@ -25,20 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build app
-        run: pnpm run build
+      # لو تحتاج بناء محتوى docs أضف الخطوات هنا
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -46,7 +33,8 @@ jobs:
       - name: Upload static files
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          # فقط docs سيتم رفعه للـ pages
+          path: docs
           name: uberfix-pages
 
       - name: Deploy to GitHub Pages
