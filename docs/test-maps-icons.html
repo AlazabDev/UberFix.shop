@@ -123,6 +123,42 @@
             opacity: 0.9;
         }
 
+        /* شاشة التحميل */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
         /* المحتوى الرئيسي */
         .main-container {
             flex: 1;
@@ -319,6 +355,22 @@
         #map {
             height: 100%;
             width: 100%;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .map-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .map-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
         }
 
         .branch-info {
@@ -589,6 +641,12 @@
     </style>
 </head>
 <body>
+    <!-- شاشة التحميل -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">جاري تحميل الخريطة...</div>
+    </div>
+
     <!-- الهيدر -->
     <header class="header">
         <div class="header-content">
@@ -660,7 +718,12 @@
 
             <!-- منطقة الخريطة -->
             <div class="map-container">
-                <div id="map"></div>
+                <div id="map">
+                    <div class="map-placeholder">
+                        <i class="fas fa-map"></i>
+                        <p>جاري تحميل الخريطة...</p>
+                    </div>
+                </div>
                 <div class="branch-info" id="branchInfo">
                     <button class="close-btn" onclick="closeBranchInfo()">
                         <i class="fas fa-times"></i>
@@ -723,7 +786,38 @@
         </div>
     </footer>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap" async defer></script>
+    <!-- تحميل Google Maps API بشكل صحيح -->
+    <script>
+        // تعريف الدالة بشكل عام قبل تحميل API
+        window.initMap = function() {
+            // إخفاء شاشة التحميل
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+            
+            // تهيئة الخريطة
+            if (typeof initializeMap === 'function') {
+                initializeMap();
+            }
+        };
+
+        // تحميل API بشكل غير متزامن
+        function loadGoogleMapsAPI() {
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap';
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+
+        // بدء تحميل API عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', loadGoogleMapsAPI);
+    </script>
+
     <script src="map.js"></script>
 </body>
 </html>
