@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Azab - فروعنا | اكتشف أقرب فرع إليك</title>
+    <meta name="description" content="خريطة تفاعلية لجميع فروع Al-Azab في مصر. ابحث عن أقرب فرع أو كشك واستمتع بخدماتنا المتميزة">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --text-color: #333;
+            --text-light: #666;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* الهيدر */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: var(--secondary-color);
+        }
+
+        .brand-text h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .brand-text p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 25px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* المحتوى الرئيسي */
+        .main-container {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            height: calc(100vh - 200px);
+        }
+
+        /* الشريط الجانبي */
+        .sidebar {
+            width: 380px;
+            background: white;
+            padding: 25px;
+            overflow-y: auto;
+            border-left: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--secondary-color);
+        }
+
+        .search-box {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 45px 14px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 15px;
+            transition: var(--transition);
+            background: #f9f9f9;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .filters {
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: var(--border-radius);
+        }
+
+        .filter-group {
+            margin-bottom: 18px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label i {
+            color: var(--secondary-color);
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            background: white;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .results-count {
+            background: var(--light-color);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .branches-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .branch-item {
+            background: #f8f9fa;
+            margin-bottom: 12px;
+            padding: 18px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary-color);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid #e9ecef;
+        }
+
+        .branch-item:hover {
+            background: #e3f2fd;
+            transform: translateX(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .branch-item.active {
+            background: #e3f2fd;
+            border-left-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .branch-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .branch-address {
+            color: var(--text-light);
+            font-size: 13px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .branch-type {
+            display: inline-block;
+            padding: 5px 12px;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .branch-type.Branch {
+            background: var(--success-color);
+        }
+
+        .branch-type.Booth {
+            background: var(--warning-color);
+        }
+
+        /* منطقة الخريطة */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .branch-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            max-width: 320px;
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .branch-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 18px;
+            padding-right: 25px;
+        }
+
+        .branch-info p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .branch-info strong {
+            color: var(--primary-color);
+        }
+
+        .branch-info a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--success-color);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .branch-info a:hover {
+            background: #219653;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        /* الفوتر */
+        .footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 30px 0 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--secondary-color);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary-color);
+            transform: translateX(-5px);
+        }
+
+        .contact-info {
+            list-style: none;
+        }
+
+        .contact-info li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-info i {
+            color: var(--secondary-color);
+            width: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 50vh;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .header-stats {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .brand-text h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .main-container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-stats {
+                flex-wrap: wrap;
+            }
+            
+            .sidebar {
+                padding: 15px;
+            }
+            
+            .branch-info {
+                max-width: 280px;
+                left: 10px;
+                right: 10px;
+                margin: 0 auto;
+            }
+        }
+
+        /* شريط التمرير المخصص */
+        .branches-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .branches-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .branches-list::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 10px;
+        }
+
+        .branches-list::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <!-- الهيدر -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="logo">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Al-Azab - فروعنا</h1>
+                    <p>اكتشف أقرب فرع إليك في جميع أنحاء مصر</p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalBranches">131</div>
+                    <div class="stat-label">فرع وكشك</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">25</div>
+                    <div class="stat-label">منطقة خدمة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">مدينة</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-container">
+        <div class="container">
+            <!-- الشريط الجانبي -->
+            <div class="sidebar">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i>
+                    قائمة الفروع
+                </h2>
+                
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="ابحث باسم الفرع أو العنوان...">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="typeFilter">
+                            <i class="fas fa-filter"></i>
+                            نوع الفرع:
+                        </label>
+                        <select id="typeFilter">
+                            <option value="all">جميع الأنواع</option>
+                            <option value="Branch">فرع رئيسي</option>
+                            <option value="Booth">كشك</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="results-count">
+                    <span id="resultsCount">131</span> فرع معروض
+                </div>
+
+                <div class="branches-list" id="branchesList">
+                    <!-- سيتم ملء القائمة بالبيانات من JavaScript -->
+                </div>
+            </div>
+
+            <!-- منطقة الخريطة -->
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="branch-info" id="branchInfo">
+                    <button class="close-btn" onclick="closeBranchInfo()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div id="branchInfoContent"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Al-Azab</h3>
+                <p>نقدم لكم خدماتنا المتميزة من خلال شبكة فروعنا المنتشرة في جميع أنحاء مصر. نحن هنا لخدمتكم على مدار الساعة.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>روابط سريعة</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-chevron-left"></i> الصفحة الرئيسية</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-left"></i> عن الشركة</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-left"></i> خدماتنا</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-left"></i> اتصل بنا</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>معلومات الاتصال</h3>
+                <ul class="contact-info">
+                    <li>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>القاهرة، مصر</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-phone"></i>
+                        <span>+20 123 456 7890</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-envelope"></i>
+                        <span>info@al-azab.com</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-clock"></i>
+                        <span>أوقات العمل: 9 ص - 5 م</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>جميع الحقوق محفوظة &copy; 2023 Al-Azab. تم التطوير بواسطة فريق Al-Azab</p>
+        </div>
+    </footer>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap" async defer></script>
+    <script src="map.js"></script>
+</body>
+</html>
