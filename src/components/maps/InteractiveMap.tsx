@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-interface InteractiveMapProps {
+interface InteractiveMap {
   latitude: number;
   longitude: number;
   onLocationChange?: (lat: number, lng: number, address?: string) => void;
