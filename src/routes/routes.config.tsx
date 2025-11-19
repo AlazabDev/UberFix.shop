@@ -57,6 +57,13 @@ const Invoices = lazy(() => import("@/pages/Invoices"));
  * تكوين المسارات المحمية (تتطلب تسجيل دخول)
  * withLayout: false للصفحات التي لا تحتاج Sidebar (مثل الخريطة)
  */
+// Maintenance - New Pages
+const MaintenanceRequestDetail = lazy(() => import("@/pages/maintenance/MaintenanceRequestDetail"));
+const MaintenanceReports = lazy(() => import("@/pages/maintenance/MaintenanceReports"));
+const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
+const MaintenanceList = lazy(() => import("@/pages/maintenance/MaintenanceList"));
+const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
+
 export const protectedRoutes = [
   { path: "/dashboard", element: <Dashboard />, withLayout: true },
   { path: "/sla-dashboard", element: <SLADashboard />, withLayout: true },
@@ -65,6 +72,10 @@ export const protectedRoutes = [
   { path: "/requests/:id", element: <RequestDetails />, withLayout: true },
   { path: "/request-lifecycle", element: <RequestLifecycleJourney />, withLayout: true },
   { path: "/service-request", element: <ServiceRequest />, withLayout: true },
+  { path: "/maintenance/overview", element: <MaintenanceOverview />, withLayout: true },
+  { path: "/maintenance/list", element: <MaintenanceList />, withLayout: true },
+  { path: "/maintenance/create", element: <CreateMaintenanceRequest />, withLayout: true },
+  { path: "/maintenance/:id", element: <MaintenanceRequestDetail />, withLayout: true },
   { path: "/vendors", element: <Vendors />, withLayout: true },
   { path: "/vendors/:id", element: <VendorDetails />, withLayout: true },
   { path: "/reports", element: <Reports />, withLayout: true },
