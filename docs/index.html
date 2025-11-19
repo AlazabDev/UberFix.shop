@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UberFix - Maintenance Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="parallax.css" rel="stylesheet">
+
+</head>
+<body>
+    <!-- Mouse Follower -->
+    <div class="mouse-follower" id="mouseFollower"></div>
+
+    <!-- Stars Background -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Hero Section with Parallax Layers -->
+    <div class="hero-container" id="hero">
+        <!-- Grid Overlay -->
+        <div class="grid-overlay">
+            <div class="grid-diagonal-1"></div>
+            <div class="grid-diagonal-2"></div>
+        </div>
+
+        <!-- Logo -->
+        <div class="logo-container">
+            <a href="#hero" class="logo">
+                <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Outer hexagon -->
+                    <polygon points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5" 
+                             fill="none" 
+                             stroke="url(#logo-gradient)" 
+                             stroke-width="2"/>
+                    <!-- Inner triangles creating depth -->
+                    <polygon points="50,20 70,35 50,50" 
+                             fill="url(#logo-gradient)" 
+                             opacity="0.8"/>
+                    <polygon points="50,50 70,35 70,65" 
+                             fill="url(#logo-gradient2)" 
+                             opacity="0.6"/>
+                    <polygon points="50,50 70,65 50,80" 
+                             fill="url(#logo-gradient)" 
+                             opacity="0.7"/>
+                    <polygon points="50,20 30,35 50,50" 
+                             fill="url(#logo-gradient2)" 
+                             opacity="0.7"/>
+                    <polygon points="50,50 30,35 30,65" 
+                             fill="url(#logo-gradient)" 
+                             opacity="0.5"/>
+                    <polygon points="50,50 30,65 50,80" 
+                             fill="url(#logo-gradient2)" 
+                             opacity="0.8"/>
+                    <!-- Center gem -->
+                    <polygon points="50,40 60,50 50,60 40,50" 
+                             fill="url(#logo-gradient3)" 
+                             stroke="#00ffcc" 
+                             stroke-width="1"/>
+                    <!-- Gradient definitions -->
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#ff00ea;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="logo-gradient2" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff00ea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#00ffcc;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="logo-gradient3" x1="50%" y1="0%" x2="50%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00ffcc;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#00d9ff;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="logo-text">UberFix</span>
+            </a>
+        </div>
+
+        <!-- Background Layer -->
+        <div class="parallax-layer layer-bg"></div>
+        
+        <!-- Floating Elements Layer -->
+        <div class="parallax-layer layer-float">
+            <!-- Bottom Left Rectangle Group -->
+            <div class="rectangles-bottom-left">
+                <div class="rect rect-bl-1"></div>
+                <div class="rect rect-bl-2"></div>
+                <div class="rect rect-bl-3"></div>
+                <div class="rect rect-bl-4"></div>
+                <div class="rect rect-bl-5"></div>
+                <div class="rect rect-bl-6"></div>
+            </div>
+            
+            <!-- Top Right Rectangle Group -->
+            <div class="rectangles-top-right">
+                <div class="rect rect-tr-1"></div>
+                <div class="rect rect-tr-2"></div>
+                <div class="rect rect-tr-3"></div>
+                <div class="rect rect-tr-4"></div>
+            </div>
+        </div>
+        
+        <!-- Foreground Layer -->
+        <div class="parallax-layer layer-fg">
+            <div class="glowing-orb orb-1"></div>
+            <div class="glowing-orb orb-2"></div>
+        </div>
+        
+        <!-- Hero Content -->
+        <div class="hero-content">
+            <h1 class="hero-title">UberFix</h1>
+            <p class="hero-subtitle">Maintenance & Operations Platform for Multi-Branch Businesses</p>
+            <a href="#about" class="cta-button">Explore Solutions</a>
+        </div>
+
+        <!-- Navigation -->
+        <a href="#about" class="nav-btn-next" title="Next Section">
+            <div class="pyramid">
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-base"></div>
+                <span class="pyramid-inner">▼</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- About Section -->
+    <section class="content-section section-gradient" id="about">
+        <div class="container">
+            <h2 class="section-title">About UberFix</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Built for Maintenance & Operations</h3>
+                    <p>UberFix is a B2B maintenance platform built for retail chains, F&amp;B brands, and multi-branch businesses. It centralizes all maintenance requests, branch data, and technician workflows in one place, so every issue is tracked from the first report to final resolution.</p>
+                    <p>From incident reporting and technician dispatching to approvals, visits, and maintenance history, UberFix gives operations teams full visibility on what is happening in every location, every day.</p>
+                    
+                    <div class="about-boxes">
+                        <div class="info-box">
+                            <div class="box-icon">
+                                ⚡
+                                <span class="box-number">1</span>
+                            </div>
+                            <h4 class="box-title">Centralized Requests</h4>
+                            <p class="box-description">Receive and track all maintenance tickets from branches, tenants, and managers in a single unified hub.</p>
+                        </div>
+                        <div class="info-box">
+                            <div class="box-icon">
+                                🎯
+                                <span class="box-number">2</span>
+                            </div>
+                            <h4 class="box-title">Branch Visibility</h4>
+                            <p class="box-description">See live status, open issues, and historical maintenance records for each store, warehouse, or facility.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-visual">
+                    <div class="orbit-container">
+                        <div class="orbit orbit-1">
+                            <div class="orbit-dot dot-1"></div>
+                        </div>
+                        <div class="orbit orbit-2">
+                            <div class="orbit-dot dot-2"></div>
+                        </div>
+                        <div class="orbit orbit-3">
+                            <div class="orbit-dot dot-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <a href="#hero" class="nav-btn-prev" title="Previous Section">
+            <div class="hexagon">
+                <span class="hex-content">▲</span>
+            </div>
+        </a>
+        <a href="#features" class="nav-btn-next" title="Next Section">
+            <div class="pyramid">
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-base"></div>
+                <span class="pyramid-inner">▼</span>
+            </div>
+        </a>
+    </section>
+
+    <!-- Features Section with 3D Carousel -->
+    <section class="content-section features-section-bg" id="features">
+        <!-- Grid Overlay -->
+        <div class="features-grid-overlay">
+            <div class="features-grid"></div>
+            <div class="features-grid-large"></div>
+        </div>
+        
+        <div class="container">
+            <h2 class="section-title">Our Solutions</h2>
+            <div class="features-container">
+                <div class="carousel-3d" id="carousel">
+                    <div class="feature-card-3d" data-index="0">
+                        <span class="feature-number">01</span>
+                        <div class="feature-icon-3d">🛠️</div>
+                        <h3 class="feature-title-3d">Maintenance Requests Hub</h3>
+                        <p class="feature-description-3d">Omni-channel intake for issues from QR codes, web forms, WhatsApp, and call centers with clear SLAs.</p>
+                    </div>
+                    <div class="feature-card-3d" data-index="1">
+                        <span class="feature-number">02</span>
+                        <div class="feature-icon-3d">🏬</div>
+                        <h3 class="feature-title-3d">Branches &amp; Assets</h3>
+                        <p class="feature-description-3d">Structured records for branches, equipment, and spaces with photos, categories, and priority levels.</p>
+                    </div>
+                    <div class="feature-card-3d" data-index="2">
+                        <span class="feature-number">03</span>
+                        <div class="feature-icon-3d">👷</div>
+                        <h3 class="feature-title-3d">Technicians &amp; Vendors</h3>
+                        <p class="feature-description-3d">Assign the right technician or supplier, manage schedules, and monitor job completion quality.</p>
+                    </div>
+                    <div class="feature-card-3d" data-index="3">
+                        <span class="feature-number">04</span>
+                        <div class="feature-icon-3d">📅</div>
+                        <h3 class="feature-title-3d">Preventive Maintenance</h3>
+                        <p class="feature-description-3d">Plan recurring tasks, inspections, and checklists to prevent breakdowns before they happen.</p>
+                    </div>
+                    <div class="feature-card-3d" data-index="4">
+                        <span class="feature-number">05</span>
+                        <div class="feature-icon-3d">💰</div>
+                        <h3 class="feature-title-3d">Costs &amp; Invoicing</h3>
+                        <p class="feature-description-3d">Track parts, labour, and vendor invoices and connect with your financial or ERP systems.</p>
+                    </div>
+                    <div class="feature-card-3d" data-index="5">
+                        <span class="feature-number">06</span>
+                        <div class="feature-icon-3d">📊</div>
+                        <h3 class="feature-title-3d">Dashboards &amp; KPIs</h3>
+                        <p class="feature-description-3d">Monitor SLA compliance, response times, and branch performance with executive-ready dashboards.</p>
+                    </div>
+                </div>
+                <div class="carousel-controls">
+                    <div class="carousel-btn" id="prevBtn">◀</div>
+                    <div class="carousel-btn" id="nextBtn">▶</div>
+                </div>
+                <div class="carousel-indicators" id="indicators"></div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <a href="#about" class="nav-btn-prev" title="Previous Section">
+            <div class="hexagon">
+                <span class="hex-content">▲</span>
+            </div>
+        </a>
+        <a href="#gallery" class="nav-btn-next" title="Next Section">
+            <div class="pyramid">
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-base"></div>
+                <span class="pyramid-inner">▼</span>
+            </div>
+        </a>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section section-gradient" id="gallery">
+        <div class="container">
+            <h2 class="section-title">UberFix in Action</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/abuauf_10.jpg" alt="Abu Auf Branch Network" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Abu Auf Network</h3>
+                        <p class="gallery-subtitle">Multi-branch maintenance operations</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/uberfix/contenar-store.jpg" alt="Container Store" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Container Store</h3>
+                        <p class="gallery-subtitle">Retail fit-out and reactive repairs</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/uberfix/acampamento.jpg" alt="Outdoor Maintenance" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Outdoor Sites</h3>
+                        <p class="gallery-subtitle">External areas and site upgrades</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/uberfix/wood-store.jpg" alt="Wood Store and Carpentry" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Wood &amp; Joinery</h3>
+                        <p class="gallery-subtitle">Architectural finishes and carpentry</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/uberfix/projects13.jpg" alt="Technical Rooms" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Technical Rooms</h3>
+                        <p class="gallery-subtitle">MEP systems and critical assets</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/uberfix/projects11.jpg" alt="Commercial Interiors" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Commercial Interiors</h3>
+                        <p class="gallery-subtitle">Ongoing maintenance for active branches</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/uberfix/projects08.jpg" alt="Renovation Before & After" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Before &amp; After</h3>
+                        <p class="gallery-subtitle">Renovation and upgrade projects</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://al-azab.co/img/uberfix/projects13.jpg" alt="Command Center" class="gallery-image">
+                    <div class="gallery-overlay">
+                        <h3 class="gallery-title">Command Center</h3>
+                        <p class="gallery-subtitle">Centralized control for all branches</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <a href="#features" class="nav-btn-prev" title="Previous Section">
+            <div class="hexagon">
+                <span class="hex-content">▲</span>
+            </div>
+        </a>
+        <a href="#contact" class="nav-btn-next" title="Next Section">
+            <div class="pyramid">
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-face"></div>
+                <div class="pyramid-base"></div>
+                <span class="pyramid-inner">▼</span>
+            </div>
+        </a>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="content-section contact-section-bg" id="contact">
+        <div class="container">
+            <h2 class="section-title">Partner With Us</h2>
+            <div class="contact-content">
+                <div class="contact-form">
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-input" placeholder="Work Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="Company / Brand" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-input form-textarea" placeholder="Describe your maintenance needs" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </div>
+                <div class="contact-info">
+                    <h3>Connect With UberFix</h3>
+                    <div class="info-item">
+                        <div class="info-icon">📧</div>
+                        <span class="info-text">support@uberfix.shop</span>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">📱</div>
+                        <span class="info-text">+20 100 000 0000</span>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">📍</div>
+                        <span class="info-text">Cairo, Egypt — Al-Azab Construction Company</span>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">🌐</div>
+                        <span class="info-text">www.uberfix.shop</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <a href="#gallery" class="nav-btn-prev" title="Previous Section">
+            <div class="hexagon">
+                <span class="hex-content">▲</span>
+            </div>
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#hero" class="footer-link">Home</a>
+                <a href="#about" class="footer-link">About</a>
+                <a href="#features" class="footer-link">Solutions</a>
+                <a href="#gallery" class="footer-link">Gallery</a>
+                <a href="#contact" class="footer-link">Contact</a>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-copyright">
+                <p>© 2025 UberFix Maintenance Solutions. All rights reserved.</p>
+                <p>Design: <a href="https://www.tooplate.com" target="_blank" rel="nofollow noopener">Tooplate</a></p>
+            </div>
+        </div>
+    </footer>
+
+<script src="parallax.js"></script>
+</body>
+</html>
