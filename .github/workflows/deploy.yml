@@ -3,7 +3,7 @@ name: Deploy UberFix Landing Page
 on:
   push:
     branches:
-      - main  # عدّلها لو عندك فرع نشر مختلف
+      - main
 
 permissions:
   contents: read
@@ -25,16 +25,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: latest
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -48,7 +46,6 @@ jobs:
       - name: Upload static files
         uses: actions/upload-pages-artifact@v3
         with:
-          # الناتج من Vite/React بيكون في dist
           path: ./dist
           name: uberfix-pages
 
@@ -57,4 +54,3 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: uberfix-pages
-
