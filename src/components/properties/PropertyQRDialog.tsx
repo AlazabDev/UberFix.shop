@@ -40,10 +40,9 @@ export function PropertyQRDialog({
   };
 
   const downloadQR = () => {
-    const svg = document.getElementById(
-      `qr-${propertyId}`
-    ) as SVGSVGElement | null;
-    if (!svg) return;
+    const element = document.getElementById(`qr-${propertyId}`);
+    if (!element) return;
+    const svg = element as unknown as SVGSVGElement;
 
     const serializer = new XMLSerializer();
     const svgData = serializer.serializeToString(svg);
@@ -84,10 +83,9 @@ export function PropertyQRDialog({
   };
 
   const downloadQRPoster = () => {
-    const svg = document.getElementById(
-      `qr-${propertyId}`
-    ) as SVGSVGElement | null;
-    if (!svg) return;
+    const element = document.getElementById(`qr-${propertyId}`);
+    if (!element) return;
+    const svg = element as unknown as SVGSVGElement;
 
     const serializer = new XMLSerializer();
     const svgData = serializer.serializeToString(svg);
