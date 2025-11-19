@@ -1,4 +1,15 @@
-// بيانات الفروع الكاملة من CSV
+// دالة تهيئة الخريطة الرئيسية
+function initializeMap() {
+    // مركز الخريطة الأولي (القاهرة)
+    map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 10,
+        center: { lat: 30.0444, lng: 31.2357 },
+        mapTypeId: 'roadmap',
+        styles: [
+            // الأنماط تبقى كما هي...
+        ]
+    });
+
 const branches = [
     {
         "id": "Az-Branch-0001",
