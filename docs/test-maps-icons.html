@@ -787,35 +787,37 @@
     </footer>
 
     <!-- تحميل Google Maps API بشكل صحيح -->
-<script>
-    window.initMap = function () {
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 500);
+    <script>
+        // تعريف الدالة بشكل عام قبل تحميل API
+        window.initMap = function() {
+            // إخفاء شاشة التحميل
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+            
+            // تهيئة الخريطة
+            if (typeof initializeMap === 'function') {
+                initializeMap();
+            }
+        };
+
+        // تحميل API بشكل غير متزامن
+        function loadGoogleMapsAPI() {
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap';
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
         }
 
-        if (typeof initializeMap === "function") {
-            initializeMap();
-        }
-    };
+        // بدء تحميل API عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', loadGoogleMapsAPI);
+    </script>
 
-    function loadGoogleMapsAPI() {
-        if (window.google) return; // منع التحميل المزدوج
-
-        const script = document.createElement("script");
-        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap&loading=async";
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-    }
-
-    document.addEventListener("DOMContentLoaded", loadGoogleMapsAPI);
-</script>
-
-<script src="map.js"></script>
-
+    <script src="map.js"></script>
 </body>
 </html>
