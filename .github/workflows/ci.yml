@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -19,19 +18,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          # IMPORTANT: remove cache: pnpm (it breaks the job)
 
-      # أهم خطوة — تثبيت pnpm فعليًا
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
-          run_install: true   # <-- دي اللي بتعمل pnpm install تلقائيًا
-
-      # لو محتاج install يدوي
-      # (مش لازم لو run_install: true موجود)
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          run_install: true
 
       - name: Lint
         run: pnpm run lint
@@ -49,4 +42,3 @@ jobs:
           name: unit-test-coverage
           path: coverage/
           retention-days: 30
-
