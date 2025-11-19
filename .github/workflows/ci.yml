@@ -15,29 +15,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
+      # أهم خطوة — تثبيت pnpm فعليًا
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: latest
-          run_install: false
+          version: 9
+          run_install: true   # <-- دي اللي بتعمل pnpm install تلقائيًا
 
+      # لو محتاج install يدوي
+      # (مش لازم لو run_install: true موجود)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm run lint
 
-      # تأكد إن عندك سكربت typecheck في package.json
       - name: Type check
         run: pnpm run typecheck
 
-      # تأكد إن عندك test:unit + vitest في المشروع
       - name: Run Unit Tests
         run: pnpm run test:unit
 
@@ -48,3 +49,4 @@ jobs:
           name: unit-test-coverage
           path: coverage/
           retention-days: 30
+
