@@ -33,7 +33,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   longitude = 31.2357,
   onLocationSelect,
   markers = [],
-  height = '400px',
+  height: _height = '400px',
   interactive = true,
 }) => {
   const [lat, setLat] = useState(latitude.toString());

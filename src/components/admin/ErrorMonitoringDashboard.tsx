@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,18 +32,14 @@ export function ErrorMonitoringDashboard() {
   const [filter, setFilter] = useState<'all' | 'unresolved'>('unresolved');
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchErrors();
-  }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchErrors = async () => {
+  const fetchErrors = useCallback(async () => {
     try {
       setLoading(true);
       
       let query = supabase
         .from('error_logs')
         .select('*')
-        .order('last_seen_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(100);
 
       if (filter === 'unresolved') {
@@ -52,19 +48,26 @@ export function ErrorMonitoringDashboard() {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+
       setErrors((data || []) as ErrorLog[]);
     } catch (error) {
-      console.error('Error fetching logs:', error);
       toast({
-        title: "خطأ",
-        description: "فشل في تحميل سجل الأخطاء",
-        variant: "destructive",
+        title: 'خطأ',
+        description: 'فشل في تحميل السجلات',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, toast]);
+
+  useEffect(() => {
+    fetchErrors();
+  }, [fetchErrors]);
+
 
   const markAsResolved = async (errorId: string) => {
     try {
@@ -167,7 +170,7 @@ export function ErrorMonitoringDashboard() {
                   <div className="flex items-center gap-2 flex-wrap">
                     {getLevelIcon(error.level)}
                     <CardTitle className="text-lg">{error.message}</CardTitle>
-                    <Badge variant={getLevelColor(error.level) as any}>
+                    <Badge variant={getLevelColor(error.level) as "default" | "destructive" | "outline" | "secondary"}>
                       {error.level}
                     </Badge>
                     {error.count > 1 && (
