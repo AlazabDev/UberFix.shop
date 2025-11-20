@@ -54,7 +54,7 @@ export function PermissionsManagement() {
         .order('role');
 
       if (error) throw error;
-      return (data || []) as unknown as RolePermission[];
+      return (data || []) as RolePermission[];
     },
   });
 

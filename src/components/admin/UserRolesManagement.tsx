@@ -49,10 +49,11 @@ const ROLE_LABELS: Record<AppRole, string> = {
 };
 
 interface UserRoleWithProfile {
+  id: string;
   user_id: string;
   role: string;
-  created_at: string;
-  assigned_at?: string;
+  assigned_at: string;
+  assigned_by: string | null;
   profiles?: {
     id: string;
     email: string;
@@ -142,7 +143,7 @@ export function UserRolesManagement() {
         .from('user_roles')
         .delete()
         .eq('user_id', userId)
-        .eq('role', role as any);
+        .eq('role', role as Database['public']['Enums']['app_role']);
 
       if (error) throw error;
     },
@@ -279,7 +280,7 @@ export function UserRolesManagement() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {new Date(userRole.assigned_at || userRole.created_at).toLocaleDateString('ar-EG')}
+                      {new Date(userRole.assigned_at).toLocaleDateString('ar-EG')}
                     </TableCell>
                     <TableCell>
                       <Button

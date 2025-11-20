@@ -46,7 +46,7 @@ export function RequestStatusTimeline({
             {stages.map((stage, index) => {
               const isCompleted = index < currentIndex;
               const isCurrent = index === currentIndex;
-              const isPending = index > currentIndex;
+              const _isPending = index > currentIndex;
 
               return (
                 <div key={stage.key} className="relative flex items-start gap-4">
