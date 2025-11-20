@@ -10,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Upload, AlertCircle } from "lucide-react";
 import { InteractiveMap } from "@/components/maps/InteractiveMap";
 import type { Property } from "@/hooks/useProperties";
 import { PropertyFormTabs } from "./PropertyFormTabs";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const propertyFormSchema = z.object({
   code: z.string().optional(),
@@ -50,6 +51,8 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
   const [contactPhone, setContactPhone] = useState("");
   const [contactName, setContactName] = useState("");
   const [selectedType, setSelectedType] = useState(initialData?.type || "residential");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [storageError, setStorageError] = useState<string | null>(null);
 
   const {
     register,
@@ -103,7 +106,22 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast.error("نوع الملف غير مدعوم. يرجى استخدام JPG, PNG أو WebP");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error("حجم الصورة كبير جداً. الحد الأقصى 5 ميجابايت");
+        return;
+      }
+
       setImage(file);
+      setStorageError(null);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -115,49 +133,100 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
   const removeImage = () => {
     setImage(null);
     setImagePreview(null);
+    setStorageError(null);
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      setUploadProgress(0);
+      
+      // Check if bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(b => b.name === 'property-images');
+      
+      if (!bucketExists) {
+        const { error: bucketError } = await supabase.storage.createBucket('property-images', {
+          public: true,
+          fileSizeLimit: 5242880,
+          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp']
+        });
+        
+        if (bucketError && !bucketError.message.includes('already exists')) {
+          console.error("Bucket creation error:", bucketError);
+          throw new Error("فشل إنشاء مساحة التخزين");
+        }
+      }
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `properties/${fileName}`;
+
+      setUploadProgress(30);
+
+      const { error: uploadError } = await supabase.storage
+        .from("property-images")
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        if (uploadError.message.includes('row-level security')) {
+          throw new Error("ليس لديك صلاحية رفع الصور");
+        }
+        throw new Error(`فشل رفع الصورة: ${uploadError.message}`);
+      }
+
+      setUploadProgress(70);
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("property-images")
+        .getPublicUrl(filePath);
+
+      setUploadProgress(100);
+      return publicUrl;
+
+    } catch (error: any) {
+      console.error("Image upload error:", error);
+      setStorageError(error.message);
+      throw error;
+    }
   };
 
   const onSubmit = async (data: PropertyFormData) => {
     try {
       setLoading(true);
+      setStorageError(null);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
         toast.error("يجب تسجيل الدخول أولاً");
+        navigate("/login");
         return;
       }
 
       let uploadedImages: string[] = initialData?.images || [];
 
+      // Upload image if provided
       if (image) {
-        const fileExt = image.name.split(".").pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = fileName;
-
-        const { error: uploadError, data: uploadData } = await supabase.storage
-          .from("property-images")
-          .upload(filePath, image, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (uploadError) {
-          console.error("Upload error:", uploadError);
-          throw new Error(`فشل تحميل الصورة: ${uploadError.message}`);
+        try {
+          const imageUrl = await uploadImage(image);
+          if (imageUrl) {
+            uploadedImages = [imageUrl];
+          }
+        } catch (uploadError: any) {
+          console.error("Image upload failed:", uploadError);
+          toast.error(`تحذير: ${uploadError.message}. سيتم حفظ العقار بدون صورة.`);
+          uploadedImages = [];
         }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("property-images")
-          .getPublicUrl(filePath);
-
-        uploadedImages = [publicUrl];
       }
 
       const qrCodeData = `${window.location.origin}/quick-request/${propertyId || "new"}`;
 
       const propertyData = {
         ...data,
-        images: uploadedImages,
+        images: uploadedImages.length > 0 ? uploadedImages : null,
         qr_code_data: qrCodeData,
         qr_code_generated_at: new Date().toISOString(),
         created_by: user.id,
@@ -169,7 +238,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
           .update(propertyData)
           .eq("id", propertyId);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Update error:", error);
+          throw new Error(`فشل تحديث العقار: ${error.message}`);
+        }
         
         toast.success("تم تحديث العقار بنجاح");
       } else {
@@ -177,7 +249,13 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
           .from("properties")
           .insert([propertyData]);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Insert error:", error);
+          if (error.message.includes('row-level security')) {
+            throw new Error("ليس لديك صلاحية إضافة عقارات");
+          }
+          throw new Error(`فشل إنشاء العقار: ${error.message}`);
+        }
         
         toast.success("تم إنشاء العقار بنجاح");
       }
@@ -185,18 +263,32 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       if (onSuccess) {
         onSuccess();
       } else if (!skipNavigation) {
-        navigate("/properties");
+        setTimeout(() => {
+          navigate("/properties");
+        }, 1500);
       }
+
     } catch (error: any) {
       console.error("Error saving property:", error);
       toast.error(error?.message || "حدث خطأ أثناء حفظ العقار");
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Storage Error Alert */}
+      {storageError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {storageError}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Property Type Tabs */}
       <div>
         <Label className="mb-2 block">تصنيف العقار *</Label>
@@ -420,18 +512,25 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       </div>
 
       {/* Form Actions */}
-      <div className="flex gap-4 pt-6">
-        <Button type="submit" disabled={loading} className="flex-1">
+      <div className="flex gap-4 pt-6 border-t border-border">
+        <Button 
+          type="submit" 
+          disabled={loading} 
+          className="flex-1"
+          size="lg"
+        >
           {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-          حفظ البيانات
+          {propertyId ? "تحديث العقار" : "حفظ العقار"}
         </Button>
         <Button 
           type="button" 
           variant="outline"
           onClick={() => navigate("/properties")}
+          disabled={loading}
           className="flex-1"
+          size="lg"
         >
-          حفظ وإنشاء جديد
+          إلغاء
         </Button>
       </div>
     </form>
