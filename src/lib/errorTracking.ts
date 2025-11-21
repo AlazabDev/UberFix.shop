@@ -85,7 +85,7 @@ class ErrorTracker {
         // Re-queue on failure (up to max size)
         this.queue.unshift(...errorsToSend.slice(0, this.maxQueueSize - this.queue.length));
       } else {
-        console.log(`Successfully sent ${errorsToSend.length} errors to server`, data);
+        console.warn(`Successfully sent ${errorsToSend.length} errors to server`, data);
       }
     } catch (err) {
       console.error('Error flushing queue:', err);

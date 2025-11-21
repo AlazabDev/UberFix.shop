@@ -29,7 +29,7 @@ class TestLogger {
     
     // تسجيل في console للمراجعة الفورية
     const color = log.status === 'success' ? 'green' : log.status === 'error' ? 'red' : 'orange';
-    console.log(
+    console.warn(
       `%c[TEST ${log.status.toUpperCase()}] ${log.test_name}`,
       `color: ${color}; font-weight: bold`,
       log.message,
@@ -84,7 +84,7 @@ class TestLogger {
       // حفظ في localStorage كنسخة احتياطية
       localStorage.setItem(`test_session_${this.sessionId}`, JSON.stringify(testResults));
 
-      console.log('Test results saved:', testResults);
+      console.warn('Test results saved:', testResults);
     } catch (error) {
       console.error('Failed to save test results to database:', error);
     }

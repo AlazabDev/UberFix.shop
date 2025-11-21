@@ -161,16 +161,16 @@ export default function Invoices() {
             <InvoiceCard
               key={invoice.id}
               invoice={invoice}
-              onView={(id) => console.log('View invoice', id)}
-              onDownload={(id) => console.log('Download invoice', id)}
+              onView={(id) => console.warn('View invoice', id)}
+              onDownload={(id) => console.warn('Download invoice', id)}
             />
           ))}
         </div>
       ) : (
         <InvoiceTable
           invoices={invoices}
-          onView={(id) => console.log('View invoice', id)}
-          onDownload={(id) => console.log('Download invoice', id)}
+          onView={(id) => console.warn('View invoice', id)}
+          onDownload={(id) => console.warn('Download invoice', id)}
         />
       )}
     </div>

@@ -42,7 +42,7 @@ export class PushNotificationManager {
     const permission = await Notification.requestPermission();
     
     if (permission === 'granted') {
-      console.log('Notification permission granted');
+      console.warn('Notification permission granted');
       await this.subscribeToPush();
     }
     
@@ -69,7 +69,7 @@ export class PushNotificationManager {
         applicationServerKey: this.urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource
       });
 
-      console.log('Push subscription successful:', subscription);
+      console.warn('Push subscription successful:', subscription);
       
       // Send subscription to server
       await this.sendSubscriptionToServer(subscription);
@@ -94,7 +94,7 @@ export class PushNotificationManager {
       
       if (subscription) {
         await subscription.unsubscribe();
-        console.log('Unsubscribed from push notifications');
+        console.warn('Unsubscribed from push notifications');
         return true;
       }
       
@@ -160,7 +160,7 @@ export class PushNotificationManager {
 
       if (error) throw error;
       
-      console.log('✅ Push subscription stored successfully');
+      console.warn('✅ Push subscription stored successfully');
     } catch (error) {
       console.error('❌ Failed to store push subscription:', error);
       throw error;
@@ -173,7 +173,7 @@ export class PushNotificationManager {
   private urlBase64ToUint8Array(base64String: string): Uint8Array {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
-      .replace(/\-/g, '+')
+      .replace(/-/g, '+')
       .replace(/_/g, '/');
 
     const rawData = window.atob(base64);

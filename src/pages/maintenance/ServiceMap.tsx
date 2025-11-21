@@ -33,7 +33,7 @@ export default function ServiceMap() {
     
     const initMap = async () => {
       try {
-        console.log("🗺️ Starting map initialization...");
+        console.warn("🗺️ Starting map initialization...");
         
         const { data, error } = await supabase.functions.invoke("get-maps-key");
         
@@ -41,7 +41,7 @@ export default function ServiceMap() {
           console.error("❌ Failed to get API key:", error);
           if (mounted && retryCount < maxRetries) {
             retryCount++;
-            console.log(`🔄 Retrying... (${retryCount}/${maxRetries})`);
+            console.warn(`🔄 Retrying... (${retryCount}/${maxRetries})`);
             setTimeout(() => initMap(), 2000);
             return;
           }
@@ -58,17 +58,17 @@ export default function ServiceMap() {
           return;
         }
         
-        console.log("✅ API key received successfully:", data.apiKey.substring(0, 15) + "...");
+        console.warn("✅ API key received successfully:", data.apiKey.substring(0, 15) + "...");
 
         
         // تحقق من وجود Google Maps
         if (typeof window.google !== 'undefined' && window.google.maps) {
-          console.log("✅ Google Maps already loaded, reusing instance");
+          console.warn("✅ Google Maps already loaded, reusing instance");
         } else {
-          console.log("📦 Loading Google Maps script with key...");
+          console.warn("📦 Loading Google Maps script with key...");
           try {
             await loadGoogleMaps(data.apiKey);
-            console.log("✅ Google Maps script loaded successfully");
+            console.warn("✅ Google Maps script loaded successfully");
           } catch (loadError) {
             console.error("❌ Error loading Google Maps script:", loadError);
             if (mounted) setMapError(true);
@@ -84,7 +84,7 @@ export default function ServiceMap() {
         }
 
         if (mapRef.current && !mapInstanceRef.current && mounted) {
-          console.log("🗺️ Creating map instance...");
+          console.warn("🗺️ Creating map instance...");
           mapInstanceRef.current = new google.maps.Map(mapRef.current, {
             center: { lat: 30.0444, lng: 31.2357 },
             zoom: 13,
@@ -100,18 +100,18 @@ export default function ServiceMap() {
             ],
           });
           
-          console.log("✅ Map instance created successfully");
+          console.warn("✅ Map instance created successfully");
           
           // أضف حدث للتأكد من تحميل الخريطة
           google.maps.event.addListenerOnce(mapInstanceRef.current, 'idle', () => {
-            console.log("✅ Map is fully loaded and idle");
+            console.warn("✅ Map is fully loaded and idle");
           });
         }
       } catch (error) {
         console.error("❌ Map loading error:", error);
         if (mounted && retryCount < maxRetries) {
           retryCount++;
-          console.log(`🔄 Retrying after error... (${retryCount}/${maxRetries})`);
+          console.warn(`🔄 Retrying after error... (${retryCount}/${maxRetries})`);
           setTimeout(() => initMap(), 2000);
           return;
         }
@@ -298,7 +298,7 @@ export default function ServiceMap() {
                               e.preventDefault();
                               e.stopPropagation();
                               if (tech.phone) {
-                                console.log("📞 Calling technician:", tech.name, tech.phone);
+                                console.warn("📞 Calling technician:", tech.name, tech.phone);
                                 window.open(`tel:${tech.phone}`, '_self');
                               } else {
                                 console.warn("⚠️ No phone number for technician:", tech.name);

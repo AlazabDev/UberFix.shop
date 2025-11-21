@@ -39,7 +39,7 @@ export const useVendorRouting = ({
       setError(null);
 
       try {
-        console.log('🚗 Calculating route via edge function...');
+        console.warn('🚗 Calculating route via edge function...');
         
         const { data, error: functionError } = await supabase.functions.invoke('calculate-route', {
           body: {
@@ -56,7 +56,7 @@ export const useVendorRouting = ({
           throw new Error(data.message || 'فشل حساب المسار');
         }
 
-        console.log('✅ Route calculated:', data);
+        console.warn('✅ Route calculated:', data);
         setRouteInfo(data);
       } catch (err) {
         console.error('Error calculating route:', err);

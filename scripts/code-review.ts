@@ -49,7 +49,7 @@ class ProjectCodeReview {
   }
 
   async performComprehensiveReview(): Promise<CodeReviewResult> {
-    console.log('🚀 بدء المراجعة الشاملة للمشروع...\n');
+    console.warn('🚀 بدء المراجعة الشاملة للمشروع...\n');
 
     // مسح المشروع
     const scanResult = await this.scanProject();
