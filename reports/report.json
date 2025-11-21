@@ -1,0 +1,13 @@
+{
+  "reportsDirectory": "reports",
+  "output": {
+    "path": "reports",
+    "logs": "reports/logs",
+    "tests": "reports/tests",
+    "coverage": "reports/coverage",
+    "analysis": "reports/analysis"
+  },
+  "enforceReportsDir": true,
+  "disallowRootReports": true,
+  "overrideDefaults": true
+}
