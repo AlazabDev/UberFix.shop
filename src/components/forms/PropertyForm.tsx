@@ -134,32 +134,16 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
     setImage(null);
     setImagePreview(null);
     setStorageError(null);
+    setUploadProgress(0);
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
     try {
-      setUploadProgress(0);
+      setUploadProgress(10);
       
-      // Check if bucket exists
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketExists = buckets?.some(b => b.name === 'property-images');
-      
-      if (!bucketExists) {
-        const { error: bucketError } = await supabase.storage.createBucket('property-images', {
-          public: true,
-          fileSizeLimit: 5242880,
-          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp']
-        });
-        
-        if (bucketError && !bucketError.message.includes('already exists')) {
-          console.error("Bucket creation error:", bucketError);
-          throw new Error("فشل إنشاء مساحة التخزين");
-        }
-      }
-
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `properties/${fileName}`;
+      const filePath = `${fileName}`;
 
       setUploadProgress(30);
 
@@ -190,7 +174,7 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
     } catch (error: any) {
       console.error("Image upload error:", error);
       setStorageError(error.message);
-      throw error;
+      return null;
     }
   };
 
@@ -210,15 +194,11 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
       // Upload image if provided
       if (image) {
-        try {
-          const imageUrl = await uploadImage(image);
-          if (imageUrl) {
-            uploadedImages = [imageUrl];
-          }
-        } catch (uploadError: any) {
-          console.error("Image upload failed:", uploadError);
-          toast.error(`تحذير: ${uploadError.message}. سيتم حفظ العقار بدون صورة.`);
-          uploadedImages = [];
+        const imageUrl = await uploadImage(image);
+        if (imageUrl) {
+          uploadedImages = [imageUrl];
+        } else {
+          toast.error("فشل رفع الصورة. سيتم حفظ العقار بدون صورة.");
         }
       }
 
@@ -230,6 +210,8 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         qr_code_data: qrCodeData,
         qr_code_generated_at: new Date().toISOString(),
         created_by: user.id,
+        manager_id: user.id,
+        status: data.status || "active"
       };
 
       if (propertyId) {
@@ -245,9 +227,11 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         
         toast.success("تم تحديث العقار بنجاح");
       } else {
-        const { error } = await supabase
+        const { data: newProperty, error } = await supabase
           .from("properties")
-          .insert([propertyData]);
+          .insert([propertyData])
+          .select()
+          .single();
 
         if (error) {
           console.error("Insert error:", error);
@@ -322,23 +306,35 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
                 size="icon"
                 className="absolute -top-2 -left-2 h-6 w-6 rounded-full"
                 onClick={removeImage}
+                disabled={loading}
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
           ) : (
             <div className="w-32 h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">لا توجد صورة</span>
+              <Upload className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
-          <div>
+          <div className="flex-1 space-y-2">
             <Input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
               onChange={handleImageChange}
               className="max-w-xs"
+              disabled={loading}
             />
-            <p className="text-xs text-muted-foreground mt-1">اختر صورة للعقار</p>
+            <p className="text-xs text-muted-foreground">
+              اختر صورة للعقار (JPG, PNG, WebP - حد أقصى 5MB)
+            </p>
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
