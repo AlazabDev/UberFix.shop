@@ -21,7 +21,7 @@ interface SpecializationIcon {
   sort_order: number;
 }
 
-export const IconSelector = ({ value, onChange, specialization }: IconSelectorProps) => {
+export const IconSelector = ({ value, onChange, specialization: _specialization }: IconSelectorProps) => {
   const [icons, setIcons] = useState<SpecializationIcon[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ export const IconSelector = ({ value, onChange, specialization }: IconSelectorPr
   const fetchIcons = async () => {
     setLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('specialization_icons')
         .select('*')
         .eq('is_active', true)

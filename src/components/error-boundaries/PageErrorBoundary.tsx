@@ -2,7 +2,6 @@ import { Component, ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Home, RefreshCw } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface Props {
   children: ReactNode;
@@ -24,7 +23,7 @@ class PageErrorBoundaryClass extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: unknown) {
     console.error(`Error in ${this.props.pageName || 'page'}:`, error, errorInfo);
   }
 

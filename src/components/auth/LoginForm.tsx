@@ -51,7 +51,7 @@ export function LoginForm() {
           variant: result.mode === 'error' ? "destructive" : "default",
         });
       }
-    } catch (_error) {
+    } catch {
       toast({
         title: "خطأ في تسجيل الدخول",
         description: "حدث خطأ غير متوقع",
@@ -99,7 +99,7 @@ export function LoginForm() {
           variant: result.mode === 'error' ? "destructive" : "default",
         });
       }
-    } catch (_error) {
+    } catch {
       toast({
         title: "خطأ في إنشاء الحساب",
         description: "حدث خطأ غير متوقع",
@@ -120,7 +120,7 @@ export function LoginForm() {
       });
       
       if (error) throw error;
-    } catch (_error) {
+    } catch {
       toast({
         title: "خطأ في تسجيل الدخول",
         description: "تعذر تسجيل الدخول بجوجل",
@@ -139,7 +139,7 @@ export function LoginForm() {
       });
       
       if (error) throw error;
-    } catch (_error) {
+    } catch {
       toast({
         title: "خطأ في تسجيل الدخول",
         description: "تعذر تسجيل الدخول بفيسبوك",

@@ -61,10 +61,11 @@ export function MaintenanceLockControl() {
       });
       setMessage('');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'فشل في تغيير حالة القفل';
       toast({
         title: 'خطأ',
-        description: error.message || 'فشل في تغيير حالة القفل',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
