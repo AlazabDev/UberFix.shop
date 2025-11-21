@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Phone, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MapHeader } from "@/components/service-map/MapHeader";
+import { FilterBar, SERVICE_FILTERS } from "@/components/service-map/FilterBar";
+import { ProvidersSidebar } from "@/components/service-map/ProvidersSidebar";
 import { InteractiveMap } from "@/components/maps/InteractiveMap";
+import { ProviderPopup } from "@/components/service-map/ProviderPopup";
+import { BottomNavigation } from "@/components/service-map/BottomNavigation";
+import { useNavigate } from "react-router-dom";
 
 interface ServiceProvider {
   id: string;
@@ -23,30 +24,45 @@ interface ServiceProvider {
 }
 
 export default function ServiceMap() {
+  const navigate = useNavigate();
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
-  const [filteredProviders, setFilteredProviders] = useState<ServiceProvider[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [centerLat, setCenterLat] = useState(30.0444);
   const [centerLng, setCenterLng] = useState(31.2357);
-
-  const specialties = [
-    { id: "plumbing", label: "سباكة", icon: "🔧" },
-    { id: "electrical", label: "كهرباء", icon: "⚡" },
-    { id: "carpentry", label: "نجارة", icon: "🪚" },
-    { id: "painting", label: "دهان", icon: "🎨" },
-    { id: "hvac", label: "تكييف", icon: "❄️" },
-    { id: "general", label: "عام", icon: "🛠️" },
-  ];
 
   useEffect(() => {
     fetchProviders();
   }, []);
 
-  useEffect(() => {
-    filterProviders();
-  }, [searchQuery, selectedSpecialty, providers]);
+  // تصفية المزودين بناءً على الفلاتر والبحث
+  const filteredProviders = providers.filter((provider) => {
+    // تصفية حسب التخصص
+    if (selectedFilters.length > 0) {
+      const hasMatchingSpecialty = provider.specialization?.some((spec) =>
+        selectedFilters.includes(spec)
+      );
+      if (!hasMatchingSpecialty) return false;
+    }
+
+    // تصفية حسب البحث
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesName = provider.name.toLowerCase().includes(query);
+      const matchesCompany = provider.company_name?.toLowerCase().includes(query);
+      const matchesSpecialty = provider.specialization?.some((s) =>
+        s.toLowerCase().includes(query)
+      );
+
+      if (!matchesName && !matchesCompany && !matchesSpecialty) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   const fetchProviders = async () => {
     try {
@@ -69,198 +85,70 @@ export default function ServiceMap() {
     }
   };
 
-  const filterProviders = () => {
-    let filtered = providers;
-
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.specialization?.some((s) =>
-            s.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-      );
-    }
-
-    if (selectedSpecialty) {
-      filtered = filtered.filter((p) =>
-        p.specialization?.includes(selectedSpecialty)
-      );
-    }
-
-    setFilteredProviders(filtered);
+  const toggleFilter = (filterId: string) => {
+    setSelectedFilters((prev) =>
+      prev.includes(filterId)
+        ? prev.filter((id) => id !== filterId)
+        : [...prev, filterId]
+    );
   };
 
   const handleProviderClick = (provider: ServiceProvider) => {
+    setSelectedProvider(provider);
     if (provider.current_latitude && provider.current_longitude) {
       setCenterLat(provider.current_latitude);
       setCenterLng(provider.current_longitude);
-      toast.success(`تم التركيز على ${provider.name}`);
     }
   };
 
+  const handleRequestService = (providerId: string) => {
+    // التوجيه إلى صفحة طلب الخدمة
+    navigate(`/request-service?vendor=${providerId}`);
+  };
+
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          خريطة مزودي الخدمة
-        </h1>
-        <p className="text-muted-foreground">
-          تتبع مواقع الفنيين ومزودي الخدمة في الوقت الفعلي
-        </p>
-      </div>
+    <div className="h-screen flex flex-col bg-background">
+      {/* الشريط العلوي */}
+      <MapHeader searchQuery={searchQuery} onSearch={setSearchQuery} />
 
-      {/* Search and Filters */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن فني أو خدمة..."
-                className="pr-10"
-              />
-            </div>
+      {/* شريط الفلاتر */}
+      <FilterBar
+        selectedFilters={selectedFilters}
+        onToggleFilter={toggleFilter}
+        providersCount={filteredProviders.length}
+      />
 
-            {/* Specialty Filters */}
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={selectedSpecialty === null ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedSpecialty(null)}
-              >
-                الكل ({providers.length})
-              </Button>
-              {specialties.map((specialty) => {
-                const count = providers.filter((p) =>
-                  p.specialization?.includes(specialty.id)
-                ).length;
-                return (
-                  <Button
-                    key={specialty.id}
-                    variant={selectedSpecialty === specialty.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedSpecialty(specialty.id)}
-                  >
-                    <span className="ml-1">{specialty.icon}</span>
-                    {specialty.label} ({count})
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* المحتوى الرئيسي */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* القائمة الجانبية */}
+        <ProvidersSidebar
+          providers={filteredProviders}
+          selectedId={selectedProvider?.id || null}
+          onSelectProvider={handleProviderClick}
+        />
 
-      {/* Map and List */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Provider List */}
-        <div className="lg:col-span-1 space-y-4 max-h-[600px] overflow-y-auto">
-          {loading ? (
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-muted-foreground">جاري التحميل...</p>
-              </CardContent>
-            </Card>
-          ) : filteredProviders.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-muted-foreground">لا توجد نتائج</p>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredProviders.map((provider) => (
-              <Card
-                key={provider.id}
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => handleProviderClick(provider)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{provider.name}</CardTitle>
-                      {provider.company_name && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {provider.company_name}
-                        </p>
-                      )}
-                    </div>
-                    <Badge
-                      variant={provider.status === "available" ? "default" : "secondary"}
-                    >
-                      {provider.status === "available" ? "متاح" : "مشغول"}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {/* Specializations */}
-                  <div className="flex flex-wrap gap-1">
-                    {provider.specialization?.map((spec) => {
-                      const specialty = specialties.find((s) => s.id === spec);
-                      return (
-                        <Badge key={spec} variant="outline" className="text-xs">
-                          {specialty?.icon} {specialty?.label || spec}
-                        </Badge>
-                      );
-                    })}
-                  </div>
+        {/* الخريطة */}
+        <div className="flex-1 relative">
+          <InteractiveMap
+            latitude={centerLat}
+            longitude={centerLng}
+            height="100%"
+            className="w-full h-full"
+          />
 
-                  {/* Rating */}
-                  {provider.rating && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{provider.rating.toFixed(1)}</span>
-                      <span className="text-muted-foreground">
-                        ({provider.total_reviews || 0} تقييم)
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Phone */}
-                  {provider.phone && (
-                    <a
-                      href={`tel:${provider.phone}`}
-                      className="flex items-center gap-2 text-sm text-primary hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Phone className="h-4 w-4" />
-                      {provider.phone}
-                    </a>
-                  )}
-
-                  {/* Location */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>
-                      {provider.current_latitude?.toFixed(4)},{" "}
-                      {provider.current_longitude?.toFixed(4)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+          {/* نافذة تفاصيل المزود */}
+          {selectedProvider && (
+            <ProviderPopup
+              provider={selectedProvider}
+              onClose={() => setSelectedProvider(null)}
+              onRequestService={handleRequestService}
+            />
           )}
         </div>
-
-        {/* Map */}
-        <div className="lg:col-span-2">
-          <Card className="h-[600px]">
-            <CardContent className="p-0 h-full">
-              <InteractiveMap
-                latitude={centerLat}
-                longitude={centerLng}
-                height="600px"
-                className="rounded-lg"
-              />
-            </CardContent>
-          </Card>
-        </div>
       </div>
+
+      {/* شريط التنقل السفلي (للجوال فقط) */}
+      <BottomNavigation />
     </div>
   );
 }
