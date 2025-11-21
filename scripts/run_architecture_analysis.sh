@@ -20,9 +20,9 @@ cd /opt/UberFix
 echo "🚀 بدء التحليل المعماري الشامل..."
 python3 scripts/architecture_analyzer.py
 
-# البحث عن أحدث التقارير
-LATEST_REPORT=$(find /opt/UberFix -name "architecture_report_*.txt" | sort -r | head -1)
-LATEST_JSON=$(find /opt/UberFix -name "architecture_data_*.json" | sort -r | head -1)
+# البحث عن أحدث التقارير في مجلد reports/
+LATEST_REPORT=$(find /opt/UberFix/reports -name "architecture_report_*.txt" 2>/dev/null | sort -r | head -1)
+LATEST_JSON=$(find /opt/UberFix/reports -name "architecture_data_*.json" 2>/dev/null | sort -r | head -1)
 
 if [ -f "$LATEST_REPORT" ]; then
     echo ""

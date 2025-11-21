@@ -431,10 +431,11 @@ class UberFixRepair:
         print(f"📋 المشاكل المتبقية: {validation['remaining_issues']}")
         print(f"🧪 الاختبارات: {'✅ نجحت' if tests_passed else '❌ فشلت'}")
 
-        report_path = (
-            self.project_root
-            / f"repair_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        )
+        # حفظ التقرير في مجلد reports/
+        reports_dir = self.project_root / "reports"
+        reports_dir.mkdir(exist_ok=True)
+        
+        report_path = reports_dir / f"repair_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(self.generate_report())
 
