@@ -45,7 +45,7 @@ export function MaintenanceTimeline({ events }: MaintenanceTimelineProps) {
         <div className="absolute right-[10px] top-0 bottom-0 w-[2px] bg-border" />
         
         <div className="space-y-6">
-          {events.map((event, index) => (
+          {events.map((event) => (
             <div key={event.id} className="relative flex gap-4">
               {/* الأيقونة */}
               <div className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 ${getColor(event.type)}`}>

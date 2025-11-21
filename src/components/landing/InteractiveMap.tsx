@@ -24,19 +24,19 @@ const branches: Branch[] = [
 
 declare global {
   interface Window {
-    google: any;
+    google: typeof google;
     initMap: () => void;
   }
 }
 
 export const InteractiveMap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
   const [apiKey, setApiKey] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const markersRef = useRef<any[]>([]);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
 
   useEffect(() => {
     const fetchApiKey = async () => {
@@ -198,17 +198,6 @@ export const InteractiveMap = () => {
 
     loadGoogleMaps();
   }, [apiKey]);
-
-  const getLocationIcon = (type: string) => {
-    switch (type) {
-      case 'construction':
-        return <Building2 className="h-4 w-4" />;
-      case 'electrical':
-        return <Zap className="h-4 w-4" />;
-      default:
-        return <Wrench className="h-4 w-4" />;
-    }
-  };
 
   if (isLoading) {
     return (

@@ -5,9 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Eye, Calendar, Phone, DollarSign, Plus, MapPin } from "lucide-react";
-import { MaintenanceRequestDetails } from "./MaintenanceRequestDetails";
 import { MaintenanceRequestActions } from "./MaintenanceRequestActions";
 import { MaintenanceFilters } from "./MaintenanceFilters";
 import { MaintenanceExport } from "./MaintenanceExport";
@@ -30,7 +28,6 @@ export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceReques
   const [minCostFilter, setMinCostFilter] = useState("");
   const [maxCostFilter, setMaxCostFilter] = useState("");
   const [ratingFilter, setRatingFilter] = useState("all");
-  const [selectedRequest, setSelectedRequest] = useState(null);
 
   const filteredRequests = useMemo(() => {
     return requests?.filter(request => {
@@ -47,8 +44,7 @@ export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceReques
       return matchesSearch && matchesStatus && matchesPriority && 
              matchesDateFrom && matchesDateTo;
     }) || [];
-  }, [requests, searchTerm, statusFilter, priorityFilter,
-      dateFromFilter, dateToFilter, minCostFilter, maxCostFilter, ratingFilter]);
+  }, [requests, searchTerm, statusFilter, priorityFilter, dateFromFilter, dateToFilter]);
 
   const clearFilters = () => {
     setSearchTerm("");

@@ -1,18 +1,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, Edit, Trash2, UserCheck, DollarSign, CheckCircle, XCircle } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, UserCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
+
+type MaintenanceStatus = Database["public"]["Enums"]["mr_status"];
 
 interface MaintenanceRequestActionsProps {
-  request: any;
+  request: {
+    id: string;
+    status: string;
+    created_by?: string;
+  };
 }
 
 export function MaintenanceRequestActions({ request }: MaintenanceRequestActionsProps) {
@@ -21,7 +27,7 @@ export function MaintenanceRequestActions({ request }: MaintenanceRequestActions
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showVendorDialog, setShowVendorDialog] = useState(false);
   
-  const [newStatus, setNewStatus] = useState(request.status);
+  const [newStatus, setNewStatus] = useState<MaintenanceStatus>(request.status as MaintenanceStatus);
   const [notes, setNotes] = useState('');
 
   const updateRequestStatus = async () => {
@@ -62,7 +68,7 @@ export function MaintenanceRequestActions({ request }: MaintenanceRequestActions
 
       setShowStatusDialog(false);
       window.location.reload();
-    } catch (error) {
+    } catch {
       toast({
         title: "خطأ",
         description: "فشل في تحديث حالة الطلب",
@@ -90,7 +96,7 @@ export function MaintenanceRequestActions({ request }: MaintenanceRequestActions
       setShowVendorDialog(false);
       setNotes('');
       window.location.reload();
-    } catch (error) {
+    } catch {
       toast({
         title: "خطأ",
         description: "فشل في إضافة الملاحظة",
@@ -119,7 +125,7 @@ export function MaintenanceRequestActions({ request }: MaintenanceRequestActions
       });
 
       window.location.reload();
-    } catch (error) {
+    } catch {
       toast({
         title: "خطأ",
         description: "فشل في حذف الطلب",
@@ -173,7 +179,7 @@ export function MaintenanceRequestActions({ request }: MaintenanceRequestActions
             
             <div>
               <Label htmlFor="status">الحالة الجديدة</Label>
-              <Select value={newStatus} onValueChange={setNewStatus}>
+              <Select value={newStatus} onValueChange={(value) => setNewStatus(value as MaintenanceStatus)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
