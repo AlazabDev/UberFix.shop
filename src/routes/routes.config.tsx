@@ -78,6 +78,7 @@ const VendorDetails = lazy(() => import("@/pages/VendorDetails"));
 // Other
 const Appointments = lazy(() => import("@/pages/Appointments"));
 const Invoices = lazy(() => import("@/pages/Invoices"));
+const UsersPage = lazy(() => import("@/pages/UsersPage"));
 
 /**
  * صفحات جديدة تحت قسم Maintenance
@@ -142,6 +143,7 @@ export const protectedRoutes = [
   { path: "/production-monitor", element: <ProductionMonitor />, withLayout: true },
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
+  { path: "/users", element: <UsersPage />, withLayout: true },
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
 
   // Messages
