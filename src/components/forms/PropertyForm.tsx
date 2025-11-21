@@ -63,9 +63,17 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
   } = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
     defaultValues: {
-      ...initialData,
-      type: selectedType,
-      status: initialData?.status || "active"
+      code: initialData?.code || "",
+      name: initialData?.name || "",
+      type: initialData?.type || selectedType,
+      status: initialData?.status || "active",
+      address: initialData?.address || "",
+      city_id: initialData?.city_id,
+      district_id: initialData?.district_id,
+      latitude: initialData?.latitude || 30.0444,
+      longitude: initialData?.longitude || 31.2357,
+      description: initialData?.description || "",
+      manager_id: initialData?.manager_id || ""
     },
   });
 
@@ -205,13 +213,21 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       const qrCodeData = `${window.location.origin}/quick-request/${propertyId || "new"}`;
 
       const propertyData = {
-        ...data,
+        code: data.code || null,
+        name: data.name,
+        type: data.type,
+        status: data.status || "active",
+        address: data.address,
+        city_id: data.city_id || null,
+        district_id: data.district_id || null,
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        description: data.description || null,
         images: uploadedImages.length > 0 ? uploadedImages : null,
         qr_code_data: qrCodeData,
         qr_code_generated_at: new Date().toISOString(),
         created_by: user.id,
-        manager_id: user.id,
-        status: data.status || "active"
+        manager_id: data.manager_id || user.id
       };
 
       if (propertyId) {
@@ -368,9 +384,16 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
         <div className="space-y-2">
           <Label>المدينة</Label>
-          <Select onValueChange={(value) => setValue("city_id", parseInt(value))}>
+          <Select 
+            value={watch("city_id")?.toString() || ""}
+            onValueChange={(value) => {
+              const cityId = value ? parseInt(value, 10) : undefined;
+              setValue("city_id", cityId);
+              setValue("district_id", undefined); // Reset district when city changes
+            }}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="القاهرة" />
+              <SelectValue placeholder="اختر المدينة" />
             </SelectTrigger>
             <SelectContent>
               {cities.map((city) => (
@@ -384,9 +407,16 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
         <div className="space-y-2">
           <Label>الحي</Label>
-          <Select onValueChange={(value) => setValue("district_id", parseInt(value))} disabled={!selectedCityId}>
+          <Select 
+            value={watch("district_id")?.toString() || ""}
+            onValueChange={(value) => {
+              const districtId = value ? parseInt(value, 10) : undefined;
+              setValue("district_id", districtId);
+            }}
+            disabled={!selectedCityId}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="الحورة" />
+              <SelectValue placeholder="اختر الحي" />
             </SelectTrigger>
             <SelectContent>
               {districts.map((district) => (
@@ -416,23 +446,17 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
       {/* Interactive Map */}
       <InteractiveMap
-        latitude={watch("latitude") || 30.0444}
-        longitude={watch("longitude") || 31.2357}
+        latitude={watch("latitude") ?? 30.0444}
+        longitude={watch("longitude") ?? 31.2357}
         onLocationChange={(lat, lng, address) => {
-          setValue("latitude", lat);
-          setValue("longitude", lng);
+          setValue("latitude", lat, { shouldDirty: true });
+          setValue("longitude", lng, { shouldDirty: true });
           if (address) {
-            setValue("address", address);
+            setValue("address", address, { shouldDirty: true });
           }
         }}
         height="320px"
       />
-
-      {/* Detailed Address */}
-      <div className="space-y-2">
-        <Label>العنوان التفصيلي</Label>
-        <Input placeholder="(ادخل العنوان التفصيلي الاختياري)" />
-      </div>
 
       {/* Property Managers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

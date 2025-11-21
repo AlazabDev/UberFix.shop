@@ -3,8 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Building2, Phone } from "lucide-react";
+import { ArrowLeft, MapPin, Building2, Edit } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { InteractiveMap } from "@/components/maps/InteractiveMap";
+import { Badge } from "@/components/ui/badge";
 
 export default function PropertyDetails() {
   const { id } = useParams();
@@ -38,60 +40,107 @@ export default function PropertyDetails() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <Button
-        variant="default"
-        onClick={() => navigate("/properties")}
-        className="mb-4"
-      >
-        <ArrowLeft className="h-4 w-4 ml-2" />
-        الرجوع إلى القائمة
-      </Button>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <Button
+          variant="outline"
+          onClick={() => navigate("/properties")}
+        >
+          <ArrowLeft className="h-4 w-4 ml-2" />
+          الرجوع إلى القائمة
+        </Button>
+        
+        <Button
+          onClick={() => navigate(`/properties/edit/${property.id}`)}
+          className="bg-primary hover:bg-primary/90"
+        >
+          <Edit className="h-4 w-4 ml-2" />
+          تعديل العقار
+        </Button>
+      </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          {property.images && property.images[0] && (
+      {/* Property Image */}
+      {property.images && property.images[0] && (
+        <Card className="mb-6">
+          <CardContent className="p-0">
             <img
               src={property.images[0]}
               alt={property.name}
-              className="w-full h-64 object-cover rounded-lg mb-6"
+              className="w-full h-96 object-cover rounded-lg"
             />
-          )}
+          </CardContent>
+        </Card>
+      )}
 
-          <h1 className="text-2xl font-bold mb-4">{property.name}</h1>
+      {/* Property Info */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between mb-4">
+            <h1 className="text-3xl font-bold text-foreground">{property.name}</h1>
+            <Badge variant={property.status === "active" ? "default" : "secondary"}>
+              {property.status === "active" ? "نشط" : property.status}
+            </Badge>
+          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-start gap-2">
-              <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div className="flex items-start gap-3">
+              <Building2 className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium">النوع</p>
-                <p className="text-muted-foreground">{property.type}</p>
+                <p className="text-sm text-muted-foreground">نوع العقار</p>
+                <p className="font-medium text-foreground">{property.type}</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-2">
-              <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium">العنوان</p>
-                <p className="text-muted-foreground">{property.address}</p>
+                <p className="text-sm text-muted-foreground">العنوان</p>
+                <p className="font-medium text-foreground">{property.address}</p>
               </div>
             </div>
 
             {property.code && (
-              <div>
-                <p className="font-medium">رمز العقار</p>
-                <p className="text-muted-foreground">{property.code}</p>
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 flex items-center justify-center bg-primary/10 rounded mt-0.5">
+                  <span className="text-xs font-bold text-primary">#</span>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">رمز العقار</p>
+                  <p className="font-medium text-foreground">{property.code}</p>
+                </div>
               </div>
             )}
 
             {property.description && (
-              <div>
-                <p className="font-medium">الوصف</p>
-                <p className="text-muted-foreground">{property.description}</p>
+              <div className="col-span-full">
+                <p className="text-sm text-muted-foreground mb-1">الوصف</p>
+                <p className="text-foreground">{property.description}</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Map */}
+      {property.latitude && property.longitude && (
+        <InteractiveMap
+          latitude={property.latitude}
+          longitude={property.longitude}
+          height="400px"
+        />
+      )}
+
+      {/* Footer */}
+      <div className="mt-8 text-center text-xs text-muted-foreground space-x-4 space-x-reverse">
+        <a href="#" className="hover:text-primary">دليل المستخدم</a>
+        <span>•</span>
+        <a href="#" className="hover:text-primary">شروط الاستخدام</a>
+        <span>•</span>
+        <a href="#" className="hover:text-primary">سياسة الخصوصية</a>
+        <div className="mt-2">
+          جميع الحقوق محفوظة © 2025 بواسطة UberFix.shop - v2.0.0
+        </div>
+      </div>
     </div>
   );
 }
