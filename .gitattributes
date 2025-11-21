@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+# shell scripts
+*.sh text eol=lf
+
+# node / web
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+
+# config
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# env files
+.env text eol=lf
+.env.* text eol=lf

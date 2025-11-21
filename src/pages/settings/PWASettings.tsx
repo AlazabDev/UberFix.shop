@@ -57,7 +57,7 @@ export default function PWASettings() {
     try {
       // Calculate localStorage size
       let localStorageSize = 0;
-      for (let key in localStorage) {
+      for (const key in localStorage) {
         if (localStorage.hasOwnProperty(key)) {
           localStorageSize += localStorage[key].length + key.length;
         }

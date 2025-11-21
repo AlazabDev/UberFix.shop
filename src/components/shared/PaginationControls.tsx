@@ -52,7 +52,7 @@ export const PaginationControls = ({
     } else {
       // احسب نطاق الصفحات المعروضة
       let start = Math.max(1, currentPage - 2);
-      let end = Math.min(totalPages, start + maxVisible - 1);
+      const end = Math.min(totalPages, start + maxVisible - 1);
       
       if (end - start < maxVisible - 1) {
         start = Math.max(1, end - maxVisible + 1);

@@ -138,7 +138,7 @@ export const InteractiveMap = () => {
           const vendorDiv = document.createElement('div');
           vendorDiv.className = 'relative vendor-marker';
           
-          let pinIcon = '/icons/pin-pro/pin-pro-35.svg'; // Default yellow
+          const pinIcon = '/icons/pin-pro/pin-pro-35.svg'; // Default yellow
           let innerIcon = '';
           
           switch (vendor.specialty.toLowerCase()) {
