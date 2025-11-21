@@ -74,7 +74,7 @@ export function ChatBot() {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (_error) {
+    } catch {
       toast({
         title: "خطأ",
         description: "حدث خطأ في الاتصال بالمساعد الذكي",

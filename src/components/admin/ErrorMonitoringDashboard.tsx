@@ -46,10 +46,10 @@ export function ErrorMonitoringDashboard() {
         query = query.is('resolved_at', null);
       }
 
-      const { data, error } = await query;
+      const { data, error: fetchError } = await query;
 
-      if (error) {
-        throw error;
+      if (fetchError) {
+        throw fetchError;
       }
 
       setErrors((data || []) as ErrorLog[]);
