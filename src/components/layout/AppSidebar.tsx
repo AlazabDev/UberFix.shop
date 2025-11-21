@@ -14,8 +14,7 @@ import {
   Activity,
   ListChecks,
   Clock,
-  Mail,
-  Map
+  Mail
 } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 
@@ -123,7 +122,6 @@ export function AppSidebar() {
   const { requests } = useMaintenanceRequests();
 
   const isActive = (path: string) => currentPath === path;
-  const isExpanded = items.some((i) => isActive(i.href));
 
   return (
     <Sidebar

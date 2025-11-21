@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
@@ -19,7 +18,6 @@ import {
 } from "lucide-react";
 
 interface SidebarProps {
-  isOpen?: boolean;
   onClose?: () => void;
 }
 
@@ -97,7 +95,7 @@ const menuItems = [
   }
 ];
 
-export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
+export const Sidebar = ({ onClose }: SidebarProps) => {
   const location = useLocation();
 
   return (

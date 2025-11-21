@@ -1,18 +1,42 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, DollarSign, MapPin, Phone, User, FileText, Image as ImageIcon, AlertCircle, TrendingUp } from "lucide-react";
+import { Calendar, DollarSign, MapPin, Phone, User, FileText, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { SLAIndicator } from "./SLAIndicator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestStatusTimeline } from "./RequestStatusTimeline";
 import { WorkflowDiagram } from "@/components/workflow/WorkflowDiagram";
 import { ApprovalManager } from "@/components/workflow/ApprovalManager";
-import { toast } from "sonner";
 
 interface MaintenanceRequestDetailsProps {
-  request: any;
+  request: {
+    id: string;
+    title: string;
+    status: string;
+    priority: string;
+    sla_due_date?: string;
+    created_at: string;
+    updated_at?: string;
+    follow_up_required?: boolean;
+    follow_up_date?: string;
+    workflow_stage?: string;
+    client_name: string;
+    client_phone?: string;
+    client_email?: string;
+    location?: string;
+    preferred_date?: string;
+    preferred_time?: string;
+    estimated_completion?: string;
+    service_type: string;
+    description: string;
+    customer_notes?: string;
+    vendor_notes?: string;
+    estimated_cost?: number;
+    actual_cost?: number;
+    completion_photos?: string[];
+    rating?: number;
+  };
 }
 
 export function MaintenanceRequestDetails({ request }: MaintenanceRequestDetailsProps) {

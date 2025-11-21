@@ -81,7 +81,7 @@ export function MaintenanceExport({ requests, filteredRequests }: MaintenanceExp
     }));
   };
 
-  const formatValue = (value: any, field: string) => {
+  const formatValue = (value: unknown, field: string) => {
     if (value === null || value === undefined) return "";
     
     switch (field) {
@@ -94,14 +94,14 @@ export function MaintenanceExport({ requests, filteredRequests }: MaintenanceExp
                value === "medium" ? "متوسطة" : "عالية";
       case "created_at":
       case "preferred_date":
-        return new Date(value).toLocaleDateString('ar-SA');
+        return typeof value === 'string' ? new Date(value).toLocaleDateString('ar-SA') : "";
       case "estimated_cost":
       case "actual_cost":
-        return value ? `${value} ج.م` : "";
+        return typeof value === 'number' ? `${value} ج.م` : "";
       case "completion_photos":
         return Array.isArray(value) ? value.length + " صور" : "";
       default:
-        return value.toString();
+        return String(value);
     }
   };
 
@@ -134,7 +134,7 @@ export function MaintenanceExport({ requests, filteredRequests }: MaintenanceExp
       .map(([field, _]) => field);
 
     return dataToExport.map(request => {
-      const filteredRequest: any = {};
+      const filteredRequest: Record<string, unknown> = {};
       selectedFieldsArray.forEach(field => {
         filteredRequest[fieldLabels[field as keyof typeof fieldLabels]] = 
           formatValue(request[field as keyof MaintenanceRequest], field);
@@ -188,7 +188,7 @@ export function MaintenanceExport({ requests, filteredRequests }: MaintenanceExp
       });
 
       setIsOpen(false);
-    } catch (error) {
+    } catch {
       toast({
         title: "خطأ في التصدير",
         description: "فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.",
