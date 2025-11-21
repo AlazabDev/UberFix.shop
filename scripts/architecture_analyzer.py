@@ -448,13 +448,16 @@ class UberFixArchitectureAnalyzer:
         # 3. توليد التقرير
         report = self.generate_architecture_report()
         
-        # 4. حفظ التقرير
-        report_path = self.project_root / f"architecture_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        # 4. حفظ التقرير في مجلد reports/
+        reports_dir = self.project_root / "reports"
+        reports_dir.mkdir(exist_ok=True)
+        
+        report_path = reports_dir / f"architecture_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report)
         
-        # 5. تصدير JSON
-        json_path = self.project_root / f"architecture_data_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        # 5. تصدير JSON في مجلد reports/
+        json_path = reports_dir / f"architecture_data_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         self.export_to_json(json_path)
         
         print("\n" + "=" * 60)

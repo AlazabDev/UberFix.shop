@@ -1,13 +1,25 @@
 {
   "reportsDirectory": "reports",
+  "description": "مجلد التقارير المركزي - جميع التقارير يجب أن توضع هنا فقط",
+  "rules": {
+    "enforceReportsDir": true,
+    "disallowRootReports": true,
+    "overrideDefaults": true,
+    "noRootFiles": true
+  },
   "output": {
     "path": "reports",
     "logs": "reports/logs",
     "tests": "reports/tests",
     "coverage": "reports/coverage",
-    "analysis": "reports/analysis"
+    "analysis": "reports/analysis",
+    "status": "reports/project-status-report.md"
   },
-  "enforceReportsDir": true,
-  "disallowRootReports": true,
-  "overrideDefaults": true
+  "reportTypes": [
+    "project-status-report.md - تقرير حالة المشروع الشامل",
+    "architecture_report_*.txt - تقارير البنية المعمارية (Python script)",
+    "architecture_data_*.json - بيانات البنية الخام (Python script)",
+    "repair_report_*.txt - تقارير الإصلاح التلقائي (Python script)"
+  ],
+  "notes": "جميع التقارير الجديدة يجب أن تُحفظ في هذا المجلد وليس في الجذر"
 }

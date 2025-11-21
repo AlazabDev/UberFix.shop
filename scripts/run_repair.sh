@@ -20,13 +20,15 @@ cd /opt/UberFix
 echo "🚀 بدء عملية الإصلاح الشاملة..."
 python3 scripts/uberfix_repair.py
 
-# حفظ التقرير
-REPORT_FILE=$(find /opt/UberFix -name "repair_report_*.txt" | head -1)
+# حفظ التقرير في مجلد reports/
+REPORT_FILE=$(find /opt/UberFix/reports -name "repair_report_*.txt" 2>/dev/null | sort -r | head -1)
 if [ -f "$REPORT_FILE" ]; then
     echo ""
     echo "📄 تم حفظ التقرير في: $REPORT_FILE"
     echo "📋 ملخص التقرير:"
     tail -20 "$REPORT_FILE"
+else
+    echo "⚠️  لم يتم العثور على تقرير في مجلد reports/"
 fi
 
 echo ""
