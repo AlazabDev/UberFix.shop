@@ -181,14 +181,6 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
     });
   };
 
-  const handlePropertyAdded = () => {
-    setShowPropertyForm(false);
-    toast({
-      title: "تم إضافة العقار بنجاح",
-      description: "يمكنك الآن تقديم طلب الصيانة",
-    });
-  };
-
   // عرض نموذج إضافة عقار إذا لم يكن لدى المستخدم عقارات
   if (showPropertyForm) {
     return (

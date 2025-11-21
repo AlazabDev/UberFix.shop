@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Play, Wrench, Building2, Zap, Droplets, MapPin, Sparkles } from "lucide-react";
 import { RotatingText } from "./RotatingText";

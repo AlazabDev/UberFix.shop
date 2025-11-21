@@ -72,7 +72,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         description: "نراك قريباً",
       });
       navigate("/login");
-    } catch (error) {
+    } catch {
       toast({
         title: "خطأ",
         description: "فشل في تسجيل الخروج",

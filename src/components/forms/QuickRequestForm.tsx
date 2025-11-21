@@ -10,9 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowRight, QrCode, MapPin, Calendar, Upload, Camera, Check } from "lucide-react";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
+import { ArrowRight, QrCode, MapPin, Upload, Camera, Check } from "lucide-react";
 
 const quickRequestSchema = z.object({
   client_name: z.string().min(2, "الاسم مطلوب"),
@@ -27,14 +25,18 @@ const quickRequestSchema = z.object({
 type QuickRequestFormData = z.infer<typeof quickRequestSchema>;
 
 interface QuickRequestFormProps {
-  property: any;
+  property: {
+    id: string;
+    name: string;
+    address: string;
+    qr_code_data?: string;
+  };
   locale: string;
 }
 
 export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
   const [loading, setLoading] = useState(false);
-  const [services, setServices] = useState<any[]>([]);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectedServices] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [showQR, setShowQR] = useState(true);
@@ -46,7 +48,6 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<QuickRequestFormData>({
     resolver: zodResolver(quickRequestSchema),
     defaultValues: {
@@ -77,14 +78,6 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
     setImagePreviews(imagePreviews.filter((_, i) => i !== index));
-  };
-
-  const toggleService = (serviceId: string) => {
-    if (selectedServices.includes(serviceId)) {
-      setSelectedServices(selectedServices.filter(id => id !== serviceId));
-    } else {
-      setSelectedServices([...selectedServices, serviceId]);
-    }
   };
 
   const onSubmit = async (data: QuickRequestFormData) => {
@@ -148,11 +141,11 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
         channel: 'qr_code',
       };
 
-      const { error } = await supabase
+      const { error: requestError } = await supabase
         .from('maintenance_requests')
         .insert(requestData);
 
-      if (error) throw error;
+      if (requestError) throw requestError;
 
       toast.success(
         isArabic 

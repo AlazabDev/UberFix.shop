@@ -4,7 +4,7 @@ interface ErrorTrackingData {
   message: string;
   stack?: string;
   level?: 'error' | 'warning' | 'info';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface ErrorQueueItem extends ErrorTrackingData {
@@ -104,20 +104,21 @@ class ErrorTracker {
     this.queue = [];
   }
 
-  trackApiError(error: any, endpoint: string, method: string) {
-    this.track(error, {
+  trackApiError(error: unknown, endpoint: string, method: string) {
+    const errorObj = error as { status?: number; statusText?: string };
+    this.track(error instanceof Error ? error : String(error), {
       level: 'error',
       metadata: {
         type: 'api_error',
         endpoint,
         method,
-        status: error?.status,
-        statusText: error?.statusText
+        status: errorObj?.status,
+        statusText: errorObj?.statusText
       }
     });
   }
 
-  trackUserAction(action: string, metadata?: Record<string, any>) {
+  trackUserAction(action: string, metadata?: Record<string, unknown>) {
     this.track(`User action: ${action}`, {
       level: 'info',
       metadata: {
@@ -128,7 +129,7 @@ class ErrorTracker {
     });
   }
 
-  trackPerformance(metric: string, value: number, metadata?: Record<string, any>) {
+  trackPerformance(metric: string, value: number, metadata?: Record<string, unknown>) {
     this.track(`Performance: ${metric}`, {
       level: 'info',
       metadata: {

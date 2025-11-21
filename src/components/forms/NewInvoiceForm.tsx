@@ -104,7 +104,7 @@ export function NewInvoiceForm({ onSuccess, onCancel }: NewInvoiceFormProps) {
           currency: 'EGP',
           created_by: user.id,
           invoice_number: '', // Temporary, will be set by trigger
-        } as any])
+        }])
         .select()
         .single();
 
@@ -143,7 +143,7 @@ export function NewInvoiceForm({ onSuccess, onCancel }: NewInvoiceFormProps) {
             title: "تم إنشاء الفاتورة بنجاح",
             description: "تم إرسال الفاتورة بالبريد الإلكتروني",
           });
-        } catch (emailError) {
+        } catch {
           toast({
             title: "تم إنشاء الفاتورة",
             description: "لكن فشل في إرسال البريد الإلكتروني",
@@ -159,10 +159,11 @@ export function NewInvoiceForm({ onSuccess, onCancel }: NewInvoiceFormProps) {
 
       form.reset();
       onSuccess?.();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير متوقع';
       toast({
         title: "خطأ في إنشاء الفاتورة",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

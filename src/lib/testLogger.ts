@@ -6,9 +6,9 @@ export interface TestLog {
   message: string;
   duration?: number;
   timestamp: string;
-  error_details?: any;
+  error_details?: unknown;
   stack_trace?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 class TestLogger {
