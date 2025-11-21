@@ -104,16 +104,18 @@ export const NewVendorForm = ({ onClose, onSuccess }: NewVendorFormProps) => {
 
       onSuccess?.();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding vendor:', error);
       
       let errorMessage = "حدث خطأ في إضافة الفني";
       
       // معالجة الأخطاء الشائعة
-      if (error.message?.includes('permission denied') || error.message?.includes('policy')) {
-        errorMessage = "ليس لديك صلاحية لإضافة فنيين. يرجى التواصل مع المدير.";
-      } else if (error.message?.includes('duplicate')) {
-        errorMessage = "هذا البريد الإلكتروني أو رقم الهاتف مستخدم بالفعل";
+      if (error instanceof Error) {
+        if (error.message?.includes('permission denied') || error.message?.includes('policy')) {
+          errorMessage = "ليس لديك صلاحية لإضافة فنيين. يرجى التواصل مع المدير.";
+        } else if (error.message?.includes('duplicate')) {
+          errorMessage = "هذا البريد الإلكتروني أو رقم الهاتف مستخدم بالفعل";
+        }
       }
       
       toast({

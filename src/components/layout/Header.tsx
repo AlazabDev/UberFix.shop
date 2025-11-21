@@ -70,7 +70,7 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
         description: "نراك قريباً",
       });
       navigate("/login");
-    } catch (error) {
+    } catch {
       toast({
         title: "خطأ",
         description: "فشل في تسجيل الخروج",

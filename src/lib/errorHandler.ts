@@ -8,7 +8,7 @@ interface ErrorLog {
   url?: string;
   userId?: string;
   userAgent?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 class ErrorHandler {
@@ -80,7 +80,7 @@ class ErrorHandler {
     }
   }
 
-  logCustomError(message: string, metadata?: Record<string, any>) {
+  logCustomError(message: string, metadata?: Record<string, unknown>) {
     return this.logError({
       level: 'error',
       message,
@@ -88,7 +88,7 @@ class ErrorHandler {
     });
   }
 
-  logWarning(message: string, metadata?: Record<string, any>) {
+  logWarning(message: string, metadata?: Record<string, unknown>) {
     return this.logError({
       level: 'warning',
       message,
@@ -96,7 +96,7 @@ class ErrorHandler {
     });
   }
 
-  logInfo(message: string, metadata?: Record<string, any>) {
+  logInfo(message: string, metadata?: Record<string, unknown>) {
     return this.logError({
       level: 'info',
       message,
@@ -118,13 +118,13 @@ class ErrorHandler {
 
 export const errorHandler = new ErrorHandler();
 
-export const logError = (message: string, metadata?: Record<string, any>) =>
+export const logError = (message: string, metadata?: Record<string, unknown>) =>
   errorHandler.logCustomError(message, metadata);
 
-export const logWarning = (message: string, metadata?: Record<string, any>) =>
+export const logWarning = (message: string, metadata?: Record<string, unknown>) =>
   errorHandler.logWarning(message, metadata);
 
-export const logInfo = (message: string, metadata?: Record<string, any>) =>
+export const logInfo = (message: string, metadata?: Record<string, unknown>) =>
   errorHandler.logInfo(message, metadata);
 
 export const handleReactError = (error: Error, errorInfo: { componentStack: string }) => {

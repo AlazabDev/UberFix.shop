@@ -35,7 +35,6 @@ interface ApprovalWorkflow {
 export function ApprovalWorkflowManager() {
   const [workflows, setWorkflows] = useState<ApprovalWorkflow[]>([]);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
-  const [_loading, setLoading] = useState(true);
   const [editingWorkflow, setEditingWorkflow] = useState<ApprovalWorkflow | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -50,7 +49,6 @@ export function ApprovalWorkflowManager() {
   };
 
   const fetchWorkflows = async () => {
-    setLoading(true);
     try {
       // Since approval_workflows is not in the types, we'll skip this for now
       // and just set an empty array
@@ -58,7 +56,6 @@ export function ApprovalWorkflowManager() {
     } catch (error) {
       console.error('Error fetching workflows:', error);
     }
-    setLoading(false);
   };
 
   const createNewWorkflow = () => {
@@ -142,6 +139,7 @@ export function ApprovalWorkflowManager() {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: workflow, error: workflowError } = await (supabase as any)
         .from("approval_workflows")
         .upsert({
@@ -157,7 +155,7 @@ export function ApprovalWorkflowManager() {
 
       if (workflowError) throw workflowError;
 
-      const workflowData = workflow as { id: string };
+      const workflowId = (workflow as unknown as { id: string }).id;
 
       // Delete existing steps
       if (editingWorkflow.id) {
@@ -165,9 +163,10 @@ export function ApprovalWorkflowManager() {
       }
 
       // Insert new steps
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: stepsError } = await (supabase as any).from("approval_steps").insert(
         editingWorkflow.steps.map((s) => ({
-          workflow_id: (workflow as any).id,
+          workflow_id: workflowId,
           step_order: s.step_order,
           role_required: s.role_required,
           approver_email: s.approver_email,
@@ -187,10 +186,11 @@ export function ApprovalWorkflowManager() {
 
       setDialogOpen(false);
       fetchWorkflows();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير متوقع';
       toast({
         title: "خطأ",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
