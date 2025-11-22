@@ -235,9 +235,8 @@ export default function ServiceMap() {
     // Add markers for branches
     branches.forEach((branch) => {
       if (branch.latitude && branch.longitude) {
-        // الإحداثيات في CSV معكوسة - نحتاج لتبديلها
-        const lat = parseFloat(branch.longitude); // longitude في CSV هو في الحقيقة latitude
-        const lng = parseFloat(branch.latitude);  // latitude في CSV هو في الحقيقة longitude
+        const lat = parseFloat(branch.latitude);
+        const lng = parseFloat(branch.longitude);
         
         console.log(`Branch: ${branch.branch}, lat: ${lat}, lng: ${lng}`);
         
