@@ -38,7 +38,7 @@ export default function QuickRequestFromMap() {
         description: 'يرجى العودة للخريطة واختيار فني',
         variant: 'destructive',
       });
-      navigate('/map');
+      navigate('/service-map');
     }
   }, [navigate, toast]);
 
@@ -176,7 +176,7 @@ export default function QuickRequestFromMap() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/map')}
+                    onClick={() => navigate('/service-map')}
                   >
                     تغيير الفني
                   </Button>
@@ -266,7 +266,7 @@ export default function QuickRequestFromMap() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/map')}
+                  onClick={() => navigate('/service-map')}
                   className="flex-1"
                 >
                   رجوع
