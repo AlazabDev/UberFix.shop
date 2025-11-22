@@ -36,15 +36,10 @@ const ArchivedProperties = lazy(
 // Reports
 const Reports = lazy(() => import("@/pages/reports/Reports"));
 const SLADashboard = lazy(() => import("@/pages/reports/SLADashboard"));
-const ExpenseReports = lazy(
-  () => import("@/pages/reports/ExpenseReports")
-);
-const MaintenanceReports = lazy(
-  () => import("@/pages/reports/MaintenanceReports")
-); // الأصلية
-const ProductionReport = lazy(
-  () => import("@/pages/reports/ProductionReport")
-);
+const ExpenseReports = lazy(() => import("@/pages/reports/ExpenseReports"));
+const MaintenanceReports = lazy(() => import("@/pages/reports/MaintenanceReports"));
+const ProductionReport = lazy(() => import("@/pages/reports/ProductionReport"));
+const PropertyLifecycle = lazy(() => import("@/pages/reports/PropertyLifecycle"));
 
 // Admin
 const UserManagement = lazy(
@@ -105,29 +100,14 @@ const Appointments = lazy(() => import("@/pages/Appointments"));
 const Invoices = lazy(() => import("@/pages/Invoices"));
 const UsersPage = lazy(() => import("@/pages/UsersPage"));
 
-/**
- * صفحات جديدة تحت قسم Maintenance
- * (بعد التصحيح — تم إعادة تسمية المتغيّر الثاني فقط)
- */
-const MaintenanceRequestDetail = lazy(
-  () => import("@/pages/maintenance/MaintenanceRequestDetail")
-);
-const MaintenanceReportsPage = lazy(
-  () => import("@/pages/maintenance/MaintenanceReports")
-); // ← هذه كانت سبب المشكلة
-const CreateMaintenanceRequest = lazy(
-  () => import("@/pages/maintenance/CreateMaintenanceRequest")
-);
-const MaintenanceList = lazy(
-  () => import("@/pages/maintenance/MaintenanceList")
-);
-const MaintenanceOverview = lazy(
-  () => import("@/pages/maintenance/MaintenanceOverview")
-);
+// Maintenance Module Pages
+const MaintenanceRequestDetail = lazy(() => import("@/pages/maintenance/MaintenanceRequestDetail"));
+const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
+const MaintenanceList = lazy(() => import("@/pages/maintenance/MaintenanceList"));
+const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
 
 export const protectedRoutes = [
   { path: "/dashboard", element: <Dashboard />, withLayout: true },
-  { path: "/sla-dashboard", element: <SLADashboard />, withLayout: true },
   { path: "/monitoring", element: <MonitoringDashboard />, withLayout: true },
   { path: "/branch-management", element: <BranchManagement />, withLayout: true },
 
@@ -148,9 +128,11 @@ export const protectedRoutes = [
 
   // Reports
   { path: "/reports", element: <Reports />, withLayout: true },
+  { path: "/reports/sla", element: <SLADashboard />, withLayout: true },
   { path: "/reports/expenses", element: <ExpenseReports />, withLayout: true },
-  { path: "/reports/maintenance", element: <MaintenanceReports />, withLayout: true }, // الأصلية
-  { path: "/maintenance/reports", element: <MaintenanceReportsPage />, withLayout: true }, // ← الجديدة بعد التصحيح
+  { path: "/reports/maintenance", element: <MaintenanceReports />, withLayout: true },
+  { path: "/reports/production", element: <ProductionReport />, withLayout: true },
+  { path: "/reports/property-lifecycle", element: <PropertyLifecycle />, withLayout: true },
 
   // Properties
   { path: "/properties", element: <Properties />, withLayout: true },
@@ -166,7 +148,6 @@ export const protectedRoutes = [
   { path: "/maintenance-procedures", element: <MaintenanceProcedures />, withLayout: true },
   { path: "/settings", element: <Settings />, withLayout: true },
   { path: "/testing", element: <Testing />, withLayout: true },
-  { path: "/production-report", element: <ProductionReport />, withLayout: true },
   { path: "/production-monitor", element: <ProductionMonitor />, withLayout: true },
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
