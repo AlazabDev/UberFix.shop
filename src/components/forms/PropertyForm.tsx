@@ -197,6 +197,12 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         return;
       }
 
+      // التحقق من تأكيد البريد الإلكتروني
+      if (!user.email_confirmed_at) {
+        toast.error("يجب تأكيد بريدك الإلكتروني أولاً قبل إضافة عقارات");
+        return;
+      }
+
       let uploadedImages: string[] = initialData?.images || [];
 
       // Upload image if provided
@@ -250,8 +256,8 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
         if (error) {
           console.error("Insert error:", error);
-          if (error.message.includes('row-level security')) {
-            throw new Error("ليس لديك صلاحية إضافة عقارات");
+          if (error.message.includes('row-level security') || error.message.includes('new row violates')) {
+            throw new Error("يجب تأكيد بريدك الإلكتروني أولاً قبل إضافة عقارات. تحقق من بريدك الإلكتروني واضغط على رابط التأكيد.");
           }
           throw new Error(`فشل إنشاء العقار: ${error.message}`);
         }
