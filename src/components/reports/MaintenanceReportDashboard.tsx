@@ -17,6 +17,7 @@ import {
   LineChart, 
   Line 
 } from "recharts";
+import { ChartTooltip } from "@/components/ui/chart";
 import { Download, RefreshCw, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
