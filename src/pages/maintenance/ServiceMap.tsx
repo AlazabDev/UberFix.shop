@@ -235,10 +235,13 @@ export default function ServiceMap() {
     // Add markers for branches
     branches.forEach((branch) => {
       if (branch.latitude && branch.longitude) {
-        const lat = parseFloat(branch.latitude);
-        const lng = parseFloat(branch.longitude);
+        // الإحداثيات في CSV معكوسة - نحتاج لتبديلها
+        const lat = parseFloat(branch.longitude); // longitude في CSV هو في الحقيقة latitude
+        const lng = parseFloat(branch.latitude);  // latitude في CSV هو في الحقيقة longitude
         
-        if (!isNaN(lat) && !isNaN(lng)) {
+        console.log(`Branch: ${branch.branch}, lat: ${lat}, lng: ${lng}`);
+        
+        if (!isNaN(lat) && !isNaN(lng) && lat >= 20 && lat <= 35 && lng >= 25 && lng <= 40) {
           const marker = new google.maps.Marker({
             position: { lat, lng },
             map: mapInstanceRef.current!,
@@ -270,6 +273,8 @@ export default function ServiceMap() {
 
           markersRef.current.push(marker);
           branchMarkersAdded++;
+        } else {
+          console.warn(`❌ Invalid coordinates for branch: ${branch.branch}`);
         }
       }
     });
