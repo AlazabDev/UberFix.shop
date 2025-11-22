@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { loadGoogleMaps } from "@/lib/googleMapsLoader";
 import { useTechnicians } from "@/hooks/useTechnicians";
+import { useBranchLocations } from "@/hooks/useBranchLocations";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -19,6 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotificationsList } from "@/components/notifications/NotificationsList";
+import { BranchPopup } from "@/components/maps/BranchPopup";
+import { TechnicianPopup } from "@/components/maps/TechnicianPopup";
+import { createRoot } from "react-dom/client";
 
 const specialties = [
   { id: "paint", label: "دهان", icon: "🎨" },
@@ -45,6 +49,7 @@ export default function ServiceMap() {
   const [userData, setUserData] = useState<UserData | null>(null);
 
   const { technicians, loading } = useTechnicians();
+  const { branches } = useBranchLocations();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -210,24 +215,123 @@ export default function ServiceMap() {
   }, []);
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !technicians.length) return;
+    if (!mapInstanceRef.current) return;
 
     // Clear existing markers
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
 
-    // Add markers for technicians
-    technicians.forEach((tech) => {
-      if (tech.current_latitude && tech.current_longitude) {
-        const marker = new google.maps.Marker({
-          position: { lat: tech.current_latitude, lng: tech.current_longitude },
-          map: mapInstanceRef.current!,
-          title: tech.name || "فني",
-        });
-        markersRef.current.push(marker);
+    // Add markers for branches
+    branches.forEach((branch) => {
+      if (branch.latitude && branch.longitude) {
+        const lat = parseFloat(branch.latitude);
+        const lng = parseFloat(branch.longitude);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const marker = new google.maps.Marker({
+            position: { lat, lng },
+            map: mapInstanceRef.current!,
+            title: branch.branch,
+            icon: {
+              url: "/icons/branch-icon.png",
+              scaledSize: new google.maps.Size(40, 40),
+              anchor: new google.maps.Point(20, 40),
+            },
+          });
+
+          // Create info window for branch
+          const infoWindow = new google.maps.InfoWindow();
+          
+          marker.addListener("click", () => {
+            const div = document.createElement("div");
+            const root = createRoot(div);
+            root.render(
+              <BranchPopup
+                id={branch.id}
+                name={branch.branch}
+                address={branch.address || "لا يوجد عنوان"}
+                status="Active"
+              />
+            );
+            infoWindow.setContent(div);
+            infoWindow.open(mapInstanceRef.current!, marker);
+          });
+
+          markersRef.current.push(marker);
+        }
       }
     });
-  }, [technicians]);
+
+    // Add markers for random technicians in Cairo/Giza area
+    const randomTechnicianIcons = [
+      "tec-01.png", "tec-05.png", "tec-10.png", "tec-15.png", "tec-20.png",
+      "tec-25.png", "tec-30.png", "tec-35.png", "tec-40.png", "tec-45.png"
+    ];
+
+    // Generate 10 random technician positions in Cairo/Giza area
+    const cairoCenter = { lat: 30.0444, lng: 31.2357 };
+    const radius = 0.15; // roughly 15km radius
+
+    for (let i = 0; i < 10; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * radius;
+      const lat = cairoCenter.lat + (distance * Math.cos(angle));
+      const lng = cairoCenter.lng + (distance * Math.sin(angle));
+      
+      const iconIndex = i % randomTechnicianIcons.length;
+      const tech = technicians[i] || {
+        id: `random-${i}`,
+        name: `فني ${i + 1}`,
+        specialization: ["سباك", "كهربائي", "نجار", "دهان"][i % 4],
+        rating: 4 + Math.random(),
+        total_reviews: Math.floor(Math.random() * 50) + 10,
+        status: ["available", "busy", "soon"][Math.floor(Math.random() * 3)] as "available" | "busy" | "soon",
+        profile_image: undefined,
+      };
+
+      const techStatus = (tech.status === "available" || tech.status === "busy" || tech.status === "soon") 
+        ? tech.status 
+        : "soon";
+
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map: mapInstanceRef.current!,
+        title: tech.name || "فني",
+        icon: {
+          url: `/icons/technicians/${randomTechnicianIcons[iconIndex]}`,
+          scaledSize: new google.maps.Size(45, 45),
+          anchor: new google.maps.Point(22.5, 45),
+        },
+      });
+
+      // Create info window for technician
+      const infoWindow = new google.maps.InfoWindow();
+      
+      marker.addListener("click", () => {
+        const div = document.createElement("div");
+        const root = createRoot(div);
+        root.render(
+          <TechnicianPopup
+            name={tech.name || "فني"}
+            specialization={tech.specialization || "فني عام"}
+            rating={tech.rating || 4.5}
+            totalReviews={tech.total_reviews || 20}
+            status={techStatus}
+            availableIn={techStatus === "soon" ? 40 : undefined}
+            profileImage={undefined}
+            onRequestService={() => {
+              navigate("/quick-request");
+              infoWindow.close();
+            }}
+          />
+        );
+        infoWindow.setContent(div);
+        infoWindow.open(mapInstanceRef.current!, marker);
+      });
+
+      markersRef.current.push(marker);
+    }
+  }, [technicians, branches, navigate]);
 
   const filteredTechnicians = technicians.filter((tech) => {
     const matchesSpecialty =
