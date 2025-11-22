@@ -119,7 +119,7 @@ export function ApprovalWorkflowManager() {
     });
   };
 
-  const updateStep = (index: number, field: keyof ApprovalStep, value: any) => {
+  const updateStep = (index: number, field: keyof ApprovalStep, value: string | number | boolean) => {
     if (!editingWorkflow) return;
     const steps = [...editingWorkflow.steps];
     steps[index] = { ...steps[index], [field]: value };

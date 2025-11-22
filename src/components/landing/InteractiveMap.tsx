@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Wrench, Building2, Zap, Phone, X, Star, Store } from "lucide-react";
+import { MapPin, Phone, X, Star, Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { VendorsList, vendors, type Vendor } from "./VendorsList";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
