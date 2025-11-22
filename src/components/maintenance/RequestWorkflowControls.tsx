@@ -34,7 +34,7 @@ interface RequestWorkflowControlsProps {
   onUpdate?: () => void;
 }
 
-const workflowStages: { value: WorkflowStage; label: string; icon: any; color: string }[] = [
+const workflowStages: { value: WorkflowStage; label: string; icon: React.ElementType; color: string }[] = [
   { value: 'submitted', label: 'تم الإرسال', icon: Clock, color: 'bg-blue-500' },
   { value: 'acknowledged', label: 'تم الاستلام', icon: CheckCircle2, color: 'bg-cyan-500' },
   { value: 'assigned', label: 'تم التعيين', icon: UserCheck, color: 'bg-purple-500' },
@@ -60,7 +60,7 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
   const updateWorkflowStage = async (newStage: WorkflowStage) => {
     setLoading(true);
     try {
-      const updates: any = {
+      const updates: Record<string, string> = {
         workflow_stage: newStage,
       };
 
@@ -89,13 +89,14 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
       });
 
       if (onUpdate) {
-        onUpdate();
+      onUpdate();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "فشل في تحديث المرحلة";
       console.error('Error updating workflow:', error);
       toast({
         title: "خطأ",
-        description: error.message || "فشل في تحديث المرحلة",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {

@@ -53,7 +53,7 @@ export function ErrorMonitoringDashboard() {
       }
 
       setErrors((data || []) as ErrorLog[]);
-    } catch (_error) {
+    } catch {
       toast({
         title: 'خطأ',
         description: 'فشل في تحميل السجلات',

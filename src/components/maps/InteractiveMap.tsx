@@ -228,7 +228,7 @@ export function InteractiveMap({
             if (mapDiv.parentNode) {
               mapDiv.parentNode.replaceChild(newDiv, mapDiv);
             }
-          } catch (e) {
+          } catch {
             // Fallback: remove children manually
             while (mapDiv.firstChild) {
               try {

@@ -46,7 +46,7 @@ class ErrorHandler {
       if (data?.user) {
         errorLog.userId = data.user.id;
       }
-    } catch (e) {
+    } catch {
       // تجاهل الخطأ
     }
 
@@ -75,7 +75,7 @@ class ErrorHandler {
       await supabase.functions.invoke('log-errors', {
         body: { errors }
       });
-    } catch (error) {
+    } catch {
       this.errorQueue.push(...errors);
     }
   }

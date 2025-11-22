@@ -305,5 +305,5 @@ export const VendorsList = ({ onVendorSelect }: VendorsListProps) => {
   );
 };
 
-export { vendors };
-export type { Vendor };
+// Re-export vendors and Vendor type separately for tree-shaking
+export { vendors, type Vendor };
