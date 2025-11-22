@@ -39,16 +39,22 @@ export function InteractiveMap({
 
   // Load Google Maps SDK
   const loadGoogleMaps = useCallback(async () => {
-    if (window.google?.maps) return;
+    if (window.google?.maps) return true;
     if (document.getElementById("google-maps-sdk")) {
       // Wait for script to load
-      return new Promise<void>((resolve) => {
+      return new Promise<boolean>((resolve) => {
         const checkInterval = setInterval(() => {
           if (window.google?.maps) {
             clearInterval(checkInterval);
-            resolve();
+            resolve(true);
           }
         }, 100);
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(false);
+        }, 10000);
       });
     }
 
@@ -58,40 +64,47 @@ export function InteractiveMap({
 
       const apiKey = data?.apiKey || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<boolean>((resolve, reject) => {
         const script = document.createElement("script");
         script.id = "google-maps-sdk";
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&v=weekly`;
         script.async = true;
         script.defer = true;
-        script.onload = () => resolve();
+        script.onload = () => resolve(true);
         script.onerror = () => reject(new Error("Failed to load Google Maps"));
         document.head.appendChild(script);
       });
     } catch (error) {
       console.error("Failed to load Google Maps API key:", error);
-      throw error;
+      return false;
     }
   }, []);
 
   // Initialize map ONCE ONLY
   useEffect(() => {
     let isMounted = true;
+    let mapDiv: HTMLDivElement | null = null;
 
     const initMap = async () => {
       try {
         // Prevent double initialization
         if (isInitializedRef.current || !mapContainerRef.current) return;
         
-        await loadGoogleMaps();
+        const loaded = await loadGoogleMaps();
+        if (!loaded) {
+          throw new Error("Failed to load Google Maps SDK");
+        }
 
         if (!isMounted || !mapContainerRef.current) return;
+
+        // Store reference to map div
+        mapDiv = mapContainerRef.current;
 
         // Mark as initialized BEFORE creating map
         isInitializedRef.current = true;
 
-        // Create map instance with minimal DOM manipulation
-        const mapInstance = new google.maps.Map(mapContainerRef.current, {
+        // Create map instance
+        const mapInstance = new google.maps.Map(mapDiv, {
           center: { lat: currentLat, lng: currentLng },
           zoom: 15,
           mapTypeControl: false,
@@ -119,8 +132,9 @@ export function InteractiveMap({
 
         // Add marker dragend listener
         markerInstance.addListener("dragend", async () => {
+          if (!isMounted) return;
           const pos = markerInstance.getPosition();
-          if (!pos || !isMounted) return;
+          if (!pos) return;
 
           const lat = pos.lat();
           const lng = pos.lng();
@@ -131,16 +145,21 @@ export function InteractiveMap({
           try {
             const result = await geocoder.geocode({ location: { lat, lng } });
             const address = result.results[0]?.formatted_address;
-            onLocationChange?.(lat, lng, address);
-            toast.success("تم تحديث الموقع");
+            if (isMounted) {
+              onLocationChange?.(lat, lng, address);
+              toast.success("تم تحديث الموقع");
+            }
           } catch {
-            onLocationChange?.(lat, lng);
+            if (isMounted) {
+              onLocationChange?.(lat, lng);
+            }
           }
         });
 
         // Add map click listener
         mapInstance.addListener("click", async (e: google.maps.MapMouseEvent) => {
-          if (!e.latLng || !isMounted) return;
+          if (!isMounted) return;
+          if (!e.latLng) return;
 
           const lat = e.latLng.lat();
           const lng = e.latLng.lng();
@@ -154,10 +173,14 @@ export function InteractiveMap({
           try {
             const result = await geocoder.geocode({ location: { lat, lng } });
             const address = result.results[0]?.formatted_address;
-            onLocationChange?.(lat, lng, address);
-            toast.success("تم تحديث الموقع");
+            if (isMounted) {
+              onLocationChange?.(lat, lng, address);
+              toast.success("تم تحديث الموقع");
+            }
           } catch {
-            onLocationChange?.(lat, lng);
+            if (isMounted) {
+              onLocationChange?.(lat, lng);
+            }
           }
         });
 
@@ -175,7 +198,7 @@ export function InteractiveMap({
 
     initMap();
 
-    // CRITICAL: Comprehensive cleanup function
+    // CRITICAL: Comprehensive cleanup to prevent DOM errors
     return () => {
       isMounted = false;
 
@@ -184,33 +207,49 @@ export function InteractiveMap({
       cleanupExecutedRef.current = true;
 
       try {
-        // Step 1: Remove marker from map (prevents DOM manipulation after unmount)
+        // Step 1: Remove marker completely
         if (markerInstanceRef.current) {
           markerInstanceRef.current.setMap(null);
+          google.maps.event.clearInstanceListeners(markerInstanceRef.current);
           markerInstanceRef.current = null;
         }
 
         // Step 2: Clear ALL map event listeners
         if (mapInstanceRef.current) {
           google.maps.event.clearInstanceListeners(mapInstanceRef.current);
+          mapInstanceRef.current = null;
         }
 
-        // Step 3: Clear the map div content manually
-        if (mapContainerRef.current) {
-          // Remove all child nodes safely
-          while (mapContainerRef.current.firstChild) {
-            mapContainerRef.current.removeChild(mapContainerRef.current.firstChild);
+        // Step 3: CRITICAL - Manually remove all child nodes to prevent removeChild errors
+        if (mapDiv && mapDiv.parentNode) {
+          try {
+            // Clone the div and replace it (removes all Google Maps DOM)
+            const newDiv = mapDiv.cloneNode(false) as HTMLDivElement;
+            if (mapDiv.parentNode) {
+              mapDiv.parentNode.replaceChild(newDiv, mapDiv);
+            }
+          } catch (e) {
+            // Fallback: remove children manually
+            while (mapDiv.firstChild) {
+              try {
+                mapDiv.removeChild(mapDiv.firstChild);
+              } catch (childError) {
+                // Ignore removeChild errors during cleanup
+                console.warn("Child removal failed (expected during cleanup):", childError);
+                break;
+              }
+            }
           }
         }
 
         // Step 4: Nullify references
-        mapInstanceRef.current = null;
         geocoderRef.current = null;
         
         // Reset initialization flag
         isInitializedRef.current = false;
       } catch (error) {
-        console.error("Cleanup error:", error);
+        // Ignore cleanup errors - they're expected when component unmounts
+        console.warn("Cleanup completed with warnings (expected):", error);
       }
     };
   }, []); // EMPTY deps - run ONCE only
