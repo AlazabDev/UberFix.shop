@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { 
   BarChart, 
   Bar, 
@@ -53,7 +52,7 @@ export function MaintenanceReportDashboard() {
   const [loading, setLoading] = useState(false);
   const _navigate = useNavigate();
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch completed requests from maintenance_requests
@@ -68,21 +67,20 @@ export function MaintenanceReportDashboard() {
       if (completedError) throw completedError;
 
       // For now, only use completed requests (archived table doesn't exist yet)
-      const archived: any[] = [];
+      const archived: Array<{ id: string; service_type?: string; actual_cost?: number; created_at?: string; title?: string; description?: string; location?: string; priority?: string; completion_date?: string; store_id?: string; }> = [];
 
       setCompletedRequests(completed || []);
       setArchiveRequests(archived || []);
-    } catch (error) {
-      console.error('Error fetching requests:', error);
+    } catch (_error) {
+      // Error handled silently
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate]);
 
   useEffect(() => {
     fetchRequests();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startDate, endDate]);
+  }, [fetchRequests]);
 
   const allCompleted = [...completedRequests, ...archiveRequests];
   const totalCompleted = allCompleted.length;

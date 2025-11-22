@@ -143,7 +143,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
 
       const { error: requestError } = await supabase
         .from('maintenance_requests')
-        .insert(requestData);
+        .insert([requestData]);
 
       if (requestError) throw requestError;
 
