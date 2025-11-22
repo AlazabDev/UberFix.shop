@@ -7,6 +7,7 @@ import {
   Bell,
   Plus,
   MapPin,
+  ClipboardList,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -18,12 +19,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: User, label: "الملف الشخصي", route: "/profile" },
-  { icon: FileText, label: "الفواتير", route: "/invoices" },
-  { icon: CheckCircle, label: "الخدمات", route: "/services" },
-  { icon: Bell, label: "الطلبات", route: "/requests" },
+  { icon: MapPin, label: "الخريطة", route: "/map" },
+  { icon: ClipboardList, label: "تتبع الطلبات", route: "/track-orders" },
   { icon: Plus, label: "طلب سريع", route: "/quick-request", isPrimary: true },
-  { icon: MapPin, label: "الخريطة", route: "/service-map" },
+  { icon: CheckCircle, label: "الخدمات المكتملة", route: "/completed-services" },
+  { icon: FileText, label: "الفواتير", route: "/invoices" },
 ];
 
 export function BottomNavigation() {
