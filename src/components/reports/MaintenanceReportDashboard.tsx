@@ -26,8 +26,30 @@ import { useNavigate } from "react-router-dom";
 export function MaintenanceReportDashboard() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [completedRequests, setCompletedRequests] = useState<Array<{ id: string; service_type?: string; actual_cost?: number; created_at?: string; [key: string]: unknown }>>([]);
-  const [archiveRequests, setArchiveRequests] = useState<Array<{ id: string; service_type?: string; actual_cost?: number; created_at?: string; [key: string]: unknown }>>([]);
+  const [completedRequests, setCompletedRequests] = useState<Array<{ 
+    id: string; 
+    service_type?: string; 
+    actual_cost?: number; 
+    created_at?: string;
+    title?: string;
+    description?: string;
+    location?: string;
+    priority?: string;
+    completion_date?: string;
+    store_id?: string;
+  }>>([]);
+  const [archiveRequests, setArchiveRequests] = useState<Array<{ 
+    id: string; 
+    service_type?: string; 
+    actual_cost?: number; 
+    created_at?: string;
+    title?: string;
+    description?: string;
+    location?: string;
+    priority?: string;
+    completion_date?: string;
+    store_id?: string;
+  }>>([]);
   const [loading, setLoading] = useState(false);
   const _navigate = useNavigate();
 
