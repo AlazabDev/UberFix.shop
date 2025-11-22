@@ -20,12 +20,12 @@ export function InteractiveMap({
   height = "400px",
   className = "",
 }: InteractiveMapProps) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerInstanceRef = useRef<google.maps.Marker | null>(null);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
-  const isInitializedRef = useRef(false);
-  const cleanupExecutedRef = useRef(false);
+  const isCleaningUpRef = useRef(false);
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentLat, setCurrentLat] = useState(latitude);
@@ -83,25 +83,26 @@ export function InteractiveMap({
   // Initialize map ONCE ONLY
   useEffect(() => {
     let isMounted = true;
-    let mapDiv: HTMLDivElement | null = null;
 
     const initMap = async () => {
       try {
-        // Prevent double initialization
-        if (isInitializedRef.current || !mapContainerRef.current) return;
+        // Check if wrapper exists
+        if (!wrapperRef.current) return;
         
         const loaded = await loadGoogleMaps();
-        if (!loaded) {
+        if (!loaded || !isMounted || !wrapperRef.current) {
           throw new Error("Failed to load Google Maps SDK");
         }
 
-        if (!isMounted || !mapContainerRef.current) return;
-
-        // Store reference to map div
-        mapDiv = mapContainerRef.current;
-
-        // Mark as initialized BEFORE creating map
-        isInitializedRef.current = true;
+        // Create a NEW div element that React won't track
+        const mapDiv = document.createElement('div');
+        mapDiv.style.width = '100%';
+        mapDiv.style.height = '100%';
+        mapDiv.style.minHeight = height;
+        
+        // Append to wrapper
+        wrapperRef.current.appendChild(mapDiv);
+        mapDivRef.current = mapDiv;
 
         // Create map instance
         const mapInstance = new google.maps.Map(mapDiv, {
@@ -111,7 +112,6 @@ export function InteractiveMap({
           streetViewControl: false,
           fullscreenControl: false,
           zoomControl: true,
-          disableDefaultUI: false,
         });
 
         // Create marker
@@ -132,7 +132,7 @@ export function InteractiveMap({
 
         // Add marker dragend listener
         markerInstance.addListener("dragend", async () => {
-          if (!isMounted) return;
+          if (!isMounted || isCleaningUpRef.current) return;
           const pos = markerInstance.getPosition();
           if (!pos) return;
 
@@ -145,12 +145,12 @@ export function InteractiveMap({
           try {
             const result = await geocoder.geocode({ location: { lat, lng } });
             const address = result.results[0]?.formatted_address;
-            if (isMounted) {
+            if (isMounted && !isCleaningUpRef.current) {
               onLocationChange?.(lat, lng, address);
               toast.success("تم تحديث الموقع");
             }
           } catch {
-            if (isMounted) {
+            if (isMounted && !isCleaningUpRef.current) {
               onLocationChange?.(lat, lng);
             }
           }
@@ -158,7 +158,7 @@ export function InteractiveMap({
 
         // Add map click listener
         mapInstance.addListener("click", async (e: google.maps.MapMouseEvent) => {
-          if (!isMounted) return;
+          if (!isMounted || isCleaningUpRef.current) return;
           if (!e.latLng) return;
 
           const lat = e.latLng.lat();
@@ -173,12 +173,12 @@ export function InteractiveMap({
           try {
             const result = await geocoder.geocode({ location: { lat, lng } });
             const address = result.results[0]?.formatted_address;
-            if (isMounted) {
+            if (isMounted && !isCleaningUpRef.current) {
               onLocationChange?.(lat, lng, address);
               toast.success("تم تحديث الموقع");
             }
           } catch {
-            if (isMounted) {
+            if (isMounted && !isCleaningUpRef.current) {
               onLocationChange?.(lat, lng);
             }
           }
@@ -198,66 +198,41 @@ export function InteractiveMap({
 
     initMap();
 
-    // CRITICAL: Comprehensive cleanup to prevent DOM errors
+    // CRITICAL: Cleanup to prevent DOM errors
     return () => {
       isMounted = false;
-
-      // Prevent double cleanup
-      if (cleanupExecutedRef.current) return;
-      cleanupExecutedRef.current = true;
+      isCleaningUpRef.current = true;
 
       try {
-        // Step 1: Remove marker completely
+        // Remove marker
         if (markerInstanceRef.current) {
           markerInstanceRef.current.setMap(null);
           google.maps.event.clearInstanceListeners(markerInstanceRef.current);
           markerInstanceRef.current = null;
         }
 
-        // Step 2: Clear ALL map event listeners
+        // Clear map listeners
         if (mapInstanceRef.current) {
           google.maps.event.clearInstanceListeners(mapInstanceRef.current);
           mapInstanceRef.current = null;
         }
 
-        // Step 3: CRITICAL - Manually remove all child nodes to prevent removeChild errors
-        if (mapDiv && mapDiv.parentNode) {
-          try {
-            // Clone the div and replace it (removes all Google Maps DOM)
-            const newDiv = mapDiv.cloneNode(false) as HTMLDivElement;
-            if (mapDiv.parentNode) {
-              mapDiv.parentNode.replaceChild(newDiv, mapDiv);
-            }
-          } catch {
-            // Fallback: remove children manually
-            while (mapDiv.firstChild) {
-              try {
-                mapDiv.removeChild(mapDiv.firstChild);
-              } catch (childError) {
-                // Ignore removeChild errors during cleanup
-                console.warn("Child removal failed (expected during cleanup):", childError);
-                break;
-              }
-            }
-          }
+        // Remove the map div we created (not tracked by React)
+        if (mapDivRef.current && mapDivRef.current.parentNode) {
+          mapDivRef.current.parentNode.removeChild(mapDivRef.current);
+          mapDivRef.current = null;
         }
 
-        // Step 4: Nullify references
         geocoderRef.current = null;
-        
-        // Reset initialization flag
-        isInitializedRef.current = false;
       } catch (error) {
-        // Ignore cleanup errors - they're expected when component unmounts
-        console.warn("Cleanup completed with warnings (expected):", error);
+        console.warn("Cleanup error (safe to ignore):", error);
       }
     };
-  }, []); // EMPTY deps - run ONCE only
+  }, []); // Run ONCE only
 
   // Update marker position when coordinates change
   useEffect(() => {
-    if (!markerInstanceRef.current || !mapInstanceRef.current) return;
-    if (!isInitializedRef.current) return;
+    if (!markerInstanceRef.current || !mapInstanceRef.current || isCleaningUpRef.current) return;
 
     try {
       const newPos = { lat: currentLat, lng: currentLng };
@@ -276,6 +251,8 @@ export function InteractiveMap({
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        if (isCleaningUpRef.current) return;
+        
         const newLat = position.coords.latitude;
         const newLng = position.coords.longitude;
         const newPos = { lat: newLat, lng: newLng };
@@ -283,7 +260,7 @@ export function InteractiveMap({
         setCurrentLat(newLat);
         setCurrentLng(newLng);
 
-        if (markerInstanceRef.current && isInitializedRef.current) {
+        if (markerInstanceRef.current) {
           try {
             markerInstanceRef.current.setPosition(newPos);
           } catch (error) {
@@ -291,7 +268,7 @@ export function InteractiveMap({
           }
         }
         
-        if (mapInstanceRef.current && isInitializedRef.current) {
+        if (mapInstanceRef.current) {
           try {
             mapInstanceRef.current.panTo(newPos);
             mapInstanceRef.current.setZoom(16);
@@ -337,9 +314,9 @@ export function InteractiveMap({
         </div>
 
         <div
-          ref={mapContainerRef}
-          style={{ height, width: "100%", minHeight: height }}
-          className="rounded-lg border overflow-hidden relative bg-muted"
+          ref={wrapperRef}
+          style={{ height, width: "100%", minHeight: height, position: 'relative' }}
+          className="rounded-lg border overflow-hidden bg-muted"
         >
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
