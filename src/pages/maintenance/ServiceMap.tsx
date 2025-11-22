@@ -174,10 +174,13 @@ export default function ServiceMap() {
           mapInstanceRef.current = new google.maps.Map(mapRef.current, {
             center: { lat: 30.0444, lng: 31.2357 },
             zoom: 13,
-            mapTypeControl: false,
+            mapTypeControl: true,
             fullscreenControl: true,
-            streetViewControl: false,
+            streetViewControl: true,
             zoomControl: true,
+            mapId: 'b41c60a3f8e58bdb15b2c668',
+            clickableIcons: true,
+            gestureHandling: 'greedy',
             styles: [
               {
                 featureType: "poi",
