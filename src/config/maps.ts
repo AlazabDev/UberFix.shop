@@ -5,7 +5,7 @@
 
 export const MAPS_CONFIG = {
   // API Key from environment variable
-  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk',
   
   // Default map settings
   defaultCenter: { lat: 30.0444, lng: 31.2357 }, // Cairo, Egypt
@@ -15,10 +15,12 @@ export const MAPS_CONFIG = {
   defaultOptions: {
     disableDefaultUI: false,
     zoomControl: true,
-    mapTypeControl: false,
-    streetViewControl: false,
+    mapTypeControl: true,
+    streetViewControl: true,
     fullscreenControl: true,
-    mapId: '8e0a97af9386fef',
+    mapId: 'b41c60a3f8e58bdb15b2c668',
+    clickableIcons: true,
+    gestureHandling: 'greedy',
   },
   
   // Libraries to load
