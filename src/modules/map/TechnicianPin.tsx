@@ -39,59 +39,32 @@ const getStatusColor = (status: TechnicianLocation['status']) => {
 };
 
 export const TechnicianPin = memo(({ technician, isSelected, onClick }: TechnicianPinProps) => {
-  const statusColor = getStatusColor(technician.status);
   const specializationStyle = getSpecializationStyle(technician.specialization);
-  
-  // استخدام الأيقونة من النظام المخصص
   const iconUrl = specializationStyle.icon;
-  const pinColor = specializationStyle.color;
 
   return (
     <div
       onClick={onClick}
       className={cn(
-        "relative flex items-center justify-center w-14 h-14 rounded-full cursor-pointer transition-all duration-300",
-        "bg-white border-4 shadow-xl hover:shadow-2xl hover:scale-110",
-        isSelected && "shadow-2xl scale-125 z-50 ring-4 ring-primary/30"
+        "relative cursor-pointer transition-all duration-200",
+        "hover:scale-110 drop-shadow-lg",
+        isSelected && "scale-125 z-50"
       )}
       style={{
-        borderColor: pinColor,
-        boxShadow: isSelected 
-          ? `0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 4px ${pinColor}40`
-          : `0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 3px ${pinColor}20`
+        width: '50px',
+        height: '50px',
+        filter: isSelected ? 'drop-shadow(0 0 8px rgba(0,0,0,0.3))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
       }}
     >
-      {/* الأيقونة الرئيسية */}
       <img
         src={iconUrl}
         alt={specializationStyle.label}
-        className="w-9 h-9 object-contain"
+        className="w-full h-full object-contain"
         loading="lazy"
         onError={(e) => {
           e.currentTarget.src = '/icons/default-pin.png';
         }}
       />
-      
-      {/* Status indicator بتأثير نبض */}
-      <div className={cn(
-        "absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white",
-        statusColor.bg,
-        technician.status === 'available' && "animate-pulse"
-      )} />
-
-      {/* Glow effect */}
-      <div 
-        className="absolute inset-0 rounded-full blur-md -z-10 opacity-40"
-        style={{ backgroundColor: pinColor }}
-      />
-
-      {/* Pulse ring عند التحديد */}
-      {isSelected && (
-        <div 
-          className="absolute inset-0 rounded-full border-2 animate-ping opacity-75"
-          style={{ borderColor: pinColor }}
-        />
-      )}
     </div>
   );
 });
