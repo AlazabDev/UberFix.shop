@@ -48,6 +48,29 @@ const ProductionReport = lazy(
 const UserManagement = lazy(
   () => import("@/pages/admin/UserManagement")
 );
+
+// Technicians
+const TechnicianRegistration = lazy(
+  () => import("@/pages/technicians/TechnicianRegistration")
+);
+const TechnicianVerification = lazy(
+  () => import("@/pages/technicians/TechnicianVerification")
+);
+const TechnicianAgreement = lazy(
+  () => import("@/pages/technicians/TechnicianAgreement")
+);
+const TechnicianTraining = lazy(
+  () => import("@/pages/technicians/TechnicianTraining")
+);
+const TechnicianDashboard = lazy(
+  () => import("@/pages/technicians/TechnicianDashboard")
+);
+const TechnicianTaskManagement = lazy(
+  () => import("@/pages/technicians/TechnicianTaskManagement")
+);
+const HallOfExcellence = lazy(
+  () => import("@/pages/technicians/HallOfExcellence")
+);
 const AdminControlCenter = lazy(
   () => import("@/pages/admin/AdminControlCenter")
 );
@@ -145,6 +168,15 @@ export const protectedRoutes = [
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
   { path: "/users", element: <UsersPage />, withLayout: true },
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
+
+  // Technicians Module
+  { path: "/technicians/register", element: <TechnicianRegistration />, withLayout: true },
+  { path: "/technicians/verification", element: <TechnicianVerification />, withLayout: true },
+  { path: "/technicians/agreement", element: <TechnicianAgreement />, withLayout: true },
+  { path: "/technicians/training", element: <TechnicianTraining />, withLayout: true },
+  { path: "/technicians/dashboard", element: <TechnicianDashboard />, withLayout: true },
+  { path: "/technicians/tasks", element: <TechnicianTaskManagement />, withLayout: true },
+  { path: "/hall-of-excellence", element: <HallOfExcellence />, withLayout: true },
 
   // Messages
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },
