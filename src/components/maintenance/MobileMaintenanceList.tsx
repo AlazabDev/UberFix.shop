@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, 
   Search, 
-  Filter, 
   RefreshCw,
   AlertCircle,
   Clock,
@@ -27,12 +26,10 @@ interface MobileMaintenanceListProps {
 }
 
 export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceListProps) {
-  const navigate = useNavigate();
   const { requests, loading, error, refetch } = useMaintenanceRequests();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
 
   const filteredRequests = useMemo(() => {
     return requests?.filter(request => {

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { AlertCircle, RefreshCw, WifiOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 

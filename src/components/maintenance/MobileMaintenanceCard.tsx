@@ -10,22 +10,34 @@ import {
   Phone, 
   DollarSign, 
   MapPin, 
-  Clock, 
   Star,
   User,
   Wrench,
   AlertCircle
 } from "lucide-react";
-import { MaintenanceRequestDetails } from "./MaintenanceRequestDetails";
 import { MaintenanceRequestActions } from "./MaintenanceRequestActions";
 
+interface MaintenanceRequest {
+  id: string;
+  title?: string;
+  status: string;
+  priority?: string;
+  client_name?: string;
+  client_phone?: string;
+  service_type?: string;
+  location?: string;
+  created_at: string;
+  actual_cost?: number;
+  estimated_cost?: number;
+  rating?: number;
+}
+
 interface MobileMaintenanceCardProps {
-  request: any;
+  request: MaintenanceRequest;
 }
 
 export function MobileMaintenanceCard({ request }: MobileMaintenanceCardProps) {
   const navigate = useNavigate();
-  const [showDetails, setShowDetails] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
   const getStatusBadge = (status: string) => {
