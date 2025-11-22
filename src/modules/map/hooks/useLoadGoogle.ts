@@ -10,33 +10,38 @@ export const useLoadGoogle = () => {
       return;
     }
 
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-    
-    if (!apiKey) {
-      setLoadError(new Error('Google Maps API key not configured'));
-      return;
-    }
+    const loadGoogleMapsAPI = async () => {
+      try {
+        // جلب API Key من Supabase Functions
+        const response = await fetch('https://zrrffsjbfkphridqyais.supabase.co/functions/v1/get-google-maps-key');
+        const data = await response.json();
+        
+        if (!data.apiKey) {
+          setLoadError(new Error('Google Maps API key not configured'));
+          return;
+        }
 
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker,places,geometry&language=ar&region=EG&v=weekly`;
-    script.async = true;
-    script.defer = true;
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=marker,places,geometry&language=ar&region=EG&v=weekly`;
+        script.async = true;
+        script.defer = true;
 
-    script.onload = () => {
-      setIsLoaded(true);
-    };
+        script.onload = () => {
+          setIsLoaded(true);
+        };
 
-    script.onerror = () => {
-      setLoadError(new Error('Failed to load Google Maps script'));
-    };
+        script.onerror = () => {
+          setLoadError(new Error('Failed to load Google Maps script'));
+        };
 
-    document.head.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
+        document.head.appendChild(script);
+      } catch (error) {
+        console.error('Error loading Google Maps API:', error);
+        setLoadError(error as Error);
       }
     };
+
+    loadGoogleMapsAPI();
   }, []);
 
   return { isLoaded, loadError };
