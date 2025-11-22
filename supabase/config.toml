@@ -87,3 +87,6 @@ verify_jwt = false
 
 [functions.twilio-fallback]
 verify_jwt = false
+
+[functions.send-approval-email]
+verify_jwt = false
