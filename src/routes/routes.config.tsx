@@ -14,7 +14,7 @@ const RequestLifecycleJourney = lazy(
   () => import("@/pages/maintenance/RequestLifecycleJourney")
 );
 const ServiceRequest = lazy(() => import("@/pages/maintenance/ServiceRequest"));
-const ServiceMap = lazy(() => import("@/pages/maintenance/ServiceMap"));
+const Map = lazy(() => import("@/pages/Map"));
 const EmergencyService = lazy(
   () => import("@/pages/maintenance/EmergencyService")
 );
@@ -168,7 +168,8 @@ export const protectedRoutes = [
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
 
   // No layout
-  { path: "/service-map", element: <ServiceMap />, withLayout: false },
+  { path: "/service-map", element: <Map />, withLayout: false },
+  { path: "/map", element: <Map />, withLayout: false },
   { path: "/emergency-service/:technicianId", element: <EmergencyService />, withLayout: false },
   { path: "/inbox", element: <Inbox />, withLayout: false }
 ];
