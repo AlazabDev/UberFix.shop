@@ -25,6 +25,8 @@ const Map = lazy(() => import("@/pages/Map"));
 const PWASettings = lazy(() => import("@/pages/settings/PWASettings"));
 const QuickRequest = lazy(() => import("@/pages/QuickRequest"));
 const QuickRequestFromMap = lazy(() => import("@/pages/QuickRequestFromMap"));
+const TrackOrders = lazy(() => import("@/pages/TrackOrders"));
+const CompletedServices = lazy(() => import("@/pages/CompletedServices"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
@@ -51,5 +53,7 @@ export const publicRoutes = [
   { path: "/pwa-settings", element: <PWASettings /> },
   { path: "/quick-request/:propertyId", element: <QuickRequest /> },
   { path: "/quick-request", element: <QuickRequestFromMap /> },
+  { path: "/track-orders", element: <TrackOrders /> },
+  { path: "/completed-services", element: <CompletedServices /> },
   { path: "*", element: <NotFound /> },
 ];
