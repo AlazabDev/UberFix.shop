@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, User, MapPin, Phone, Star } from "lucide-react";
+import { Search, User, MapPin, Phone, Star, FileText, Home, ClipboardList, Settings as SettingsIcon, Cog, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +8,17 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { loadGoogleMaps } from "@/lib/googleMapsLoader";
 import { useTechnicians } from "@/hooks/useTechnicians";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { NotificationsList } from "@/components/notifications/NotificationsList";
 
 const specialties = [
   { id: "paint", label: "دهان", icon: "🎨" },
@@ -16,6 +27,14 @@ const specialties = [
   { id: "plumbing", label: "سباك", icon: "🔧" },
 ];
 
+interface UserData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  role: string;
+}
+
 export default function ServiceMap() {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,8 +42,70 @@ export default function ServiceMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   const { technicians, loading } = useTechnicians();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, avatar_url, role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setUserData({
+        email: user.email || "",
+        firstName: profile?.first_name || "مستخدم",
+        lastName: profile?.last_name || "",
+        avatarUrl: profile?.avatar_url || null,
+        role: profile?.role === "admin" ? "مسؤول" : 
+              profile?.role === "manager" ? "مدير" :
+              profile?.role === "staff" ? "موظف" :
+              profile?.role === "vendor" ? "فني" : "عميل"
+      });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "تم تسجيل الخروج",
+        description: "نراك قريباً",
+      });
+      navigate("/login");
+    } catch {
+      toast({
+        title: "خطأ",
+        description: "فشل في تسجيل الخروج",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getInitials = () => {
+    if (!userData) return "م";
+    const first = userData.firstName?.charAt(0) || "";
+    const last = userData.lastName?.charAt(0) || "";
+    return `${first}${last}` || "م";
+  };
+
+  const getFullName = () => {
+    if (!userData) return "المستخدم";
+    return `${userData.firstName} ${userData.lastName}`.trim() || "المستخدم";
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -160,137 +241,206 @@ export default function ServiceMap() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] flex flex-col" dir="rtl">
-      {/* Header */}
-      <header className="bg-[#0B0B3B] text-white px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-background flex flex-col" dir="rtl">
+      {/* Unified Header */}
+      <header className="bg-card/95 backdrop-blur-md border-b border-border/50 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#F5BF23] rounded-full flex items-center justify-center">
-            <Phone className="w-5 h-5 text-[#0B0B3B]" />
+          <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="relative">
+              <span className="text-primary-foreground font-bold text-base">A</span>
+              <Cog className="absolute -top-1 -right-1 h-2.5 w-2.5 text-primary-foreground/80 animate-spin" style={{ animationDuration: '8s' }} />
+            </div>
           </div>
-          <div className="text-right">
-            <h1 className="text-xl font-bold">UberFix.shop</h1>
-            <p className="text-xs text-gray-300">خدمات الصيانة المنزلية</p>
+          <div className="hidden sm:block">
+            <h1 className="text-lg font-bold text-primary">UberFix.shop</h1>
+            <p className="text-xs text-muted-foreground">خريطة الخدمات</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white hover:bg-white/10"
-        >
-          <User className="w-5 h-5" />
-        </Button>
+
+        {/* User Profile */}
+        <div className="flex items-center gap-3">
+          <NotificationsList />
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-200 p-1 rounded-xl"
+              >
+                <Avatar className="h-9 w-9 border-2 border-primary/30 shadow-lg ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
+                  <AvatarImage 
+                    src={userData?.avatarUrl || "/lovable-uploads/fb9d438e-077d-4ce0-997b-709c295e2b35.png"} 
+                    alt={getFullName()} 
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-bold text-sm">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden lg:block text-right">
+                  <p className="text-sm font-semibold text-foreground">{getFullName()}</p>
+                  <p className="text-xs text-muted-foreground">{userData?.role || "..."}</p>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 bg-card/95 backdrop-blur-md border-border/50 shadow-xl">
+              <DropdownMenuLabel className="text-right py-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12 border-2 border-primary/20">
+                    <AvatarImage 
+                      src={userData?.avatarUrl || "/lovable-uploads/fb9d438e-077d-4ce0-997b-709c295e2b35.png"} 
+                      alt={getFullName()} 
+                    />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-bold">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1 flex-1">
+                    <p className="text-sm font-semibold leading-none">{getFullName()}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userData?.email || "..."}
+                    </p>
+                    <span className="text-xs text-primary font-medium">{userData?.role || "..."}</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="cursor-pointer hover:bg-primary/10 transition-colors"
+                onClick={() => navigate("/settings")}
+              >
+                <User className="ml-2 h-4 w-4 text-primary" />
+                <span>الملف الشخصي</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="cursor-pointer hover:bg-primary/10 transition-colors"
+                onClick={() => navigate("/settings")}
+              >
+                <SettingsIcon className="ml-2 h-4 w-4 text-primary" />
+                <span>الإعدادات</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleLogout} 
+                className="text-destructive cursor-pointer hover:bg-destructive/10 focus:text-destructive focus:bg-destructive/10 transition-colors"
+              >
+                <LogOut className="ml-2 h-4 w-4" />
+                <span>تسجيل الخروج</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
-      {/* Search Bar */}
-      <div className="bg-white px-6 py-4 shadow-sm">
-        <div className="relative max-w-4xl mx-auto">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="ابحث عن خدمة أو موقع..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10 h-12 text-right"
-          />
-        </div>
-      </div>
-
-      {/* Specialty Filters */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
-        <div className="flex gap-2 overflow-x-auto">
-          {specialties.map((specialty) => (
-            <Button
-              key={specialty.id}
-              variant={selectedSpecialty === specialty.label ? "default" : "outline"}
-              onClick={() =>
-                setSelectedSpecialty(
-                  selectedSpecialty === specialty.label ? null : specialty.label
-                )
-              }
-              className={`whitespace-nowrap ${
-                selectedSpecialty === specialty.label
-                  ? "bg-[#0B0B3B] text-white hover:bg-[#0B0B3B]/90"
-                  : "border-gray-300"
-              }`}
-            >
-              <span className="mr-2">{specialty.icon}</span>
-              {specialty.label}
-            </Button>
-          ))}
+      {/* Search Bar and Filters Combined */}
+      <div className="bg-card border-b border-border px-4 sm:px-6 py-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="ابحث عن خدمة أو موقع..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-10 h-10 text-right"
+            />
+          </div>
+          
+          {/* Specialty Filters */}
+          <div className="flex gap-2 overflow-x-auto">
+            {specialties.map((specialty) => (
+              <Button
+                key={specialty.id}
+                variant={selectedSpecialty === specialty.label ? "default" : "outline"}
+                size="sm"
+                onClick={() =>
+                  setSelectedSpecialty(
+                    selectedSpecialty === specialty.label ? null : specialty.label
+                  )
+                }
+                className="whitespace-nowrap"
+              >
+                <span className="mr-1">{specialty.icon}</span>
+                {specialty.label}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Technicians List */}
-        <aside className="w-80 bg-white border-l border-gray-200 flex flex-col max-h-[calc(100vh-200px)]">
-          <div className="p-4 flex-shrink-0 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-[#0B0B3B] mb-1">
+        {/* Sidebar - Technicians List (تصغير 20%) */}
+        <aside className="w-64 bg-card border-l border-border flex flex-col max-h-[calc(100vh-180px)]">
+          <div className="p-3 flex-shrink-0 border-b border-border">
+            <h2 className="text-base font-bold text-foreground mb-1">
               الخدمات المتاحة ({filteredTechnicians.length})
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs text-muted-foreground">
               اختر فني من القائمة أدناه
             </p>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div className="space-y-3">
+          <div className="flex-1 overflow-y-auto px-3 py-3 scrollbar-thin scrollbar-thumb-muted scrollbar-track-muted/30">
+            <div className="space-y-2">
 
               {loading ? (
-                <div className="text-center py-8 text-gray-500">جاري التحميل...</div>
+                <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
               ) : filteredTechnicians.length > 0 ? (
                 filteredTechnicians.map((tech) => (
-                  <Card key={tech.id} className="p-4 hover:shadow-md transition-shadow">
-                    <div className="flex gap-3">
-                      <Avatar className="w-12 h-12">
+                  <Card key={tech.id} className="p-3 hover:shadow-md transition-shadow">
+                    <div className="flex gap-2">
+                      <Avatar className="w-10 h-10">
                         <AvatarImage src={tech.profile_image || undefined} />
-                        <AvatarFallback className="bg-[#F5BF23] text-[#0B0B3B]">
+                        <AvatarFallback className="bg-primary text-primary-foreground">
                           {tech.name?.charAt(0) || "ف"}
                         </AvatarFallback>
                       </Avatar>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <h3 className="font-semibold text-[#0B0B3B]">
+                        <div className="flex items-start justify-between gap-1 mb-0.5">
+                          <h3 className="text-sm font-semibold text-foreground">
                             {tech.name || "فني"}
                           </h3>
                           <Badge
                             variant="secondary"
                             className={
                               tech.status === "online"
-                                ? "bg-green-100 text-green-700"
+                                ? "bg-green-100 text-green-700 text-xs"
                                 : tech.status === "busy"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-gray-100 text-gray-700"
+                                ? "bg-yellow-100 text-yellow-700 text-xs"
+                                : "bg-muted text-muted-foreground text-xs"
                             }
                           >
                             {tech.status === "online"
-                              ? "متاح الآن"
+                              ? "متاح"
                               : tech.status === "busy"
                               ? "مشغول"
                               : "غير متاح"}
                           </Badge>
                         </div>
 
-                        <p className="text-sm text-gray-600 mb-2">
+                        <p className="text-xs text-muted-foreground mb-1.5">
                           {tech.specialization || "فني عام"}
                         </p>
 
-                        <div className="flex items-center gap-3 text-sm mb-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-[#F5BF23] text-[#F5BF23]" />
+                        <div className="flex items-center gap-2 text-xs mb-1.5">
+                          <div className="flex items-center gap-0.5">
+                            <Star className="w-3 h-3 fill-primary text-primary" />
                             <span className="font-medium">
                               {tech.rating || "5.0"}
                             </span>
-                            <span className="text-gray-500">
-                              ({tech.total_reviews || 0} تقييم)
+                            <span className="text-muted-foreground">
+                              ({tech.total_reviews || 0})
                             </span>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">
-                            {tech.hourly_rate || 150} جنيه/ساعة
+                          <span className="text-xs text-muted-foreground">
+                            {tech.hourly_rate || 150} ج/س
                           </span>
                           <Button
                             size="sm"
@@ -298,13 +448,10 @@ export default function ServiceMap() {
                               e.preventDefault();
                               e.stopPropagation();
                               if (tech.phone) {
-                                console.warn("📞 Calling technician:", tech.name, tech.phone);
                                 window.open(`tel:${tech.phone}`, '_self');
-                              } else {
-                                console.warn("⚠️ No phone number for technician:", tech.name);
                               }
                             }}
-                            className="bg-[#0B0B3B] hover:bg-[#0B0B3B]/90 text-white h-8 cursor-pointer"
+                            className="h-7 text-xs"
                           >
                             <Phone className="w-3 h-3 ml-1" />
                             اتصل
@@ -315,7 +462,7 @@ export default function ServiceMap() {
                   </Card>
                 ))
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground text-sm">
                   لا توجد خدمات متاحة حالياً
                 </div>
               )}
@@ -326,15 +473,15 @@ export default function ServiceMap() {
         {/* Map Area */}
         <main className="flex-1 relative">
           {mapError ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-8 h-8 text-red-500" />
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              <div className="text-center p-8 bg-card rounded-lg shadow-md max-w-md">
+                <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="w-8 h-8 text-destructive" />
                 </div>
-                <h3 className="text-xl font-bold text-[#0B0B3B] mb-2">
+                <h3 className="text-xl font-bold text-foreground mb-2">
                   عذرًا، حدث خطأ!
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   لم يمكن تحميل خريطة Google. يرجى المحاولة مرة أخرى لاحقاً.
                 </p>
               </div>
@@ -346,25 +493,41 @@ export default function ServiceMap() {
       </div>
 
       {/* Bottom Navigation */}
-      <nav className="bg-white border-t border-gray-200 px-6 py-3 flex items-center justify-around">
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <User className="w-5 h-5" />
-          <span>الملف الشخصي</span>
+      <nav className="bg-card border-t border-border px-4 py-2 flex items-center justify-around">
+        <Button 
+          variant="ghost" 
+          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
+          onClick={() => navigate("/")}
+        >
+          <Home className="w-5 h-5" />
+          <span>الرئيسية</span>
         </Button>
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <MapPin className="w-5 h-5" />
+        <Button 
+          variant="ghost" 
+          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
+          onClick={() => navigate("/invoices")}
+        >
+          <FileText className="w-5 h-5" />
           <span>الفواتير</span>
         </Button>
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <Star className="w-5 h-5" />
-          <span>الخدمات المكتملة</span>
+        <Button 
+          variant="ghost" 
+          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
+          onClick={() => navigate("/requests")}
+        >
+          <ClipboardList className="w-5 h-5" />
+          <span>الطلبات</span>
         </Button>
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <Phone className="w-5 h-5" />
-          <span>تتبع الطلبات</span>
+        <Button 
+          variant="ghost" 
+          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
+          onClick={() => navigate("/settings")}
+        >
+          <SettingsIcon className="w-5 h-5" />
+          <span>الإعدادات</span>
         </Button>
         <Button
-          className="flex flex-col items-center gap-1 text-xs bg-[#0B0B3B] hover:bg-[#0B0B3B]/90 text-white px-6"
+          className="flex flex-col items-center gap-0.5 text-xs bg-primary hover:bg-primary/90 px-4"
         >
           <MapPin className="w-5 h-5" />
           <span>الخريطة</span>
