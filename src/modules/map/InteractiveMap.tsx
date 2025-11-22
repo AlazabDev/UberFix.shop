@@ -12,8 +12,10 @@ import { MapPin, BranchLocation as BranchType, TechnicianLocation } from './type
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import ReactDOM from 'react-dom/client';
+import { useNavigate } from 'react-router-dom';
 
 export const InteractiveMap = () => {
+  const navigate = useNavigate();
   const { isLoaded, loadError } = useLoadGoogle();
   const { branches, loading: branchesLoading } = useBranchLocations();
   const { technicians, loading: techniciansLoading } = useTechnicians();
@@ -189,6 +191,22 @@ export const InteractiveMap = () => {
     );
   }, [technicianPins, handlePinClick]);
 
+  const handleRequestService = useCallback((technicianId: string) => {
+    // حفظ بيانات الفني في sessionStorage للاستخدام في صفحة الطلب
+    const tech = technicianPins.find(t => t.id === technicianId);
+    if (tech) {
+      sessionStorage.setItem('selectedTechnician', JSON.stringify(tech));
+      navigate('/quick-request');
+    }
+  }, [technicianPins, navigate]);
+
+  const handleContact = useCallback((technicianId: string) => {
+    const tech = technicianPins.find(t => t.id === technicianId);
+    if (tech?.phone) {
+      window.location.href = `tel:${tech.phone}`;
+    }
+  }, [technicianPins]);
+
   if (loadError) {
     return (
       <div className="h-screen flex items-center justify-center bg-muted">
@@ -244,6 +262,8 @@ export const InteractiveMap = () => {
           technician={popup.data as TechnicianLocation}
           position={popup.position}
           onClose={closePopup}
+          onRequestService={handleRequestService}
+          onContact={handleContact}
         />
       )}
     </div>
