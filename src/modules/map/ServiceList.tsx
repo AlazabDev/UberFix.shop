@@ -3,6 +3,7 @@ import { Star, MapPin } from 'lucide-react';
 import { TechnicianLocation } from './types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { getSpecializationStyle } from '@/lib/technicianIcons';
 
 interface ServiceListProps {
   technicians: TechnicianLocation[];
@@ -88,21 +89,36 @@ export const ServiceList = memo(({
                     : "bg-card border-border hover:border-primary/50 hover:bg-card/80"
                 )}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground text-base mb-1">{tech.name}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {getSpecializationLabel(tech.specialization)}
-                    </p>
+                <div className="flex items-start gap-3 mb-2">
+                  {/* أيقونة التخصص */}
+                  <div 
+                    className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md"
+                    style={{ backgroundColor: getSpecializationStyle(tech.specialization).color }}
+                  >
+                    <img
+                      src={getSpecializationStyle(tech.specialization).icon}
+                      alt={getSpecializationStyle(tech.specialization).label}
+                      className="w-7 h-7 object-contain"
+                      loading="lazy"
+                    />
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className={cn(
-                      "w-2.5 h-2.5 rounded-full flex-shrink-0 animate-pulse",
-                      getStatusColor(tech.status)
-                    )} />
-                    <span className="text-[10px] text-muted-foreground">
-                      {getStatusLabel(tech.status)}
-                    </span>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-1">
+                      <h4 className="font-bold text-foreground text-base truncate">{tech.name}</h4>
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0 mr-2">
+                        <div className={cn(
+                          "w-2.5 h-2.5 rounded-full flex-shrink-0 animate-pulse",
+                          getStatusColor(tech.status)
+                        )} />
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          {getStatusLabel(tech.status)}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {getSpecializationStyle(tech.specialization).label}
+                    </p>
                   </div>
                 </div>
 
