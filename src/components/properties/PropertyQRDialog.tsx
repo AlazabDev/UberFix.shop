@@ -27,8 +27,7 @@ export function PropertyQRDialog({
 
   const qrUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    const base = `${window.location.origin}/quick-request/${propertyId}`;
-    return `${base}?locale=${language}`;
+    return `${window.location.origin}/quick-request/${propertyId}?locale=${language}`;
   }, [propertyId, language]);
 
   const copyToClipboard = () => {
