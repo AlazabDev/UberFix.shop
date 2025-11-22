@@ -181,12 +181,6 @@ export default function ServiceMap() {
             mapId: 'b41c60a3f8e58bdb15b2c668',
             clickableIcons: true,
             gestureHandling: 'greedy',
-            styles: [
-              {
-                featureType: "poi",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
           });
           
           console.warn("✅ Map instance created successfully");
@@ -244,14 +238,54 @@ export default function ServiceMap() {
         console.log(`Branch: ${branch.branch}, lat: ${lat}, lng: ${lng}`);
         
         if (!isNaN(lat) && !isNaN(lng) && lat >= 20 && lat <= 35 && lng >= 25 && lng <= 40) {
+          // Create custom pin element for branch
+          const pinElement = document.createElement('div');
+          pinElement.innerHTML = `
+            <div style="
+              width: 40px;
+              height: 40px;
+              background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+              border-radius: 50% 50% 50% 0;
+              transform: rotate(-45deg);
+              border: 3px solid white;
+              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+            ">
+              <svg style="transform: rotate(45deg);" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              </svg>
+            </div>
+          `;
+          
           const marker = new google.maps.Marker({
             position: { lat, lng },
             map: mapInstanceRef.current!,
             title: branch.branch,
             icon: {
-              url: "/icons/branch-icon.png",
-              scaledSize: new google.maps.Size(40, 40),
-              anchor: new google.maps.Point(20, 40),
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="40" height="50" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                      <feOffset dx="0" dy="2" result="offsetblur"/>
+                      <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.3"/>
+                      </feComponentTransfer>
+                      <feMerge>
+                        <feMergeNode/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <circle cx="20" cy="20" r="15" fill="#3b82f6" stroke="white" stroke-width="3" filter="url(#shadow)"/>
+                  <path d="M20 12 L20 20 L16 24 L20 28 L24 24 L20 20" fill="white"/>
+                </svg>
+              `),
+              scaledSize: new google.maps.Size(40, 50),
+              anchor: new google.maps.Point(20, 50),
             },
           });
 
@@ -318,15 +352,39 @@ export default function ServiceMap() {
         ? tech.status 
         : "soon";
 
+      // Choose color based on status
+      const statusColor = techStatus === "available" ? "#10b981" : 
+                         techStatus === "busy" ? "#ef4444" : "#f59e0b";
+      
       const marker = new google.maps.Marker({
         position: { lat, lng },
         map: mapInstanceRef.current!,
         title: tech.name || "فني",
         icon: {
-          url: `/icons/technicians/${randomTechnicianIcons[iconIndex]}`,
-          scaledSize: new google.maps.Size(45, 45),
-          anchor: new google.maps.Point(22.5, 45),
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="50" height="60" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="shadow${i}" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                  <feOffset dx="0" dy="2" result="offsetblur"/>
+                  <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.4"/>
+                  </feComponentTransfer>
+                  <feMerge>
+                    <feMergeNode/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <circle cx="25" cy="25" r="18" fill="${statusColor}" stroke="white" stroke-width="3" filter="url(#shadow${i})"/>
+              <path d="M25 15 L25 25 L30 30 M25 25 L20 30" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              <circle cx="25" cy="25" r="2" fill="white"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(50, 60),
+          anchor: new google.maps.Point(25, 60),
         },
+        optimized: false,
       });
 
       // Create info window for technician
