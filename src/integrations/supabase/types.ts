@@ -1285,7 +1285,7 @@ export type Database = {
           city_id: number | null
           code: string | null
           created_at: string
-          created_by: string | null
+          created_by: string
           description: string | null
           district_id: number | null
           floors: number | null
@@ -1319,7 +1319,7 @@ export type Database = {
           city_id?: number | null
           code?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by: string
           description?: string | null
           district_id?: number | null
           floors?: number | null
@@ -1353,7 +1353,7 @@ export type Database = {
           city_id?: number | null
           code?: string | null
           created_at?: string
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           district_id?: number | null
           floors?: number | null
@@ -2353,6 +2353,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_email_confirmed: { Args: never; Returns: boolean }
       is_staff:
         | { Args: { uid: string }; Returns: boolean }
         | { Args: never; Returns: boolean }
