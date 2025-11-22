@@ -469,9 +469,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label>مدير الصيانة</Label>
-          <Button type="button" variant="outline" className="w-full justify-start">
-            تحديد مدير للصيانة
-          </Button>
+          <Input 
+            placeholder="أدخل اسم مدير الصيانة" 
+            defaultValue=""
+          />
           <p className="text-xs text-muted-foreground">
             متاح لجميع مديري الصيانة
           </p>
@@ -479,9 +480,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
         <div className="space-y-2">
           <Label>مشرف العقار</Label>
-          <Button type="button" variant="outline" className="w-full justify-start">
-            تحديد مشرف العقار
-          </Button>
+          <Input 
+            placeholder="أدخل اسم مشرف العقار" 
+            defaultValue=""
+          />
           <p className="text-xs text-muted-foreground">
             متاح لجميع مشرفي العقارات
           </p>
