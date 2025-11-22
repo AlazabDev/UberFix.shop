@@ -23,18 +23,6 @@ export const ServiceList = memo(({
     return technicians.filter(t => t.specialization === specializationFilter);
   }, [technicians, specializationFilter]);
 
-  const getSpecializationLabel = (spec: string) => {
-    const labels: Record<string, string> = {
-      plumber: 'سباك',
-      carpenter: 'نجار',
-      electrician: 'كهربائي',
-      painter: 'دهان',
-      ac_technician: 'فني تكييف',
-      general_maintenance: 'صيانة عامة',
-    };
-    return labels[spec] || spec;
-  };
-
   const getStatusLabel = (status: TechnicianLocation['status']) => {
     switch (status) {
       case 'available':
@@ -62,20 +50,20 @@ export const ServiceList = memo(({
   };
 
   return (
-    <div className="absolute top-20 right-4 w-80 bg-background/95 backdrop-blur-sm border border-border rounded-xl shadow-2xl z-[500] max-h-[calc(100vh-8rem)] overflow-hidden">
-      <div className="p-4 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
-        <h3 className="text-lg font-bold text-foreground">الفنيين المتاحين</h3>
-        <p className="text-sm text-muted-foreground">
-          {filteredTechnicians.length} فني {specializationFilter ? `(${getSpecializationLabel(specializationFilter)})` : ''}
+    <div className="absolute top-20 right-4 w-56 bg-background/95 backdrop-blur-sm border border-border rounded-xl shadow-2xl z-[500] max-h-[calc(100vh-8rem)] overflow-hidden">
+      <div className="p-3 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
+        <h3 className="text-base font-bold text-foreground">الفنيين المتاحين</h3>
+        <p className="text-xs text-muted-foreground">
+          {filteredTechnicians.length} فني {specializationFilter ? `(${getSpecializationStyle(specializationFilter).label})` : ''}
         </p>
       </div>
       
       <ScrollArea className="h-[calc(100vh-16rem)]">
-        <div className="p-3 space-y-2">
+        <div className="p-2 space-y-2">
           {filteredTechnicians.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <MapPin className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">لا يوجد فنيين متاحين حالياً</p>
+              <MapPin className="w-10 h-10 mx-auto mb-2 opacity-50" />
+              <p className="text-xs">لا يوجد فنيين متاحين حالياً</p>
             </div>
           ) : (
             filteredTechnicians.map((tech) => (
@@ -83,69 +71,69 @@ export const ServiceList = memo(({
                 key={tech.id}
                 onClick={() => onSelect(tech.id)}
                 className={cn(
-                  "w-full p-4 rounded-lg border transition-all text-right hover:shadow-lg",
+                  "w-full p-3 rounded-lg border transition-all text-right hover:shadow-lg",
                   selectedId === tech.id
                     ? "bg-primary/15 border-primary shadow-md ring-2 ring-primary/30"
                     : "bg-card border-border hover:border-primary/50 hover:bg-card/80"
                 )}
               >
-                <div className="flex items-start gap-3 mb-2">
+                <div className="flex items-start gap-2 mb-2">
                   {/* أيقونة التخصص */}
                   <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md"
+                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md"
                     style={{ backgroundColor: getSpecializationStyle(tech.specialization).color }}
                   >
                     <img
                       src={getSpecializationStyle(tech.specialization).icon}
                       alt={getSpecializationStyle(tech.specialization).label}
-                      className="w-7 h-7 object-contain"
+                      className="w-6 h-6 object-contain"
                       loading="lazy"
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-1">
-                      <h4 className="font-bold text-foreground text-base truncate">{tech.name}</h4>
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0 mr-2">
+                      <h4 className="font-bold text-foreground text-sm truncate">{tech.name}</h4>
+                      <div className="flex flex-col items-end gap-0.5 flex-shrink-0 mr-1">
                         <div className={cn(
-                          "w-2.5 h-2.5 rounded-full flex-shrink-0 animate-pulse",
+                          "w-2 h-2 rounded-full flex-shrink-0 animate-pulse",
                           getStatusColor(tech.status)
                         )} />
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        <span className="text-[9px] text-muted-foreground whitespace-nowrap">
                           {getStatusLabel(tech.status)}
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] text-muted-foreground">
                       {getSpecializationStyle(tech.specialization).label}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 mb-2">
+                <div className="flex items-center gap-0.5 mb-1.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
                       className={cn(
-                        "w-3.5 h-3.5",
+                        "w-3 h-3",
                         i < Math.floor(tech.rating)
                           ? "fill-yellow-400 text-yellow-400"
                           : "fill-gray-200 text-gray-200"
                       )}
                     />
                   ))}
-                  <span className="text-xs font-bold text-foreground mr-1">
+                  <span className="text-xs font-bold text-foreground mr-0.5">
                     {tech.rating.toFixed(1)}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({tech.total_reviews} تقييم)
+                  <span className="text-[10px] text-muted-foreground">
+                    ({tech.total_reviews})
                   </span>
                 </div>
 
                 {tech.hourly_rate && (
-                  <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-border/50">
-                    <span className="text-muted-foreground">السعر:</span>
-                    <span className="text-primary font-bold">{tech.hourly_rate} ج/ساعة</span>
+                  <div className="flex items-center justify-between text-xs mt-1.5 pt-1.5 border-t border-border/50">
+                    <span className="text-muted-foreground text-[10px]">السعر:</span>
+                    <span className="text-primary font-bold text-xs">{tech.hourly_rate} ج/س</span>
                   </div>
                 )}
               </button>
