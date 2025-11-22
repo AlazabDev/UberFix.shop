@@ -12,94 +12,9 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-      manifest: {
-        name: 'UberFix.shop - نظام إدارة الصيانة',
-        short_name: 'UberFix',
-        description: 'نظام إدارة طلبات الصيانة المتطور',
-        theme_color: '#3b82f6',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
-        lang: 'ar',
-        dir: 'rtl',
-        icons: [
-          {
-            src: 'https://storage.googleapis.com/gpt-engineer-file-uploads/dmiUcYug6mgFnkhRfrySrDYZmFR2/uploads/1762298790053-uber-icon.gif',
-            sizes: '192x192',
-            type: 'image/gif',
-            purpose: 'any maskable'
-          },
-          {
-            src: 'https://storage.googleapis.com/gpt-engineer-file-uploads/dmiUcYug6mgFnkhRfrySrDYZmFR2/uploads/1762298790053-uber-icon.gif',
-            sizes: '512x512',
-            type: 'image/gif',
-            purpose: 'any maskable'
-          }
-        ],
-        categories: ['business', 'productivity', 'utilities'],
-        screenshots: [
-          {
-            src: 'https://storage.googleapis.com/gpt-engineer-file-uploads/dmiUcYug6mgFnkhRfrySrDYZmFR2/social-images/social-1760689845366-d57e8678-dc97-47d6-acfc-ba08731d8d90-1635294513.webp',
-            sizes: '1280x720',
-            type: 'image/webp',
-            form_factor: 'wide'
-          }
-        ]
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,gif,jpg,jpeg,woff,woff2,ttf}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/maps\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-maps-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/storage\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          }
-        ],
-        cleanupOutdatedCaches: true,
-        skipWaiting: true,
-        clientsClaim: true
-      },
-      devOptions: {
-        enabled: false
-      }
-    })
+    // PWA plugin temporarily disabled due to build issues
+    // Will be re-enabled after dependency resolution
+    // VitePWA({...})
   ].filter(Boolean),
   resolve: {
     alias: {
