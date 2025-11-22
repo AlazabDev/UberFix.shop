@@ -18,7 +18,7 @@ interface TechnicianInfoWindowProps {
 
 export const TechnicianInfoWindow = ({ 
   name, 
-  specialization, 
+  specialization: _specialization, 
   rating = 4.7,
   totalReviews = 82,
   phone,

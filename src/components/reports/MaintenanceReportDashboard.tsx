@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { 
   BarChart, 
   Bar, 
@@ -18,24 +18,18 @@ import {
   LineChart, 
   Line 
 } from "recharts";
-import { Calendar, Download, RefreshCw, Eye, FileText } from "lucide-react";
+import { Download, RefreshCw, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const COLORS = {
-  completed: 'hsl(var(--success))',
-  in_progress: 'hsl(var(--primary))',
-  pending: 'hsl(var(--warning))',
-};
-
 export function MaintenanceReportDashboard() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [completedRequests, setCompletedRequests] = useState<any[]>([]);
-  const [archiveRequests, setArchiveRequests] = useState<any[]>([]);
+  const [completedRequests, setCompletedRequests] = useState<Array<{ id: string; service_type?: string; actual_cost?: number; created_at?: string; [key: string]: unknown }>>([]);
+  const [archiveRequests, setArchiveRequests] = useState<Array<{ id: string; service_type?: string; actual_cost?: number; created_at?: string; [key: string]: unknown }>>([]);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -65,6 +59,7 @@ export function MaintenanceReportDashboard() {
 
   useEffect(() => {
     fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   const allCompleted = [...completedRequests, ...archiveRequests];
@@ -73,8 +68,8 @@ export function MaintenanceReportDashboard() {
   const averageCost = totalCompleted > 0 ? totalCost / totalCompleted : 0;
 
   // Group by service type
-  const serviceTypeData = allCompleted.reduce((acc: any[], req) => {
-    const serviceType = req.service_type || 'غير محدد';
+  const serviceTypeData = allCompleted.reduce((acc: Array<{ name: string; value: number; totalCost: number }>, req) => {
+    const serviceType = (req.service_type as string) || 'غير محدد';
     const existing = acc.find(item => item.name === serviceType);
     if (existing) {
       existing.value++;
@@ -87,11 +82,11 @@ export function MaintenanceReportDashboard() {
       });
     }
     return acc;
-  }, []);
+  }, [] as Array<{ name: string; value: number; totalCost: number }>);
 
   // Group by month for timeline
-  const monthlyData = allCompleted.reduce((acc: any[], req) => {
-    const month = format(new Date(req.created_at), 'yyyy-MM');
+  const monthlyData = allCompleted.reduce((acc: Array<{ month: string; count: number; cost: number }>, req) => {
+    const month = req.created_at ? format(new Date(req.created_at as string), 'yyyy-MM') : 'غير محدد';
     const existing = acc.find(item => item.month === month);
     if (existing) {
       existing.count++;
@@ -104,7 +99,7 @@ export function MaintenanceReportDashboard() {
       });
     }
     return acc;
-  }, []).sort((a, b) => a.month.localeCompare(b.month));
+  }, [] as Array<{ month: string; count: number; cost: number }>).sort((a, b) => a.month.localeCompare(b.month));
 
   return (
     <div className="space-y-6">

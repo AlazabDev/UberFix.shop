@@ -178,9 +178,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       setUploadProgress(100);
       return publicUrl;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير معروف';
       console.error("Image upload error:", error);
-      setStorageError(error.message);
+      setStorageError(errorMessage);
       return null;
     }
   };
@@ -248,7 +249,7 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         
         toast.success("تم تحديث العقار بنجاح");
       } else {
-        const { data: newProperty, error } = await supabase
+        const { error } = await supabase
           .from("properties")
           .insert([propertyData])
           .select()
@@ -273,9 +274,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         }, 1500);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving property:", error);
-      toast.error(error?.message || "حدث خطأ أثناء حفظ العقار");
+      const errorMsg = error instanceof Error ? error.message : "حدث خطأ أثناء حفظ العقار";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
       setUploadProgress(0);
