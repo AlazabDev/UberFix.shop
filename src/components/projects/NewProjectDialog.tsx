@@ -6,8 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Loader2 } from "lucide-react";
@@ -57,10 +56,11 @@ export function NewProjectDialog({ onSuccess }: NewProjectDialogProps) {
       setOpen(false);
       form.reset();
       onSuccess?.();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "حدث خطأ غير متوقع";
       toast({
         title: "خطأ في إنشاء المشروع",
-        description: error.message,
+        description: errorMsg,
         variant: "destructive",
       });
     }

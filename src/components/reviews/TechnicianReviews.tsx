@@ -24,7 +24,7 @@ interface TechnicianReviewsProps {
 
 export function TechnicianReviews({
   technicianId,
-  technicianName,
+  technicianName: _technicianName,
   rating,
   totalReviews
 }: TechnicianReviewsProps) {
@@ -35,7 +35,7 @@ export function TechnicianReviews({
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('reviews')
         .select('*')
         .eq('technician_id', technicianId)
@@ -52,6 +52,7 @@ export function TechnicianReviews({
 
   useEffect(() => {
     fetchReviews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [technicianId]);
 
   return (

@@ -91,7 +91,7 @@ export function AddReviewDialog({
       const imageUrls: string[] = [];
       for (const file of selectedImages) {
         const fileName = `${user.id}/${Date.now()}_${file.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('review-images')
           .upload(fileName, file);
 
@@ -105,7 +105,7 @@ export function AddReviewDialog({
       }
 
       // Insert review
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('reviews')
         .insert({
           technician_id: technicianId,

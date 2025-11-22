@@ -3,6 +3,8 @@
  * Handles push notification subscription and management
  */
 
+import { supabase } from '@/integrations/supabase/client';
+
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
 export class PushNotificationManager {
@@ -144,8 +146,6 @@ export class PushNotificationManager {
    */
   private async sendSubscriptionToServer(subscription: PushSubscription): Promise<void> {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('User not authenticated');

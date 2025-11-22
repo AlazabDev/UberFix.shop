@@ -3,27 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
-interface ExpenseData {
-  category: string;
-  total: number;
-  count: number;
-}
-
 export function ExpenseReport() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [expenses, setExpenses] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchExpenses = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error }: { data: Array<Record<string, unknown>> | null; error: unknown } = await supabase
         .from('expenses')
         .select('*')
         .gte('expense_date', startDate)
@@ -41,15 +35,15 @@ export function ExpenseReport() {
 
   useEffect(() => {
     fetchExpenses();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, fetchExpenses]);
 
-  const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+  const totalExpenses = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const maintenanceExpenses = expenses.filter(e => e.category === 'maintenance')
-    .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    .reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const servicesExpenses = expenses.filter(e => e.category === 'services')
-    .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    .reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const otherExpenses = expenses.filter(e => e.category === 'other')
-    .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    .reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
 
   return (
     <div className="space-y-6">

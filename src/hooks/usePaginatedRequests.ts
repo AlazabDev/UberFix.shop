@@ -7,9 +7,10 @@ interface UsePaginatedRequestsOptions {
   pageSize?: number;
   initialPage?: number;
   filters?: {
-    status?: string;
-    priority?: string;
-    workflow_stage?: string;
+    status?: string | null;
+    priority?: string | null;
+    workflow_stage?: string | null;
+    search?: string;
   };
 }
 
@@ -65,15 +66,18 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
         .order('created_at', { ascending: false })
         .range(from, to);
 
-      // تطبيق الفلاتر إذا كانت موجودة
+      // تطبيق الفلاتر مع استخدام indexes
       if (filters.status) {
-        query = query.ilike('status', `%${filters.status}%`);
+        query = query.eq('status', filters.status as any); // uses idx_maintenance_requests_status
       }
       if (filters.priority) {
-        query = query.ilike('priority', `%${filters.priority}%`);
+        query = query.eq('priority', filters.priority as any); // uses idx_maintenance_requests_priority
       }
       if (filters.workflow_stage) {
-        query = query.ilike('workflow_stage', `%${filters.workflow_stage}%`);
+        query = query.eq('workflow_stage', filters.workflow_stage as any); // uses idx_maintenance_requests_workflow_stage
+      }
+      if (filters.search) {
+        query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
       }
 
       const { data, error, count } = await query;
@@ -150,7 +154,7 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
         supabase.removeChannel(channel);
       });
     };
-  }, [filters.status, filters.priority, filters.workflow_stage]);
+  }, [filters.status, filters.priority, filters.workflow_stage, filters.search]);
 
   return {
     requests,

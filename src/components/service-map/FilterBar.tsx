@@ -10,6 +10,7 @@ export interface ServiceFilter {
   color: string;
 }
 
+// Export separately for tree-shaking
 export const SERVICE_FILTERS: ServiceFilter[] = [
   {
     id: "painting",
@@ -66,7 +67,7 @@ export function FilterBar({
   onToggleFilter,
   providersCount,
 }: FilterBarProps) {
-  const getFilterCount = (filterId: string) => {
+  const getFilterCount = (_filterId: string) => {
     // في التطبيق الفعلي، هذا سيأتي من البيانات
     return 0;
   };

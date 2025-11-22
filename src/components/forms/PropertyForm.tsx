@@ -178,9 +178,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       setUploadProgress(100);
       return publicUrl;
 
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير معروف';
       console.error("Image upload error:", error);
-      setStorageError(error.message);
+      setStorageError(errorMessage);
       return null;
     }
   };
@@ -248,7 +249,7 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         
         toast.success("تم تحديث العقار بنجاح");
       } else {
-        const { data: newProperty, error } = await supabase
+        const { data: _newProperty, error } = await supabase
           .from("properties")
           .insert([propertyData])
           .select()
@@ -273,9 +274,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         }, 1500);
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving property:", error);
-      toast.error(error?.message || "حدث خطأ أثناء حفظ العقار");
+      const errorMsg = error instanceof Error ? error.message : "حدث خطأ أثناء حفظ العقار";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
       setUploadProgress(0);
@@ -467,9 +469,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label>مدير الصيانة</Label>
-          <Button type="button" variant="outline" className="w-full justify-start">
-            تحديد مدير للصيانة
-          </Button>
+          <Input 
+            placeholder="أدخل اسم مدير الصيانة" 
+            defaultValue=""
+          />
           <p className="text-xs text-muted-foreground">
             متاح لجميع مديري الصيانة
           </p>
@@ -477,9 +480,10 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
 
         <div className="space-y-2">
           <Label>مشرف العقار</Label>
-          <Button type="button" variant="outline" className="w-full justify-start">
-            تحديد مشرف العقار
-          </Button>
+          <Input 
+            placeholder="أدخل اسم مشرف العقار" 
+            defaultValue=""
+          />
           <p className="text-xs text-muted-foreground">
             متاح لجميع مشرفي العقارات
           </p>

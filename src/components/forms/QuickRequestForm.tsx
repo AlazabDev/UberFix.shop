@@ -128,7 +128,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
       }
 
       // Create maintenance request  
-      const requestData: any = {
+      const requestData = {
         branch_id: branchId,
         company_id: companyId,
         title: `${property.name} - طلب صيانة`,
@@ -143,7 +143,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
 
       const { error: requestError } = await supabase
         .from('maintenance_requests')
-        .insert(requestData);
+        .insert([requestData]);
 
       if (requestError) throw requestError;
 

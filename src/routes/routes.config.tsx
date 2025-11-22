@@ -3,6 +3,8 @@ import { lazy } from "react";
 // Dashboard & Core
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Documentation = lazy(() => import("@/pages/Documentation"));
+const MonitoringDashboard = lazy(() => import("@/pages/MonitoringDashboard"));
+const BranchManagement = lazy(() => import("@/pages/BranchManagement"));
 
 // Maintenance
 const Requests = lazy(() => import("@/pages/maintenance/Requests"));
@@ -47,6 +49,29 @@ const ProductionReport = lazy(
 // Admin
 const UserManagement = lazy(
   () => import("@/pages/admin/UserManagement")
+);
+
+// Technicians
+const TechnicianRegistration = lazy(
+  () => import("@/pages/technicians/TechnicianRegistration")
+);
+const TechnicianVerification = lazy(
+  () => import("@/pages/technicians/TechnicianVerification")
+);
+const TechnicianAgreement = lazy(
+  () => import("@/pages/technicians/TechnicianAgreement")
+);
+const TechnicianTraining = lazy(
+  () => import("@/pages/technicians/TechnicianTraining")
+);
+const TechnicianDashboard = lazy(
+  () => import("@/pages/technicians/TechnicianDashboard")
+);
+const TechnicianTaskManagement = lazy(
+  () => import("@/pages/technicians/TechnicianTaskManagement")
+);
+const HallOfExcellence = lazy(
+  () => import("@/pages/technicians/HallOfExcellence")
 );
 const AdminControlCenter = lazy(
   () => import("@/pages/admin/AdminControlCenter")
@@ -103,6 +128,8 @@ const MaintenanceOverview = lazy(
 export const protectedRoutes = [
   { path: "/dashboard", element: <Dashboard />, withLayout: true },
   { path: "/sla-dashboard", element: <SLADashboard />, withLayout: true },
+  { path: "/monitoring", element: <MonitoringDashboard />, withLayout: true },
+  { path: "/branch-management", element: <BranchManagement />, withLayout: true },
 
   // Maintenance
   { path: "/requests", element: <Requests />, withLayout: true },
@@ -145,6 +172,15 @@ export const protectedRoutes = [
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
   { path: "/users", element: <UsersPage />, withLayout: true },
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
+
+  // Technicians Module
+  { path: "/technicians/register", element: <TechnicianRegistration />, withLayout: true },
+  { path: "/technicians/verification", element: <TechnicianVerification />, withLayout: true },
+  { path: "/technicians/agreement", element: <TechnicianAgreement />, withLayout: true },
+  { path: "/technicians/training", element: <TechnicianTraining />, withLayout: true },
+  { path: "/technicians/dashboard", element: <TechnicianDashboard />, withLayout: true },
+  { path: "/technicians/tasks", element: <TechnicianTaskManagement />, withLayout: true },
+  { path: "/hall-of-excellence", element: <HallOfExcellence />, withLayout: true },
 
   // Messages
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },

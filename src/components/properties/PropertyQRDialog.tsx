@@ -234,105 +234,110 @@ export function PropertyQRDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            مشاركة رابط الصيانة
+      <DialogContent className="sm:max-w-2xl border-0 shadow-2xl bg-gradient-to-br from-background via-background to-primary/5">
+        <DialogHeader className="space-y-3 pb-2">
+          <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            {language === "ar" ? "رمز QR للعقار" : "Property QR Code"}
           </DialogTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            {language === "ar" 
+              ? "شارك هذا الرمز لتسهيل طلبات الصيانة" 
+              : "Share this code for easy maintenance requests"}
+          </p>
         </DialogHeader>
 
         {/* اختيار اللغة */}
-        <div className="flex gap-2 justify-center mb-6">
+        <div className="flex gap-3 justify-center mb-4">
           <Button
             variant={language === "ar" ? "default" : "outline"}
             size="sm"
             onClick={() => setLanguage("ar")}
-            className="flex-1"
+            className="min-w-[120px] transition-all duration-300"
           >
-            العربية
+            العربية 🇸🇦
           </Button>
           <Button
             variant={language === "en" ? "default" : "outline"}
             size="sm"
             onClick={() => setLanguage("en")}
-            className="flex-1"
+            className="min-w-[120px] transition-all duration-300"
           >
-            English
+            English 🇬🇧
           </Button>
         </div>
 
         {/* QR + بيانات العقار */}
-        <div className="flex flex-col items-center space-y-4 py-4">
-          <div className="bg-white p-6 rounded-xl border-4 border-primary/15 shadow-sm">
-            <QRCodeSVG
-              id={`qr-${propertyId}`}
-              value={qrUrl || "about:blank"}
-              size={280}
-              level="H"
-              includeMargin
-              bgColor="#ffffff"
-              fgColor="#0b2264"
-              imageSettings={{
-                src: "/logo/uberfix-pin.png", // ضع اللوجو هنا في public/logo/uberfix-pin.png
-                height: 64,
-                width: 64,
-                excavate: true,
-              }}
-            />
+        <div className="flex flex-col items-center space-y-5 py-6">
+          {/* QR Code Container */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-xl"></div>
+            <div className="relative bg-white p-8 rounded-2xl border-2 border-primary/20 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <QRCodeSVG
+                id={`qr-${propertyId}`}
+                value={qrUrl || "about:blank"}
+                size={280}
+                level="H"
+                includeMargin
+                bgColor="#ffffff"
+                fgColor="#0b2264"
+                imageSettings={{
+                  src: "/logo/uberfix-pin.png",
+                  height: 64,
+                  width: 64,
+                  excavate: true,
+                }}
+              />
+            </div>
           </div>
 
-          <div className="text-center space-y-1">
-            <div className="flex items-center justify-center gap-2">
-              <Building2 className="w-5 h-5 text-primary" />
-              <p className="font-semibold text-lg">{propertyName}</p>
+          {/* معلومات العقار */}
+          <div className="text-center space-y-2 w-full">
+            <div className="flex items-center justify-center gap-3 px-4 py-3 bg-primary/5 rounded-xl border border-primary/10">
+              <Building2 className="w-6 h-6 text-primary" />
+              <p className="font-bold text-xl text-foreground">{propertyName}</p>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground px-4">
               {language === "ar"
-                ? "امسح الكود لإرسال طلب صيانة لهذا العقار"
-                : "Scan to submit a maintenance request for this property"}
+                ? "امسح الكود لإرسال طلب صيانة فورياً"
+                : "Scan to submit an instant maintenance request"}
             </p>
           </div>
 
           {/* رابط الطلب */}
-          <div className="w-full bg-muted rounded-lg p-3 flex items-center gap-2">
-            <code
-              className="text-xs flex-1 truncate"
-              dir="ltr"
-            >
+          <div className="w-full bg-muted/50 backdrop-blur-sm rounded-xl p-4 flex items-center gap-3 border border-border/50 hover:border-primary/30 transition-colors">
+            <code className="text-xs flex-1 truncate font-mono text-foreground/80" dir="ltr">
               {qrUrl}
             </code>
             <Button
               size="icon"
               variant="ghost"
               onClick={copyToClipboard}
-              className="shrink-0"
+              className="shrink-0 hover:bg-primary/10 hover:text-primary transition-all"
               aria-label="نسخ الرابط"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-5 w-5" />
             </Button>
           </div>
 
           {/* أزرار التحميل */}
-          <div className="w-full flex flex-col sm:flex-row gap-2 mt-2">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
             <Button
               onClick={downloadQR}
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-md hover:shadow-lg transition-all duration-300"
+              size="lg"
             >
-              <Download className="ml-2 h-4 w-4" />
-              {language === "ar"
-                ? "تحميل رمز QR فقط"
-                : "Download QR code"}
+              <Download className="ml-2 h-5 w-5" />
+              {language === "ar" ? "تحميل رمز QR" : "Download QR"}
             </Button>
 
             <Button
               onClick={downloadQRPoster}
               variant="outline"
-              className="flex-1 border-primary/40 text-primary"
+              size="lg"
+              className="border-2 border-primary/40 text-primary hover:bg-primary/10 hover:border-primary shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <Download className="ml-2 h-4 w-4" />
-              {language === "ar"
-                ? "تحميل ملصق الطباعة"
-                : "Download poster"}
+              <Download className="ml-2 h-5 w-5" />
+              {language === "ar" ? "تحميل ملصق طباعة" : "Download Poster"}
             </Button>
           </div>
         </div>
