@@ -37,13 +37,13 @@ export function ExpenseReport() {
     fetchExpenses();
   }, [startDate, endDate]);
 
-  const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+  const totalExpenses = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const maintenanceExpenses = expenses.filter(e => e.category === 'maintenance')
-    .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    .reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const servicesExpenses = expenses.filter(e => e.category === 'services')
-    .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    .reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const otherExpenses = expenses.filter(e => e.category === 'other')
-    .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
+    .reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
 
   return (
     <div className="space-y-6">
