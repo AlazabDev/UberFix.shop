@@ -3,6 +3,7 @@ import { lazy } from "react";
 // Dashboard & Core
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Documentation = lazy(() => import("@/pages/Documentation"));
+const MonitoringDashboard = lazy(() => import("@/pages/MonitoringDashboard"));
 
 // Maintenance
 const Requests = lazy(() => import("@/pages/maintenance/Requests"));
@@ -126,6 +127,7 @@ const MaintenanceOverview = lazy(
 export const protectedRoutes = [
   { path: "/dashboard", element: <Dashboard />, withLayout: true },
   { path: "/sla-dashboard", element: <SLADashboard />, withLayout: true },
+  { path: "/monitoring", element: <MonitoringDashboard />, withLayout: true },
 
   // Maintenance
   { path: "/requests", element: <Requests />, withLayout: true },
