@@ -215,12 +215,23 @@ export default function ServiceMap() {
   }, []);
 
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current || !branches.length) {
+      console.warn("⏳ Waiting for map or branches:", {
+        hasMap: !!mapInstanceRef.current,
+        branchCount: branches.length
+      });
+      return;
+    }
+
+    console.warn("🚀 Adding markers to map...");
+    console.warn(`📍 Found ${branches.length} branches to display`);
 
     // Clear existing markers
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
 
+    let branchMarkersAdded = 0;
+    
     // Add markers for branches
     branches.forEach((branch) => {
       if (branch.latitude && branch.longitude) {
@@ -258,9 +269,12 @@ export default function ServiceMap() {
           });
 
           markersRef.current.push(marker);
+          branchMarkersAdded++;
         }
       }
     });
+
+    console.warn(`✅ Added ${branchMarkersAdded} branch markers to map`);
 
     // Add markers for random technicians in Cairo/Giza area
     const randomTechnicianIcons = [
@@ -268,9 +282,13 @@ export default function ServiceMap() {
       "tec-25.png", "tec-30.png", "tec-35.png", "tec-40.png", "tec-45.png"
     ];
 
+    console.warn("👷 Adding technician markers...");
+
     // Generate 10 random technician positions in Cairo/Giza area
     const cairoCenter = { lat: 30.0444, lng: 31.2357 };
     const radius = 0.15; // roughly 15km radius
+
+    let techMarkersAdded = 0;
 
     for (let i = 0; i < 10; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -330,7 +348,11 @@ export default function ServiceMap() {
       });
 
       markersRef.current.push(marker);
+      techMarkersAdded++;
     }
+
+    console.warn(`✅ Added ${techMarkersAdded} technician markers to map`);
+    console.warn(`🎯 Total markers on map: ${markersRef.current.length}`);
   }, [technicians, branches, navigate]);
 
   const filteredTechnicians = technicians.filter((tech) => {
