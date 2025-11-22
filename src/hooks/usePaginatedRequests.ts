@@ -137,7 +137,7 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'maintenance_requests' },
         (payload) => {
-          console.log('🔄 Maintenance requests changed:', payload.eventType);
+          console.warn('🔄 Maintenance requests changed:', payload.eventType);
           // إعادة جلب الصفحة الحالية للحصول على آخر تحديث
           fetchRequests(pagination.currentPage);
         }
@@ -145,7 +145,7 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
       .subscribe();
 
     return () => {
-      console.log('🧹 Cleaning up paginated requests subscription');
+      console.warn('🧹 Cleaning up paginated requests subscription');
       channel.unsubscribe().then(() => {
         supabase.removeChannel(channel);
       });

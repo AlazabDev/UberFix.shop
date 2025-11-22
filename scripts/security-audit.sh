@@ -3,12 +3,12 @@
 echo "🔒 إجراء فحص أمني للمشروع..."
 
 # فحص الثغرات
-pnpm audit --audit-level high
+npm run audit --audit-level high
 
 # فحص المكتبات المعرضة للخطر
-pnpm dlx npm-audit-resolver
+npm run dlx npm-audit-resolver
 
 # فحص التبعيات
-pnpm dlX depcheck
+npm run dlX depcheck
 
 echo "✅ اكتمل الفحص الأمني"

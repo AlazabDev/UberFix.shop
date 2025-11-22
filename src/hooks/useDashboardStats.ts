@@ -67,14 +67,14 @@ export function useDashboardStats() {
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'maintenance_requests' },
         () => {
-          console.log('🔄 Maintenance requests changed, refreshing stats...');
+          console.warn('🔄 Maintenance requests changed, refreshing stats...');
           fetchStats();
         }
       )
       .subscribe();
 
     return () => {
-      console.log('🧹 Cleaning up dashboard stats subscription');
+      console.warn('🧹 Cleaning up dashboard stats subscription');
       channel.unsubscribe().then(() => {
         supabase.removeChannel(channel);
       });

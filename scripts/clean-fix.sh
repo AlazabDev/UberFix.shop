@@ -10,26 +10,26 @@ echo "== CLEAN + FIX =="
 rm -rf node_modules
 rm -f pnpm-lock.yaml
 
-PNPM_STORE="$(pnpm store path)"
+PNPM_STORE="$(npm run store path)"
 rm -rf "$PNPM_STORE"
 
 # 2. تنظيف الكاش
-pnpm store prune || true
-pnpm cache clean --force || true
+npm run store prune || true
+npm run cache clean --force || true
 
 # 3. إعادة التثبيت
-pnpm install
+npm run install
 
 # 4. الموافقة على build scripts
-pnpm approve-builds --yes || true
+npm run approve-builds --yes || true
 
 # 5. فحص البيئة
-pnpm doctor || true
+npm run doctor || true
 
 # 6. فحص الكود
-pnpm run lint || true
-pnpm run lint:fix || true
-pnpm run format || true
-pnpm run check || true
+npm run lint || true
+npm run lint:fix || true
+npm run format || true
+npm run check || true
 
 echo "✔ CLEAN & FIX COMPLETED"

@@ -39,7 +39,7 @@ export const useBranchLocations = () => {
       );
       
       setBranches(validBranches as BranchLocation[]);
-      console.log(`✅ Loaded ${validBranches.length} branch locations`);
+      console.warn(`✅ Loaded ${validBranches.length} branch locations`);
     } catch (err) {
       console.error('❌ Error fetching branch locations:', err);
       setError(err as Error);

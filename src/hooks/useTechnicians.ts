@@ -97,14 +97,14 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'technicians' },
         () => {
-          console.log('🔄 Technicians changed, refetching...');
+          console.warn('🔄 Technicians changed, refetching...');
           fetchTechnicians();
         }
       )
       .subscribe();
 
     return () => {
-      console.log('🧹 Cleaning up technicians subscription');
+      console.warn('🧹 Cleaning up technicians subscription');
       supabase.removeChannel(channel);
     };
   }, [filter?.status, filter?.specialization]);

@@ -71,10 +71,10 @@ has_playwright_config () {
 log_step "فحص البيئة والأساسيات"
 
 check_command pnpm
-log_ok "pnpm موجود"
+log_ok "npm run موجود"
 
 if [ ! -d "node_modules" ]; then
-  log_warn "مجلد node_modules غير موجود. شغّل 'pnpm install' أولاً."
+  log_warn "مجلد node_modules غير موجود. شغّل 'npm run install' أولاً."
   exit 1
 fi
 
@@ -89,7 +89,7 @@ fi
 
 if [ -f "tsconfig.json" ]; then
   log_step "TypeScript – فحص الأنواع (tsc --noEmit)"
-  pnpm exec tsc --noEmit
+  npm run exec tsc --noEmit
   log_ok "TypeScript type-check نجح"
 else
   log_warn "لا يوجد tsconfig.json – تخطي فحص TypeScript"
@@ -103,11 +103,11 @@ log_step "ESLint – فحص الكود"
 
 if jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
   # لو فيه سكربت lint في package.json
-  pnpm lint
+  npm run lint
 else
   # fallback مباشر لو مفيش سكربت lint
   if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.cjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc" ]; then
-    pnpm exec eslint "src/**/*.{ts,tsx,js,jsx}"
+    npm run exec eslint "src/**/*.{ts,tsx,js,jsx}"
   else
     log_warn "لا يوجد سكربت lint ولا إعداد ESLint واضح – تم تخطي lint"
   fi
@@ -124,18 +124,18 @@ log_step "Vitest – اختبارات الوحدة"
 if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
   if [ "$RUN_COVERAGE" = "1" ]; then
     if jq -e '.scripts["test:coverage"]' package.json >/dev/null 2>&1; then
-      pnpm run test:coverage
+      npm run test:coverage
     else
-      pnpm run test -- --coverage
+      npm run test -- --coverage
     fi
   else
-    pnpm test
+    npm run test
   fi
   log_ok "اختبارات Vitest نجحت"
 else
   # fallback لو مفيش سكربت test
   if ls src/**/*.{test,spec}.{ts,tsx,js,jsx} >/dev/null 2>&1; then
-    pnpm exec vitest
+    npm run exec vitest
     log_ok "اختبارات Vitest (بدون سكربت npm) نجحت"
   else
     log_warn "لا يوجد سكربت test ولا ملفات اختبار – تم تخطي Vitest"
@@ -149,7 +149,7 @@ fi
 log_step "Vite – build"
 
 if jq -e '.scripts.build' package.json >/dev/null 2>&1; then
-  pnpm build
+  npm run build
   log_ok "بناء المشروع نجح"
 else
   log_warn "لا يوجد سكربت build في package.json – تم تخطي build"
@@ -165,9 +165,9 @@ if [ "$RUN_E2E" = "1" ]; then
   if has_playwright_config; then
     # نفضل استخدام سكربت npm لو موجود
     if jq -e '.scripts["test:e2e"]' package.json >/dev/null 2>&1; then
-      pnpm run test:e2e
+      npm run test:e2e
     else
-      pnpm exec playwright test
+      npm run exec playwright test
     fi
     log_ok "اختبارات Playwright E2E نجحت"
   else

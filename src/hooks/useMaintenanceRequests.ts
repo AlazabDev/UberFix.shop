@@ -341,7 +341,7 @@ export function useMaintenanceRequests() {
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'maintenance_requests' },
         (payload) => {
-          console.log('🔄 Maintenance requests changed:', payload.eventType);
+          console.warn('🔄 Maintenance requests changed:', payload.eventType);
           fetchRequests();
         }
       )
@@ -349,7 +349,7 @@ export function useMaintenanceRequests() {
 
     // Cleanup function محسّنة
     return () => {
-      console.log('🧹 Cleaning up maintenance requests subscription');
+      console.warn('🧹 Cleaning up maintenance requests subscription');
       channel.unsubscribe().then(() => {
         supabase.removeChannel(channel);
       });

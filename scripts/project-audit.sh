@@ -7,7 +7,7 @@ echo "=========================================="
 # 1. فحص النظام
 echo "1. 📋 فحص النظام:"
 echo "   Node.js: $(node --version)"
-echo "   pnpm: $(pnpm --version)"
+echo "   pnpm: $(npm run --version)"
 echo "   OS: $(uname -s)"
 
 # 2. فحص الملفات الأساسية

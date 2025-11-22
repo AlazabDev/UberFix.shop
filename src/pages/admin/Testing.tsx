@@ -455,7 +455,7 @@ const Testing = () => {
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'profiles' },
           () => {
-            console.log('Realtime test successful');
+            console.warn('Realtime test successful');
           }
         )
         .subscribe();
@@ -1354,7 +1354,7 @@ const Testing = () => {
     const warningCount = testResults.filter(test => test.status === 'warning').length;
     const totalTests = testResults.length;
     
-    console.log('📊 ملخص الاختبارات:', summary);
+    console.warn('📊 ملخص الاختبارات:', summary);
     
     toast({
       title: errorCount === 0 ? "✅ اكتمل الاختبار بنجاح" : "⚠️ اكتمل الاختبار مع أخطاء",

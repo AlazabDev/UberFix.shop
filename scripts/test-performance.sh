@@ -29,9 +29,9 @@ print_warning() {
 print_step "⚡ Performance Testing Suite"
 echo ""
 
-# تحديد مدير الحزم (pnpm أو npm)
+# تحديد مدير الحزم (npm run أو npm)
 PKG="npm"
-if command -v pnpm &> /dev/null && [ -f "pnpm-lock.yaml" ]; then
+if command -v npm run &> /dev/null && [ -f "pnpm-lock.yaml" ]; then
   PKG="pnpm"
 fi
 

@@ -9,7 +9,7 @@ echo "== CLEAN MODE =="
 rm -rf node_modules
 rm -f pnpm-lock.yaml
 
-PNPM_STORE="$(pnpm store path)"
+PNPM_STORE="$(npm run store path)"
 rm -rf "$PNPM_STORE"
 
 echo "✔ CLEAN COMPLETED"

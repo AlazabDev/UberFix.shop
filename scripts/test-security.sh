@@ -34,7 +34,7 @@ echo ""
 
 # تحديد مدير الحزم
 PKG="npm"
-if command -v pnpm &> /dev/null && [ -f "pnpm-lock.yaml" ]; then
+if command -v npm run &> /dev/null && [ -f "pnpm-lock.yaml" ]; then
   PKG="pnpm"
 fi
 
@@ -48,13 +48,13 @@ else
 fi
 echo ""
 
-# 2. NPM/PNPM Audit
+# 2. NPM/npm run Audit
 print_step "2️⃣  Running Security Audit"
 if [ "$PKG" = "pnpm" ]; then
-    if pnpm audit --audit-level=moderate; then
+    if npm run audit --audit-level=moderate; then
         print_success "No moderate or higher vulnerabilities found (pnpm)"
     else
-        print_warning "Security vulnerabilities detected - review pnpm audit"
+        print_warning "Security vulnerabilities detected - review npm run audit"
     fi
 else
     if npm audit --audit-level=moderate; then
