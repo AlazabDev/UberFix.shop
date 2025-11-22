@@ -20,11 +20,12 @@ export function InteractiveMap({
   height = "400px",
   className = "",
 }: InteractiveMapProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerInstanceRef = useRef<google.maps.Marker | null>(null);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
-  const listenersRef = useRef<google.maps.MapsEventListener[]>([]);
+  const isInitializedRef = useRef(false);
+  const cleanupExecutedRef = useRef(false);
   
   const [isLoading, setIsLoading] = useState(true);
   const [currentLat, setCurrentLat] = useState(latitude);
@@ -36,10 +37,20 @@ export function InteractiveMap({
     setCurrentLng(longitude);
   }, [latitude, longitude]);
 
-  // Load Google Maps SDK once globally
+  // Load Google Maps SDK
   const loadGoogleMaps = useCallback(async () => {
     if (window.google?.maps) return;
-    if (document.getElementById("google-maps-sdk")) return;
+    if (document.getElementById("google-maps-sdk")) {
+      // Wait for script to load
+      return new Promise<void>((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (window.google?.maps) {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 100);
+      });
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke("get-google-maps-key");
@@ -69,24 +80,28 @@ export function InteractiveMap({
 
     const initMap = async () => {
       try {
-        // Guard: prevent re-initialization
-        if (!mapRef.current || mapInstanceRef.current) return;
-
+        // Prevent double initialization
+        if (isInitializedRef.current || !mapContainerRef.current) return;
+        
         await loadGoogleMaps();
 
-        if (!isMounted || !mapRef.current) return;
+        if (!isMounted || !mapContainerRef.current) return;
 
-        // Create map instance
-        const mapInstance = new google.maps.Map(mapRef.current, {
+        // Mark as initialized BEFORE creating map
+        isInitializedRef.current = true;
+
+        // Create map instance with minimal DOM manipulation
+        const mapInstance = new google.maps.Map(mapContainerRef.current, {
           center: { lat: currentLat, lng: currentLng },
           zoom: 15,
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: false,
           zoomControl: true,
+          disableDefaultUI: false,
         });
 
-        // Create marker instance
+        // Create marker
         const markerInstance = new google.maps.Marker({
           position: { lat: currentLat, lng: currentLng },
           map: mapInstance,
@@ -94,7 +109,7 @@ export function InteractiveMap({
           animation: google.maps.Animation.DROP,
         });
 
-        // Create geocoder instance
+        // Create geocoder
         const geocoder = new google.maps.Geocoder();
 
         // Store refs
@@ -103,9 +118,9 @@ export function InteractiveMap({
         geocoderRef.current = geocoder;
 
         // Add marker dragend listener
-        const dragListener = markerInstance.addListener("dragend", async () => {
+        markerInstance.addListener("dragend", async () => {
           const pos = markerInstance.getPosition();
-          if (!pos) return;
+          if (!pos || !isMounted) return;
 
           const lat = pos.lat();
           const lng = pos.lng();
@@ -124,8 +139,8 @@ export function InteractiveMap({
         });
 
         // Add map click listener
-        const clickListener = mapInstance.addListener("click", async (e: google.maps.MapMouseEvent) => {
-          if (!e.latLng) return;
+        mapInstance.addListener("click", async (e: google.maps.MapMouseEvent) => {
+          if (!e.latLng || !isMounted) return;
 
           const lat = e.latLng.lat();
           const lng = e.latLng.lng();
@@ -146,9 +161,6 @@ export function InteractiveMap({
           }
         });
 
-        // Store listeners for cleanup
-        listenersRef.current = [dragListener, clickListener];
-
         if (isMounted) {
           setIsLoading(false);
         }
@@ -163,42 +175,58 @@ export function InteractiveMap({
 
     initMap();
 
-    // Cleanup function - CRITICAL for preventing DOM errors
+    // CRITICAL: Comprehensive cleanup function
     return () => {
       isMounted = false;
 
-      // Remove all event listeners
-      listenersRef.current.forEach(listener => {
-        if (listener) {
-          google.maps.event.removeListener(listener);
+      // Prevent double cleanup
+      if (cleanupExecutedRef.current) return;
+      cleanupExecutedRef.current = true;
+
+      try {
+        // Step 1: Remove marker from map (prevents DOM manipulation after unmount)
+        if (markerInstanceRef.current) {
+          markerInstanceRef.current.setMap(null);
+          markerInstanceRef.current = null;
         }
-      });
-      listenersRef.current = [];
 
-      // Detach marker from map (prevents DOM manipulation)
-      if (markerInstanceRef.current) {
-        markerInstanceRef.current.setMap(null);
-        markerInstanceRef.current = null;
-      }
+        // Step 2: Clear ALL map event listeners
+        if (mapInstanceRef.current) {
+          google.maps.event.clearInstanceListeners(mapInstanceRef.current);
+        }
 
-      // Clear map instance listeners
-      if (mapInstanceRef.current) {
-        google.maps.event.clearInstanceListeners(mapInstanceRef.current);
+        // Step 3: Clear the map div content manually
+        if (mapContainerRef.current) {
+          // Remove all child nodes safely
+          while (mapContainerRef.current.firstChild) {
+            mapContainerRef.current.removeChild(mapContainerRef.current.firstChild);
+          }
+        }
+
+        // Step 4: Nullify references
         mapInstanceRef.current = null;
+        geocoderRef.current = null;
+        
+        // Reset initialization flag
+        isInitializedRef.current = false;
+      } catch (error) {
+        console.error("Cleanup error:", error);
       }
-
-      // Clear geocoder
-      geocoderRef.current = null;
     };
-  }, []); // Empty deps - run ONCE only
+  }, []); // EMPTY deps - run ONCE only
 
   // Update marker position when coordinates change
   useEffect(() => {
     if (!markerInstanceRef.current || !mapInstanceRef.current) return;
+    if (!isInitializedRef.current) return;
 
-    const newPos = { lat: currentLat, lng: currentLng };
-    markerInstanceRef.current.setPosition(newPos);
-    mapInstanceRef.current.panTo(newPos);
+    try {
+      const newPos = { lat: currentLat, lng: currentLng };
+      markerInstanceRef.current.setPosition(newPos);
+      mapInstanceRef.current.panTo(newPos);
+    } catch (error) {
+      console.error("Error updating marker position:", error);
+    }
   }, [currentLat, currentLng]);
 
   const handleCurrentLocation = useCallback(() => {
@@ -216,13 +244,21 @@ export function InteractiveMap({
         setCurrentLat(newLat);
         setCurrentLng(newLng);
 
-        if (markerInstanceRef.current) {
-          markerInstanceRef.current.setPosition(newPos);
+        if (markerInstanceRef.current && isInitializedRef.current) {
+          try {
+            markerInstanceRef.current.setPosition(newPos);
+          } catch (error) {
+            console.error("Error setting marker position:", error);
+          }
         }
         
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.panTo(newPos);
-          mapInstanceRef.current.setZoom(16);
+        if (mapInstanceRef.current && isInitializedRef.current) {
+          try {
+            mapInstanceRef.current.panTo(newPos);
+            mapInstanceRef.current.setZoom(16);
+          } catch (error) {
+            console.error("Error panning map:", error);
+          }
         }
 
         if (geocoderRef.current) {
@@ -262,8 +298,8 @@ export function InteractiveMap({
         </div>
 
         <div
-          ref={mapRef}
-          style={{ height, width: "100%" }}
+          ref={mapContainerRef}
+          style={{ height, width: "100%", minHeight: height }}
           className="rounded-lg border overflow-hidden relative bg-muted"
         >
           {isLoading && (
