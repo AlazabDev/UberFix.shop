@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 // استخدم الـ URL الأساسي للمشروع مع تحسينات الإنتاج
-const ORIGIN = window.location.origin;
+const ORIGIN = import.meta.env.VITE_APP_URL || window.location.origin;
 
 // إعدادات محسنة للإنتاج
 const AUTH_CONFIG = {
