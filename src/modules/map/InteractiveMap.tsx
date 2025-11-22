@@ -39,7 +39,7 @@ export const InteractiveMap = () => {
     icon: b.icon,
   }));
 
-  // تحويل technicians من Supabase إلى النوع المطلوب
+  // تحويل technicians من Supabase إلى النوع المطلوب مع الأيقونات
   const technicianPins: TechnicianLocation[] = technicians
     .filter(t => t.current_latitude && t.current_longitude)
     .map(t => ({
@@ -56,30 +56,49 @@ export const InteractiveMap = () => {
       available_to: t.available_to || undefined,
       phone: t.phone || undefined,
       profile_image: t.profile_image || undefined,
+      icon_url: (t as any).icon_url || undefined, // إضافة الأيقونة من قاعدة البيانات
     }));
 
-  // تهيئة الخريطة
+  // تهيئة الخريطة مع تحسينات للإنتاج
   useEffect(() => {
     if (!isLoaded || !mapRef.current || mapInstanceRef.current) return;
 
     const map = new google.maps.Map(mapRef.current, {
-      center: { lat: 30.0444, lng: 31.2357 },
+      center: { lat: 30.0444, lng: 31.2357 }, // القاهرة
       zoom: 12,
       mapId: '8e0a97af9386fef',
-      disableDefaultUI: false,
+      disableDefaultUI: true, // إخفاء UI الافتراضي
       zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_CENTER,
+      },
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: true,
+      fullscreenControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_TOP,
+      },
+      gestureHandling: 'greedy', // تحسين التفاعل على الموبايل
+      minZoom: 10,
+      maxZoom: 18,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }] // إخفاء POI للتركيز على الفنيين
+        }
+      ]
     });
 
     mapInstanceRef.current = map;
 
+    // تحسين الأداء: تنظيف عند الإزالة
     return () => {
       markersRef.current.forEach(marker => {
         marker.map = null;
       });
       markersRef.current = [];
+      mapInstanceRef.current = null;
     };
   }, [isLoaded]);
 
@@ -95,12 +114,13 @@ export const InteractiveMap = () => {
 
     const { AdvancedMarkerElement } = google.maps.marker;
 
-    // إضافة Branch Pins
+  // إضافة Branch Pins مع تحسينات
     branchPins.forEach(branch => {
       const container = document.createElement('div');
       const root = ReactDOM.createRoot(container);
       
       const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         const rect = container.getBoundingClientRect();
         handlePinClick(
           {
@@ -124,12 +144,13 @@ export const InteractiveMap = () => {
         map: mapInstanceRef.current,
         position: { lat: branch.latitude, lng: branch.longitude },
         content: container,
+        title: branch.branch, // Accessibility
       });
 
       markersRef.current.push(marker);
     });
 
-    // إضافة Technician Pins (مع الفلتر)
+    // إضافة Technician Pins (مع الفلتر) مع تحسينات
     const filteredTechs = specializationFilter
       ? technicianPins.filter(t => t.specialization === specializationFilter)
       : technicianPins;
@@ -139,6 +160,7 @@ export const InteractiveMap = () => {
       const root = ReactDOM.createRoot(container);
       
       const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         const rect = container.getBoundingClientRect();
         handlePinClick(
           {
@@ -163,6 +185,7 @@ export const InteractiveMap = () => {
         map: mapInstanceRef.current,
         position: { lat: tech.latitude, lng: tech.longitude },
         content: container,
+        title: `${tech.name} - ${tech.specialization}`, // Accessibility
       });
 
       markersRef.current.push(marker);
@@ -217,8 +240,14 @@ export const InteractiveMap = () => {
 
   if (!isLoaded || branchesLoading || techniciansLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-muted">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-muted">
+        <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+        <p className="text-lg text-muted-foreground animate-pulse">جاري تحميل الخريطة...</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          {!isLoaded && "تحميل Google Maps..."}
+          {isLoaded && branchesLoading && "تحميل الفروع..."}
+          {isLoaded && !branchesLoading && techniciansLoading && "تحميل الفنيين..."}
+        </p>
       </div>
     );
   }
@@ -227,15 +256,46 @@ export const InteractiveMap = () => {
     <div className="relative h-screen w-full">
       <div ref={mapRef} className="h-full w-full" />
 
-      {/* Tabs Filter */}
+      {/* Tabs Filter مع مؤشر العدد */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500]">
         <Tabs value={specializationFilter || 'all'} onValueChange={(v) => setSpecializationFilter(v === 'all' ? undefined : v)}>
-          <TabsList className="bg-background border border-border shadow-lg">
-            <TabsTrigger value="all">الكل</TabsTrigger>
-            <TabsTrigger value="plumber">سباك</TabsTrigger>
-            <TabsTrigger value="carpenter">نجار</TabsTrigger>
-            <TabsTrigger value="electrician">كهربائي</TabsTrigger>
-            <TabsTrigger value="painter">دهان</TabsTrigger>
+          <TabsList className="bg-background/95 backdrop-blur-sm border border-border shadow-xl">
+            <TabsTrigger value="all" className="gap-2">
+              الكل
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+                {technicianPins.length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="plumber" className="gap-2">
+              سباك
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+                {technicianPins.filter(t => t.specialization === 'plumber').length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="carpenter" className="gap-2">
+              نجار
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+                {technicianPins.filter(t => t.specialization === 'carpenter').length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="electrician" className="gap-2">
+              كهربائي
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+                {technicianPins.filter(t => t.specialization === 'electrician').length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="painter" className="gap-2">
+              دهان
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+                {technicianPins.filter(t => t.specialization === 'painter').length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="ac_technician" className="gap-2">
+              تكييف
+              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+                {technicianPins.filter(t => t.specialization === 'ac_technician').length}
+              </span>
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
