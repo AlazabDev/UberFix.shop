@@ -78,7 +78,7 @@ export const useAppointments = () => {
         .from('appointments')
         .insert([appointmentData])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { success: true, data };
@@ -94,7 +94,7 @@ export const useAppointments = () => {
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { success: true, data };

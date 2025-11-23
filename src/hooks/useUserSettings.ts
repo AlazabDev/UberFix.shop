@@ -61,7 +61,7 @@ export const useUserSettings = () => {
             last_name: user.user_metadata?.last_name || ""
           })
           .select()
-          .single();
+          .maybeSingle();
         
         if (createError) throw createError;
         return newProfile as UserProfile;

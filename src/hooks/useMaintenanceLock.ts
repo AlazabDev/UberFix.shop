@@ -14,7 +14,7 @@ export const useMaintenanceLock = () => {
         .from("app_control")
         .select("is_locked, message")
         .eq("id", "global")
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching maintenance lock status:", error);
