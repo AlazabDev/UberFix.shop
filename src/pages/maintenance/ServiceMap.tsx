@@ -268,7 +268,7 @@ export default function ServiceMap() {
       });
       markersRef.current = [];
     };
-  }, [technicians, branches, navigate]);
+  }, [technicians, branches]);
 
   const filteredTechnicians = technicians.filter((tech) => {
     const matchesSpecialty =
