@@ -39,7 +39,6 @@ export default function Properties() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
-      {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-6">
         <PropertySettingsMenu />
         
@@ -51,30 +50,14 @@ export default function Properties() {
             <Plus className="h-4 w-4 ml-2" />
             عقار جديد
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-          >
+          <Button variant="outline" size="icon">
             <LayoutGrid className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {/* Property Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.map((property) => (
-          <PropertyCard
-            key={property.id}
-            property={property}
-            onActionsClick={setSelectedProperty}
-          />
-        ))}
-      </div>
-
-      {/* Stats */}
       <PropertyStatsCards properties={properties} />
 
-      {/* Filters */}
       <PropertyFilters
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -84,7 +67,38 @@ export default function Properties() {
         setFilterType={setFilterType}
       />
 
-      {/* Actions Dialog */}
+      {filteredProperties.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="mb-4">
+            <LayoutGrid className="mx-auto h-24 w-24 text-muted-foreground" />
+          </div>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            لا توجد عقارات
+          </h3>
+          <p className="text-muted-foreground mb-6">
+            {searchTerm || filterType !== "all" || filterStatus !== "all"
+              ? "لم يتم العثور على نتائج تطابق البحث"
+              : "ابدأ بإضافة عقار جديد لإدارة طلبات الصيانة"}
+          </p>
+          <Button
+            onClick={() => navigate("/properties/add")}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4 ml-2" />
+            إضافة عقار جديد
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {filteredProperties.map((property) => (
+            <PropertyCard
+              key={property.id}
+              property={property}
+              onActionsClick={setSelectedProperty}
+            />
+          ))}
+        </div>
+      )}
       {selectedProperty && (
         <PropertyActionsDialog
           propertyId={selectedProperty.id}
