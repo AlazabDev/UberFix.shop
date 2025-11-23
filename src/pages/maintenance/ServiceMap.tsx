@@ -45,7 +45,7 @@ export default function ServiceMap() {
   const [mapError, setMapError] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
+  const markersRef = useRef<(google.maps.Marker | google.maps.marker.AdvancedMarkerElement)[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
 
   const { technicians, loading } = useTechnicians();
@@ -206,7 +206,13 @@ export default function ServiceMap() {
 
     return () => {
       mounted = false;
-      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current.forEach((marker) => {
+        if ('setMap' in marker) {
+          marker.setMap(null);
+        } else {
+          marker.map = null;
+        }
+      });
       markersRef.current = [];
     };
   }, []);
@@ -224,7 +230,13 @@ export default function ServiceMap() {
     console.warn(`📍 Found ${branches.length} branches to display`);
 
     // Clear existing markers
-    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current.forEach((marker) => {
+      if ('setMap' in marker) {
+        marker.setMap(null);
+      } else {
+        marker.map = null;
+      }
+    });
     markersRef.current = [];
 
     let branchMarkersAdded = 0;
@@ -238,41 +250,22 @@ export default function ServiceMap() {
         console.log(`Branch: ${branch.branch}, lat: ${lat}, lng: ${lng}`);
         
         if (!isNaN(lat) && !isNaN(lng) && lat >= 20 && lat <= 35 && lng >= 25 && lng <= 40) {
-          // Create custom pin element for branch
-          const pinElement = document.createElement('div');
-          pinElement.innerHTML = `
-            <div style="
-              width: 40px;
-              height: 40px;
-              background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-              border-radius: 50% 50% 50% 0;
-              transform: rotate(-45deg);
-              border: 3px solid white;
-              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              cursor: pointer;
-            ">
-              <svg style="transform: rotate(45deg);" width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-              </svg>
-            </div>
-          `;
+          // Create custom image content for branch marker using Advanced Marker
+          const markerContent = document.createElement('img');
+          markerContent.src = '/icons/properties/icon-5060.png';
+          markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; position: relative; left: 10px;';
+          markerContent.alt = branch.branch;
           
-          const marker = new google.maps.Marker({
-            position: { lat, lng },
+          // Fallback if image fails to load
+          markerContent.onerror = () => {
+            markerContent.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iNTUiIHZpZXdCb3g9IjAgMCA0NSA1NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMi41IiBjeT0iMjIuNSIgcj0iMjAiIGZpbGw9IiMzYjgyZjYiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTSAyMi41IDQyLjUgTCAyMi41IDU1IiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==';
+          };
+          
+          const marker = new google.maps.marker.AdvancedMarkerElement({
             map: mapInstanceRef.current!,
+            position: { lat, lng },
+            content: markerContent,
             title: branch.branch,
-            icon: {
-              path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-              fillColor: '#3b82f6',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 2,
-              scale: 6,
-            },
-            optimized: false,
             zIndex: 100,
           });
 
@@ -341,22 +334,29 @@ export default function ServiceMap() {
         ? tech.status 
         : "soon";
       
-      const statusColor = techStatus === "available" ? "#10b981" : 
-                         techStatus === "busy" ? "#ef4444" : "#f59e0b";
+      // Create custom image content for technician marker using Advanced Marker
+      const markerContent = document.createElement('img');
+      markerContent.src = `/icons/technicians/${randomTechnicianIcons[iconIndex]}`;
+      markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; position: relative; left: 10px;';
+      markerContent.alt = tech.name || "فني";
       
-      const marker = new google.maps.Marker({
-        position: { lat, lng },
+      // Fallback if image fails to load
+      markerContent.onerror = () => {
+        const statusColor = techStatus === "available" ? "#10b981" : 
+                           techStatus === "busy" ? "#ef4444" : "#f59e0b";
+        markerContent.src = `data:image/svg+xml;base64,${btoa(`
+          <svg width="45" height="55" viewBox="0 0 45 55" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="22.5" cy="22.5" r="20" fill="${statusColor}" stroke="#ffffff" stroke-width="3"/>
+            <path d="M 22.5 42.5 L 22.5 55" stroke="${statusColor}" stroke-width="2"/>
+          </svg>
+        `)}`;
+      };
+      
+      const marker = new google.maps.marker.AdvancedMarkerElement({
         map: mapInstanceRef.current!,
+        position: { lat, lng },
+        content: markerContent,
         title: tech.name || "فني",
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: statusColor,
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 3,
-          scale: 10,
-        },
-        optimized: false,
         zIndex: 200,
       });
 
