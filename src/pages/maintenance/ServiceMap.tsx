@@ -45,7 +45,7 @@ export default function ServiceMap() {
   const [mapError, setMapError] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<(google.maps.Marker | google.maps.marker.AdvancedMarkerElement)[]>([]);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
 
   const { technicians, loading } = useTechnicians();
@@ -114,63 +114,22 @@ export default function ServiceMap() {
 
   useEffect(() => {
     let mounted = true;
-    let retryCount = 0;
-    const maxRetries = 3;
     
     const initMap = async () => {
       try {
-        console.warn("🗺️ Starting map initialization...");
-        
         const { data, error } = await supabase.functions.invoke("get-maps-key");
         
-        if (error) {
-          console.error("❌ Failed to get API key:", error);
-          if (mounted && retryCount < maxRetries) {
-            retryCount++;
-            console.warn(`🔄 Retrying... (${retryCount}/${maxRetries})`);
-            setTimeout(() => initMap(), 2000);
-            return;
-          }
-          if (mounted) {
-            setMapError(true);
-            console.error("❌ Max retries reached, showing error message");
-          }
-          return;
-        }
-        
-        if (!data?.apiKey) {
-          console.error("❌ No API key returned from edge function");
+        if (error || !data?.apiKey) {
           if (mounted) setMapError(true);
           return;
         }
-        
-        console.warn("✅ API key received successfully:", data.apiKey.substring(0, 15) + "...");
-
-        
-        // تحقق من وجود Google Maps
-        if (typeof window.google !== 'undefined' && window.google.maps) {
-          console.warn("✅ Google Maps already loaded, reusing instance");
-        } else {
-          console.warn("📦 Loading Google Maps script with key...");
-          try {
-            await loadGoogleMaps(data.apiKey);
-            console.warn("✅ Google Maps script loaded successfully");
-          } catch (loadError) {
-            console.error("❌ Error loading Google Maps script:", loadError);
-            if (mounted) setMapError(true);
-            return;
-          }
-        }
-
-        // انتظر قليلاً للتأكد من تحميل Google Maps
-        await new Promise(resolve => setTimeout(resolve, 500));
 
         if (typeof window.google === 'undefined' || !window.google.maps) {
-          throw new Error("Google Maps failed to load");
+          await loadGoogleMaps(data.apiKey);
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
 
         if (mapRef.current && !mapInstanceRef.current && mounted) {
-          console.warn("🗺️ Creating map instance...");
           mapInstanceRef.current = new google.maps.Map(mapRef.current, {
             center: { lat: 30.0444, lng: 31.2357 },
             zoom: 13,
@@ -182,22 +141,9 @@ export default function ServiceMap() {
             clickableIcons: true,
             gestureHandling: 'greedy',
           });
-          
-          console.warn("✅ Map instance created successfully");
-          
-          // أضف حدث للتأكد من تحميل الخريطة
-          google.maps.event.addListenerOnce(mapInstanceRef.current, 'idle', () => {
-            console.warn("✅ Map is fully loaded and idle");
-          });
         }
       } catch (error) {
-        console.error("❌ Map loading error:", error);
-        if (mounted && retryCount < maxRetries) {
-          retryCount++;
-          console.warn(`🔄 Retrying after error... (${retryCount}/${maxRetries})`);
-          setTimeout(() => initMap(), 2000);
-          return;
-        }
+        console.error("Map error:", error);
         if (mounted) setMapError(true);
       }
     };
@@ -207,111 +153,71 @@ export default function ServiceMap() {
     return () => {
       mounted = false;
       markersRef.current.forEach((marker) => {
-        if ('setMap' in marker) {
-          marker.setMap(null);
-        } else {
-          marker.map = null;
-        }
+        marker.map = null;
       });
       markersRef.current = [];
     };
   }, []);
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !branches.length) {
-      console.warn("⏳ Waiting for map or branches:", {
-        hasMap: !!mapInstanceRef.current,
-        branchCount: branches.length
-      });
-      return;
-    }
+    if (!mapInstanceRef.current || !branches.length) return;
 
-    console.warn("🚀 Adding markers to map...");
-    console.warn(`📍 Found ${branches.length} branches to display`);
-
-    // Clear existing markers
     markersRef.current.forEach((marker) => {
-      if ('setMap' in marker) {
-        marker.setMap(null);
-      } else {
-        marker.map = null;
-      }
+      marker.map = null;
     });
     markersRef.current = [];
-
-    let branchMarkersAdded = 0;
     
-    // Add markers for branches
+    // Add branch markers
     branches.forEach((branch) => {
-      if (branch.latitude && branch.longitude) {
-        const lat = parseFloat(branch.latitude);
-        const lng = parseFloat(branch.longitude);
-        
-        console.log(`Branch: ${branch.branch}, lat: ${lat}, lng: ${lng}`);
-        
-        if (!isNaN(lat) && !isNaN(lng) && lat >= 20 && lat <= 35 && lng >= 25 && lng <= 40) {
-          // Create custom image content for branch marker using Advanced Marker
-          const markerContent = document.createElement('img');
-          markerContent.src = '/icons/properties/icon-5060.png';
-          markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; position: relative; left: 10px;';
-          markerContent.alt = branch.branch;
-          
-          // Fallback if image fails to load
-          markerContent.onerror = () => {
-            markerContent.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDUiIGhlaWdodD0iNTUiIHZpZXdCb3g9IjAgMCA0NSA1NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMi41IiBjeT0iMjIuNSIgcj0iMjAiIGZpbGw9IiMzYjgyZjYiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTSAyMi41IDQyLjUgTCAyMi41IDU1IiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==';
-          };
-          
-          const marker = new google.maps.marker.AdvancedMarkerElement({
-            map: mapInstanceRef.current!,
-            position: { lat, lng },
-            content: markerContent,
-            title: branch.branch,
-            zIndex: 100,
-          });
+      if (!branch.latitude || !branch.longitude) return;
+      
+      const lat = parseFloat(branch.latitude);
+      const lng = parseFloat(branch.longitude);
+      
+      if (isNaN(lat) || isNaN(lng)) return;
 
-          // Create info window for branch
-          const infoWindow = new google.maps.InfoWindow();
-          
-          marker.addListener("click", () => {
-            const div = document.createElement("div");
-            const root = createRoot(div);
-            root.render(
-              <BranchPopup
-                id={branch.id}
-                name={branch.branch}
-                address={branch.address || "لا يوجد عنوان"}
-                status="Active"
-              />
-            );
-            infoWindow.setContent(div);
-            infoWindow.open(mapInstanceRef.current!, marker);
-          });
+      const markerContent = document.createElement('img');
+      markerContent.src = '/icons/properties/icon-5060.png';
+      markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; position: relative; left: 10px;';
+      markerContent.alt = branch.branch;
 
-          markersRef.current.push(marker);
-          branchMarkersAdded++;
-        } else {
-          console.warn(`❌ Invalid coordinates for branch: ${branch.branch}`);
-        }
-      }
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        map: mapInstanceRef.current!,
+        position: { lat, lng },
+        content: markerContent,
+        title: branch.branch,
+        zIndex: 100,
+      });
+
+      const infoWindow = new google.maps.InfoWindow();
+      marker.addListener("click", () => {
+        const div = document.createElement("div");
+        const root = createRoot(div);
+        root.render(
+          <BranchPopup
+            id={branch.id}
+            name={branch.branch}
+            address={branch.address || "لا يوجد عنوان"}
+            status="Active"
+          />
+        );
+        infoWindow.setContent(div);
+        infoWindow.open(mapInstanceRef.current!, marker);
+      });
+
+      markersRef.current.push(marker);
     });
 
-    console.warn(`✅ Added ${branchMarkersAdded} branch markers to map`);
-
-    // Add markers for random technicians in Cairo/Giza area
-    const randomTechnicianIcons = [
+    // Add technician markers
+    const technicianIcons = [
       "tec-01.png", "tec-02.png", "tec-03.png", "tec-04.png", "tec-05.png",
       "tec-06.png", "tec-07.png", "tec-08.png", "tec-09.png", "tec-10.png",
       "tec-11.png", "tec-12.png", "tec-13.png", "tec-14.png", "tec-15.png",
       "tec-16.png", "tec-17.png", "tec-18.png", "tec-19.png", "tec-20.png"
     ];
 
-    console.warn("👷 Adding technician markers...");
-
-    // Generate 20 random technician positions in Cairo/Giza area
     const cairoCenter = { lat: 30.0444, lng: 31.2357 };
-    const radius = 0.2; // roughly 20km radius
-
-    let techMarkersAdded = 0;
+    const radius = 0.2;
 
     for (let i = 0; i < 20; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -319,39 +225,20 @@ export default function ServiceMap() {
       const lat = cairoCenter.lat + (distance * Math.cos(angle));
       const lng = cairoCenter.lng + (distance * Math.sin(angle));
       
-      const iconIndex = i % randomTechnicianIcons.length;
       const tech = technicians[i] || {
         id: `random-${i}`,
         name: `فني ${i + 1}`,
         specialization: ["سباك", "كهربائي", "نجار", "دهان"][i % 4],
         rating: 4 + Math.random(),
         total_reviews: Math.floor(Math.random() * 50) + 10,
-        status: ["available", "busy", "soon"][Math.floor(Math.random() * 3)] as "available" | "busy" | "soon",
-        profile_image: undefined,
+        status: ["online", "busy", "offline"][Math.floor(Math.random() * 3)] as "online" | "busy" | "offline",
       };
 
-      const techStatus = (tech.status === "available" || tech.status === "busy" || tech.status === "soon") 
-        ? tech.status 
-        : "soon";
-      
-      // Create custom image content for technician marker using Advanced Marker
       const markerContent = document.createElement('img');
-      markerContent.src = `/icons/technicians/${randomTechnicianIcons[iconIndex]}`;
+      markerContent.src = `/icons/technicians/${technicianIcons[i % technicianIcons.length]}`;
       markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; position: relative; left: 10px;';
       markerContent.alt = tech.name || "فني";
-      
-      // Fallback if image fails to load
-      markerContent.onerror = () => {
-        const statusColor = techStatus === "available" ? "#10b981" : 
-                           techStatus === "busy" ? "#ef4444" : "#f59e0b";
-        markerContent.src = `data:image/svg+xml;base64,${btoa(`
-          <svg width="45" height="55" viewBox="0 0 45 55" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="22.5" cy="22.5" r="20" fill="${statusColor}" stroke="#ffffff" stroke-width="3"/>
-            <path d="M 22.5 42.5 L 22.5 55" stroke="${statusColor}" stroke-width="2"/>
-          </svg>
-        `)}`;
-      };
-      
+
       const marker = new google.maps.marker.AdvancedMarkerElement({
         map: mapInstanceRef.current!,
         position: { lat, lng },
@@ -360,8 +247,8 @@ export default function ServiceMap() {
         zIndex: 200,
       });
 
-      // Create info window for technician
       const infoWindow = new google.maps.InfoWindow();
+      const techStatus = tech.status === "busy" ? "busy" : tech.status === "online" ? "available" : "soon";
       
       marker.addListener("click", () => {
         const div = document.createElement("div");
@@ -374,12 +261,10 @@ export default function ServiceMap() {
             totalReviews={tech.total_reviews || 20}
             status={techStatus}
             availableIn={techStatus === "soon" ? 40 : undefined}
-            profileImage={tech.profile_image || undefined}
+            profileImage={undefined}
             onRequestService={() => {
               infoWindow.close();
-              setTimeout(() => {
-                navigate("/quick-request");
-              }, 100);
+              setTimeout(() => navigate("/quick-request"), 100);
             }}
           />
         );
@@ -388,11 +273,14 @@ export default function ServiceMap() {
       });
 
       markersRef.current.push(marker);
-      techMarkersAdded++;
     }
 
-    console.warn(`✅ Added ${techMarkersAdded} technician markers to map`);
-    console.warn(`🎯 Total markers on map: ${markersRef.current.length}`);
+    return () => {
+      markersRef.current.forEach((marker) => {
+        marker.map = null;
+      });
+      markersRef.current = [];
+    };
   }, [technicians, branches, navigate]);
 
   const filteredTechnicians = technicians.filter((tech) => {
@@ -408,9 +296,7 @@ export default function ServiceMap() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
-      {/* Unified Header */}
       <header className="bg-card/95 backdrop-blur-md border-b border-border/50 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg">
             <div className="relative">
@@ -424,22 +310,14 @@ export default function ServiceMap() {
           </div>
         </div>
 
-        {/* User Profile */}
         <div className="flex items-center gap-3">
           <NotificationsList />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-200 p-1 rounded-xl"
-              >
+              <Button variant="ghost" className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-200 p-1 rounded-xl">
                 <Avatar className="h-9 w-9 border-2 border-primary/30 shadow-lg ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
-                  <AvatarImage 
-                    src={userData?.avatarUrl || "/lovable-uploads/fb9d438e-077d-4ce0-997b-709c295e2b35.png"} 
-                    alt={getFullName()} 
-                    className="object-cover"
-                  />
+                  <AvatarImage src={userData?.avatarUrl || "/lovable-uploads/fb9d438e-077d-4ce0-997b-709c295e2b35.png"} alt={getFullName()} className="object-cover" />
                   <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-bold text-sm">
                     {getInitials()}
                   </AvatarFallback>
@@ -450,59 +328,27 @@ export default function ServiceMap() {
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 bg-card/95 backdrop-blur-md border-border/50 shadow-xl">
-              <DropdownMenuLabel className="text-right py-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
-                    <AvatarImage 
-                      src={userData?.avatarUrl || "/lovable-uploads/fb9d438e-077d-4ce0-997b-709c295e2b35.png"} 
-                      alt={getFullName()} 
-                    />
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-bold">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col space-y-1 flex-1">
-                    <p className="text-sm font-semibold leading-none">{getFullName()}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {userData?.email || "..."}
-                    </p>
-                    <span className="text-xs text-primary font-medium">{userData?.role || "..."}</span>
-                  </div>
-                </div>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>
+                <p className="text-sm">{getFullName()}</p>
+                <p className="text-xs text-muted-foreground">{userData?.email}</p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="cursor-pointer hover:bg-primary/10 transition-colors"
-                onClick={() => navigate("/settings")}
-              >
-                <User className="ml-2 h-4 w-4 text-primary" />
-                <span>الملف الشخصي</span>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <SettingsIcon className="ml-2 h-4 w-4" />
+                الإعدادات
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="cursor-pointer hover:bg-primary/10 transition-colors"
-                onClick={() => navigate("/settings")}
-              >
-                <SettingsIcon className="ml-2 h-4 w-4 text-primary" />
-                <span>الإعدادات</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={handleLogout} 
-                className="text-destructive cursor-pointer hover:bg-destructive/10 focus:text-destructive focus:bg-destructive/10 transition-colors"
-              >
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                 <LogOut className="ml-2 h-4 w-4" />
-                <span>تسجيل الخروج</span>
+                تسجيل الخروج
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
-      {/* Search Bar and Filters Combined */}
       <div className="bg-card border-b border-border px-4 sm:px-6 py-3">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          {/* Search */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -514,18 +360,13 @@ export default function ServiceMap() {
             />
           </div>
           
-          {/* Specialty Filters */}
           <div className="flex gap-2 overflow-x-auto">
             {specialties.map((specialty) => (
               <Button
                 key={specialty.id}
                 variant={selectedSpecialty === specialty.label ? "default" : "outline"}
                 size="sm"
-                onClick={() =>
-                  setSelectedSpecialty(
-                    selectedSpecialty === specialty.label ? null : specialty.label
-                  )
-                }
+                onClick={() => setSelectedSpecialty(selectedSpecialty === specialty.label ? null : specialty.label)}
                 className="whitespace-nowrap"
               >
                 <span className="mr-1">{specialty.icon}</span>
@@ -536,22 +377,16 @@ export default function ServiceMap() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Technicians List (تصغير 20%) */}
         <aside className="w-64 bg-card border-l border-border flex flex-col max-h-[calc(100vh-180px)]">
           <div className="p-3 flex-shrink-0 border-b border-border">
             <h2 className="text-base font-bold text-foreground mb-1">
               الخدمات المتاحة ({filteredTechnicians.length})
             </h2>
-            <p className="text-xs text-muted-foreground">
-              اختر فني من القائمة أدناه
-            </p>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-3 py-3 scrollbar-thin scrollbar-thumb-muted scrollbar-track-muted/30">
+          <div className="flex-1 overflow-y-auto px-3 py-3">
             <div className="space-y-2">
-
               {loading ? (
                 <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
               ) : filteredTechnicians.length > 0 ? (
@@ -570,21 +405,13 @@ export default function ServiceMap() {
                           <h3 className="text-sm font-semibold text-foreground">
                             {tech.name || "فني"}
                           </h3>
-                          <Badge
-                            variant="secondary"
-                            className={
-                              tech.status === "online"
-                                ? "bg-green-100 text-green-700 text-xs"
-                                : tech.status === "busy"
-                                ? "bg-yellow-100 text-yellow-700 text-xs"
-                                : "bg-muted text-muted-foreground text-xs"
-                            }
-                          >
-                            {tech.status === "online"
-                              ? "متاح"
-                              : tech.status === "busy"
-                              ? "مشغول"
-                              : "غير متاح"}
+                          <Badge variant="secondary" className={
+                            tech.status === "online" ? "bg-green-100 text-green-700 text-xs" :
+                            tech.status === "busy" ? "bg-yellow-100 text-yellow-700 text-xs" :
+                            "bg-muted text-muted-foreground text-xs"
+                          }>
+                            {tech.status === "online" ? "متاح" :
+                             tech.status === "busy" ? "مشغول" : "غير متاح"}
                           </Badge>
                         </div>
 
@@ -595,12 +422,8 @@ export default function ServiceMap() {
                         <div className="flex items-center gap-2 text-xs mb-1.5">
                           <div className="flex items-center gap-0.5">
                             <Star className="w-3 h-3 fill-primary text-primary" />
-                            <span className="font-medium">
-                              {tech.rating || "5.0"}
-                            </span>
-                            <span className="text-muted-foreground">
-                              ({tech.total_reviews || 0})
-                            </span>
+                            <span className="font-medium">{tech.rating || "5.0"}</span>
+                            <span className="text-muted-foreground">({tech.total_reviews || 0})</span>
                           </div>
                         </div>
 
@@ -611,11 +434,8 @@ export default function ServiceMap() {
                           <Button
                             size="sm"
                             onClick={(e) => {
-                              e.preventDefault();
                               e.stopPropagation();
-                              if (tech.phone) {
-                                window.open(`tel:${tech.phone}`, '_self');
-                              }
+                              if (tech.phone) window.open(`tel:${tech.phone}`, '_self');
                             }}
                             className="h-7 text-xs"
                           >
@@ -636,7 +456,6 @@ export default function ServiceMap() {
           </div>
         </aside>
 
-        {/* Map Area */}
         <main className="flex-1 relative">
           {mapError ? (
             <div className="absolute inset-0 flex items-center justify-center bg-muted">
@@ -644,12 +463,8 @@ export default function ServiceMap() {
                 <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <MapPin className="w-8 h-8 text-destructive" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">
-                  عذرًا، حدث خطأ!
-                </h3>
-                <p className="text-muted-foreground">
-                  لم يمكن تحميل خريطة Google. يرجى المحاولة مرة أخرى لاحقاً.
-                </p>
+                <h3 className="text-xl font-bold text-foreground mb-2">عذرًا، حدث خطأ!</h3>
+                <p className="text-muted-foreground">لم يمكن تحميل خريطة Google. يرجى المحاولة مرة أخرى لاحقاً.</p>
               </div>
             </div>
           ) : (
@@ -658,43 +473,16 @@ export default function ServiceMap() {
         </main>
       </div>
 
-      {/* Bottom Navigation */}
       <nav className="bg-card border-t border-border px-4 py-2 flex items-center justify-around">
-        <Button 
-          variant="ghost" 
-          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
-          onClick={() => navigate("/")}
-        >
+        <Button variant="ghost" className="flex flex-col items-center gap-0.5 text-xs" onClick={() => navigate("/")}>
           <Home className="w-5 h-5" />
           <span>الرئيسية</span>
         </Button>
-        <Button 
-          variant="ghost" 
-          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
-          onClick={() => navigate("/invoices")}
-        >
-          <FileText className="w-5 h-5" />
-          <span>الفواتير</span>
-        </Button>
-        <Button 
-          variant="ghost" 
-          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
-          onClick={() => navigate("/requests")}
-        >
+        <Button variant="ghost" className="flex flex-col items-center gap-0.5 text-xs" onClick={() => navigate("/requests")}>
           <ClipboardList className="w-5 h-5" />
           <span>الطلبات</span>
         </Button>
-        <Button 
-          variant="ghost" 
-          className="flex flex-col items-center gap-0.5 text-xs hover:bg-primary/10"
-          onClick={() => navigate("/settings")}
-        >
-          <SettingsIcon className="w-5 h-5" />
-          <span>الإعدادات</span>
-        </Button>
-        <Button
-          className="flex flex-col items-center gap-0.5 text-xs bg-primary hover:bg-primary/90 px-4"
-        >
+        <Button className="flex flex-col items-center gap-0.5 text-xs">
           <MapPin className="w-5 h-5" />
           <span>الخريطة</span>
         </Button>
