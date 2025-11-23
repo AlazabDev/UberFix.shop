@@ -265,27 +265,9 @@ export default function ServiceMap() {
             map: mapInstanceRef.current!,
             title: branch.branch,
             icon: {
-              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg width="40" height="50" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-                      <feOffset dx="0" dy="2" result="offsetblur"/>
-                      <feComponentTransfer>
-                        <feFuncA type="linear" slope="0.3"/>
-                      </feComponentTransfer>
-                      <feMerge>
-                        <feMergeNode/>
-                        <feMergeNode in="SourceGraphic"/>
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <circle cx="20" cy="20" r="15" fill="#3b82f6" stroke="white" stroke-width="3" filter="url(#shadow)"/>
-                  <path d="M20 12 L20 20 L16 24 L20 28 L24 24 L20 20" fill="white"/>
-                </svg>
-              `),
-              scaledSize: new google.maps.Size(40, 50),
-              anchor: new google.maps.Point(20, 50),
+              url: '/icons/properties/icon-5060.png',
+              scaledSize: new google.maps.Size(48, 48),
+              anchor: new google.maps.Point(24, 48),
             },
           });
 
@@ -319,19 +301,21 @@ export default function ServiceMap() {
 
     // Add markers for random technicians in Cairo/Giza area
     const randomTechnicianIcons = [
-      "tec-01.png", "tec-05.png", "tec-10.png", "tec-15.png", "tec-20.png",
-      "tec-25.png", "tec-30.png", "tec-35.png", "tec-40.png", "tec-45.png"
+      "tec-01.png", "tec-02.png", "tec-03.png", "tec-04.png", "tec-05.png",
+      "tec-06.png", "tec-07.png", "tec-08.png", "tec-09.png", "tec-10.png",
+      "tec-11.png", "tec-12.png", "tec-13.png", "tec-14.png", "tec-15.png",
+      "tec-16.png", "tec-17.png", "tec-18.png", "tec-19.png", "tec-20.png"
     ];
 
     console.warn("👷 Adding technician markers...");
 
-    // Generate 10 random technician positions in Cairo/Giza area
+    // Generate 20 random technician positions in Cairo/Giza area
     const cairoCenter = { lat: 30.0444, lng: 31.2357 };
-    const radius = 0.15; // roughly 15km radius
+    const radius = 0.2; // roughly 20km radius
 
     let techMarkersAdded = 0;
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       const angle = Math.random() * Math.PI * 2;
       const distance = Math.random() * radius;
       const lat = cairoCenter.lat + (distance * Math.cos(angle));
@@ -351,38 +335,15 @@ export default function ServiceMap() {
       const techStatus = (tech.status === "available" || tech.status === "busy" || tech.status === "soon") 
         ? tech.status 
         : "soon";
-
-      // Choose color based on status
-      const statusColor = techStatus === "available" ? "#10b981" : 
-                         techStatus === "busy" ? "#ef4444" : "#f59e0b";
       
       const marker = new google.maps.Marker({
         position: { lat, lng },
         map: mapInstanceRef.current!,
         title: tech.name || "فني",
         icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="50" height="60" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <filter id="shadow${i}" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-                  <feOffset dx="0" dy="2" result="offsetblur"/>
-                  <feComponentTransfer>
-                    <feFuncA type="linear" slope="0.4"/>
-                  </feComponentTransfer>
-                  <feMerge>
-                    <feMergeNode/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-              <circle cx="25" cy="25" r="18" fill="${statusColor}" stroke="white" stroke-width="3" filter="url(#shadow${i})"/>
-              <path d="M25 15 L25 25 L30 30 M25 25 L20 30" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-              <circle cx="25" cy="25" r="2" fill="white"/>
-            </svg>
-          `),
-          scaledSize: new google.maps.Size(50, 60),
-          anchor: new google.maps.Point(25, 60),
+          url: `/icons/technicians/${randomTechnicianIcons[iconIndex]}`,
+          scaledSize: new google.maps.Size(40, 40),
+          anchor: new google.maps.Point(20, 40),
         },
         optimized: false,
       });
