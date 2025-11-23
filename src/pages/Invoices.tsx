@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
@@ -9,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { InvoiceStats } from "@/components/invoices/InvoiceStats";
 import { InvoiceCard } from "@/components/invoices/InvoiceCard";
 import { InvoiceTable } from "@/components/invoices/InvoiceTable";
+import { AppFooter } from "@/components/shared/AppFooter";
 
 type Invoice = {
   id: string;
@@ -72,32 +72,6 @@ export default function Invoices() {
   const handleInvoiceCreated = () => {
     setIsDialogOpen(false);
     fetchInvoices();
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-success text-success-foreground';
-      case 'pending':
-        return 'bg-warning text-warning-foreground';
-      case 'overdue':
-        return 'bg-destructive text-destructive-foreground';
-      default:
-        return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'مدفوعة';
-      case 'pending':
-        return 'معلقة';
-      case 'overdue':
-        return 'متأخرة';
-      default:
-        return status;
-    }
   };
 
   const stats = {
@@ -173,6 +147,8 @@ export default function Invoices() {
           onDownload={(id) => console.warn('Download invoice', id)}
         />
       )}
+
+      <AppFooter />
     </div>
   );
 }

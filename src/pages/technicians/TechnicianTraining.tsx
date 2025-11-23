@@ -83,7 +83,7 @@ export default function TechnicianTraining() {
         .from("technicians")
         .select("id")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (!tech) {
         toast({

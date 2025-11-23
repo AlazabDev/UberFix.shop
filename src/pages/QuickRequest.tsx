@@ -25,7 +25,7 @@ export default function QuickRequest() {
         .from("properties")
         .select("*")
         .eq("id", propertyId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching property:", error);

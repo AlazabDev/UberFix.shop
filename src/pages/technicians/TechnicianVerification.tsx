@@ -34,7 +34,7 @@ export default function TechnicianVerification() {
         .from("technician_applications")
         .select("id, status")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (!application) {
         toast({
@@ -53,7 +53,7 @@ export default function TechnicianVerification() {
         .from("technician_verifications")
         .select("verification_status")
         .eq("application_id", application.id)
-        .single();
+        .maybeSingle();
 
       if (verification) {
         setVerificationStatus(verification.verification_status);

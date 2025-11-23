@@ -11,7 +11,7 @@ export function SystemSettings() {
       const { data, error } = await supabase
         .from('app_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;

@@ -34,7 +34,7 @@ export default function TechnicianAgreement() {
         .from("technician_applications")
         .select("id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (!application) {
         navigate("/technicians/register");
@@ -48,7 +48,7 @@ export default function TechnicianAgreement() {
         .from("technician_verifications")
         .select("verification_status")
         .eq("application_id", application.id)
-        .single();
+        .maybeSingle();
 
       if (!verification || verification.verification_status !== "verified") {
         toast({
@@ -65,7 +65,7 @@ export default function TechnicianAgreement() {
         .from("technician_agreements")
         .select("signed_at")
         .eq("application_id", application.id)
-        .single();
+        .maybeSingle();
 
       if (existingAgreement && existingAgreement.signed_at) {
         navigate("/technicians/training");

@@ -70,7 +70,7 @@ export async function checkUserRole(userId: string, role: AppRole): Promise<bool
       .select('role')
       .eq('user_id', userId)
       .eq('role', role)
-      .single();
+      .maybeSingle();
 
     return !error && !!data;
   } catch {
