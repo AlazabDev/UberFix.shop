@@ -57,7 +57,7 @@ export default function EmergencyService() {
         .from('profiles')
         .select('company_id')
         .eq('id', user?.id)
-        .single();
+        .maybeSingle();
       
       const requestData: any = {
         title: `صيانة طارئة - ${technicianData?.specialization || 'خدمة'}`,
@@ -79,7 +79,7 @@ export default function EmergencyService() {
         .from('maintenance_requests')
         .insert(requestData)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

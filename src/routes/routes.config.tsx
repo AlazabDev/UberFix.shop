@@ -8,7 +8,6 @@ const BranchManagement = lazy(() => import("@/pages/BranchManagement"));
 
 // Maintenance
 const Requests = lazy(() => import("@/pages/maintenance/Requests"));
-const AllRequests = lazy(() => import("@/pages/maintenance/AllRequests"));
 const RequestDetails = lazy(() => import("@/pages/maintenance/RequestDetails"));
 const RequestLifecycleJourney = lazy(
   () => import("@/pages/maintenance/RequestLifecycleJourney")
@@ -103,7 +102,6 @@ const UsersPage = lazy(() => import("@/pages/UsersPage"));
 // Maintenance Module Pages
 const MaintenanceRequestDetail = lazy(() => import("@/pages/maintenance/MaintenanceRequestDetail"));
 const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
-const MaintenanceList = lazy(() => import("@/pages/maintenance/MaintenanceList"));
 const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
 
 export const protectedRoutes = [
@@ -113,12 +111,10 @@ export const protectedRoutes = [
 
   // Maintenance
   { path: "/requests", element: <Requests />, withLayout: true },
-  { path: "/all-requests", element: <AllRequests />, withLayout: true },
   { path: "/requests/:id", element: <RequestDetails />, withLayout: true },
   { path: "/request-lifecycle", element: <RequestLifecycleJourney />, withLayout: true },
   { path: "/service-request", element: <ServiceRequest />, withLayout: true },
   { path: "/maintenance/overview", element: <MaintenanceOverview />, withLayout: true },
-  { path: "/maintenance/list", element: <MaintenanceList />, withLayout: true },
   { path: "/maintenance/create", element: <CreateMaintenanceRequest />, withLayout: true },
   { path: "/maintenance/:id", element: <MaintenanceRequestDetail />, withLayout: true },
 

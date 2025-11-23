@@ -52,28 +52,28 @@ export default function MaintenanceRequestDetail() {
         .from("maintenance_requests")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (requestError) throw requestError;
       setRequest(requestData);
 
       // Fetch property
-      if (requestData.property_id) {
+      if (requestData?.property_id) {
         const { data: propertyData } = await supabase
           .from("properties")
           .select("*")
           .eq("id", requestData.property_id)
-          .single();
+          .maybeSingle();
         setProperty(propertyData);
       }
 
       // Fetch vendor
-      if (requestData.assigned_vendor_id) {
+      if (requestData?.assigned_vendor_id) {
         const { data: vendorData } = await supabase
           .from("vendors")
           .select("*")
           .eq("id", requestData.assigned_vendor_id)
-          .single();
+          .maybeSingle();
         setVendor(vendorData);
       }
 
