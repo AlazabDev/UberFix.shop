@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 type AppRole = 'admin' | 'manager' | 'staff' | 'technician' | 'vendor' | 'customer' | 'dispatcher' | 'finance';
 
+export type { AppRole };
+
 interface UserRoles {
   roles: AppRole[];
   loading: boolean;
@@ -32,8 +34,7 @@ export const useUserRoles = (): UserRoles => {
         { 
           event: '*', 
           schema: 'public', 
-          table: 'user_roles',
-          filter: `user_id=eq.${supabase.auth.getUser().then(u => u.data.user?.id)}`
+          table: 'profiles'
         },
         () => {
           fetchUserRoles();
@@ -56,16 +57,18 @@ export const useUserRoles = (): UserRoles => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('user_roles')
+      const { data: profile } = await supabase
+        .from('profiles')
         .select('role')
-        .eq('user_id', user.id);
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
-
-      setRoles(data?.map(r => r.role as AppRole) || []);
+      if (profile?.role) {
+        setRoles([profile.role as AppRole]);
+      } else {
+        setRoles([]);
+      }
     } catch (error) {
-      console.error('Error fetching user roles:', error);
       setRoles([]);
     } finally {
       setLoading(false);
@@ -85,21 +88,24 @@ export const useUserRoles = (): UserRoles => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
-      // Check permissions directly from role_permissions table
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select(`
-          role,
-          role_permissions!inner(resource, action)
-        `)
-        .eq('user_id', user.id)
-        .eq('role_permissions.resource', resource)
-        .eq('role_permissions.action', action);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (!profile?.role) return false;
+
+      const { data, error } = await supabase
+        .from('role_permissions')
+        .select('resource, action')
+        .eq('role', profile.role)
+        .eq('resource', resource)
+        .eq('action', action);
+
+      if (error) return false;
       return (data && data.length > 0) || false;
     } catch (error) {
-      console.error('Error checking permission:', error);
       return false;
     }
   };
