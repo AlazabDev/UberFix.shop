@@ -100,7 +100,6 @@ const Invoices = lazy(() => import("@/pages/Invoices"));
 const UsersPage = lazy(() => import("@/pages/UsersPage"));
 
 // Maintenance Module Pages
-const MaintenanceRequestDetail = lazy(() => import("@/pages/maintenance/MaintenanceRequestDetail"));
 const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
 const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
 
@@ -116,7 +115,7 @@ export const protectedRoutes = [
   { path: "/service-request", element: <ServiceRequest />, withLayout: true },
   { path: "/maintenance/overview", element: <MaintenanceOverview />, withLayout: true },
   { path: "/maintenance/create", element: <CreateMaintenanceRequest />, withLayout: true },
-  { path: "/maintenance/:id", element: <MaintenanceRequestDetail />, withLayout: true },
+  { path: "/maintenance/:id", element: <RequestDetails />, withLayout: true },
 
   // Vendors
   { path: "/vendors", element: <Vendors />, withLayout: true },
