@@ -66,7 +66,7 @@ export const useVendors = () => {
         .from('vendors')
         .insert([vendorData])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { success: true, data };
@@ -82,7 +82,7 @@ export const useVendors = () => {
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { success: true, data };

@@ -76,7 +76,7 @@ export function useAppSettings() {
       const { data, error } = await supabase
         .from("app_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data as AppSettings;
@@ -90,7 +90,7 @@ export function useAppSettings() {
         .update(updates)
         .eq("id", settings?.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;

@@ -132,7 +132,7 @@ export const useProjectDetails = (projectId: string) => {
         .from('projects')
         .select('*')
         .eq('id', projectId)
-        .single();
+        .maybeSingle();
 
       if (projectError) throw projectError;
       setProject(projectData as Project);
