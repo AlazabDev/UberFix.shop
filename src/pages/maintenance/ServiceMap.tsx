@@ -265,9 +265,12 @@ export default function ServiceMap() {
             map: mapInstanceRef.current!,
             title: branch.branch,
             icon: {
-              url: '/icons/properties/icon-5060.png',
-              scaledSize: new google.maps.Size(45, 55),
-              anchor: new google.maps.Point(22, 55),
+              path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+              fillColor: '#3b82f6',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 2,
+              scale: 6,
             },
             optimized: false,
             zIndex: 100,
@@ -338,14 +341,20 @@ export default function ServiceMap() {
         ? tech.status 
         : "soon";
       
+      const statusColor = techStatus === "available" ? "#10b981" : 
+                         techStatus === "busy" ? "#ef4444" : "#f59e0b";
+      
       const marker = new google.maps.Marker({
         position: { lat, lng },
         map: mapInstanceRef.current!,
         title: tech.name || "فني",
         icon: {
-          url: `/icons/technicians/${randomTechnicianIcons[iconIndex]}`,
-          scaledSize: new google.maps.Size(45, 55),
-          anchor: new google.maps.Point(22, 55),
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: statusColor,
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3,
+          scale: 10,
         },
         optimized: false,
         zIndex: 200,
