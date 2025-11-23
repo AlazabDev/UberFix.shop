@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ServiceCategoriesStep } from "@/components/service-request/ServiceCategoriesStep";
 import { ServiceSelectionStep } from "@/components/service-request/ServiceSelectionStep";
 import { RequestDetailsStep } from "@/components/service-request/RequestDetailsStep";
 import { useNavigate } from "react-router-dom";
+import { AppFooter } from "@/components/shared/AppFooter";
 
 type Step = 1 | 2 | 3;
 
@@ -47,7 +48,6 @@ export default function ServiceRequest() {
         <h1 className="text-2xl font-bold">إضافة طلب صيانة جديد</h1>
       </div>
 
-      {/* Progress Steps */}
       <Card className="mb-6">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between mb-8">
@@ -75,7 +75,6 @@ export default function ServiceRequest() {
         </CardContent>
       </Card>
 
-      {/* Step Content */}
       <div className="mb-6">
         {currentStep === 1 && (
           <ServiceCategoriesStep
@@ -108,7 +107,6 @@ export default function ServiceRequest() {
         )}
       </div>
 
-      {/* Navigation Buttons */}
       {currentStep !== 3 && (
         <div className="flex justify-between">
           <Button
@@ -131,6 +129,8 @@ export default function ServiceRequest() {
           </Button>
         </div>
       )}
+
+      <AppFooter />
     </div>
   );
 }
