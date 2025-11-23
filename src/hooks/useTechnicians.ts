@@ -41,6 +41,10 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
+  // استخراج القيم من filter لتجنب infinite loop
+  const filterStatus = filter?.status;
+  const filterSpecialization = filter?.specialization;
+
   const fetchTechnicians = async () => {
     try {
       setLoading(true);
@@ -51,12 +55,12 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
         .select('*')
         .eq('is_active', true);
 
-      if (filter?.status) {
-        query = query.eq('status', filter.status);
+      if (filterStatus) {
+        query = query.eq('status', filterStatus);
       }
 
-      if (filter?.specialization) {
-        query = query.eq('specialization', filter.specialization);
+      if (filterSpecialization) {
+        query = query.eq('specialization', filterSpecialization);
       }
 
       const { data, error: dbError } = await query.order('rating', { ascending: false });
@@ -97,17 +101,15 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'technicians' },
         () => {
-          console.warn('🔄 Technicians changed, refetching...');
           fetchTechnicians();
         }
       )
       .subscribe();
 
     return () => {
-      console.warn('🧹 Cleaning up technicians subscription');
       supabase.removeChannel(channel);
     };
-  }, [filter?.status, filter?.specialization]);
+  }, [filterStatus, filterSpecialization]);
 
   return {
     technicians,
