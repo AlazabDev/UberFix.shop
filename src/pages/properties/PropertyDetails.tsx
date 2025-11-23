@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Building2, Edit } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Building2, Edit, Loader2 } from "lucide-react";
 import { InteractiveMap } from "@/components/maps/InteractiveMap";
 import { Badge } from "@/components/ui/badge";
+import { AppFooter } from "@/components/shared/AppFooter";
 
 export default function PropertyDetails() {
   const { id } = useParams();
@@ -19,7 +19,7 @@ export default function PropertyDetails() {
         .from("properties")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -130,17 +130,7 @@ export default function PropertyDetails() {
         />
       )}
 
-      {/* Footer */}
-      <div className="mt-8 text-center text-xs text-muted-foreground space-x-4 space-x-reverse">
-        <a href="#" className="hover:text-primary">دليل المستخدم</a>
-        <span>•</span>
-        <a href="#" className="hover:text-primary">شروط الاستخدام</a>
-        <span>•</span>
-        <a href="#" className="hover:text-primary">سياسة الخصوصية</a>
-        <div className="mt-2">
-          جميع الحقوق محفوظة © 2025 بواسطة UberFix.shop - v2.0.0
-        </div>
-      </div>
+      <AppFooter />
     </div>
   );
 }
