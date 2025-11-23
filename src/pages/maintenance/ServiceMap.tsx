@@ -22,6 +22,7 @@ import {
 import { NotificationsList } from "@/components/notifications/NotificationsList";
 import { BranchPopup } from "@/components/maps/BranchPopup";
 import { TechnicianPopup } from "@/components/maps/TechnicianPopup";
+import { BranchInfoCard } from "@/components/maps/BranchInfoCard";
 import { createRoot } from "react-dom/client";
 
 const specialties = [
@@ -160,14 +161,14 @@ export default function ServiceMap() {
   }, []);
 
   useEffect(() => {
-    if (!mapInstanceRef.current || !branches.length) return;
+    if (!mapInstanceRef.current) return;
 
     markersRef.current.forEach((marker) => {
       marker.map = null;
     });
     markersRef.current = [];
     
-    // Add branch markers
+    // Add branch markers from database
     branches.forEach((branch) => {
       if (!branch.latitude || !branch.longitude) return;
       
@@ -177,8 +178,8 @@ export default function ServiceMap() {
       if (isNaN(lat) || isNaN(lng)) return;
 
       const markerContent = document.createElement('img');
-      markerContent.src = '/icons/properties/icon-5060.png';
-      markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; position: relative; left: 10px;';
+      markerContent.src = branch.icon || '/icons/properties/icon-5060.png';
+      markerContent.style.cssText = 'width: 50px; height: 60px; object-fit: contain; cursor: pointer; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));';
       markerContent.alt = branch.branch;
 
       const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -208,35 +209,21 @@ export default function ServiceMap() {
       markersRef.current.push(marker);
     });
 
-    // Add technician markers
-    const technicianIcons = [
-      "tec-01.png", "tec-02.png", "tec-03.png", "tec-04.png", "tec-05.png",
-      "tec-06.png", "tec-07.png", "tec-08.png", "tec-09.png", "tec-10.png",
-      "tec-11.png", "tec-12.png", "tec-13.png", "tec-14.png", "tec-15.png",
-      "tec-16.png", "tec-17.png", "tec-18.png", "tec-19.png", "tec-20.png"
-    ];
+    // Add technician markers with real data
+    technicians.forEach((tech) => {
+      if (!tech.current_latitude || !tech.current_longitude) return;
 
-    const cairoCenter = { lat: 30.0444, lng: 31.2357 };
-    const radius = 0.2;
-
-    for (let i = 0; i < 20; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const distance = Math.random() * radius;
-      const lat = cairoCenter.lat + (distance * Math.cos(angle));
-      const lng = cairoCenter.lng + (distance * Math.sin(angle));
+      const lat = Number(tech.current_latitude);
+      const lng = Number(tech.current_longitude);
       
-      const tech = technicians[i] || {
-        id: `random-${i}`,
-        name: `فني ${i + 1}`,
-        specialization: ["سباك", "كهربائي", "نجار", "دهان"][i % 4],
-        rating: 4 + Math.random(),
-        total_reviews: Math.floor(Math.random() * 50) + 10,
-        status: ["online", "busy", "offline"][Math.floor(Math.random() * 3)] as "online" | "busy" | "offline",
-      };
+      if (isNaN(lat) || isNaN(lng)) return;
 
+      // Get icon from tech data or use default
+      const iconUrl = tech.profile_image || '/icons/technicians/tec-01.png';
+      
       const markerContent = document.createElement('img');
-      markerContent.src = `/icons/technicians/${technicianIcons[i % technicianIcons.length]}`;
-      markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; position: relative; left: 10px;';
+      markerContent.src = iconUrl;
+      markerContent.style.cssText = 'width: 45px; height: 55px; object-fit: contain; cursor: pointer; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.4));';
       markerContent.alt = tech.name || "فني";
 
       const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -261,7 +248,7 @@ export default function ServiceMap() {
             totalReviews={tech.total_reviews || 20}
             status={techStatus}
             availableIn={techStatus === "soon" ? 40 : undefined}
-            profileImage={undefined}
+            profileImage={tech.profile_image || undefined}
             onRequestService={() => {
               infoWindow.close();
               setTimeout(() => navigate("/quick-request"), 100);
@@ -273,7 +260,7 @@ export default function ServiceMap() {
       });
 
       markersRef.current.push(marker);
-    }
+    });
 
     return () => {
       markersRef.current.forEach((marker) => {
@@ -378,7 +365,18 @@ export default function ServiceMap() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        <aside className="w-64 bg-card border-l border-border flex flex-col max-h-[calc(100vh-180px)]">
+        <aside className="w-80 bg-card border-l border-border flex flex-col max-h-[calc(100vh-180px)]">
+          {/* Branch Info Section */}
+          <div className="p-3 flex-shrink-0 border-b border-border">
+            <BranchInfoCard
+              id="Az-Shop-0045"
+              name="Abu Auf"
+              location="Maadi 50"
+              status="Active"
+            />
+          </div>
+
+          {/* Available Services */}
           <div className="p-3 flex-shrink-0 border-b border-border">
             <h2 className="text-base font-bold text-foreground mb-1">
               الخدمات المتاحة ({filteredTechnicians.length})
