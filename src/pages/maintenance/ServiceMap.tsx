@@ -266,8 +266,8 @@ export default function ServiceMap() {
             title: branch.branch,
             icon: {
               url: '/icons/properties/icon-5060.png',
-              scaledSize: new google.maps.Size(44, 44),
-              anchor: new google.maps.Point(22, 44),
+              scaledSize: new google.maps.Size(45, 55),
+              anchor: new google.maps.Point(22, 55),
             },
             optimized: false,
             zIndex: 100,
@@ -344,8 +344,8 @@ export default function ServiceMap() {
         title: tech.name || "فني",
         icon: {
           url: `/icons/technicians/${randomTechnicianIcons[iconIndex]}`,
-          scaledSize: new google.maps.Size(44, 44),
-          anchor: new google.maps.Point(22, 44),
+          scaledSize: new google.maps.Size(45, 55),
+          anchor: new google.maps.Point(22, 55),
         },
         optimized: false,
         zIndex: 200,
@@ -365,10 +365,12 @@ export default function ServiceMap() {
             totalReviews={tech.total_reviews || 20}
             status={techStatus}
             availableIn={techStatus === "soon" ? 40 : undefined}
-            profileImage={undefined}
+            profileImage={tech.profile_image || undefined}
             onRequestService={() => {
-              navigate("/quick-request");
               infoWindow.close();
+              setTimeout(() => {
+                navigate("/quick-request");
+              }, 100);
             }}
           />
         );
