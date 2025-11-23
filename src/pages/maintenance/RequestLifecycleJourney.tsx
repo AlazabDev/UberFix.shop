@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { AppFooter } from "@/components/shared/AppFooter";
 import { 
   FileText, CheckCircle2, UserCheck, Calendar, Wrench, 
   Package, ClipboardCheck, FileCheck, DollarSign, 
@@ -283,7 +283,6 @@ export default function RequestLifecycleJourney() {
         })}
       </div>
 
-      {/* Legend */}
       <Card>
         <CardHeader>
           <CardTitle>مفتاح الألوان</CardTitle>
@@ -326,7 +325,6 @@ export default function RequestLifecycleJourney() {
         </CardContent>
       </Card>
 
-      {/* Flow Diagram */}
       <Card>
         <CardHeader>
           <CardTitle>المسار الطبيعي للطلب (Happy Path)</CardTitle>
@@ -355,6 +353,8 @@ export default function RequestLifecycleJourney() {
           </div>
         </CardContent>
       </Card>
+
+      <AppFooter />
     </div>
   );
 }
