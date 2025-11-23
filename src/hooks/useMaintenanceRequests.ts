@@ -335,21 +335,18 @@ export function useMaintenanceRequests() {
   useEffect(() => {
     fetchRequests();
 
-    // إضافة realtime subscription مع cleanup صحيح
+    // إضافة realtime subscription
     const channel = supabase
       .channel('maintenance-requests-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'maintenance_requests' },
-        (payload) => {
-          console.warn('🔄 Maintenance requests changed:', payload.eventType);
+        () => {
           fetchRequests();
         }
       )
       .subscribe();
 
-    // Cleanup function محسّنة
     return () => {
-      console.warn('🧹 Cleaning up maintenance requests subscription');
       channel.unsubscribe().then(() => {
         supabase.removeChannel(channel);
       });
