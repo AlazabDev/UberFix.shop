@@ -40,11 +40,34 @@ export function useDashboardStats() {
       const { data, error } = await supabase
         .from('dashboard_stats')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
-      setStats(data as DashboardStats);
+      // If no data exists, set default stats
+      if (!data) {
+        setStats({
+          pending_requests: 0,
+          today_requests: 0,
+          completed_requests: 0,
+          total_requests: 0,
+          this_month_requests: 0,
+          total_budget: 0,
+          actual_cost: 0,
+          completion_rate: 0,
+          avg_completion_days: 0,
+          high_priority_count: 0,
+          medium_priority_count: 0,
+          low_priority_count: 0,
+          submitted_count: 0,
+          assigned_count: 0,
+          in_progress_count: 0,
+          workflow_completed_count: 0,
+          last_updated: new Date().toISOString(),
+        });
+      } else {
+        setStats(data as DashboardStats);
+      }
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
       setError(err as Error);
