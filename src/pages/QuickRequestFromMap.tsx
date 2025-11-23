@@ -55,7 +55,7 @@ export default function QuickRequestFromMap() {
         .from('profiles')
         .select('company_id')
         .eq('id', technician.id)
-        .single();
+        .maybeSingle();
 
       if (!profile?.company_id) {
         throw new Error('لا يمكن تحديد الشركة');
@@ -67,7 +67,7 @@ export default function QuickRequestFromMap() {
         .select('id')
         .eq('company_id', profile.company_id)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!branch) {
         throw new Error('لا يوجد فرع متاح');
@@ -92,7 +92,7 @@ export default function QuickRequestFromMap() {
           channel: 'map',
         }])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

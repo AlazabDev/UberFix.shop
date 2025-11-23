@@ -253,7 +253,7 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
           .from("properties")
           .insert([propertyData])
           .select()
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error("Insert error:", error);

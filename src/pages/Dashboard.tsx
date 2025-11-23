@@ -5,6 +5,7 @@ import { MaintenanceChart } from "@/components/dashboard/MaintenanceChart";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useProjects } from "@/hooks/useProjects";
 import { useMediaQuery } from "@/hooks/use-mobile";
+import { AppFooter } from "@/components/shared/AppFooter";
 import { 
   Wrench, 
   CheckCircle, 
@@ -19,7 +20,6 @@ const Dashboard = () => {
   const { projects } = useProjects();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  // حسابات إضافية من Projects فقط
   const projectStats = {
     totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
     actualCost: projects.reduce((sum, p) => sum + (p.actual_cost || 0), 0),
@@ -37,7 +37,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Welcome Section */}
       <div className="space-y-2 text-center sm:text-right">
         <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-hero bg-clip-text text-transparent">
           مرحباً بك في لوحة التحكم 📊
@@ -47,7 +46,6 @@ const Dashboard = () => {
         </p>
       </div>
 
-      {/* Stats Grid - مُحسنة للهواتف */}
       <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${isMobile ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
         <StatsCard
           title="الطلبات المعلقة"
@@ -80,7 +78,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Monthly Budget Overview - مُحسنة للهواتف */}
       <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-4'}`}>
         <StatsCard
           title="الطلبات هذا الشهر"
@@ -117,16 +114,13 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Charts */}
       <MaintenanceChart />
 
-      {/* Recent Activity & Quick Actions - مُحسنة للهواتف */}
       <div className={`grid gap-4 sm:gap-6 ${isMobile ? 'grid-cols-1 space-y-2' : 'grid-cols-1 lg:grid-cols-2'}`}>
         <RecentRequests />
         <QuickActions />
       </div>
 
-      {/* Performance Stats - مُحسنة للهواتف */}
       <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${isMobile ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-4'}`}>
         <div className="text-center p-6 bg-card rounded-lg border card-elegant">
           <div className="text-3xl font-bold text-primary">
@@ -156,6 +150,8 @@ const Dashboard = () => {
           <div className="text-sm text-muted-foreground">نسبة الإنجاز</div>
         </div>
       </div>
+
+      <AppFooter />
     </div>
   );
 };

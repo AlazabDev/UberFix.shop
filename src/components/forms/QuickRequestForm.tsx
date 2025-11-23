@@ -55,7 +55,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
           .from('profiles')
           .select('company_id')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (profile?.company_id) {
           companyId = profile.company_id;
