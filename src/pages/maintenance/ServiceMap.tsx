@@ -266,9 +266,10 @@ export default function ServiceMap() {
             title: branch.branch,
             icon: {
               url: '/icons/properties/icon-5060.png',
-              scaledSize: new google.maps.Size(48, 48),
-              anchor: new google.maps.Point(24, 48),
+              scaledSize: new google.maps.Size(32, 32),
+              anchor: new google.maps.Point(16, 32),
             },
+            optimized: true,
           });
 
           // Create info window for branch
@@ -342,10 +343,10 @@ export default function ServiceMap() {
         title: tech.name || "فني",
         icon: {
           url: `/icons/technicians/${randomTechnicianIcons[iconIndex]}`,
-          scaledSize: new google.maps.Size(40, 40),
-          anchor: new google.maps.Point(20, 40),
+          scaledSize: new google.maps.Size(36, 36),
+          anchor: new google.maps.Point(18, 36),
         },
-        optimized: false,
+        optimized: true,
       });
 
       // Create info window for technician
