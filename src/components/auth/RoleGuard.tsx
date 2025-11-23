@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AppRole, useUserRole } from '@/hooks/useUserRole';
+import { AppRole, useUserRoles } from '@/hooks/useUserRoles';
 import { User } from '@supabase/supabase-js';
 
 interface RoleGuardProps {
@@ -18,7 +18,7 @@ interface RoleGuardProps {
 export function RoleGuard({ children, allowedRoles, redirectTo = '/dashboard' }: RoleGuardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { roles, loading: rolesLoading } = useUserRole(user);
+  const { roles, loading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
   const { toast } = useToast();
 
