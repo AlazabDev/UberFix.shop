@@ -24,6 +24,7 @@ import { BranchPopup } from "@/components/maps/BranchPopup";
 import { TechnicianPopup } from "@/components/maps/TechnicianPopup";
 import { BranchInfoCard } from "@/components/maps/BranchInfoCard";
 import { createRoot } from "react-dom/client";
+import { cn } from "@/lib/utils";
 
 const specialties = [
   { id: "paint", label: "دهان", icon: "🎨" },
@@ -53,6 +54,52 @@ export default function ServiceMap() {
   const { branches } = useBranchLocations();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const branchHighlight = {
+    id: "Az-Shop-0045",
+    name: "Abu Auf",
+    location: "Maadi 50",
+    status: "Active",
+  } as const;
+
+  const technicianHighlights = [
+    {
+      id: "tech-1",
+      name: "أحمد حسين",
+      status: "available" as const,
+      eta: "متاح بعد 40 دقيقة",
+      position: { top: "36%", left: "58%" },
+      icon: "/icons/technicians/tec-12.png",
+    },
+    {
+      id: "tech-2",
+      name: "محمود سمير",
+      status: "busy" as const,
+      eta: "مشغول اليوم",
+      position: { top: "54%", left: "28%" },
+      icon: "/icons/technicians/tec-18.png",
+    },
+    {
+      id: "tech-3",
+      name: "محمد هاني",
+      status: "soon" as const,
+      eta: "يكون متاح بعد قليل",
+      position: { top: "22%", left: "74%" },
+      icon: "/icons/technicians/tec-05.png",
+    },
+  ];
+
+  const getStatusStyles = (status: "available" | "busy" | "soon") => {
+    switch (status) {
+      case "available":
+        return "bg-emerald-50 border border-emerald-200 text-emerald-800";
+      case "busy":
+        return "bg-amber-50 border border-amber-200 text-amber-800";
+      case "soon":
+      default:
+        return "bg-blue-50 border border-blue-200 text-blue-800";
+    }
+  };
 
   useEffect(() => {
     fetchUserData();
@@ -466,7 +513,75 @@ export default function ServiceMap() {
               </div>
             </div>
           ) : (
-            <div ref={mapRef} className="w-full h-full" />
+            <div className="relative w-full h-full">
+              <div ref={mapRef} className="w-full h-full" />
+
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute top-4 left-4 bg-white/95 backdrop-blur rounded-xl shadow-xl border border-border/60 px-4 py-3 flex items-center gap-3 pointer-events-auto">
+                  <img src="/logo/uberfix-logo.png" alt="UberFix" className="h-10 w-10 object-contain" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Quick Maintenance Methods</p>
+                    <p className="text-lg font-bold text-primary">UberFix.shop</p>
+                    <p className="text-xs text-muted-foreground">خريطة الخدمات</p>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur rounded-2xl shadow-2xl border border-border/70 px-4 py-3 max-w-xs pointer-events-auto">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 text-primary font-bold rounded-xl px-3 py-2 text-xs">{branchHighlight.id}</div>
+                    <div>
+                      <p className="text-sm font-semibold">{branchHighlight.name}</p>
+                      <p className="text-xs text-muted-foreground">{branchHighlight.location}</p>
+                    </div>
+                    <Badge className="rounded-full bg-emerald-100 text-emerald-700">{branchHighlight.status}</Badge>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1"><User className="w-3 h-3" /> فنيين نشطين</div>
+                    <div className="flex items-center gap-1"><FileText className="w-3 h-3" /> تقارير اليوم</div>
+                    <div className="flex items-center gap-1"><Phone className="w-3 h-3" /> مركز الاتصال</div>
+                    <div className="flex items-center gap-1"><Home className="w-3 h-3" /> منطقة الخدمة</div>
+                  </div>
+                </div>
+
+                {technicianHighlights.map((card) => (
+                  <div
+                    key={card.id}
+                    className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                    style={{ top: card.position.top, left: card.position.left }}
+                  >
+                    <div className="relative flex flex-col items-center gap-2 pointer-events-auto">
+                      <div className="bg-white/95 backdrop-blur rounded-xl shadow-lg border border-border/60 px-3 py-2 min-w-[180px]">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-10 w-10 border border-border">
+                            <AvatarImage src={card.icon} alt={card.name} />
+                            <AvatarFallback>{card.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-foreground">{card.name}</p>
+                            <p className="text-xs text-muted-foreground mb-1">فني في المنطقة</p>
+                            <div
+                              className={cn(
+                                "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium",
+                                getStatusStyles(card.status)
+                              )}
+                            >
+                              <span className="inline-block w-2 h-2 rounded-full bg-current opacity-80"></span>
+                              {card.eta}
+                            </div>
+                          </div>
+                        </div>
+                        <Button size="sm" className="w-full mt-2 text-xs" onClick={() => navigate("/quick-request")}>
+                          اطلب الخدمة
+                        </Button>
+                      </div>
+                      <div className="w-12 h-12 bg-primary/10 border-2 border-primary/40 rounded-full flex items-center justify-center shadow-md">
+                        <img src={card.icon} alt="technician pin" className="h-8 w-8" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </main>
       </div>
