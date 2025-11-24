@@ -297,7 +297,7 @@ export function PropertyQRDialog({
 
           {/* رابط النسخ */}
           <div className="flex items-center gap-2 p-2 bg-muted rounded-lg border">
-            <code className="text-xs flex-1 truncate font-mono" dir="ltr">
+            <code className="text-xs flex-1 font-mono break-all" dir="ltr">
               {qrUrl}
             </code>
             <Button
