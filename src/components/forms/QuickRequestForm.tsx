@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { MapPin, Send, CheckCircle2, Building2, Search, Phone, User, Upload, Calendar, QrCode, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { serviceCategories } from "@/data/serviceCategories";
 
 const quickRequestSchema = z.object({
   client_name: z.string().min(2, "الاسم مطلوب"),
@@ -34,13 +35,7 @@ interface QuickRequestFormProps {
   locale: string;
 }
 
-const SERVICES = [
-  { id: "plumbing", name_ar: "سباكة", name_en: "Plumbing", icon: "🔧" },
-  { id: "electrical", name_ar: "كهرباء", name_en: "Electrical", icon: "⚡" },
-  { id: "ac", name_ar: "تكييف", name_en: "AC", icon: "❄️" },
-  { id: "carpentry", name_ar: "نجارة", name_en: "Carpentry", icon: "🪚" },
-  { id: "metalwork", name_ar: "حدادات", name_en: "Metalwork", icon: "🔨" },
-];
+const SERVICES = serviceCategories;
 
 export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
   const [loading, setLoading] = useState(false);

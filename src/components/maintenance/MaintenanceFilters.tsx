@@ -7,10 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
-import { 
-  Search, 
-  Filter, 
-  Calendar as CalendarIcon, 
+import {
+  Search,
+  Filter,
+  Calendar as CalendarIcon,
   X,
   SlidersHorizontal,
   MapPin,
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { serviceCategoryNamesAr } from "@/data/serviceCategories";
 
 interface MaintenanceFiltersProps {
   searchTerm: string;
@@ -85,16 +86,7 @@ export function MaintenanceFilters({
     ratingFilter !== "all"
   ].filter(Boolean).length;
 
-  const serviceTypes = [
-    "كهرباء",
-    "سباكة", 
-    "تكييف",
-    "صيانة عامة",
-    "نظافة",
-    "طلاء",
-    "نجارة",
-    "أخرى"
-  ];
+  const serviceTypes = serviceCategoryNamesAr;
 
   const locations = [
     "الرياض",

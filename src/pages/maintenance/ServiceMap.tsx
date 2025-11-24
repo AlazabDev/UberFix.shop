@@ -25,13 +25,9 @@ import { TechnicianPopup } from "@/components/maps/TechnicianPopup";
 import { BranchInfoCard } from "@/components/maps/BranchInfoCard";
 import { createRoot } from "react-dom/client";
 import { cn } from "@/lib/utils";
+import { serviceCategoryLabelsAr } from "@/data/serviceCategories";
 
-const specialties = [
-  { id: "paint", label: "دهان", icon: "🎨" },
-  { id: "carpentry", label: "نجار", icon: "🔨" },
-  { id: "electrical", label: "كهربائي", icon: "⚡" },
-  { id: "plumbing", label: "سباك", icon: "🔧" },
-];
+const specialties = serviceCategoryLabelsAr;
 
 interface UserData {
   email: string;

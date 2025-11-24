@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { IconSelector } from "./IconSelector";
 import { vendorFormSchema } from "@/lib/validationSchemas";
+import { serviceCategoryNamesAr } from "@/data/serviceCategories";
 
 interface NewVendorFormProps {
   onClose: () => void;
@@ -27,17 +28,7 @@ export const NewVendorForm = ({ onClose, onSuccess }: NewVendorFormProps) => {
   const [newCertification, setNewCertification] = useState("");
   const [mapIcon, setMapIcon] = useState<string | null>(null);
 
-  const specialties = [
-    "سباكة",
-    "كهرباء",
-    "تكييف وتبريد",
-    "نجارة",
-    "دهان",
-    "بلاط وسيراميك",
-    "عزل",
-    "تنظيف",
-    "أخرى"
-  ];
+  const specialties = serviceCategoryNamesAr;
 
   const form = useForm<VendorFormData>({
     resolver: zodResolver(vendorFormSchema),
