@@ -21,7 +21,6 @@ export default function QuickRequest() {
       }
 
       try {
-        // استخدام edge function للحصول على بيانات العقار بشكل آمن
         const functionUrl = `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/get-property-for-qr?propertyId=${propertyId}`;
         
         console.log('Fetching property from:', functionUrl);
