@@ -140,31 +140,26 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
     setUploadProgress(0);
     
     try {
-      // Get default company and branch
-      const { data: { user } } = await supabase.auth.getUser();
-      let companyId = 'default-company';
-      let branchId = 'default-branch';
+      // Get first available company and branch
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('id')
+        .limit(1);
 
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('company_id')
-          .eq('id', user.id)
-          .maybeSingle();
+      const companyId = companies?.[0]?.id;
+      if (!companyId) {
+        throw new Error('No company found in system');
+      }
 
-        if (profile?.company_id) {
-          companyId = profile.company_id;
-          
-          const { data: branches } = await supabase
-            .from('branches')
-            .select('id')
-            .eq('company_id', companyId)
-            .limit(1);
+      const { data: branches } = await supabase
+        .from('branches')
+        .select('id')
+        .eq('company_id', companyId)
+        .limit(1);
 
-          if (branches && branches.length > 0) {
-            branchId = branches[0].id;
-          }
-        }
+      const branchId = branches?.[0]?.id;
+      if (!branchId) {
+        throw new Error('No branch found in system');
       }
 
       // Create maintenance request with all data
