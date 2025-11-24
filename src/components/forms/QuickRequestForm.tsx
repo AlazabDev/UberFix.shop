@@ -9,13 +9,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, Send, CheckCircle2, Building2, Search, Phone, User } from "lucide-react";
+import { MapPin, Send, CheckCircle2, Building2, Search, Phone, User, Upload, Calendar, QrCode, ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const quickRequestSchema = z.object({
   client_name: z.string().min(2, "الاسم مطلوب"),
   client_phone: z.string().min(10, "رقم الهاتف مطلوب"),
-  description: z.string().min(5, "وصف المشكلة مطلوب"),
+  country: z.string().optional(),
+  services: z.array(z.string()).min(1, "يرجى اختيار خدمة واحدة على الأقل"),
+  description: z.string().min(5, "الملاحظات مطلوبة"),
+  preferred_date: z.string().optional(),
 });
 
 type QuickRequestFormData = z.infer<typeof quickRequestSchema>;
@@ -30,6 +34,14 @@ interface QuickRequestFormProps {
   locale: string;
 }
 
+const SERVICES = [
+  { id: "plumbing", name_ar: "سباكة", name_en: "Plumbing", icon: "🔧" },
+  { id: "electrical", name_ar: "كهرباء", name_en: "Electrical", icon: "⚡" },
+  { id: "ac", name_ar: "تكييف", name_en: "AC", icon: "❄️" },
+  { id: "carpentry", name_ar: "نجارة", name_en: "Carpentry", icon: "🪚" },
+  { id: "metalwork", name_ar: "حدادات", name_en: "Metalwork", icon: "🔨" },
+];
+
 export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -38,6 +50,10 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
   const [trackingResults, setTrackingResults] = useState<any[]>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState<"request" | "track">("request");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<string>("");
 
   const isArabic = locale === "ar";
 
@@ -45,12 +61,84 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<QuickRequestFormData>({
     resolver: zodResolver(quickRequestSchema),
+    defaultValues: {
+      country: "جمهورية مصر العربية",
+      services: [],
+    },
   });
+
+  // Generate next 7 days for date selection
+  const getNextDays = () => {
+    const days = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      days.push(date);
+    }
+    return days;
+  };
+
+  const getDayName = (date: Date) => {
+    const days_ar = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const days_en = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return isArabic ? days_ar[date.getDay()] : days_en[date.getDay()];
+  };
+
+  const toggleService = (serviceId: string) => {
+    const newServices = selectedServices.includes(serviceId)
+      ? selectedServices.filter(id => id !== serviceId)
+      : [...selectedServices, serviceId];
+    setSelectedServices(newServices);
+    setValue('services', newServices);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadFiles = async (requestId: string) => {
+    if (files.length === 0) return [];
+
+    const uploadedUrls: string[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${requestId}/${Date.now()}-${i}.${fileExt}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('maintenance-attachments')
+        .upload(fileName, file);
+
+      if (!uploadError && data) {
+        const { data: urlData } = supabase.storage
+          .from('maintenance-attachments')
+          .getPublicUrl(data.path);
+        
+        uploadedUrls.push(urlData.publicUrl);
+      }
+      
+      setUploadProgress(Math.round(((i + 1) / files.length) * 100));
+    }
+
+    return uploadedUrls;
+  };
 
   const onSubmit = async (data: QuickRequestFormData) => {
     setLoading(true);
+    setUploadProgress(0);
+    
     try {
       // Get default company and branch
       const { data: { user } } = await supabase.auth.getUser();
@@ -79,19 +167,24 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
         }
       }
 
-      // Create maintenance request  
+      // Create maintenance request with all data
+      const serviceNames = selectedServices.map(id => 
+        SERVICES.find(s => s.id === id)?.[isArabic ? 'name_ar' : 'name_en'] || id
+      ).join(', ');
+
       const requestData = {
         branch_id: branchId,
         company_id: companyId,
         property_id: property.id,
-        title: `طلب صيانة سريع - ${property.name}`,
-        description: data.description,
+        title: `${isArabic ? 'طلب صيانة -' : 'Maintenance Request -'} ${serviceNames}`,
+        description: `${data.description}\n\n${isArabic ? 'الخدمات المطلوبة:' : 'Requested Services:'} ${serviceNames}${selectedDate ? `\n${isArabic ? 'التاريخ المفضل:' : 'Preferred Date:'} ${selectedDate}` : ''}`,
         client_name: data.client_name,
         client_phone: data.client_phone,
-        location: property.address,
+        location: `${property.address}${data.country ? `, ${data.country}` : ''}`,
         priority: 'medium',
         channel: 'qr_code',
         status: 'Open' as const,
+        customer_notes: data.description,
       };
 
       const { data: createdRequest, error: requestError } = await supabase
@@ -104,6 +197,11 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
 
       if (createdRequest) {
         setRequestNumber(createdRequest.id);
+        
+        // Upload files if any
+        if (files.length > 0) {
+          await uploadFiles(createdRequest.id);
+        }
       }
 
       setSubmitted(true);
@@ -121,6 +219,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
       );
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -199,7 +298,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
               <p className="text-sm text-muted-foreground mb-1">
                 {isArabic ? "رقم الطلب" : "Request Number"}
               </p>
-              <p className="text-lg font-bold text-primary font-mono">{requestNumber}</p>
+              <p className="text-lg font-bold text-primary font-mono">{requestNumber.slice(0, 8)}</p>
             </div>
           )}
           
@@ -241,116 +340,309 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
   }
 
   return (
-    <Card className="shadow-xl border-border/50">
-      {/* معلومات العقار في الأعلى */}
-      <CardHeader className="border-b border-border/30 bg-primary/5 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <Building2 className="h-6 w-6 text-primary" />
+    <Card className="shadow-xl border-border/50 max-w-3xl mx-auto">
+      {/* Header with Property Info and QR Access Badge */}
+      <CardHeader className="border-b border-border/30 bg-gradient-to-br from-primary/5 to-primary/10 pb-6 space-y-4">
+        {/* Title */}
+        <div className="text-center border-b border-border/20 pb-3">
+          <a href="https://uberfix.shop" className="text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-2 text-base font-semibold">
+            ← {isArabic ? "تبعنا هنا" : "Follow Us"}
+          </a>
+          <h2 className="text-lg font-bold text-foreground mt-2">
+            {isArabic ? "لديك طلب صيانة؟" : "Have a Maintenance Request?"}
+          </h2>
+        </div>
+
+        {/* User Avatar Section */}
+        <div className="flex items-center gap-4 bg-background/80 backdrop-blur-sm rounded-xl p-4 border border-border/30">
+          <div className="bg-muted rounded-full p-4">
+            <User className="h-8 w-8 text-muted-foreground" />
           </div>
+          <div className="flex-1">
+            <p className="text-sm text-muted-foreground">
+              {isArabic ? "صاحب الطلب" : "Request Owner"}
+            </p>
+            <p className="font-bold text-lg text-foreground">Mohamed Azab</p>
+          </div>
+          <Button size="sm" variant="default" className="bg-orange-500 hover:bg-orange-600 text-white gap-2">
+            <QrCode className="h-4 w-4" />
+            {isArabic ? "الوصول عبر QR" : "QR Access"}
+          </Button>
+        </div>
+
+        {/* Property Info */}
+        <div className="flex items-start gap-3 bg-background/60 backdrop-blur-sm rounded-lg p-3 border border-border/20">
+          <MapPin className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
           <div className="flex-1 text-right" dir="rtl">
-            <h3 className="font-bold text-foreground text-lg">{property.name}</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <MapPin className="h-3.5 w-3.5" />
-              <span>{property.address}</span>
-            </div>
-            {property.type && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {isArabic ? "النوع:" : "Type:"} {property.type}
-              </p>
-            )}
+            <h3 className="font-bold text-foreground text-base">{property.name}</h3>
+            <p className="text-sm text-muted-foreground">{property.address}</p>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="pt-6 pb-6">
         <Tabs value={currentTab} onValueChange={(v) => setCurrentTab(v as "request" | "track")} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="request" className="text-sm">
+          <TabsList className="grid w-full grid-cols-2 mb-6 h-12">
+            <TabsTrigger value="request" className="text-sm font-medium">
               <Send className="h-4 w-4 ml-2" />
-              {isArabic ? "طلب جديد" : "New Request"}
+              {isArabic ? "تقديم طلب صيانة" : "Submit Request"}
             </TabsTrigger>
-            <TabsTrigger value="track" className="text-sm">
+            <TabsTrigger value="track" className="text-sm font-medium">
               <Search className="h-4 w-4 ml-2" />
               {isArabic ? "تتبع الطلبات" : "Track Requests"}
             </TabsTrigger>
           </TabsList>
 
-          {/* تبويب الطلب الجديد */}
+          {/* New Request Tab */}
           <TabsContent value="request" className="mt-0">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="client_name" className="text-sm font-medium flex items-center gap-2" dir={isArabic ? "rtl" : "ltr"}>
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  {isArabic ? "الاسم الكامل" : "Full Name"}
-                  <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="client_name"
-                  {...register("client_name")}
-                  placeholder={isArabic ? "أدخل اسمك الكامل" : "Enter your full name"}
-                  className="h-11 border-border/50"
-                  dir={isArabic ? "rtl" : "ltr"}
-                />
-                {errors.client_name && (
-                  <p className="text-xs text-destructive">{errors.client_name.message}</p>
-                )}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Name and Country Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-right block" dir="rtl">
+                    {isArabic ? "الاسم" : "Name"}
+                    <span className="text-destructive mr-1">*</span>
+                  </Label>
+                  <Input
+                    {...register("client_name")}
+                    placeholder="Alazabco"
+                    className="h-11 border-border/50 text-right"
+                    dir="rtl"
+                  />
+                  {errors.client_name && (
+                    <p className="text-xs text-destructive text-right">{errors.client_name.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-right block" dir="rtl">
+                    {isArabic ? "الدولة" : "Country"}
+                    <span className="text-destructive mr-1">*</span>
+                  </Label>
+                  <Select defaultValue="جمهورية مصر العربية" onValueChange={(value) => setValue('country', value)}>
+                    <SelectTrigger className="h-11 border-border/50 text-right">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="جمهورية مصر العربية">جمهورية مصر العربية</SelectItem>
+                      <SelectItem value="المملكة العربية السعودية">المملكة العربية السعودية</SelectItem>
+                      <SelectItem value="الإمارات العربية المتحدة">الإمارات العربية المتحدة</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
+              {/* Phone Number */}
               <div className="space-y-2">
-                <Label htmlFor="client_phone" className="text-sm font-medium flex items-center gap-2" dir={isArabic ? "rtl" : "ltr"}>
-                  <Phone className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium text-right block" dir="rtl">
                   {isArabic ? "رقم الهاتف" : "Phone Number"}
-                  <span className="text-destructive">*</span>
+                  <span className="text-destructive mr-1">*</span>
                 </Label>
-                <Input
-                  id="client_phone"
-                  {...register("client_phone")}
-                  placeholder={isArabic ? "مثال: 0501234567" : "Example: 0501234567"}
-                  className="h-11 border-border/50"
-                  dir="ltr"
-                />
+                <div className="relative">
+                  <Input
+                    {...register("client_phone")}
+                    placeholder="1004006620 (20+)"
+                    className="h-12 border-border/50 pr-10 text-right"
+                    dir="ltr"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 bg-green-500 rounded-full p-1">
+                    <Phone className="h-4 w-4 text-white" />
+                  </div>
+                </div>
                 {errors.client_phone && (
-                  <p className="text-xs text-destructive">{errors.client_phone.message}</p>
+                  <p className="text-xs text-destructive text-right">{errors.client_phone.message}</p>
                 )}
               </div>
 
+              {/* Services Selection */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between" dir="rtl">
+                  <Label className="text-sm font-medium">
+                    {isArabic ? "اختر الخدمات الأخرى" : "Select Additional Services"}
+                    <span className="text-destructive mr-1">*</span>
+                  </Label>
+                  <button
+                    type="button"
+                    className="text-orange-500 text-sm hover:text-orange-600 flex items-center gap-1"
+                  >
+                    {isArabic ? "خدمات أخرى" : "Other Services"}
+                    <span className="bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                      {selectedServices.length}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Services Grid */}
+                <div className="grid grid-cols-5 gap-3">
+                  {SERVICES.map((service) => (
+                    <button
+                      key={service.id}
+                      type="button"
+                      onClick={() => toggleService(service.id)}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        selectedServices.includes(service.id)
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border/50 hover:border-border'
+                      }`}
+                    >
+                      <div className="text-3xl">{service.icon}</div>
+                      <span className="text-xs font-medium text-center">
+                        {isArabic ? service.name_ar : service.name_en}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {errors.services && (
+                  <p className="text-xs text-destructive text-right">{errors.services.message}</p>
+                )}
+              </div>
+
+              {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium" dir={isArabic ? "rtl" : "ltr"}>
-                  {isArabic ? "وصف المشكلة" : "Problem Description"}
-                  <span className="text-destructive ml-1">*</span>
+                <Label className="text-sm font-medium text-right block" dir="rtl">
+                  {isArabic ? "الملاحظات" : "Notes"}
+                  <span className="text-destructive mr-1">*</span>
                 </Label>
                 <Textarea
-                  id="description"
                   {...register("description")}
-                  placeholder={isArabic ? "اشرح المشكلة بالتفصيل..." : "Describe the problem in detail..."}
-                  className="min-h-[100px] border-border/50 resize-none"
-                  dir={isArabic ? "rtl" : "ltr"}
+                  placeholder={isArabic ? "اوصف المشكلة التي تواجهها..." : "Describe the problem you're facing..."}
+                  className="min-h-[100px] border-border/50 resize-none text-right"
+                  dir="rtl"
                 />
                 {errors.description && (
-                  <p className="text-xs text-destructive">{errors.description.message}</p>
+                  <p className="text-xs text-destructive text-right">{errors.description.message}</p>
                 )}
               </div>
 
+              {/* Preferred Date */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-right block" dir="rtl">
+                  {isArabic ? "الموعد المفضل" : "Preferred Date"}
+                </Label>
+                <div className="relative">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                    {getNextDays().map((date, index) => {
+                      const dateStr = date.toISOString().split('T')[0];
+                      const isSelected = selectedDate === dateStr;
+                      return (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setSelectedDate(dateStr)}
+                          className={`flex-shrink-0 flex flex-col items-center justify-center w-20 h-20 rounded-full border-2 transition-all ${
+                            isSelected
+                              ? 'border-primary bg-primary text-white'
+                              : 'border-border/50 hover:border-border bg-background'
+                          }`}
+                        >
+                          <span className="text-xs opacity-80">{isArabic ? 'ديسمبر' : 'December'}</span>
+                          <span className="text-2xl font-bold">{date.getDate()}</span>
+                          <span className="text-xs opacity-80">{getDayName(date).slice(0, 3)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* File Upload */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-right block" dir="rtl">
+                  {isArabic ? "المرفقات (اختياري)" : "Attachments (Optional)"}
+                </Label>
+                <div className="border-2 border-dashed border-border/50 rounded-xl p-8 text-center hover:border-border transition-colors">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="bg-primary/10 p-4 rounded-full">
+                        <Upload className="h-8 w-8 text-primary" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        {isArabic ? "اضغر لرفع الملفات" : "Click to upload files"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isArabic ? "او" : "or"}
+                      </p>
+                      <Button type="button" variant="outline" size="sm">
+                        {isArabic ? "التقط صورة" : "Take Photo"}
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {isArabic 
+                          ? "الصور والمستنداعات: فقط (حد أقصى 20 ميجابايت لكل ملف)"
+                          : "Images and Documents: Only (Max 20MB per file)"}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Files Preview */}
+                {files.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {files.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <div className="border border-border/50 rounded-lg p-2">
+                          <p className="text-xs truncate">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{isArabic ? "جاري الرفع..." : "Uploading..."}</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-primary hover:bg-primary/90"
+                className="w-full h-14 bg-primary hover:bg-primary/90 text-lg font-semibold"
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>{isArabic ? "جاري الإرسال..." : "Sending..."}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <span>{isArabic ? "إرسال الطلب" : "Submit Request"}</span>
-                    <Send className="h-4 w-4" />
-                  </div>
+                  <span>{isArabic ? "تقديم" : "Submit"}</span>
                 )}
               </Button>
 
-              <div className="bg-muted/30 border border-border/30 rounded-lg p-3 text-center">
+              {/* Footer */}
+              <div className="bg-muted/30 border border-border/30 rounded-lg p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <img src="/logo/uberfix-logo.png" alt="UberFix" className="h-6" />
+                  <span className="text-xs text-muted-foreground">
+                    {isArabic ? "مدعوم بواسطة" : "Powered by"}
+                  </span>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {isArabic 
                     ? "سيتم التواصل معك خلال 24 ساعة من إرسال الطلب"
@@ -360,7 +652,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
             </form>
           </TabsContent>
 
-          {/* تبويب تتبع الطلبات */}
+          {/* Track Requests Tab */}
           <TabsContent value="track" className="mt-0">
             <div className="space-y-5">
               <div className="space-y-2">
