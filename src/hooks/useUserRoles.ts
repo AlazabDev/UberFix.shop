@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 type AppRole = 'admin' | 'manager' | 'staff' | 'technician' | 'vendor' | 'customer' | 'dispatcher' | 'finance';
@@ -25,29 +25,7 @@ export const useUserRoles = (): UserRoles => {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUserRoles();
-
-    const channel = supabase
-      .channel('user-roles-changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'profiles'
-        },
-        () => {
-          fetchUserRoles();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const fetchUserRoles = async () => {
+  const fetchUserRoles = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -73,7 +51,29 @@ export const useUserRoles = (): UserRoles => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchUserRoles();
+
+    const channel = supabase
+      .channel('user-roles-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'profiles'
+        },
+        () => {
+          fetchUserRoles();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchUserRoles]);
 
   const hasRole = (role: AppRole): boolean => {
     return roles.includes(role);
