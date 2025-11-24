@@ -21,19 +21,35 @@ export default function QuickRequest() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("id", propertyId)
-        .maybeSingle();
+      try {
+        // استخدام service_role أو anon key للحصول على البيانات بدون مصادقة
+        const { data, error } = await supabase
+          .from("properties")
+          .select(`
+            *,
+            cities:city_id(id, name_ar),
+            districts:district_id(id, name_ar)
+          `)
+          .eq("id", propertyId)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching property:", error);
-        toast.error(locale === "ar" ? "خطأ في تحميل بيانات العقار" : "Error loading property data");
-      } else {
-        setProperty(data);
+        if (error) {
+          console.error("Error fetching property:", error);
+          toast.error(locale === "ar" ? "خطأ في تحميل بيانات العقار" : "Error loading property data");
+          setProperty(null);
+        } else if (!data) {
+          console.warn("Property not found:", propertyId);
+          setProperty(null);
+        } else {
+          setProperty(data);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        toast.error(locale === "ar" ? "خطأ غير متوقع" : "Unexpected error");
+        setProperty(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchProperty();
