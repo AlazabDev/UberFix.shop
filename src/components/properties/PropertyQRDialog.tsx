@@ -275,13 +275,13 @@ export function PropertyQRDialog({
                 value={qrUrl || "about:blank"}
                 size={220}
                 level="H"
-                includeMargin
+                includeMargin={true}
                 bgColor="#ffffff"
                 fgColor="#0b2264"
                 imageSettings={{
-                  src: "/logo/uberfix-pin.png",
-                  height: 48,
-                  width: 48,
+                  src: "/logo/uberfix-logo.png",
+                  height: 60,
+                  width: 60,
                   excavate: true,
                 }}
               />
