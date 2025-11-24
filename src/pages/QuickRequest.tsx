@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { QuickRequestForm } from "@/components/forms/QuickRequestForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -22,30 +21,30 @@ export default function QuickRequest() {
       }
 
       try {
-        // استخدام service_role أو anon key للحصول على البيانات بدون مصادقة
-        const { data, error } = await supabase
-          .from("properties")
-          .select(`
-            *,
-            cities:city_id(id, name_ar),
-            districts:district_id(id, name_ar)
-          `)
-          .eq("id", propertyId)
-          .maybeSingle();
+        // استخدام edge function للحصول على بيانات العقار بشكل آمن
+        const response = await fetch(
+          `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/get-property-for-qr?propertyId=${propertyId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
-        if (error) {
-          console.error("Error fetching property:", error);
-          toast.error(locale === "ar" ? "خطأ في تحميل بيانات العقار" : "Error loading property data");
-          setProperty(null);
-        } else if (!data) {
-          console.warn("Property not found:", propertyId);
-          setProperty(null);
-        } else {
-          setProperty(data);
+        if (!response.ok) {
+          throw new Error('Failed to fetch property');
         }
+
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        setProperty(data.property);
       } catch (err) {
-        console.error("Unexpected error:", err);
-        toast.error(locale === "ar" ? "خطأ غير متوقع" : "Unexpected error");
+        console.error("Error fetching property:", err);
+        toast.error(locale === "ar" ? "خطأ في تحميل بيانات العقار" : "Error loading property data");
         setProperty(null);
       } finally {
         setLoading(false);
