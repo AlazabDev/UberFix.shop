@@ -26,6 +26,7 @@ import { BranchInfoCard } from "@/components/maps/BranchInfoCard";
 import { createRoot } from "react-dom/client";
 import { cn } from "@/lib/utils";
 import { serviceCategoryLabelsAr } from "@/data/serviceCategories";
+import branchMarkerIcon from "@/data/icon-5060.png";
 
 const specialties = serviceCategoryLabelsAr;
 
@@ -214,15 +215,17 @@ export default function ServiceMap() {
     // Add branch markers from database
     branches.forEach((branch) => {
       if (!branch.latitude || !branch.longitude) return;
-      
+
       const lat = parseFloat(branch.latitude);
       const lng = parseFloat(branch.longitude);
-      
+
       if (isNaN(lat) || isNaN(lng)) return;
 
+      // Use the unified professional branch icon (5060) for all customer-facing markers
       const markerContent = document.createElement('img');
-      markerContent.src = branch.icon || '/icons/properties/icon-5060.png';
-      markerContent.style.cssText = 'width: 50px; height: 60px; object-fit: contain; cursor: pointer; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));';
+      const branchIcon = branch.icon?.includes('5060') ? branch.icon : branchMarkerIcon;
+      markerContent.src = branchIcon;
+      markerContent.style.cssText = 'width: 50px; height: 60px; object-fit: contain; cursor: pointer; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));';
       markerContent.alt = branch.branch;
 
       const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -524,7 +527,14 @@ export default function ServiceMap() {
 
                 <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur rounded-2xl shadow-2xl border border-border/70 px-4 py-3 max-w-xs pointer-events-auto">
                   <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 text-primary font-bold rounded-xl px-3 py-2 text-xs">{branchHighlight.id}</div>
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={branchMarkerIcon}
+                        alt="branch icon"
+                        className="h-10 w-8 object-contain drop-shadow-md"
+                      />
+                      <div className="bg-primary/10 text-primary font-bold rounded-xl px-3 py-2 text-xs">{branchHighlight.id}</div>
+                    </div>
                     <div>
                       <p className="text-sm font-semibold">{branchHighlight.name}</p>
                       <p className="text-xs text-muted-foreground">{branchHighlight.location}</p>
