@@ -1,9 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Edit, Plus, Wrench, QrCode, Archive } from "lucide-react";
+import { Edit, Plus, Wrench, QrCode, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { PropertyQRDialog } from "./PropertyQRDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PropertyActionsDialogProps {
   propertyId: string;
@@ -20,6 +22,32 @@ export function PropertyActionsDialog({
 }: PropertyActionsDialogProps) {
   const navigate = useNavigate();
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirm(`هل أنت متأكد من حذف العقار "${propertyName}"؟ هذا الإجراء لا يمكن التراجع عنه.`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("properties")
+        .delete()
+        .eq("id", propertyId);
+
+      if (error) throw error;
+
+      toast.success("تم حذف العقار بنجاح");
+      onOpenChange(false);
+      navigate("/properties");
+    } catch (error: any) {
+      console.error("Error deleting property:", error);
+      toast.error(error.message || "فشل حذف العقار");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <>
@@ -83,13 +111,11 @@ export function PropertyActionsDialog({
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 h-12 text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive"
-              onClick={() => {
-                // TODO: Implement archive
-                onOpenChange(false);
-              }}
+              onClick={handleDelete}
+              disabled={isDeleting}
             >
-              <Archive className="h-5 w-5" />
-              <span>أرشفة العقار</span>
+              <Trash2 className="h-5 w-5" />
+              <span>{isDeleting ? "جاري الحذف..." : "حذف العقار"}</span>
             </Button>
           </div>
         </DialogContent>
