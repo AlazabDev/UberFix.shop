@@ -20,20 +20,20 @@ jobs:
           node-version: 20
           # لا تستخدم cache: pnpm هنا لأن فيه مشاكل مع jobs كثيرة
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install npm
+        # run: npm install -g pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Type check
-        run: pnpm run typecheck
+        run: npm run typecheck
 
       - name: Run Unit Tests
-        run: pnpm run test:unit
+        run: npm run test:unit
 
       - name: Upload Unit Test Coverage
         uses: actions/upload-artifact@v4
