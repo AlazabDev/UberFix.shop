@@ -26,20 +26,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: npm
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install npm
+    
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+        run: npm exec playwright install --with-deps ${{ matrix.browser }}
 
       # Playwright سيشغّل dev server تلقائيًا من playwright.config.ts (pnpm dev أو npm run dev حسب الإعداد)
       - name: Run E2E tests (Desktop)
-        run: pnpm exec playwright test --project=${{ matrix.browser }}
+        run: npm exec playwright test --project=${{ matrix.browser }}
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:8080
           CI: true
@@ -71,19 +71,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: npm
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install npm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --frozen-lockfile
 
       - name: Install Playwright browsers (Mobile)
-        run: pnpm exec playwright install --with-deps chromium
+        run: npm exec playwright install --with-deps chromium
 
       - name: Run Mobile E2E tests
-        run: pnpm exec playwright test --project="Mobile Chrome"
+        run: npm exec playwright test --project="Mobile Chrome"
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:8080
           CI: true
