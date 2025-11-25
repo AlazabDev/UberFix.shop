@@ -18,22 +18,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: npm
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install npm
+      
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Type check
-        run: pnpm run typecheck
+        run: npm run typecheck
 
       - name: Run Unit Tests
-        run: pnpm run test:unit
+        run: npm run test:unit
 
       - name: Upload Unit Test Coverage
         uses: actions/upload-artifact@v4
