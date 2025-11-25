@@ -25,26 +25,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install pnpm
-      - name: Install pnpm
-        run: npm install -g pnpm
+      # Install npm
+      - name: Install npm
 
       # Setup Node + cache
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: npm
 
       # Install dependencies
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --frozen-lockfile
 
       # Build docs (لو المجلد ثابت احذف الخطوة دي)
       - name: Build landing page
-        run: pnpm run build:docs
+        run: npm run build:docs
         # أو لو مشروعك Vite:
-        # run: pnpm run build
+        # run: npm run build
 
       # Upload static files
       - name: Upload static files
