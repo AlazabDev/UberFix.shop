@@ -1231,6 +1231,39 @@ export type Database = {
           },
         ]
       }
+      otp_verifications: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          otp_code: string
+          phone: string
+          verified: boolean | null
+          verified_at: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          otp_code: string
+          phone: string
+          verified?: boolean | null
+          verified_at?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          phone?: string
+          verified?: boolean | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
