@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,15 +9,15 @@ import { InfoIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const PlatformSettings = () => {
-  const { preferences, permissions } = useUserSettings();
+  const { permissions } = useUserSettings();
   const [monthlyBudget, setMonthlyBudget] = useState<string>("0");
 
   const handleBudgetSave = () => {
     // Budget settings removed
   };
 
-  const togglePermission = (key: keyof import("@/hooks/useUserSettings").PlatformPermissions) => 
-    (val: boolean) => {
+  const togglePermission = (_key: keyof import("@/hooks/useUserSettings").PlatformPermissions) =>
+    (_val: boolean) => {
       // Permissions are read-only based on role
     };
 

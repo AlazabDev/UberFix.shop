@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, Send, CheckCircle2, Building2, Search, Phone, User, Upload, Calendar, QrCode, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Send, CheckCircle2, Building2, Search, Phone, User, Upload, QrCode } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -23,6 +23,15 @@ const quickRequestSchema = z.object({
 });
 
 type QuickRequestFormData = z.infer<typeof quickRequestSchema>;
+
+type TrackedRequest = {
+  id: string;
+  title: string;
+  status: string;
+  created_at: string;
+  description?: string | null;
+  priority?: string | null;
+};
 
 interface QuickRequestFormProps {
   property: {
@@ -47,7 +56,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [requestNumber, setRequestNumber] = useState<string | null>(null);
   const [trackingPhone, setTrackingPhone] = useState("");
-  const [trackingResults, setTrackingResults] = useState<any[]>([]);
+  const [trackingResults, setTrackingResults] = useState<TrackedRequest[]>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState<"request" | "track">("request");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -235,7 +244,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
 
       if (error) throw error;
 
-      setTrackingResults(data || []);
+      setTrackingResults((data as TrackedRequest[]) || []);
       
       if (!data || data.length === 0) {
         toast.info(isArabic ? "لا توجد طلبات مسجلة بهذا الرقم" : "No requests found with this number");

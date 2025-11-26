@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,15 +8,33 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Loader2, MapPin } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/forms/ImageUpload";
 import { MapLocationPicker } from "@/components/maps/MapLocationPicker";
 import type { Service } from "@/hooks/useServices";
 import { getPropertyIcon } from "@/lib/propertyIcons";
+
+type PropertyOption = {
+  id: string;
+  name: string;
+  type?: string | null;
+  icon_url?: string | null;
+};
+
+type CategoryOption = {
+  id: string;
+  name: string;
+  icon_url?: string | null;
+};
+
+type SubcategoryOption = {
+  id: string;
+  name: string;
+  base_price?: number | null;
+};
 
 const formSchema = z.object({
   property_id: z.string().optional(),
@@ -48,10 +66,9 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
-  const [properties, setProperties] = useState<any[]>([]);
-  const [images, setImages] = useState<string[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [properties, setProperties] = useState<PropertyOption[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [subcategories, setSubcategories] = useState<SubcategoryOption[]>([]);
   
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,47 +78,47 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
     }
   });
 
-  useEffect(() => {
-    fetchServices();
-    fetchProperties();
-    fetchCategories();
-  }, []);
+useEffect(() => {
+  fetchServices();
+  fetchProperties();
+  fetchCategories();
+}, [fetchServices, fetchProperties, fetchCategories]);
 
-  const fetchCategories = async () => {
-    const { data } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-    if (data) setCategories(data);
-  };
+const fetchCategories = useCallback(async () => {
+  const { data } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  if (data) setCategories(data);
+}, []);
 
-  const fetchSubcategories = async (categoryId: string) => {
-    const { data } = await supabase
-      .from('services')
-      .select('*')
-      .eq('category_id', categoryId)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-    if (data) setSubcategories(data);
-  };
+const fetchSubcategories = useCallback(async (categoryId: string) => {
+  const { data } = await supabase
+    .from('services')
+    .select('*')
+    .eq('category_id', categoryId)
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+  if (data) setSubcategories(data);
+}, []);
 
-  const fetchServices = async () => {
-    const { data } = await supabase
-      .from('services')
-      .select('*')
-      .in('id', selectedServices);
-    if (data) setServices(data);
-  };
+const fetchServices = useCallback(async () => {
+  const { data } = await supabase
+    .from('services')
+    .select('*')
+    .in('id', selectedServices);
+  if (data) setServices(data);
+}, [selectedServices]);
 
-  const fetchProperties = async () => {
-    const { data } = await supabase
-      .from('properties')
-      .select('id, name, type, icon_url')
-      .eq('status', 'active')
-      .order('name');
-    if (data) setProperties(data);
-  };
+const fetchProperties = useCallback(async () => {
+  const { data } = await supabase
+    .from('properties')
+    .select('id, name, type, icon_url')
+    .eq('status', 'active')
+    .order('name');
+  if (data) setProperties(data);
+}, []);
 
   const handleLocationSelect = (data: { lat: number; lng: number; address?: string }) => {
     form.setValue('latitude', data.lat);
@@ -116,7 +133,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('Submit started', values);
+    console.warn('Submit started', values);
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -179,7 +196,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
         estimated_cost: totalServicePrice + inspectionPrice + taxAmount
       };
 
-      console.log('Submitting request with data:', requestData);
+      console.warn('Submitting request with data:', requestData);
 
       const { data: request, error: requestError } = await supabase
         .from('maintenance_requests')
@@ -192,7 +209,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
         throw new Error(`فشل في إنشاء الطلب: ${requestError.message}`);
       }
 
-      console.log('Request created successfully:', request);
+      console.warn('Request created successfully:', request);
 
       toast({
         title: "✅ تم إنشاء الطلب بنجاح",
@@ -436,7 +453,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
                 images={[]}
                 onImagesChange={(files) => {
                   // سيتم تحميل الصور لاحقاً
-                  console.log('Files selected:', files);
+                  console.warn('Files selected:', files);
                 }}
                 maxImages={5}
               />

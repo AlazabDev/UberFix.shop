@@ -224,11 +224,11 @@ export function InteractiveMap({
         }
 
       geocoderRef.current = null;
-      } catch (_e) {
-        // Cleanup error, safe to ignore
+      } catch (cleanupError) {
+        console.warn("Map cleanup warning:", cleanupError);
       }
     };
-  }, [loadGoogleMaps, onLocationChange, currentLat, currentLng]);
+  }, [loadGoogleMaps, onLocationChange, currentLat, currentLng, height]);
 
   // Update marker position when coordinates change
   useEffect(() => {

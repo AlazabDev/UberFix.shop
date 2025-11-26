@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,7 +20,7 @@ const accountSchema = z.object({
 type AccountFormValues = z.infer<typeof accountSchema>;
 
 export const AccountSettings = () => {
-  const { profile, preferences, updateProfile, updatePreferences } = useUserSettings();
+  const { profile, preferences, updateProfile } = useUserSettings();
   const [notificationsEnabled, setNotificationsEnabled] = useState(preferences?.notifications_enabled ?? true);
 
   const form = useForm<AccountFormValues>({
