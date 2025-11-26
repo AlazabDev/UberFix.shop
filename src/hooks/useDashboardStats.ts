@@ -38,6 +38,12 @@ export function useDashboardStats() {
       setError(null);
 
 
+      // Calculate stats from maintenance_requests table directly
+      const { data: requests, error } = await supabase
+        .from('maintenance_requests')
+        .select('*');
+
+
       // Fetch all maintenance requests
       const { data: requests, error: fetchError } = await supabase
         .from('maintenance_requests')
@@ -156,6 +162,33 @@ export function useDashboardStats() {
         last_updated: new Date().toISOString(),
       };
 
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const stats: DashboardStats = {
+        total_requests: requests?.length || 0,
+        pending_requests: requests?.filter(r => r.status === 'Open' || r.workflow_stage === 'SUBMITTED').length || 0,
+        today_requests: requests?.filter(r => new Date(r.created_at) >= today).length || 0,
+        completed_requests: requests?.filter(r => r.status === 'Completed' || r.workflow_stage === 'COMPLETED').length || 0,
+        this_month_requests: requests?.filter(r => new Date(r.created_at) >= monthStart).length || 0,
+        total_budget: requests?.reduce((sum, r) => sum + (r.estimated_cost || 0), 0) || 0,
+        actual_cost: requests?.reduce((sum, r) => sum + (r.actual_cost || 0), 0) || 0,
+        completion_rate: requests?.length ? ((requests.filter(r => r.status === 'Completed').length / requests.length) * 100) : 0,
+        avg_completion_days: 0,
+        high_priority_count: requests?.filter(r => r.priority === 'high').length || 0,
+        medium_priority_count: requests?.filter(r => r.priority === 'medium').length || 0,
+        low_priority_count: requests?.filter(r => r.priority === 'low').length || 0,
+        submitted_count: requests?.filter(r => r.workflow_stage === 'SUBMITTED').length || 0,
+        assigned_count: requests?.filter(r => r.workflow_stage === 'ASSIGNED').length || 0,
+        in_progress_count: requests?.filter(r => r.workflow_stage === 'IN_PROGRESS').length || 0,
+        workflow_completed_count: requests?.filter(r => r.workflow_stage === 'COMPLETED').length || 0,
+        last_updated: new Date().toISOString(),
+      };
+
+      setStats(stats);
+
       // If no data exists, set default stats
       if (!requests || requests.length === 0) {
         setStats({
@@ -181,6 +214,7 @@ export function useDashboardStats() {
         setStats(calculatedStats);
       }
       
+
 
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
