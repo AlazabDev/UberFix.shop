@@ -82,12 +82,12 @@ const handler = async (req: Request): Promise<Response> => {
         ...corsHeaders,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending email notification:", error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: false,
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unexpected error'
       }),
       {
         status: 500,

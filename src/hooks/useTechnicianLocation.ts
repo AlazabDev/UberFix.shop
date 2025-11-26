@@ -37,9 +37,9 @@ export const useTechnicianLocation = ({
         .eq('id', technicianId);
 
       if (error) throw error;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating location in DB:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
     }
   }, [technicianId]);
 

@@ -40,6 +40,7 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
+  const supabaseClient = supabase as unknown as { from: typeof supabase.from };
 
   // استخراج القيم من filter لتجنب infinite loop
   const filterStatus = filter?.status;
@@ -50,7 +51,7 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
       setLoading(true);
       setError(null);
 
-      let query = (supabase as any)
+      let query = supabaseClient
         .from('technicians')
         .select('*')
         .eq('is_active', true);
@@ -66,10 +67,10 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
       const { data, error: dbError } = await query.order('rating', { ascending: false });
 
       if (dbError) throw dbError;
-      setTechnicians(data as Technician[] || []);
-    } catch (err) {
+      setTechnicians((data as Technician[] | null) ?? []);
+    } catch (err: unknown) {
       console.error('Error fetching technicians:', err);
-      setError(err as Error);
+      setError(err instanceof Error ? err : new Error('Unexpected error'));
       setTechnicians([]);
     } finally {
       setLoading(false);
@@ -78,15 +79,15 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
 
   const fetchSpecializationIcons = async () => {
     try {
-      const { data, error: dbError } = await (supabase as any)
+      const { data, error: dbError } = await supabaseClient
         .from('specialization_icons')
         .select('*')
         .eq('is_active', true)
         .order('sort_order');
 
       if (dbError) throw dbError;
-      setSpecializationIcons(data as SpecializationIcon[] || []);
-    } catch (err) {
+      setSpecializationIcons((data as SpecializationIcon[] | null) ?? []);
+    } catch (err: unknown) {
       console.error('Error fetching specialization icons:', err);
     }
   };

@@ -53,11 +53,11 @@ export default function Invoices() {
 
       if (error) throw error;
       setInvoices(data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching invoices:', error);
       toast({
         title: "خطأ في تحميل الفواتير",
-        description: error.message,
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     } finally {

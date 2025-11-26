@@ -206,7 +206,7 @@ const sendSLANotification = async (slaData: any, severity: 'warning' | 'violatio
     }
 
     console.log(`SLA ${severity} notification sent for request:`, slaData.request_id);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error sending SLA notification:', error);
   }
 };
@@ -255,12 +255,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     throw new Error('Invalid action');
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in sla-manager:", error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: false,
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unexpected error'
       }),
       {
         status: 500,

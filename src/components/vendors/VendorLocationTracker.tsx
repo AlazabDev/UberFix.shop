@@ -61,7 +61,11 @@ export const VendorLocationTracker = ({
           filter: `id=eq.${vendorId}`,
         },
         (payload) => {
-          const newData = payload.new as any;
+          const newData = payload.new as {
+            current_latitude?: number;
+            current_longitude?: number;
+            location_updated_at?: string;
+          };
           if (newData.current_latitude && newData.current_longitude) {
             setLocation({
               lat: newData.current_latitude,

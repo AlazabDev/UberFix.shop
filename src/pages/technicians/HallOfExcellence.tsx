@@ -28,8 +28,8 @@ export default function HallOfExcellence() {
         .order("achievement_date", { ascending: false });
 
       if (error) throw error;
-      setAchievements(data as any || []);
-    } catch (error) {
+      setAchievements((data as HallType[] | null) ?? []);
+    } catch (error: unknown) {
       console.error("Error fetching achievements:", error);
     } finally {
       setLoading(false);

@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 const AuthCallback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  type VerifyOtpType = Parameters<typeof supabase.auth.verifyOtp>[0]["type"];
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -24,7 +25,7 @@ const AuthCallback = () => {
         if (tokenHash && type) {
           const { data, error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
-            type: type as any,
+            type: type as VerifyOtpType,
           });
 
           if (error) {

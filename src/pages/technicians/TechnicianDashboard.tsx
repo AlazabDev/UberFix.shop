@@ -39,7 +39,7 @@ export default function TechnicianDashboard() {
         .eq("technician_id", user.id)
         .maybeSingle();
 
-      setLevel(levelData as any);
+      setLevel(levelData as TechnicianLevelData | null);
 
       // Fetch badges
       const { data: badgesData } = await supabase
@@ -48,7 +48,7 @@ export default function TechnicianDashboard() {
         .eq("technician_id", user.id)
         .order("awarded_at", { ascending: false });
 
-      setBadges(badgesData as any || []);
+      setBadges((badgesData as TechnicianBadge[] | null) ?? []);
 
       // Fetch recent tasks
       const { data: tasksData } = await supabase
@@ -58,8 +58,8 @@ export default function TechnicianDashboard() {
         .order("created_at", { ascending: false })
         .limit(10);
 
-      setTasks(tasksData as any || []);
-    } catch (error) {
+      setTasks((tasksData as TechnicianTask[] | null) ?? []);
+    } catch (error: unknown) {
       console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);

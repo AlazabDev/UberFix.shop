@@ -85,10 +85,10 @@ export default function TechnicianRegistration() {
       });
 
       navigate("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     } finally {

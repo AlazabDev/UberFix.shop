@@ -128,7 +128,7 @@ export default function CreateMaintenanceRequest() {
 
       toast.success("تم إنشاء طلب الصيانة بنجاح");
       navigate(`/maintenance/${request.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("فشل إنشاء طلب الصيانة");
       console.error(error);
     } finally {

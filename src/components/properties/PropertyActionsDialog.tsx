@@ -41,9 +41,13 @@ export function PropertyActionsDialog({
       toast.success("تم حذف العقار بنجاح");
       onOpenChange(false);
       navigate("/properties");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting property:", error);
-      toast.error(error.message || "فشل حذف العقار");
+      if (error instanceof Error) {
+        toast.error(error.message || "فشل حذف العقار");
+      } else {
+        toast.error("فشل حذف العقار");
+      }
     } finally {
       setIsDeleting(false);
     }

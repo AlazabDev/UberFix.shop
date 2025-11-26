@@ -76,7 +76,7 @@ export default function TechnicianWithdrawal() {
       if (walletData) {
         setBalance(walletData.balance_current);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching balance:', error);
     }
   };
@@ -131,11 +131,11 @@ export default function TechnicianWithdrawal() {
       });
 
       navigate('/technicians/wallet');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting withdrawal:', error);
       toast({
         title: "خطأ في إرسال الطلب",
-        description: error.message,
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     } finally {
@@ -201,7 +201,7 @@ export default function TechnicianWithdrawal() {
           <div>
             <Label htmlFor="method">طريقة السحب *</Label>
             <Select
-              onValueChange={(value) => setValue('method', value as any)}
+              onValueChange={(value) => setValue('method', value as WithdrawalForm['method'])}
             >
               <SelectTrigger>
                 <SelectValue placeholder="اختر طريقة السحب" />

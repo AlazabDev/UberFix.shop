@@ -146,10 +146,10 @@ const handler = async (req: Request): Promise<Response> => {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-approval-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unexpected error' }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
