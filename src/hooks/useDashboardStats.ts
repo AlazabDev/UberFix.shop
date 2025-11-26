@@ -37,14 +37,51 @@ export function useDashboardStats() {
       setLoading(true);
       setError(null);
 
+
+      // Calculate stats directly from maintenance_requests
+      const { data: requests, error: reqError } = await supabase
+        .from('maintenance_requests')
+        .select('status, created_at, estimated_cost, actual_cost, priority');
+
       // Calculate stats directly from maintenance_requests table
       const { data: requests, error } = await supabase
         .from('maintenance_requests')
         .select('*');
 
-      if (error) throw error;
+
+      if (reqError) throw reqError;
 
       const now = new Date();
+
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const requestsArray = requests || [];
+
+      const stats: DashboardStats = {
+        pending_requests: requestsArray.filter(r => r.status === 'Open').length,
+        today_requests: requestsArray.filter(r => new Date(r.created_at) >= todayStart).length,
+        completed_requests: requestsArray.filter(r => r.status === 'Completed').length,
+        total_requests: requestsArray.length,
+        this_month_requests: requestsArray.filter(r => new Date(r.created_at) >= monthStart).length,
+        total_budget: requestsArray.reduce((sum, r) => sum + (Number(r.estimated_cost) || 0), 0),
+        actual_cost: requestsArray.reduce((sum, r) => sum + (Number(r.actual_cost) || 0), 0),
+        completion_rate: requestsArray.length > 0 
+          ? (requestsArray.filter(r => r.status === 'Completed').length / requestsArray.length) * 100 
+          : 0,
+        avg_completion_days: 0, // Calculate later if needed
+        high_priority_count: requestsArray.filter(r => r.priority === 'urgent').length,
+        medium_priority_count: requestsArray.filter(r => r.priority === 'high').length,
+        low_priority_count: requestsArray.filter(r => r.priority === 'medium' || r.priority === 'low').length,
+        submitted_count: requestsArray.filter(r => r.status === 'Open').length,
+        assigned_count: requestsArray.filter(r => r.status === 'InProgress').length,
+        in_progress_count: requestsArray.filter(r => r.status === 'InProgress').length,
+        workflow_completed_count: requestsArray.filter(r => r.status === 'Completed').length,
+        last_updated: new Date().toISOString(),
+      };
+
+      setStats(stats);
+
       const today = now.toISOString().split('T')[0];
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
@@ -92,6 +129,7 @@ export function useDashboardStats() {
       } else {
         setStats(calculatedStats);
       }
+      
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
       setError(err as Error);
