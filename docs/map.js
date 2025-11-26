@@ -1342,6 +1342,21 @@ const branches = [
     }
 ];
 
+// تنسيق الإحداثيات والتأكد من صلاحيتها قبل استعمالها
+const normalizedBranches = branches.map((branch) => ({
+    ...branch,
+    latitude: typeof branch.latitude === 'string' ? parseFloat(branch.latitude) : branch.latitude,
+    longitude: typeof branch.longitude === 'string' ? parseFloat(branch.longitude) : branch.longitude
+}));
+
+const mappableBranches = normalizedBranches.filter((branch) =>
+    Number.isFinite(branch.latitude) &&
+    Number.isFinite(branch.longitude) &&
+    !(branch.latitude === 30.802498 && branch.longitude === 26.820553)
+);
+
+const skippedBranches = normalizedBranches.filter((branch) => !mappableBranches.includes(branch));
+
 // المتغيرات العامة
 let map;
 let markers = [];
@@ -1404,30 +1419,25 @@ function initializeMap() {
     setMarkers(map);
     displayBranchesList();
     setupEventListeners();
-    
-    console.log("تم تحميل " + branches.length + " فرع بنجاح");
-    
+
+    console.log("تم تحميل " + mappableBranches.length + " فرع قابل للعرض على الخريطة");
+    if (skippedBranches.length > 0) {
+        console.warn(
+            "تم تخطي " + skippedBranches.length + " فرع لعدم وجود إحداثيات صالحة.",
+            skippedBranches.map((branch) => branch.branch)
+        );
+    }
+
     // تحديث العداد في الهيدر
-    document.getElementById('totalBranches').textContent = branches.length;
-    document.getElementById('resultsCount').textContent = branches.length;
+    document.getElementById('totalBranches').textContent = normalizedBranches.length;
+    document.getElementById('resultsCount').textContent = normalizedBranches.length;
 }
 
 function setMarkers(map) {
     const bounds = new google.maps.LatLngBounds();
     let validMarkersCount = 0;
-    
-    branches.forEach(branch => {
-        // تخطي الفروع ذات الإحداثيات غير الصحيحة
-        if (branch.latitude === 30.802498 && branch.longitude === 26.820553) {
-            console.warn("تخطي فرع بإحداثيات افتراضية:", branch.branch);
-            return;
-        }
 
-        // التأكد من أن الإحداثيات صالحة
-        if (!branch.latitude || !branch.longitude) {
-            console.error("إحداثيات غير صالحة للفرع:", branch.branch);
-            return;
-        }
+    mappableBranches.forEach(branch => {
 
         const marker = new google.maps.Marker({
             position: { lat: branch.latitude, lng: branch.longitude },
@@ -1474,7 +1484,7 @@ function setMarkers(map) {
     }
 }
 
-function displayBranchesList(filteredBranches = branches) {
+function displayBranchesList(filteredBranches = normalizedBranches) {
     const branchesList = document.getElementById('branchesList');
     const resultsCount = document.getElementById('resultsCount');
     
@@ -1518,13 +1528,15 @@ function displayBranchesList(filteredBranches = branches) {
             showBranchInfo(branch);
             
             // التمرير إلى العلامة على الخريطة
-            const marker = markers.find(m => 
-                m.getPosition().lat() === branch.latitude && 
+            const marker = markers.find(m =>
+                m.getPosition().lat() === branch.latitude &&
                 m.getPosition().lng() === branch.longitude
             );
             if (marker) {
                 map.panTo(marker.getPosition());
                 map.setZoom(15);
+            } else {
+                console.warn('لا يمكن تحديد الفرع على الخريطة لغياب إحداثيات صالحة:', branch.branch);
             }
         });
 
@@ -1576,8 +1588,8 @@ function filterBranches() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const typeFilter = document.getElementById('typeFilter').value;
 
-    const filteredBranches = branches.filter(branch => {
-        const matchesSearch = branch.branch.toLowerCase().includes(searchTerm) || 
+    const filteredBranches = normalizedBranches.filter(branch => {
+        const matchesSearch = branch.branch.toLowerCase().includes(searchTerm) ||
                              branch.address.toLowerCase().includes(searchTerm);
         const matchesType = typeFilter === 'all' || branch.branch_type === typeFilter;
         
@@ -1593,11 +1605,11 @@ function filterBranches() {
 function updateMapMarkers(filteredBranches) {
     // إخفاء جميع العلامات
     markers.forEach(marker => marker.setMap(null));
-    
+
     // إظهار العلامات المرشحة فقط
     markers.forEach(marker => {
-        const branch = branches.find(b => 
-            b.latitude === marker.getPosition().lat() && 
+        const branch = mappableBranches.find(b =>
+            b.latitude === marker.getPosition().lat() &&
             b.longitude === marker.getPosition().lng()
         );
         
@@ -1634,8 +1646,8 @@ window.filterBranches = filterBranches;
 // تهيئة التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     console.log("تم تحميل الصفحة، في انتظار Google Maps API...");
-    
+
     // عرض عدد الفروع في الواجهة حتى قبل تحميل الخريطة
-    document.getElementById('totalBranches').textContent = branches.length;
-    document.getElementById('resultsCount').textContent = branches.length;
+    document.getElementById('totalBranches').textContent = normalizedBranches.length;
+    document.getElementById('resultsCount').textContent = normalizedBranches.length;
 });

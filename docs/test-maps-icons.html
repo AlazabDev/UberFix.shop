@@ -808,7 +808,7 @@
         // تحميل API بشكل غير متزامن
         function loadGoogleMapsAPI() {
             const script = document.createElement('script');
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap';
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap&loading=async';
             script.async = true;
             script.defer = true;
             document.head.appendChild(script);
