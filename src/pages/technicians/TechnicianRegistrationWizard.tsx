@@ -62,7 +62,7 @@ export default function TechnicianRegistrationWizard() {
 
       if (data) {
         setTechnicianId(data.id);
-        setFormData(data);
+        setFormData(data as Partial<TechnicianRegistrationData>);
       }
     } catch (error) {
       console.error('Error loading draft:', error);
@@ -87,11 +87,11 @@ export default function TechnicianRegistrationWizard() {
       } else {
         const { data, error } = await supabase
           .from('technician_profiles')
-          .insert({
+          .insert([{
             ...updatedData,
             user_id: user.id,
             status: 'draft',
-          })
+          }])
           .select()
           .single();
 

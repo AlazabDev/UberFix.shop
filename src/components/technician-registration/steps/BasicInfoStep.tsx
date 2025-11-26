@@ -49,7 +49,7 @@ export function BasicInfoStep({ data, onNext, onSaveAndExit }: BasicInfoStepProp
             name="company_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>اسم الشركة / الاسم التجاري</FormLabel>
+                <FormLabel>اسم الشركة / الاسم التجاري *</FormLabel>
                 <FormControl>
                   <Input placeholder="أدخل اسم الشركة أو الاسم التجاري" {...field} />
                 </FormControl>
@@ -63,7 +63,7 @@ export function BasicInfoStep({ data, onNext, onSaveAndExit }: BasicInfoStepProp
             name="company_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>نوع الكيان</FormLabel>
+                <FormLabel>نوع الكيان *</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -90,7 +90,7 @@ export function BasicInfoStep({ data, onNext, onSaveAndExit }: BasicInfoStepProp
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>الاسم الكامل</FormLabel>
+                    <FormLabel>الاسم الكامل *</FormLabel>
                     <FormControl>
                       <Input placeholder="أدخل الاسم الكامل" {...field} />
                     </FormControl>
@@ -104,7 +104,7 @@ export function BasicInfoStep({ data, onNext, onSaveAndExit }: BasicInfoStepProp
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>البريد الإلكتروني</FormLabel>
+                    <FormLabel>البريد الإلكتروني *</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="example@domain.com" {...field} />
                     </FormControl>
@@ -118,7 +118,7 @@ export function BasicInfoStep({ data, onNext, onSaveAndExit }: BasicInfoStepProp
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>رقم الهاتف</FormLabel>
+                    <FormLabel>رقم الهاتف *</FormLabel>
                     <FormControl>
                       <Input placeholder="01xxxxxxxxx" {...field} />
                     </FormControl>
