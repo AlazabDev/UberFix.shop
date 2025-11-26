@@ -148,15 +148,8 @@ export default function ServiceMap() {
 
         if (error) throw error;
         
-        // استخدام API key من environment variable كما هو معرف في المشروع
-        const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUqqo6xk9NsDNXjv5g"; // من .env أو Supabase secrets
-        
-        if (!apiKey) {
-          throw new Error("لم يتم إعداد مفتاح Google Maps");
-        }
-
         if (typeof window.google === "undefined" || !window.google.maps) {
-          await loadGoogleMaps(apiKey);
+          await loadGoogleMaps();
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
