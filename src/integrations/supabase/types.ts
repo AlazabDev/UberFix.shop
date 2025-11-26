@@ -2608,6 +2608,55 @@ export type Database = {
           },
         ]
       }
+      technician_coverage_areas: {
+        Row: {
+          city_id: number | null
+          created_at: string | null
+          district_id: number | null
+          id: string
+          radius_km: number | null
+          technician_id: string | null
+        }
+        Insert: {
+          city_id?: number | null
+          created_at?: string | null
+          district_id?: number | null
+          id?: string
+          radius_km?: number | null
+          technician_id?: string | null
+        }
+        Update: {
+          city_id?: number | null
+          created_at?: string | null
+          district_id?: number | null
+          id?: string
+          radius_km?: number | null
+          technician_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_coverage_areas_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_coverage_areas_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_coverage_areas_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technician_daily_stats: {
         Row: {
           average_arrival_time: number | null
@@ -2666,6 +2715,44 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technician_documents: {
+        Row: {
+          document_type: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string
+          id: string
+          technician_id: string | null
+          uploaded_at: string | null
+        }
+        Insert: {
+          document_type?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url: string
+          id?: string
+          technician_id?: string | null
+          uploaded_at?: string | null
+        }
+        Update: {
+          document_type?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          technician_id?: string | null
+          uploaded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_documents_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2978,6 +3065,206 @@ export type Database = {
           },
         ]
       }
+      technician_profiles: {
+        Row: {
+          accepts_emergency_jobs: boolean | null
+          accepts_national_contracts: boolean | null
+          accounting_email: string | null
+          accounting_name: string | null
+          accounting_phone: string | null
+          additional_notes: string | null
+          agree_payment_terms: boolean | null
+          agree_terms: boolean | null
+          building_no: string | null
+          city_id: number | null
+          company_model: string | null
+          company_name: string
+          company_type: string | null
+          contact_name: string | null
+          country: string | null
+          created_at: string | null
+          district_id: number | null
+          email: string
+          floor: string | null
+          full_name: string
+          has_insurance: boolean | null
+          id: string
+          insurance_company_name: string | null
+          insurance_notes: string | null
+          landmark: string | null
+          number_of_inhouse_technicians: number | null
+          number_of_office_staff: number | null
+          phone: string
+          policy_expiry_date: string | null
+          policy_number: string | null
+          preferred_language: string | null
+          pricing_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          service_email: string | null
+          status: string | null
+          street_address: string | null
+          submitted_at: string | null
+          terms_accepted_at: string | null
+          unit: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          accepts_emergency_jobs?: boolean | null
+          accepts_national_contracts?: boolean | null
+          accounting_email?: string | null
+          accounting_name?: string | null
+          accounting_phone?: string | null
+          additional_notes?: string | null
+          agree_payment_terms?: boolean | null
+          agree_terms?: boolean | null
+          building_no?: string | null
+          city_id?: number | null
+          company_model?: string | null
+          company_name: string
+          company_type?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          district_id?: number | null
+          email: string
+          floor?: string | null
+          full_name: string
+          has_insurance?: boolean | null
+          id?: string
+          insurance_company_name?: string | null
+          insurance_notes?: string | null
+          landmark?: string | null
+          number_of_inhouse_technicians?: number | null
+          number_of_office_staff?: number | null
+          phone: string
+          policy_expiry_date?: string | null
+          policy_number?: string | null
+          preferred_language?: string | null
+          pricing_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_email?: string | null
+          status?: string | null
+          street_address?: string | null
+          submitted_at?: string | null
+          terms_accepted_at?: string | null
+          unit?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          accepts_emergency_jobs?: boolean | null
+          accepts_national_contracts?: boolean | null
+          accounting_email?: string | null
+          accounting_name?: string | null
+          accounting_phone?: string | null
+          additional_notes?: string | null
+          agree_payment_terms?: boolean | null
+          agree_terms?: boolean | null
+          building_no?: string | null
+          city_id?: number | null
+          company_model?: string | null
+          company_name?: string
+          company_type?: string | null
+          contact_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          district_id?: number | null
+          email?: string
+          floor?: string | null
+          full_name?: string
+          has_insurance?: boolean | null
+          id?: string
+          insurance_company_name?: string | null
+          insurance_notes?: string | null
+          landmark?: string | null
+          number_of_inhouse_technicians?: number | null
+          number_of_office_staff?: number | null
+          phone?: string
+          policy_expiry_date?: string | null
+          policy_number?: string | null
+          preferred_language?: string | null
+          pricing_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_email?: string | null
+          status?: string | null
+          street_address?: string | null
+          submitted_at?: string | null
+          terms_accepted_at?: string | null
+          unit?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_profiles_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_profiles_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technician_service_prices: {
+        Row: {
+          created_at: string | null
+          emergency_price: number | null
+          id: string
+          is_active: boolean | null
+          material_markup_percent: number | null
+          min_job_value: number | null
+          night_weekend_price: number | null
+          service_id: number
+          standard_price: number
+          technician_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          emergency_price?: number | null
+          id?: string
+          is_active?: boolean | null
+          material_markup_percent?: number | null
+          min_job_value?: number | null
+          night_weekend_price?: number | null
+          service_id: number
+          standard_price: number
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          emergency_price?: number | null
+          id?: string
+          is_active?: boolean | null
+          material_markup_percent?: number | null
+          min_job_value?: number | null
+          night_weekend_price?: number | null
+          service_id?: number
+          standard_price?: number
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_service_prices_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technician_services: {
         Row: {
           created_at: string | null
@@ -3165,6 +3452,44 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technician_trades: {
+        Row: {
+          can_handle_heavy_projects: boolean | null
+          category_id: number
+          created_at: string | null
+          id: string
+          licenses_or_certifications: string | null
+          technician_id: string | null
+          years_of_experience: number | null
+        }
+        Insert: {
+          can_handle_heavy_projects?: boolean | null
+          category_id: number
+          created_at?: string | null
+          id?: string
+          licenses_or_certifications?: string | null
+          technician_id?: string | null
+          years_of_experience?: number | null
+        }
+        Update: {
+          can_handle_heavy_projects?: boolean | null
+          category_id?: number
+          created_at?: string | null
+          id?: string
+          licenses_or_certifications?: string | null
+          technician_id?: string | null
+          years_of_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_trades_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
             referencedColumns: ["id"]
           },
         ]
