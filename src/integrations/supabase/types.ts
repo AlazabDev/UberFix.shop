@@ -513,13 +513,6 @@ export type Database = {
             referencedRelation: "cities"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "districts_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       error_logs: {
@@ -1546,13 +1539,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "properties_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "properties_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -1933,7 +1919,7 @@ export type Database = {
           id: number
           location: string | null
           package_id: number | null
-          service_item_id: number | null
+          service_item_id: number
           status: string | null
           technician_id: number | null
           total_price: number
@@ -1945,7 +1931,7 @@ export type Database = {
           id?: number
           location?: string | null
           package_id?: number | null
-          service_item_id?: number | null
+          service_item_id: number
           status?: string | null
           technician_id?: number | null
           total_price: number
@@ -1957,7 +1943,7 @@ export type Database = {
           id?: number
           location?: string | null
           package_id?: number | null
-          service_item_id?: number | null
+          service_item_id?: number
           status?: string | null
           technician_id?: number | null
           total_price?: number
@@ -2395,13 +2381,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technician_applications_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technician_applications_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -2562,13 +2541,6 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_coverage_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
             referencedColumns: ["id"]
           },
           {
@@ -3417,13 +3389,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technician_work_zones_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technician_work_zones_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -3572,13 +3537,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technicians_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technicians_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -3724,55 +3682,7 @@ export type Database = {
       }
     }
     Views: {
-      dashboard_stats: {
-        Row: {
-          actual_cost: number | null
-          assigned_count: number | null
-          avg_completion_days: number | null
-          completed_requests: number | null
-          completion_rate: number | null
-          high_priority_count: number | null
-          in_progress_count: number | null
-          last_updated: string | null
-          low_priority_count: number | null
-          medium_priority_count: number | null
-          pending_requests: number | null
-          submitted_count: number | null
-          this_month_requests: number | null
-          today_requests: number | null
-          total_budget: number | null
-          total_requests: number | null
-          workflow_completed_count: number | null
-        }
-        Relationships: []
-      }
-      monthly_stats: {
-        Row: {
-          completed_requests: number | null
-          completion_rate: number | null
-          month: string | null
-          pending_requests: number | null
-          total_actual: number | null
-          total_estimated: number | null
-          total_requests: number | null
-        }
-        Relationships: []
-      }
-      vw_cities_public: {
-        Row: {
-          id: number | null
-          name_ar: string | null
-        }
-        Insert: {
-          id?: number | null
-          name_ar?: string | null
-        }
-        Update: {
-          id?: number | null
-          name_ar?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_distance: {
