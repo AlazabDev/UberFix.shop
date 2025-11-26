@@ -29,7 +29,7 @@ const CompletedServices = lazy(() => import("@/pages/CompletedServices"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 // Technician pages
-const TechnicianRegistrationWizard = lazy(() => import("@/pages/technicians/TechnicianRegistrationWizard"));
+const TechnicianRegistration = lazy(() => import("@/pages/technicians/TechnicianRegistration"));
 
 /**
  * المسارات العامة (لا تتطلب تسجيل دخول)
@@ -56,6 +56,6 @@ export const publicRoutes = [
   { path: "/quick-request", element: <QuickRequestFromMap /> },
   { path: "/track-orders", element: <TrackOrders /> },
   { path: "/completed-services", element: <CompletedServices /> },
-  { path: "/technicians/register", element: <TechnicianRegistrationWizard /> },
+  { path: "/technicians/register", element: <TechnicianRegistration /> },
   { path: "*", element: <NotFound /> },
 ];
