@@ -78,20 +78,21 @@ export interface ProjectUpdate {
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabaseClient = supabase as unknown as { from: typeof supabase.from };
 
   const fetchProjects = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabaseClient
         .from('projects')
         .select('*')
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setProjects((data || []) as Project[]);
-    } catch (error: any) {
+      setProjects((data as Project[] | null) ?? []);
+    } catch (error: unknown) {
       toast({
         title: 'خطأ في تحميل المشروعات',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {
@@ -122,13 +123,14 @@ export const useProjectDetails = (projectId: string) => {
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabaseClient = supabase as unknown as { from: typeof supabase.from };
 
   const fetchProjectData = async () => {
     try {
       setLoading(true);
 
       // Fetch project
-      const { data: projectData, error: projectError } = await (supabase as any)
+      const { data: projectData, error: projectError } = await supabaseClient
         .from('projects')
         .select('*')
         .eq('id', projectId)
@@ -138,7 +140,7 @@ export const useProjectDetails = (projectId: string) => {
       setProject(projectData as Project);
 
       // Fetch phases
-      const { data: phasesData, error: phasesError } = await (supabase as any)
+      const { data: phasesData, error: phasesError } = await supabaseClient
         .from('project_phases')
         .select('*')
         .eq('project_id', projectId)
@@ -148,18 +150,18 @@ export const useProjectDetails = (projectId: string) => {
       setPhases((phasesData || []) as ProjectPhase[]);
 
       // Fetch updates
-      const { data: updatesData, error: updatesError } = await (supabase as any)
+      const { data: updatesData, error: updatesError } = await supabaseClient
         .from('project_updates')
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
       if (updatesError) throw updatesError;
-      setUpdates((updatesData || []) as ProjectUpdate[]);
-    } catch (error: any) {
+      setUpdates((updatesData as ProjectUpdate[] | null) ?? []);
+    } catch (error: unknown) {
       toast({
         title: 'خطأ في تحميل بيانات المشروع',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {

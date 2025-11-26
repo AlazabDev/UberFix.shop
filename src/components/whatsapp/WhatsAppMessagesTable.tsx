@@ -74,12 +74,12 @@ export function WhatsAppMessagesTable() {
         status: msg.status,
         created_at: msg.created_at,
         delivered_at: msg.delivered_at || undefined,
-        read_at: (msg.metadata as any)?.read_at || undefined,
+        read_at: (msg.metadata as { read_at?: string } | null)?.read_at || undefined,
         error_message: msg.error_message || undefined,
       }));
-      
+
       setMessages(transformedData);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching WhatsApp messages:', error);
     } finally {
       setLoading(false);

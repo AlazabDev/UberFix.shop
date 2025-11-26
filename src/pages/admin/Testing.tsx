@@ -86,6 +86,7 @@ const Testing = () => {
   ]);
   const [isRunning, setIsRunning] = useState(false);
   const { toast } = useToast();
+  const supabaseClient = supabase as unknown as { from: (table: string) => ReturnType<typeof supabase.from> };
 
   const updateTestResult = (index: number, result: Partial<TestResult>) => {
     setTestResults(prev => prev.map((test, i) => 
@@ -488,8 +489,8 @@ const Testing = () => {
       const warnings: string[] = [];
       
       for (const table of criticalTables) {
-        const { error } = await supabase
-          .from(table as any)
+        const { error } = await supabaseClient
+          .from(table)
           .select('*')
           .limit(1);
         

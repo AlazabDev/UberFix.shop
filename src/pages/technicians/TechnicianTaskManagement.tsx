@@ -46,8 +46,8 @@ export default function TechnicianTaskManagement() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setTasks(data as any || []);
-    } catch (error) {
+      setTasks((data as TechnicianTask[] | null) ?? []);
+    } catch (error: unknown) {
       console.error("Error fetching tasks:", error);
     } finally {
       setLoading(false);
@@ -73,10 +73,10 @@ export default function TechnicianTaskManagement() {
 
       fetchTasks();
       setShowCheckIn(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     }
@@ -117,10 +117,10 @@ export default function TechnicianTaskManagement() {
       fetchTasks();
       setShowCheckOut(false);
       setWorkReport("");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     }

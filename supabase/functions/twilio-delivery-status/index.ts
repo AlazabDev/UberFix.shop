@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const formData = await req.formData();
     const statusUpdate: TwilioStatusUpdate = {
       MessageSid: formData.get('MessageSid') as string,
-      MessageStatus: formData.get('MessageStatus') as any,
+      MessageStatus: formData.get('MessageStatus') as TwilioStatusUpdate['MessageStatus'],
       To: formData.get('To') as string,
       From: formData.get('From') as string,
       ErrorCode: formData.get('ErrorCode') as string,

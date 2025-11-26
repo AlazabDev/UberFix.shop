@@ -105,7 +105,7 @@ export default function TechnicianTraining() {
         .eq("status", "completed");
 
       setCompletedCourses(training?.map(t => t.course_type) || []);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error checking eligibility:", error);
     } finally {
       setLoading(false);
@@ -164,10 +164,10 @@ export default function TechnicianTraining() {
           navigate("/technicians/dashboard");
         }, 2000);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     }

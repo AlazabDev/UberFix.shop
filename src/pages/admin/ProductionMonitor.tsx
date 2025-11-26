@@ -102,9 +102,11 @@ export default function ProductionMonitor() {
     }
 
     // قياس استخدام الذاكرة
-    if ('memory' in performance && (performance as any).memory) {
-      const memory = (performance as any).memory;
-      metrics.memoryUsage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+    if ('memory' in performance) {
+      const memoryInfo = (performance as Performance & { memory?: { usedJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
+      if (memoryInfo) {
+        metrics.memoryUsage = (memoryInfo.usedJSHeapSize / memoryInfo.jsHeapSizeLimit) * 100;
+      }
     }
 
     setPerformanceMetrics(metrics);

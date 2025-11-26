@@ -68,13 +68,13 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
 
       // تطبيق الفلاتر مع استخدام indexes
       if (filters.status) {
-        query = query.eq('status', filters.status as any); // uses idx_maintenance_requests_status
+        query = query.eq('status', filters.status); // uses idx_maintenance_requests_status
       }
       if (filters.priority) {
-        query = query.eq('priority', filters.priority as any); // uses idx_maintenance_requests_priority
+        query = query.eq('priority', filters.priority); // uses idx_maintenance_requests_priority
       }
       if (filters.workflow_stage) {
-        query = query.eq('workflow_stage', filters.workflow_stage as any); // uses idx_maintenance_requests_workflow_stage
+        query = query.eq('workflow_stage', filters.workflow_stage); // uses idx_maintenance_requests_workflow_stage
       }
       if (filters.search) {
         query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);

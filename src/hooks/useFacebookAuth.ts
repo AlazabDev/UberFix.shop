@@ -91,10 +91,10 @@ export function useFacebookAuth() {
           });
           navigate('/dashboard');
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast({
           title: 'حدث خطأ',
-          description: error.message || 'حاول مرة أخرى لاحقاً',
+          description: error instanceof Error ? error.message : 'حاول مرة أخرى لاحقاً',
           variant: 'destructive',
         });
       }

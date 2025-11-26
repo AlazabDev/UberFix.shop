@@ -117,7 +117,7 @@ export default function UserManagement() {
         .from('user_roles')
         .insert([{
           user_id: selectedUser.id,
-          role: selectedRole as any,
+          role: selectedRole,
           assigned_by: currentUser.user?.id
         }]);
 
@@ -146,7 +146,7 @@ export default function UserManagement() {
         .from('user_roles')
         .delete()
         .eq('user_id', userId)
-        .eq('role', role as any);
+        .eq('role', role);
 
       if (error) throw error;
 

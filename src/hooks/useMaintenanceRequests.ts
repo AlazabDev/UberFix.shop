@@ -198,7 +198,7 @@ export function useMaintenanceRequests() {
 
       const { data, error } = await supabase
         .from('maintenance_requests')
-        .update(updates as any)
+        .update(updates)
         .eq('id', id)
         .select()
         .maybeSingle();

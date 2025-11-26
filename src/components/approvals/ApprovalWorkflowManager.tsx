@@ -37,6 +37,7 @@ export function ApprovalWorkflowManager() {
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [editingWorkflow, setEditingWorkflow] = useState<ApprovalWorkflow | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const supabaseClient = supabase as unknown as { from: typeof supabase.from };
 
   useEffect(() => {
     fetchWorkflows();
@@ -53,7 +54,7 @@ export function ApprovalWorkflowManager() {
       // Since approval_workflows is not in the types, we'll skip this for now
       // and just set an empty array
       setWorkflows([]);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching workflows:', error);
     }
   };
@@ -139,8 +140,7 @@ export function ApprovalWorkflowManager() {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: workflow, error: workflowError } = await (supabase as any)
+      const { data: workflow, error: workflowError } = await supabaseClient
         .from("approval_workflows")
         .upsert({
           id: editingWorkflow.id,
@@ -163,8 +163,7 @@ export function ApprovalWorkflowManager() {
       }
 
       // Insert new steps
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: stepsError } = await (supabase as any).from("approval_steps").insert(
+      const { error: stepsError } = await supabaseClient.from("approval_steps").insert(
         editingWorkflow.steps.map((s) => ({
           workflow_id: workflowId,
           step_order: s.step_order,
@@ -186,7 +185,7 @@ export function ApprovalWorkflowManager() {
 
       setDialogOpen(false);
       fetchWorkflows();
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير متوقع';
       toast({
         title: "خطأ",

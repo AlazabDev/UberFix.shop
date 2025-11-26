@@ -70,7 +70,7 @@ export default function TechnicianAgreement() {
       if (existingAgreement && existingAgreement.signed_at) {
         navigate("/technicians/training");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error checking verification:", error);
     }
   };
@@ -115,10 +115,10 @@ export default function TechnicianAgreement() {
       });
 
       navigate("/technicians/training");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "خطأ",
-        description: error.message,
+        description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive",
       });
     } finally {

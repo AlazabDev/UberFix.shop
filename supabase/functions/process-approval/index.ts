@@ -207,12 +207,12 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in process-approval function:", error);
     return new Response(
       generateHtmlResponse(
         "خطأ",
-        `❌ حدث خطأ أثناء معالجة الطلب: ${error.message}`,
+        `❌ حدث خطأ أثناء معالجة الطلب: ${error instanceof Error ? error.message : 'Unexpected error'}`,
         "error"
       ),
       {

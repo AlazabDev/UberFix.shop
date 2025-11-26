@@ -106,11 +106,11 @@ export default function QuickRequestFromMap() {
 
       // الانتقال لصفحة متابعة الطلبات
       navigate(`/requests/${request.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating request:', error);
       toast({
         title: '❌ خطأ في إنشاء الطلب',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {

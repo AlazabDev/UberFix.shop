@@ -138,9 +138,9 @@ const sendInAppNotification = async (
     if (error) throw error;
     console.log('In-app notification sent successfully');
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error sending in-app notification:', error);
-    return { success: false, error };
+    return { success: false, error: error instanceof Error ? error.message : 'Unexpected error' };
   }
 };
 
@@ -159,9 +159,9 @@ const sendEmailNotification = async (
 
     console.log('Email sent successfully:', result);
     return { success: true, result };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error sending email:', error);
-    return { success: false, error };
+    return { success: false, error: error instanceof Error ? error.message : 'Unexpected error' };
   }
 };
 
@@ -180,9 +180,9 @@ const sendSMSNotification = async (
 
     console.log('SMS sent successfully:', result);
     return { success: true, result };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error sending SMS:', error);
-    return { success: false, error };
+    return { success: false, error: error instanceof Error ? error.message : 'Unexpected error' };
   }
 };
 
@@ -200,9 +200,9 @@ const sendWhatsAppNotification = async (
 
     console.log('WhatsApp sent successfully:', result);
     return { success: true, result };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error sending WhatsApp:', error);
-    return { success: false, error };
+    return { success: false, error: error instanceof Error ? error.message : 'Unexpected error' };
   }
 };
 
@@ -279,12 +279,12 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-unified-notification:", error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: false,
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unexpected error'
       }),
       {
         status: 500,

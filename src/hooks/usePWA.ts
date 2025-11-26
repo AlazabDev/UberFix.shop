@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { pushNotifications, PushNotificationManager } from '@/lib/pushNotifications';
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
+
 interface PWAStatus {
   isInstalled: boolean;
   isUpdateAvailable: boolean;
@@ -15,13 +20,14 @@ export function usePWA() {
     canInstall: false,
     notificationPermission: 'default'
   });
-  
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     // Check if app is installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const isIOSStandalone = (window.navigator as any).standalone === true;
+    const iosNavigator = window.navigator as Navigator & { standalone?: boolean };
+    const isIOSStandalone = iosNavigator.standalone === true;
     
     setStatus(prev => ({
       ...prev,

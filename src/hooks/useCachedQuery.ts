@@ -23,6 +23,7 @@ export function useCachedQuery<T>({
   enabled = true,
   staleTime = 5 * 60 * 1000, // 5 minutes default
 }: CachedQueryOptions<T>) {
+  const supabaseClient = supabase as unknown as { from: (table: string) => ReturnType<typeof supabase.from> };
   return useQuery({
     queryKey,
     queryFn: async () => {
@@ -44,7 +45,7 @@ export function useCachedQuery<T>({
       }
 
       // Fallback to direct database query
-      let query = supabase.from(table as any).select(select) as any;
+      let query = supabaseClient.from(table).select(select);
 
       // Apply filters
       Object.entries(filters).forEach(([key, value]) => {
