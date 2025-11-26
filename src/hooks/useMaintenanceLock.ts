@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 interface MaintenanceLockStatus {
   isLocked: boolean;
@@ -7,8 +7,12 @@ interface MaintenanceLockStatus {
 }
 
 export const useMaintenanceLock = () => {
+  const shouldFetch = isSupabaseConfigured;
+
   return useQuery({
     queryKey: ["maintenance-lock"],
+    enabled: shouldFetch,
+    initialData: { isLocked: false, message: null },
     queryFn: async (): Promise<MaintenanceLockStatus> => {
       const { data, error } = await supabase
         .from("app_control")
@@ -27,6 +31,6 @@ export const useMaintenanceLock = () => {
       };
     },
     refetchInterval: 30000, // تحديث كل 30 ثانية
-    staleTime: 20000,
+    staleTime: shouldFetch ? 20000 : Infinity,
   });
 };
