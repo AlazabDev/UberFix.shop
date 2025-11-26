@@ -64,6 +64,15 @@ const TechnicianDashboard = lazy(
 const TechnicianTaskManagement = lazy(
   () => import("@/pages/technicians/TechnicianTaskManagement")
 );
+const TechnicianWallet = lazy(
+  () => import("@/pages/technicians/TechnicianWallet")
+);
+const TechnicianWithdrawal = lazy(
+  () => import("@/pages/technicians/TechnicianWithdrawal")
+);
+const TechnicianEarnings = lazy(
+  () => import("@/pages/technicians/TechnicianEarnings")
+);
 const HallOfExcellence = lazy(
   () => import("@/pages/technicians/HallOfExcellence")
 );
@@ -156,6 +165,9 @@ export const protectedRoutes = [
   { path: "/technicians/training", element: <TechnicianTraining />, withLayout: true },
   { path: "/technicians/dashboard", element: <TechnicianDashboard />, withLayout: true },
   { path: "/technicians/tasks", element: <TechnicianTaskManagement />, withLayout: true },
+  { path: "/technicians/wallet", element: <TechnicianWallet />, withLayout: true },
+  { path: "/technicians/withdrawal", element: <TechnicianWithdrawal />, withLayout: true },
+  { path: "/technicians/earnings", element: <TechnicianEarnings />, withLayout: true },
   { path: "/hall-of-excellence", element: <HallOfExcellence />, withLayout: true },
 
   // Messages

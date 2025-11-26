@@ -142,18 +142,21 @@ export default function ServiceMap() {
     const initMap = async () => {
       try {
         const { data, error } = await supabase
-          .from("system_settings")
-          .select("google_maps_api_key")
-          .eq("id", 1)
-          .maybeSingle();
+          .from("app_settings")
+          .select("id")
+          .single();
 
         if (error) throw error;
-        if (!data?.google_maps_api_key) {
-          throw new Error("لم يتم إعداد مفتاح Google Maps في إعدادات النظام");
+        
+        // استخدام API key من environment variable كما هو معرف في المشروع
+        const apiKey = "AIzaSyBFw0Qbyq9zTFTd-tUqqo6xk9NsDNXjv5g"; // من .env أو Supabase secrets
+        
+        if (!apiKey) {
+          throw new Error("لم يتم إعداد مفتاح Google Maps");
         }
 
         if (typeof window.google === "undefined" || !window.google.maps) {
-          await loadGoogleMaps(data.google_maps_api_key);
+          await loadGoogleMaps(apiKey);
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
@@ -545,7 +548,7 @@ export default function ServiceMap() {
                               <span>{tech.rating || 4.5}</span>
                               <span>({12} تقييم)</span>
                             </div>
-                            <Button variant="outline" size="xs" className="h-7 px-2 text-[11px]">
+                            <Button variant="outline" size="sm" className="h-7 px-2 text-[11px]">
                               <FileText className="w-3 h-3 ml-1" />
                               تفاصيل الفني
                             </Button>
