@@ -51,10 +51,10 @@ export function useDashboardStats() {
       // Calculate stats
       const totalRequests = requests?.length || 0;
       const pendingRequests = requests?.filter(r => 
-        r.status === 'pending' || r.status === 'new' || r.status === 'submitted'
+        r.status === 'Open' || r.status === 'Waiting'
       ).length || 0;
       const completedRequests = requests?.filter(r => 
-        r.status === 'completed' || r.status === 'closed'
+        r.status === 'Completed'
       ).length || 0;
       const todayRequests = requests?.filter(r => 
         new Date(r.created_at) >= today
