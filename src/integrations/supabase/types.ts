@@ -950,13 +950,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "maintenance_requests_assigned_vendor_id_fkey"
-            columns: ["assigned_vendor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "maintenance_requests_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
@@ -1237,6 +1230,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      otp_verifications: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          otp_code: string
+          phone: string
+          verified: boolean | null
+          verified_at: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          otp_code: string
+          phone: string
+          verified?: boolean | null
+          verified_at?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          phone?: string
+          verified?: boolean | null
+          verified_at?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1787,6 +1813,210 @@ export type Database = {
         }
         Relationships: []
       }
+      service_addons: {
+        Row: {
+          additional_price: number
+          created_at: string | null
+          description: string | null
+          duration_hours: number | null
+          id: number
+          name: string
+          service_item_id: number | null
+        }
+        Insert: {
+          additional_price: number
+          created_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: number
+          name: string
+          service_item_id?: number | null
+        }
+        Update: {
+          additional_price?: number
+          created_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: number
+          name?: string
+          service_item_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_addons_service_item_id_fkey"
+            columns: ["service_item_id"]
+            isOneToOne: false
+            referencedRelation: "service_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: number
+          is_active: boolean | null
+          name: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: number
+          is_active?: boolean | null
+          name: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: number
+          is_active?: boolean | null
+          name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      service_items: {
+        Row: {
+          base_price: number
+          created_at: string | null
+          description: string | null
+          duration_hours: number | null
+          id: number
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          subcategory_id: number | null
+        }
+        Insert: {
+          base_price: number
+          created_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: number
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          subcategory_id?: number | null
+        }
+        Update: {
+          base_price?: number
+          created_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: number
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          subcategory_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_items_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "service_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_orders: {
+        Row: {
+          created_at: string | null
+          customer_id: number
+          description: string | null
+          id: number
+          location: string | null
+          package_id: number | null
+          service_item_id: number | null
+          status: string | null
+          technician_id: number | null
+          total_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: number
+          description?: string | null
+          id?: number
+          location?: string | null
+          package_id?: number | null
+          service_item_id?: number | null
+          status?: string | null
+          technician_id?: number | null
+          total_price: number
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: number
+          description?: string | null
+          id?: number
+          location?: string | null
+          package_id?: number | null
+          service_item_id?: number | null
+          status?: string | null
+          technician_id?: number | null
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "service_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_service_item_id_fkey"
+            columns: ["service_item_id"]
+            isOneToOne: false
+            referencedRelation: "service_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_packages: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          features: Json | null
+          id: number
+          package_name: string
+          price: number
+          service_item_id: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: number
+          package_name: string
+          price: number
+          service_item_id?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: number
+          package_name?: string
+          price?: number
+          service_item_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_packages_service_item_id_fkey"
+            columns: ["service_item_id"]
+            isOneToOne: false
+            referencedRelation: "service_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_prices: {
         Row: {
           branch_id: string | null
@@ -1818,6 +2048,44 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_subcategories: {
+        Row: {
+          category_id: number | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: number
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          category_id?: number | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: number
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          category_id?: number | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: number
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
             referencedColumns: ["id"]
           },
         ]
