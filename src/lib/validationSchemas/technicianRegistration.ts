@@ -4,9 +4,11 @@ import { emailSchema, egyptianPhoneSchema, nameSchema, addressSchema } from "../
 // Step 1: Basic Information
 export const basicInfoSchema = z.object({
   company_name: z.string().trim().min(2, "اسم الشركة مطلوب").max(200, "اسم الشركة طويل جداً"),
-  company_type: z.enum(['individual', 'small_team', 'company'], {
-    errorMap: () => ({ message: "نوع الكيان مطلوب" })
-  }),
+  company_type: z.union([
+    z.literal('individual'),
+    z.literal('small_team'),
+    z.literal('company')
+  ], { errorMap: () => ({ message: "نوع الكيان مطلوب" }) }),
   full_name: nameSchema,
   email: emailSchema,
   phone: egyptianPhoneSchema,
@@ -18,8 +20,8 @@ export const addressInfoSchema = z.object({
   service_email: emailSchema.optional(),
   contact_name: nameSchema.optional(),
   country: z.string().default('Egypt'),
-  city_id: z.number({ required_error: "المحافظة مطلوبة" }).int().positive(),
-  district_id: z.number({ required_error: "الحي مطلوب" }).int().positive(),
+  city_id: z.number().int().positive({ message: "المحافظة مطلوبة" }),
+  district_id: z.number().int().positive({ message: "الحي مطلوب" }),
   street_address: addressSchema,
   building_no: z.string().optional(),
   floor: z.string().optional(),

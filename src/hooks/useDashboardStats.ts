@@ -66,8 +66,8 @@ export function useDashboardStats() {
         medium_priority_count: requestsArray.filter(r => r.priority === 'high').length,
         low_priority_count: requestsArray.filter(r => r.priority === 'medium' || r.priority === 'low').length,
         submitted_count: requestsArray.filter(r => r.status === 'Open').length,
-        assigned_count: requestsArray.filter(r => r.status === 'In Progress').length,
-        in_progress_count: requestsArray.filter(r => r.status === 'In Progress').length,
+        assigned_count: requestsArray.filter(r => r.status === 'InProgress').length,
+        in_progress_count: requestsArray.filter(r => r.status === 'InProgress').length,
         workflow_completed_count: requestsArray.filter(r => r.status === 'Completed').length,
         last_updated: new Date().toISOString(),
       };
