@@ -96,3 +96,24 @@ verify_jwt = false
 
 [functions.get-property-for-qr]
 verify_jwt = false
+
+[functions.calculate-monthly-bonuses]
+verify_jwt = true
+
+[functions.send-otp]
+verify_jwt = false
+
+[functions.verify-otp]
+verify_jwt = false
+
+[functions.process-national-id-ocr]
+verify_jwt = true
+
+[functions.assign-technician-to-request]
+verify_jwt = true
+
+[functions.sla-monitor]
+verify_jwt = true
+
+[functions.send-unified-notification]
+verify_jwt = true
