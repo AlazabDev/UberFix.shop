@@ -49,9 +49,9 @@ export function useDashboardStats() {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
       const calculatedStats = {
-        pending_requests: requests?.filter(r => r.status === 'Open' || r.status === 'pending').length || 0,
+        pending_requests: requests?.filter(r => r.status === 'Open').length || 0,
         today_requests: requests?.filter(r => r.created_at?.startsWith(today)).length || 0,
-        completed_requests: requests?.filter(r => r.status === 'Completed' || r.status === 'completed').length || 0,
+        completed_requests: requests?.filter(r => r.status === 'Completed').length || 0,
         total_requests: requests?.length || 0,
         this_month_requests: requests?.filter(r => r.created_at >= monthStart).length || 0,
         total_budget: requests?.reduce((sum, r) => sum + (r.estimated_cost || 0), 0) || 0,

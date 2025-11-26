@@ -31,7 +31,7 @@ export default function Login() {
     },
     vendor: {
       title: "الفنيون",
-      description: "تسجيل الدخول لحساب الفنيون",
+      description: "هذه البوابة مخصصة للفنيين فقط لاستقبال الطلبات",
       icon: Wrench,
       color: "green",
       bgGradient: "from-green-50/50 to-background dark:from-green-950/20"
@@ -259,6 +259,19 @@ export default function Login() {
                   إنشاء حساب جديد
                 </Link>
               </p>
+              {selectedRole === "vendor" && (
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                    onClick={() => navigate("/technicians/register")}
+                  >
+                    سجل كفني جديد
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               <p className="text-sm">
                 <Link to="/role-selection" className="text-muted-foreground hover:text-primary transition-colors">
                   اختيار نوع حساب آخر
