@@ -50,13 +50,13 @@ export function useDashboardStats() {
 
       const stats: DashboardStats = {
         total_requests: requests?.length || 0,
-        pending_requests: requests?.filter(r => r.status === 'pending' || r.workflow_stage === 'SUBMITTED').length || 0,
+        pending_requests: requests?.filter(r => r.status === 'Open' || r.workflow_stage === 'SUBMITTED').length || 0,
         today_requests: requests?.filter(r => new Date(r.created_at) >= today).length || 0,
-        completed_requests: requests?.filter(r => r.status === 'completed' || r.workflow_stage === 'COMPLETED').length || 0,
+        completed_requests: requests?.filter(r => r.status === 'Completed' || r.workflow_stage === 'COMPLETED').length || 0,
         this_month_requests: requests?.filter(r => new Date(r.created_at) >= monthStart).length || 0,
         total_budget: requests?.reduce((sum, r) => sum + (r.estimated_cost || 0), 0) || 0,
         actual_cost: requests?.reduce((sum, r) => sum + (r.actual_cost || 0), 0) || 0,
-        completion_rate: requests?.length ? ((requests.filter(r => r.status === 'completed').length / requests.length) * 100) : 0,
+        completion_rate: requests?.length ? ((requests.filter(r => r.status === 'Completed').length / requests.length) * 100) : 0,
         avg_completion_days: 0,
         high_priority_count: requests?.filter(r => r.priority === 'high').length || 0,
         medium_priority_count: requests?.filter(r => r.priority === 'medium').length || 0,
