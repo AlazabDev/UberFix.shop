@@ -513,13 +513,6 @@ export type Database = {
             referencedRelation: "cities"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "districts_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       error_logs: {
@@ -947,6 +940,34 @@ export type Database = {
             columns: ["assigned_vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_branch"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_category"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
           {
@@ -1546,13 +1567,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "properties_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "properties_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -1781,6 +1795,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_review_request"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_review_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reviews_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
@@ -1933,7 +1961,7 @@ export type Database = {
           id: number
           location: string | null
           package_id: number | null
-          service_item_id: number | null
+          service_item_id: number
           status: string | null
           technician_id: number | null
           total_price: number
@@ -1945,7 +1973,7 @@ export type Database = {
           id?: number
           location?: string | null
           package_id?: number | null
-          service_item_id?: number | null
+          service_item_id: number
           status?: string | null
           technician_id?: number | null
           total_price: number
@@ -1957,7 +1985,7 @@ export type Database = {
           id?: number
           location?: string | null
           package_id?: number | null
-          service_item_id?: number | null
+          service_item_id?: number
           status?: string | null
           technician_id?: number | null
           total_price?: number
@@ -2395,13 +2423,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technician_applications_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technician_applications_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -2442,6 +2463,13 @@ export type Database = {
           technician_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_badge_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "technician_badges_technician_id_fkey"
             columns: ["technician_id"]
@@ -2562,13 +2590,6 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_coverage_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
             referencedColumns: ["id"]
           },
           {
@@ -2716,6 +2737,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_level_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "technician_levels_technician_id_fkey"
             columns: ["technician_id"]
@@ -2885,6 +2913,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_perf_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_performance_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: true
@@ -3021,6 +3056,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_skill_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_skill_tests_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
@@ -3097,6 +3139,20 @@ export type Database = {
           work_report?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_task_request"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_task_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "technician_tasks_maintenance_request_id_fkey"
             columns: ["maintenance_request_id"]
@@ -3312,6 +3368,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_wallet_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_wallet_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: true
@@ -3337,7 +3400,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          account_details: Json
+          account_details?: Json
           amount: number
           created_at?: string
           id?: string
@@ -3367,6 +3430,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_withdrawal_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "technician_withdrawals_processed_by_fkey"
             columns: ["processed_by"]
@@ -3414,13 +3484,6 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_work_zones_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
             referencedColumns: ["id"]
           },
           {
@@ -3572,13 +3635,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technicians_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "vw_cities_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technicians_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -3724,55 +3780,7 @@ export type Database = {
       }
     }
     Views: {
-      dashboard_stats: {
-        Row: {
-          actual_cost: number | null
-          assigned_count: number | null
-          avg_completion_days: number | null
-          completed_requests: number | null
-          completion_rate: number | null
-          high_priority_count: number | null
-          in_progress_count: number | null
-          last_updated: string | null
-          low_priority_count: number | null
-          medium_priority_count: number | null
-          pending_requests: number | null
-          submitted_count: number | null
-          this_month_requests: number | null
-          today_requests: number | null
-          total_budget: number | null
-          total_requests: number | null
-          workflow_completed_count: number | null
-        }
-        Relationships: []
-      }
-      monthly_stats: {
-        Row: {
-          completed_requests: number | null
-          completion_rate: number | null
-          month: string | null
-          pending_requests: number | null
-          total_actual: number | null
-          total_estimated: number | null
-          total_requests: number | null
-        }
-        Relationships: []
-      }
-      vw_cities_public: {
-        Row: {
-          id: number | null
-          name_ar: string | null
-        }
-        Insert: {
-          id?: number | null
-          name_ar?: string | null
-        }
-        Update: {
-          id?: number | null
-          name_ar?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_distance: {
