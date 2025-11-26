@@ -8,7 +8,9 @@ export const basicInfoSchema = z.object({
     z.literal('individual'),
     z.literal('small_team'),
     z.literal('company')
-  ], { errorMap: () => ({ message: "نوع الكيان مطلوب" }) }),
+  ]).refine((val) => ['individual', 'small_team', 'company'].includes(val), {
+    message: "نوع الكيان مطلوب"
+  }),
   full_name: nameSchema,
   email: emailSchema,
   phone: egyptianPhoneSchema,
