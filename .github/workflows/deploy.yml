@@ -1,4 +1,4 @@
-name: Deploy UberFix Landing Page
+name: UberFix Landing Page
 
 on:
   push:
@@ -25,15 +25,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # لو تحتاج بناء محتوى docs أضف الخطوات هنا
+      # Install npm
+      - name: Install npm
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      # Setup Node + cache
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install --frozen-lockfile
+
+      # Build docs (لو المجلد ثابت احذف الخطوة دي)
+      - name: Build landing page
+        run: npm run build:docs
+        # أو لو مشروعك Vite:
+        # run: npm run build
+
+      # Upload static files
       - name: Upload static files
         uses: actions/upload-pages-artifact@v3
         with:
-          # فقط docs سيتم رفعه للـ pages
           path: docs
           name: uberfix-pages
 
