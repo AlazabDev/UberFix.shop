@@ -5,26 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { RegistrationStepper } from "@/components/technician-registration/RegistrationStepper";
 import { TechnicianRegistrationData } from "@/types/technician-registration";
 import { BasicInfoStep } from "@/components/technician-registration/steps/BasicInfoStep";
-import { AddressStep } from "@/components/technician-registration/steps/AddressStep";
-import { InsuranceStep } from "@/components/technician-registration/steps/InsuranceStep";
-import { RatesStep } from "@/components/technician-registration/steps/RatesStep";
-import { TradesStep } from "@/components/technician-registration/steps/TradesStep";
-import { CoverageStep } from "@/components/technician-registration/steps/CoverageStep";
-import { ExtendedInfoStep } from "@/components/technician-registration/steps/ExtendedInfoStep";
-import { DocumentsStep } from "@/components/technician-registration/steps/DocumentsStep";
-import { TermsStep } from "@/components/technician-registration/steps/TermsStep";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const STEPS = [
   { id: 'basic', label: 'الأساسيات' },
-  { id: 'address', label: 'العنوان' },
-  { id: 'insurance', label: 'التأمين' },
-  { id: 'rates', label: 'الأسعار' },
-  { id: 'trades', label: 'المهن' },
-  { id: 'coverage', label: 'نطاق التغطية' },
-  { id: 'extended', label: 'معلومات إضافية' },
-  { id: 'uploads', label: 'المرفقات' },
-  { id: 'submit', label: 'الإقرار والإرسال' },
 ];
 
 export default function TechnicianRegistrationWizard() {
@@ -41,7 +26,6 @@ export default function TechnicianRegistrationWizard() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Initialize or load existing draft
   useEffect(() => {
     loadDraftProfile();
   }, []);
@@ -88,10 +72,14 @@ export default function TechnicianRegistrationWizard() {
         const { data, error } = await supabase
           .from('technician_profiles')
           .insert([{
+            company_name: updatedData.company_name || '',
+            email: updatedData.email || user.email || '',
+            phone: updatedData.phone || '',
+            full_name: updatedData.full_name || '',
             ...updatedData,
             user_id: user.id,
             status: 'draft',
-          }])
+          }] as any)
           .select()
           .single();
 
@@ -117,7 +105,6 @@ export default function TechnicianRegistrationWizard() {
     try {
       if (!technicianId) throw new Error('No profile ID');
 
-      // Update status to pending_review
       const { error } = await supabase
         .from('technician_profiles')
         .update({
@@ -129,7 +116,6 @@ export default function TechnicianRegistrationWizard() {
 
       if (error) throw error;
 
-      // Navigate to thank you page
       navigate('/technicians/registration/thank-you');
     } catch (error: any) {
       console.error('Error submitting registration:', error);
@@ -147,7 +133,6 @@ export default function TechnicianRegistrationWizard() {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final submission
       await submitRegistration();
     }
   };
@@ -191,72 +176,14 @@ export default function TechnicianRegistrationWizard() {
               onSaveAndExit={handleSaveAndExit}
             />
           )}
-          {currentStep === 1 && (
-            <AddressStep
-              data={formData}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          {currentStep === 2 && (
-            <InsuranceStep
-              data={formData}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          {currentStep === 3 && (
-            <RatesStep
-              data={formData}
-              technicianId={technicianId}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          {currentStep === 4 && (
-            <TradesStep
-              data={formData}
-              technicianId={technicianId}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          {currentStep === 5 && (
-            <CoverageStep
-              data={formData}
-              technicianId={technicianId}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          {currentStep === 6 && (
-            <ExtendedInfoStep
-              data={formData}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          {currentStep === 7 && (
-            <DocumentsStep
-              data={formData}
-              technicianId={technicianId}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          {currentStep === 8 && (
-            <TermsStep
-              data={formData}
-              onNext={handleNext}
-              onBack={handleBack}
-            />
+          
+          {currentStep > 0 && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">باقي الخطوات قيد التطوير</p>
+              <Button onClick={() => navigate('/dashboard')}>
+                العودة للوحة التحكم
+              </Button>
+            </div>
           )}
         </Card>
       </div>
