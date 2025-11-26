@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
@@ -34,12 +34,7 @@ export default function TechnicianWallet() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchWalletData();
-    fetchTransactions();
-  }, []);
-
-  const fetchWalletData = async () => {
+  const fetchWalletData = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -60,32 +55,39 @@ export default function TechnicianWallet() {
       }
 
       // Get or create wallet
-      let { data: walletData, error } = await supabase
+      const { data: walletData, error } = await supabase
         .from('technician_wallet')
         .select('*')
         .eq('technician_id', techData.id)
         .single();
 
+      let resolvedWallet = walletData;
+
       if (error && error.code === 'PGRST116') {
         // Create wallet if doesn't exist
-        const { data: newWallet } = await supabase
+        const { data: newWallet, error: creationError } = await supabase
           .from('technician_wallet')
           .insert({ technician_id: techData.id })
           .select()
           .single();
-        walletData = newWallet;
+
+        if (creationError) {
+          throw creationError;
+        }
+
+        resolvedWallet = newWallet;
       }
 
-      setWallet(walletData);
+      setWallet(resolvedWallet);
     } catch (error) {
       console.error('Error fetching wallet:', error);
       toast({ title: "خطأ", description: "فشل تحميل بيانات المحفظة", variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate, toast]);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -109,7 +111,12 @@ export default function TechnicianWallet() {
     } catch (error) {
       console.error('Error fetching transactions:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchWalletData();
+    fetchTransactions();
+  }, [fetchTransactions, fetchWalletData]);
 
   const getTransactionIcon = (type: string) => {
     switch (type) {

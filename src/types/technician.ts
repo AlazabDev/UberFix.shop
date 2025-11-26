@@ -10,6 +10,15 @@ export type TechnicianLevel = 'technician' | 'pro' | 'elite';
 export type BadgeType = 'gold_monthly' | 'crown_annual' | 'legacy';
 export type TrainingStatus = 'not_started' | 'in_progress' | 'completed' | 'failed';
 export type SkillGrade = 'A' | 'B' | 'C' | 'F';
+export type SkillQuestionData = Record<string, unknown>;
+export type SkillAnswerData = Record<string, unknown>;
+export interface PromotionHistoryEntry {
+  from: TechnicianLevel;
+  to: TechnicianLevel;
+  date: string;
+  points?: number;
+  rating?: number;
+}
 
 export interface TechnicianApplication {
   id: string;
@@ -61,8 +70,8 @@ export interface SkillTest {
   specialization: string;
   score: number;
   grade: SkillGrade;
-  questions_data?: any;
-  answers_data?: any;
+  questions_data?: SkillQuestionData;
+  answers_data?: SkillAnswerData;
   completed_at?: string;
   created_at: string;
 }
@@ -127,7 +136,7 @@ export interface TechnicianLevelData {
   technician_id: string;
   current_level: TechnicianLevel;
   level_updated_at: string;
-  promotion_history: any[];
+  promotion_history: PromotionHistoryEntry[];
   created_at: string;
   updated_at: string;
 }

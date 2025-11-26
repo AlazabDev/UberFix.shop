@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { TechnicianPerformance, MonthlyExcellenceAward } from "@/types/technician";
+import { MonthlyExcellenceAward } from "@/types/technician";
 
 export const calculateTechnicianPerformance = async (technicianId: string) => {
   try {
@@ -184,7 +184,7 @@ export const selectMonthlyWinners = async (month: string) => {
       }
 
       if (inserted) {
-        winners.push(inserted as any);
+        winners.push(inserted as MonthlyExcellenceAward);
 
         // Award badge
         await supabase

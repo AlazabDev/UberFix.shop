@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useForm } from 'react-hook-form';
@@ -42,11 +42,7 @@ export default function TechnicianWithdrawal() {
 
   const selectedMethod = watch('method');
 
-  useEffect(() => {
-    fetchBalance();
-  }, []);
-
-  const fetchBalance = async () => {
+  const fetchBalance = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -79,7 +75,11 @@ export default function TechnicianWithdrawal() {
     } catch (error) {
       console.error('Error fetching balance:', error);
     }
-  };
+  }, [navigate, toast]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
 
   const onSubmit = async (data: WithdrawalForm) => {
     if (!technicianId) {
@@ -131,26 +131,17 @@ export default function TechnicianWithdrawal() {
       });
 
       navigate('/technicians/wallet');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting withdrawal:', error);
+      const errorMessage = error instanceof Error ? error.message : 'حدث خطأ غير متوقع';
       toast({
         title: "خطأ في إرسال الطلب",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
-
-  const getMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
-      vodafone_cash: 'فودافون كاش',
-      bank_transfer: 'تحويل بنكي',
-      instapay: 'InstaPay',
-      wallet: 'محفظة إلكترونية',
-    };
-    return labels[method] || method;
   };
 
   return (
@@ -201,7 +192,7 @@ export default function TechnicianWithdrawal() {
           <div>
             <Label htmlFor="method">طريقة السحب *</Label>
             <Select
-              onValueChange={(value) => setValue('method', value as any)}
+              onValueChange={(value) => setValue('method', value as WithdrawalForm['method'])}
             >
               <SelectTrigger>
                 <SelectValue placeholder="اختر طريقة السحب" />

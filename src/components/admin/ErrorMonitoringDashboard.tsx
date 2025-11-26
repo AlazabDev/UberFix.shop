@@ -53,7 +53,8 @@ export function ErrorMonitoringDashboard() {
       }
 
       setErrors((data || []) as ErrorLog[]);
-    } catch (_error) {
+    } catch (error) {
+      console.error('Failed to fetch error logs:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في تحميل السجلات',
