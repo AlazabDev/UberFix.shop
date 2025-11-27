@@ -129,7 +129,7 @@ serve(async (req) => {
     console.error('❌ Error in calculate-route function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         message: 'حدث خطأ أثناء حساب المسار'
       }),
       { 

@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NotificationsList } from "@/components/notifications/NotificationsList";
+import { AppFooter } from "@/components/shared/AppFooter";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -201,6 +202,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
               {children}
             </div>
+            <AppFooter variant="simple" />
           </main>
         </div>
       </div>
