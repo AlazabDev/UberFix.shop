@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseReady } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Technician {
@@ -50,6 +50,11 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
       setLoading(true);
       setError(null);
 
+      if (!supabaseReady) {
+        setTechnicians([]);
+        return;
+      }
+
       let query = (supabase as any)
         .from('technicians')
         .select('*')
@@ -78,6 +83,11 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
 
   const fetchSpecializationIcons = async () => {
     try {
+      if (!supabaseReady) {
+        setSpecializationIcons([]);
+        return;
+      }
+
       const { data, error: dbError } = await (supabase as any)
         .from('specialization_icons')
         .select('*')
@@ -95,10 +105,12 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
     fetchTechnicians();
     fetchSpecializationIcons();
 
+    if (!supabaseReady) return;
+
     // إضافة realtime subscription
     const channel = supabase
       .channel('technicians-changes')
-      .on('postgres_changes', 
+      .on('postgres_changes',
         { event: '*', schema: 'public', table: 'technicians' },
         () => {
           fetchTechnicians();

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, supabaseReady } from "@/integrations/supabase/client";
 
 interface MaintenanceLockStatus {
   isLocked: boolean;
@@ -10,6 +10,11 @@ export const useMaintenanceLock = () => {
   return useQuery({
     queryKey: ["maintenance-lock"],
     queryFn: async (): Promise<MaintenanceLockStatus> => {
+      if (!supabaseReady) {
+        console.warn("Supabase is not configured; skipping maintenance lock check.");
+        return { isLocked: false, message: null };
+      }
+
       const { data, error } = await supabase
         .from("app_control")
         .select("is_locked, message")
