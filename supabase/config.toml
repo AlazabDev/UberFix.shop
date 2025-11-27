@@ -70,6 +70,9 @@ verify_jwt = true
 [functions.meta-deauthorize]
 verify_jwt = false
 
+[functions.get-maps-key]
+verify_jwt = true
+
 [functions.meta-delete-data]
 verify_jwt = false
 
