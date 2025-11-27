@@ -2317,7 +2317,6 @@ export type Database = {
       }
       technician_agreements: {
         Row: {
-          application_id: string | null
           conduct_policy_accepted: boolean | null
           created_at: string | null
           customer_respect_policy_accepted: boolean | null
@@ -2327,9 +2326,9 @@ export type Database = {
           punctuality_policy_accepted: boolean | null
           quality_policy_accepted: boolean | null
           signed_at: string | null
+          technician_id: string
         }
         Insert: {
-          application_id?: string | null
           conduct_policy_accepted?: boolean | null
           created_at?: string | null
           customer_respect_policy_accepted?: boolean | null
@@ -2339,9 +2338,9 @@ export type Database = {
           punctuality_policy_accepted?: boolean | null
           quality_policy_accepted?: boolean | null
           signed_at?: string | null
+          technician_id: string
         }
         Update: {
-          application_id?: string | null
           conduct_policy_accepted?: boolean | null
           created_at?: string | null
           customer_respect_policy_accepted?: boolean | null
@@ -2351,82 +2350,14 @@ export type Database = {
           punctuality_policy_accepted?: boolean | null
           quality_policy_accepted?: boolean | null
           signed_at?: string | null
+          technician_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "technician_agreements_application_id_fkey"
-            columns: ["application_id"]
+            foreignKeyName: "technician_agreements_technician_id_fkey"
+            columns: ["technician_id"]
             isOneToOne: false
-            referencedRelation: "technician_applications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_applications: {
-        Row: {
-          alternative_contact: string | null
-          city_id: number | null
-          created_at: string | null
-          district_id: number | null
-          full_name: string
-          home_address: string | null
-          id: string
-          national_id: string
-          phone: string
-          profile_image: string | null
-          specialization: string
-          status: string | null
-          updated_at: string | null
-          user_id: string | null
-          years_of_experience: number | null
-        }
-        Insert: {
-          alternative_contact?: string | null
-          city_id?: number | null
-          created_at?: string | null
-          district_id?: number | null
-          full_name: string
-          home_address?: string | null
-          id?: string
-          national_id: string
-          phone: string
-          profile_image?: string | null
-          specialization: string
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_of_experience?: number | null
-        }
-        Update: {
-          alternative_contact?: string | null
-          city_id?: number | null
-          created_at?: string | null
-          district_id?: number | null
-          full_name?: string
-          home_address?: string | null
-          id?: string
-          national_id?: string
-          phone?: string
-          profile_image?: string | null
-          specialization?: string
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_of_experience?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_applications_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_applications_district_id_fkey"
-            columns: ["district_id"]
-            isOneToOne: false
-            referencedRelation: "districts"
+            referencedRelation: "technician_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2611,27 +2542,33 @@ export type Database = {
       technician_coverage_areas: {
         Row: {
           city_id: number | null
+          city_name: string | null
           created_at: string | null
           district_id: number | null
+          district_name: string | null
           id: string
           radius_km: number | null
-          technician_id: string | null
+          technician_id: string
         }
         Insert: {
           city_id?: number | null
+          city_name?: string | null
           created_at?: string | null
           district_id?: number | null
+          district_name?: string | null
           id?: string
           radius_km?: number | null
-          technician_id?: string | null
+          technician_id: string
         }
         Update: {
           city_id?: number | null
+          city_name?: string | null
           created_at?: string | null
           district_id?: number | null
+          district_name?: string | null
           id?: string
           radius_km?: number | null
-          technician_id?: string | null
+          technician_id?: string
         }
         Relationships: [
           {
@@ -2721,30 +2658,30 @@ export type Database = {
       }
       technician_documents: {
         Row: {
-          document_type: string | null
-          file_name: string | null
+          document_type: Database["public"]["Enums"]["document_type_enum"]
+          file_name: string
           file_size: number | null
           file_url: string
           id: string
-          technician_id: string | null
+          technician_id: string
           uploaded_at: string | null
         }
         Insert: {
-          document_type?: string | null
-          file_name?: string | null
+          document_type: Database["public"]["Enums"]["document_type_enum"]
+          file_name: string
           file_size?: number | null
           file_url: string
           id?: string
-          technician_id?: string | null
+          technician_id: string
           uploaded_at?: string | null
         }
         Update: {
-          document_type?: string | null
-          file_name?: string | null
+          document_type?: Database["public"]["Enums"]["document_type_enum"]
+          file_name?: string
           file_size?: number | null
           file_url?: string
           id?: string
-          technician_id?: string | null
+          technician_id?: string
           uploaded_at?: string | null
         }
         Relationships: [
@@ -3220,42 +3157,49 @@ export type Database = {
           created_at: string | null
           emergency_price: number | null
           id: string
-          is_active: boolean | null
           material_markup_percent: number | null
           min_job_value: number | null
           night_weekend_price: number | null
+          platform_price: number | null
           service_id: number
+          service_name: string | null
           standard_price: number
-          technician_id: string | null
-          updated_at: string | null
+          technician_id: string
         }
         Insert: {
           created_at?: string | null
           emergency_price?: number | null
           id?: string
-          is_active?: boolean | null
           material_markup_percent?: number | null
           min_job_value?: number | null
           night_weekend_price?: number | null
+          platform_price?: number | null
           service_id: number
+          service_name?: string | null
           standard_price: number
-          technician_id?: string | null
-          updated_at?: string | null
+          technician_id: string
         }
         Update: {
           created_at?: string | null
           emergency_price?: number | null
           id?: string
-          is_active?: boolean | null
           material_markup_percent?: number | null
           min_job_value?: number | null
           night_weekend_price?: number | null
+          platform_price?: number | null
           service_id?: number
+          service_name?: string | null
           standard_price?: number
-          technician_id?: string | null
-          updated_at?: string | null
+          technician_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "technician_service_prices_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "technician_service_prices_technician_id_fkey"
             columns: ["technician_id"]
@@ -3460,31 +3404,41 @@ export type Database = {
         Row: {
           can_handle_heavy_projects: boolean | null
           category_id: number
+          category_name: string | null
           created_at: string | null
           id: string
           licenses_or_certifications: string | null
-          technician_id: string | null
+          technician_id: string
           years_of_experience: number | null
         }
         Insert: {
           can_handle_heavy_projects?: boolean | null
           category_id: number
+          category_name?: string | null
           created_at?: string | null
           id?: string
           licenses_or_certifications?: string | null
-          technician_id?: string | null
+          technician_id: string
           years_of_experience?: number | null
         }
         Update: {
           can_handle_heavy_projects?: boolean | null
           category_id?: number
+          category_name?: string | null
           created_at?: string | null
           id?: string
           licenses_or_certifications?: string | null
-          technician_id?: string | null
+          technician_id?: string
           years_of_experience?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "technician_trades_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "technician_trades_technician_id_fkey"
             columns: ["technician_id"]
@@ -3606,47 +3560,47 @@ export type Database = {
       }
       technician_verifications: {
         Row: {
-          application_id: string | null
           created_at: string | null
           id: string
           national_id_back: string | null
           national_id_front: string | null
           rejection_reason: string | null
           selfie_image: string | null
+          technician_id: string
           verification_status: string | null
           verified_at: string | null
           verified_by: string | null
         }
         Insert: {
-          application_id?: string | null
           created_at?: string | null
           id?: string
           national_id_back?: string | null
           national_id_front?: string | null
           rejection_reason?: string | null
           selfie_image?: string | null
+          technician_id: string
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
         }
         Update: {
-          application_id?: string | null
           created_at?: string | null
           id?: string
           national_id_back?: string | null
           national_id_front?: string | null
           rejection_reason?: string | null
           selfie_image?: string | null
+          technician_id?: string
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "technician_verifications_application_id_fkey"
-            columns: ["application_id"]
+            foreignKeyName: "technician_verifications_technician_id_fkey"
+            columns: ["technician_id"]
             isOneToOne: false
-            referencedRelation: "technician_applications"
+            referencedRelation: "technician_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4277,6 +4231,14 @@ export type Database = {
         | "accounting"
         | "engineering"
         | "dispatcher"
+      company_model_enum: "local_provider" | "third_party"
+      company_type_enum: "individual" | "small_team" | "company"
+      document_type_enum:
+        | "tax_card"
+        | "commercial_registration"
+        | "national_id"
+        | "insurance_certificate"
+        | "professional_license"
       maintenance_stage:
         | "DRAFT"
         | "SUBMITTED"
@@ -4339,6 +4301,13 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      technician_status:
+        | "draft"
+        | "pending_review"
+        | "approved"
+        | "rejected"
+        | "active"
+        | "suspended"
       update_type:
         | "status_change"
         | "assignment"
@@ -4495,6 +4464,15 @@ export const Constants = {
         "engineering",
         "dispatcher",
       ],
+      company_model_enum: ["local_provider", "third_party"],
+      company_type_enum: ["individual", "small_team", "company"],
+      document_type_enum: [
+        "tax_card",
+        "commercial_registration",
+        "national_id",
+        "insurance_certificate",
+        "professional_license",
+      ],
       maintenance_stage: [
         "DRAFT",
         "SUBMITTED",
@@ -4561,6 +4539,14 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+      ],
+      technician_status: [
+        "draft",
+        "pending_review",
+        "approved",
+        "rejected",
+        "active",
+        "suspended",
       ],
       update_type: [
         "status_change",
