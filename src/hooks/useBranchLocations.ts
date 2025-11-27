@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseReady } from '@/integrations/supabase/client';
+import { fallbackBranches } from '@/data/fallbackBranches';
 
 export interface BranchLocation {
   id: string;
@@ -22,26 +23,36 @@ export const useBranchLocations = () => {
       setLoading(true);
       setError(null);
 
+      if (!supabaseReady) {
+        setBranches(fallbackBranches);
+        return;
+      }
+
       const { data, error: dbError } = await supabase
         .from('branch_locations')
         .select('*')
         .order('branch');
 
       if (dbError) throw dbError;
-      
+
       // Filter out branches without coordinates
       const validBranches = (data || []).filter(
-        (branch: BranchLocation) => 
-          branch.latitude && 
-          branch.longitude && 
-          !isNaN(parseFloat(branch.latitude)) && 
+        (branch: BranchLocation) =>
+          branch.latitude &&
+          branch.longitude &&
+          !isNaN(parseFloat(branch.latitude)) &&
           !isNaN(parseFloat(branch.longitude))
       );
-      
-      setBranches(validBranches as BranchLocation[]);
+
+      // Use fallback sample data if database is empty
+      if (validBranches.length === 0) {
+        setBranches(fallbackBranches);
+      } else {
+        setBranches(validBranches as BranchLocation[]);
+      }
     } catch (err) {
       setError(err as Error);
-      setBranches([]);
+      setBranches(fallbackBranches);
     } finally {
       setLoading(false);
     }
