@@ -1,278 +1,62 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>خريطة فروع الأزاب</title>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خريطة الفروع</title>
     <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-      }
-
-      .branch-icon {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      }
-
-      .booth-icon {
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      }
-
-      .info-window {
-        padding: 10px;
-        max-width: 250px;
-      }
-
-      .info-window h3 {
-        margin: 0 0 5px 0;
-        color: #333;
-      }
-
-      .info-window p {
-        margin: 5px 0;
-        color: #666;
-      }
-
-      .info-window a {
-        color: #1a73e8;
-        text-decoration: none;
-      }
-
-      .info-window a:hover {
-        text-decoration: underline;
-      }
-
-      .controls {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: white;
-        padding: 10px;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        z-index: 1000;
-      }
-
-      .filter-btn {
-        margin: 5px;
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        background: white;
-        cursor: pointer;
-        border-radius: 4px;
-      }
-
-      .filter-btn.active {
-        background: #1a73e8;
-        color: white;
-        border-color: #1a73e8;
-      }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        .info-window {
+            padding: 10px;
+        }
     </style>
-  </head>
-  <body>
-    <div class="controls">
-      <button class="filter-btn active" data-type="all">جميع الفروع</button>
-      <button class="filter-btn" data-type="Branch">الفروع الرئيسية</button>
-      <button class="filter-btn" data-type="Booth">الأكشاك</button>
-    </div>
+</head>
+<body>
+    <div id="map"></div>
 
-    <gmp-map center="26.8206,30.8025" zoom="10" map-id="DEMO_MAP_ID">
-      <!-- سيتم إضافة العلامات ديناميكياً عبر JavaScript -->
-    </gmp-map>
+    <!-- تضمين ملف البيانات -->
+    <script src="coodsmap.js"></script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&loading=async&libraries=marker&v=beta&solution_channel=GMP_CCS_complexmarkers_v3"></script>
-    
+    <!-- مكتبة خرائط جوجل -->
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDrSEYA_2HoB3IQuIg6OThed9r53I8gRGk&callback=initMap"></script>
+
     <script>
-      // بيانات الفروع من ملفك
-      const branches = [
-        {
-          "id": "Az-Branch-0001",
-          "branch": "Adly Mansour Metro Station",
-          "address": "Adly Mansour Central Station, 10th Park inside Metro Station",
-          "branch_type": "Branch",
-          "link": "https://goo.gl/maps/cCoGeE3rBNz1in5k6",
-          "icon": "https://al-azab.co/img/icon-5060.png",
-          "latitude": 30.147076,
-          "longitude": 31.421225
-        },
-        {
-          "id": "Az-Branch-0002",
-          "branch": "Agora Mall",
-          "address": "Agora Mall - Ground Floor - Fifth Settlement",
-          "branch_type": "Booth",
-          "link": "https://goo.gl/maps/tDFSwg3iHs7r7Cie7",
-          "icon": "https://al-azab.co/img/icon-5060.png",
-          "latitude": 30.0204966,
-          "longitude": 31.528987
-        },
-        {
-          "id": "Az-Branch-0003",
-          "branch": "Ain Shams Law",
-          "address": "Ain Shams University - Faculty of Law",
-          "branch_type": "Booth",
-          "link": "https://maps.app.goo.gl/AV7oNVy3zv1ELvBz8",
-          "icon": "https://al-azab.co/img/icon-5060.png",
-          "latitude": 30.0748834,
-          "longitude": 31.2872428
-        },
-        {
-          "id": "Az-Branch-0004",
-          "branch": "Ain Shams University",
-          "address": "Ain Shams University -Faculty Of Commerce",
-          "branch_type": "Booth",
-          "link": "https://goo.gl/maps/LGGAzW8ZAf7pYVz49",
-          "icon": "https://al-azab.co/img/icon-5060.png",
-          "latitude": 30.0873348,
-          "longitude": 31.2893179
-        },
-        {
-          "id": "Az-Branch-0005",
-          "branch": "Ain Shams University 3",
-          "address": "Ain Shams University - Faculty of Arts",
-          "branch_type": "Booth",
-          "link": "https://maps.app.goo.gl/ubdBiMwJz1ofBZKc9",
-          "icon": "https://al-azab.co/img/icon-5060.png",
-          "latitude": 30.0767007,
-          "longitude": 31.287256
-        },
-        // إضافة الفروع الأخرى من ملفك
-        {
-          "name": "30°07'41.8\"N 31°24'09.1\"E",
-          "branch": "موقع 1",
-          "address": "موقع إضافي 1",
-          "branch_type": "Booth",
-          "latitude": 30.1282778,
-          "longitude": 31.4025278,
-          "link": "https://goo.gl/maps/q3bVw53xkvkSTyVY6",
-          "icon": "https://al-azab.co/img/icon-5060.png"
-        },
-        {
-          "name": "30°06'41.8\"N 31°24'08.6\"E",
-          "branch": "موقع 2",
-          "address": "موقع إضافي 2",
-          "branch_type": "Booth",
-          "latitude": 30.1116111,
-          "longitude": 31.4023889,
-          "link": "https://goo.gl/maps/acYTr6K66V12g5gV7",
-          "icon": "https://al-azab.co/img/icon-5060.png"
+        function initMap() {
+            // إنشاء الخريطة
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: { lat: 30.0444, lng: 31.2357 } // مركز القاهرة
+            });
+
+            // إضافة العلامات للخريطة
+            branches.forEach(branch => {
+                const marker = new google.maps.Marker({
+                    position: { lat: branch.latitude, lng: branch.longitude },
+                    map: map,
+                    title: branch.branch,
+                    icon: branch.icon
+                });
+
+                // نافذة المعلومات
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="info-window">
+                            <h3>${branch.branch}</h3>
+                            <p>${branch.address}</p>
+                            <p><strong>النوع:</strong> ${branch.branch_type}</p>
+                            <a href="${branch.link}" target="_blank">عرض على الخريطة</a>
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+            });
         }
-        // يمكنك إضافة باقي الفروع هنا بنفس الطريقة
-      ];
-
-      // كائن لتخزين العلامات
-      let markers = [];
-
-      // دالة لإنشاء الخريطة وإضافة العلامات
-      function initMap() {
-        const map = document.querySelector('gmp-map');
-        
-        // إضافة جميع الفروع إلى الخريطة
-        branches.forEach(branch => {
-          const marker = document.createElement('gmp-advanced-marker');
-          marker.position = { lat: branch.latitude, lng: branch.longitude };
-          marker.title = branch.branch || branch.name;
-          
-          // إنشاء العنصر البصري للعلامة
-          const icon = document.createElement('img');
-          icon.src = branch.icon;
-          icon.className = branch.branch_type === 'Branch' ? 'branch-icon' : 'booth-icon';
-          icon.alt = branch.branch || branch.name;
-          
-          marker.appendChild(icon);
-          map.appendChild(marker);
-          
-          // تخزين المرجع للعلامة
-          markers.push({
-            element: marker,
-            type: branch.branch_type,
-            info: branch
-          });
-
-          // إضافة نافذة معلومات عند النقر
-          marker.addEventListener('gmp-click', () => {
-            showInfoWindow(branch, marker);
-          });
-        });
-      }
-
-      // دالة لعرض نافذة المعلومات
-      function showInfoWindow(branch, marker) {
-        // إزالة أي نافذة معلومات سابقة
-        const existingWindow = document.querySelector('.info-window-container');
-        if (existingWindow) {
-          existingWindow.remove();
-        }
-
-        // إنشاء نافذة معلومات جديدة
-        const infoWindow = document.createElement('div');
-        infoWindow.className = 'info-window-container';
-        infoWindow.innerHTML = `
-          <div class="info-window">
-            <h3>${branch.branch || branch.name}</h3>
-            <p><strong>العنوان:</strong> ${branch.address || 'لا يوجد عنوان'}</p>
-            <p><strong>النوع:</strong> ${branch.branch_type === 'Branch' ? 'فرع رئيسي' : 'كشك'}</p>
-            ${branch.link ? `<p><a href="${branch.link}" target="_blank">عرض على الخريطة</a></p>` : ''}
-          </div>
-        `;
-
-        // إضافة النافذة إلى الجسم
-        document.body.appendChild(infoWindow);
-
-        // وضع النافذة بالقرب من العلامة
-        const markerRect = marker.getBoundingClientRect();
-        infoWindow.style.position = 'absolute';
-        infoWindow.style.left = markerRect.left + 'px';
-        infoWindow.style.top = (markerRect.top - infoWindow.offsetHeight - 10) + 'px';
-        infoWindow.style.zIndex = '1000';
-      }
-
-      // دالة لتصفية العلامات
-      function filterMarkers(type) {
-        markers.forEach(marker => {
-          if (type === 'all' || marker.type === type) {
-            marker.element.style.display = 'block';
-          } else {
-            marker.element.style.display = 'none';
-          }
-        });
-      }
-
-      // إضافة مستمعي الأحداث لأزرار التصفية
-      document.addEventListener('DOMContentLoaded', () => {
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        
-        filterButtons.forEach(button => {
-          button.addEventListener('click', () => {
-            // إزالة النشاط من جميع الأزرار
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            // إضافة النشاط للزر المختار
-            button.classList.add('active');
-            // تصفية العلامات
-            filterMarkers(button.dataset.type);
-          });
-        });
-
-        // تهيئة الخريطة بعد تحميل الصفحة
-        initMap();
-      });
-
-      // إغلاق نافذة المعلومات عند النقر في أي مكان
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.info-window-container') && !e.target.closest('gmp-advanced-marker')) {
-          const infoWindow = document.querySelector('.info-window-container');
-          if (infoWindow) {
-            infoWindow.remove();
-          }
-        }
-      });
     </script>
-  </body>
+</body>
 </html>
