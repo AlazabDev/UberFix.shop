@@ -78,9 +78,9 @@ export default function Vendors() {
   const vendorList = loading ? [] : vendors.length > 0 ? vendors : mockVendors;
   
   const filteredVendors = vendorList.filter((vendor: any) => {
-    const vendorName = vendor.name;
-    const vendorSpecialty = vendor.specialty;
-    const vendorStatus = vendor.status;
+    const vendorName = vendor.name || '';
+    const vendorSpecialty = vendor.specialty || '';
+    const vendorStatus = vendor.status || '';
     
     const matchesSearch = vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vendorSpecialty.toLowerCase().includes(searchTerm.toLowerCase());
