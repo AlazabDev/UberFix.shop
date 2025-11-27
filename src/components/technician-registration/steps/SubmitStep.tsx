@@ -1,0 +1,239 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { TechnicianRegistrationData } from "@/types/technician-registration";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CheckCircle2 } from "lucide-react";
+
+const submitSchema = z.object({
+  agree_terms: z.boolean().refine(val => val === true, {
+    message: "يجب الموافقة على الشروط والأحكام",
+  }),
+  agree_payment_terms: z.boolean().refine(val => val === true, {
+    message: "يجب الموافقة على شروط الدفع",
+  }),
+});
+
+type SubmitFormData = z.infer<typeof submitSchema>;
+
+interface SubmitStepProps {
+  data: Partial<TechnicianRegistrationData>;
+  onSubmit: (data: Partial<TechnicianRegistrationData>) => void;
+  onBack: () => void;
+}
+
+export function SubmitStep({ data, onSubmit, onBack }: SubmitStepProps) {
+  const form = useForm<SubmitFormData>({
+    resolver: zodResolver(submitSchema),
+    defaultValues: {
+      agree_terms: data.agree_terms || false,
+      agree_payment_terms: data.agree_payment_terms || false,
+    },
+  });
+
+  const handleSubmit = (formData: SubmitFormData) => {
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-foreground mb-2">الخطوة 9: المراجعة والإرسال</h2>
+        <p className="text-muted-foreground">راجع البيانات ووافق على الشروط لإتمام التسجيل</p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-green-800 dark:text-green-200">أنت على وشك الانتهاء!</p>
+                <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                  بعد الموافقة على الشروط والإرسال، سيتم مراجعة طلبك من قبل فريقنا خلال 24-48 ساعة
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="agree_terms"
+              render={({ field }) => (
+                <FormItem className="rounded-lg border p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-2 space-x-reverse">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <FormLabel className="text-base font-medium cursor-pointer">
+                        أوافق على الشروط والأحكام العامة
+                      </FormLabel>
+                    </div>
+                    
+                    <ScrollArea className="h-48 w-full rounded border bg-muted/30 p-4">
+                      <div className="space-y-3 text-sm">
+                        <h4 className="font-semibold">شروط وأحكام منصة UberFix للفنيين</h4>
+                        
+                        <div>
+                          <h5 className="font-medium mb-1">1. التسجيل والقبول</h5>
+                          <p className="text-muted-foreground">
+                            - يجب تقديم معلومات صحيحة ودقيقة أثناء التسجيل
+                            <br />- تحتفظ المنصة بحق قبول أو رفض أي طلب تسجيل
+                            <br />- يجب تقديم المستندات المطلوبة للتحقق
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">2. الالتزامات المهنية</h5>
+                          <p className="text-muted-foreground">
+                            - الالتزام بمعايير الجودة العالية في تقديم الخدمات
+                            <br />- الوصول في الوقت المحدد والتواصل المهني مع العملاء
+                            <br />- استخدام معدات وأدوات آمنة ومرخصة
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">3. سياسة الإلغاء</h5>
+                          <p className="text-muted-foreground">
+                            - يجب إخطار المنصة مسبقاً في حالة عدم القدرة على تنفيذ الطلب
+                            <br />- الإلغاء المتكرر قد يؤدي إلى تعليق أو إنهاء الحساب
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">4. المسؤولية والتأمين</h5>
+                          <p className="text-muted-foreground">
+                            - الفني مسؤول عن جودة العمل المنجز
+                            <br />- يُنصح بشدة بالحصول على تأمين مسؤولية مهنية
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">5. حماية البيانات</h5>
+                          <p className="text-muted-foreground">
+                            - معلومات العملاء سرية ولا يجوز مشاركتها
+                            <br />- يُحظر استخدام معلومات العملاء خارج المنصة
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">6. إنهاء الحساب</h5>
+                          <p className="text-muted-foreground">
+                            - يحق للمنصة إنهاء الحساب في حالة انتهاك الشروط
+                            <br />- يمكن للفني طلب إنهاء الحساب مع إشعار مسبق
+                          </p>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="agree_payment_terms"
+              render={({ field }) => (
+                <FormItem className="rounded-lg border p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-2 space-x-reverse">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <FormLabel className="text-base font-medium cursor-pointer">
+                        أوافق على شروط الدفع والعمولات
+                      </FormLabel>
+                    </div>
+                    
+                    <ScrollArea className="h-48 w-full rounded border bg-muted/30 p-4">
+                      <div className="space-y-3 text-sm">
+                        <h4 className="font-semibold">شروط الدفع والعمولات</h4>
+                        
+                        <div>
+                          <h5 className="font-medium mb-1">1. نظام العمولات</h5>
+                          <p className="text-muted-foreground">
+                            - تحصل المنصة على عمولة من كل طلب منجز
+                            <br />- نسبة العمولة تعتمد على نوع الخدمة ومستوى الفني
+                            <br />- العمولة تُخصم تلقائياً قبل التحويل للفني
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">2. جدول السحب</h5>
+                          <p className="text-muted-foreground">
+                            - الحد الأدنى للسحب: 300 جنيه
+                            <br />- معالجة طلبات السحب خلال 48 ساعة عمل
+                            <br />- التحويل عبر: فودافون كاش، محفظة بنكية، تحويل بنكي
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">3. الأسعار والفواتير</h5>
+                          <p className="text-muted-foreground">
+                            - الأسعار المعروضة نهائية وشاملة لكل الرسوم
+                            <br />- لا يجوز طلب مبالغ إضافية من العملاء مباشرة
+                            <br />- يتم إصدار فاتورة رسمية لكل عملية
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">4. استرداد الأموال</h5>
+                          <p className="text-muted-foreground">
+                            - في حالة الشكاوى المثبتة، قد يُطلب استرداد المبلغ
+                            <br />- يتم التحقيق في كل حالة بشكل عادل
+                          </p>
+                        </div>
+
+                        <div>
+                          <h5 className="font-medium mb-1">5. المكافآت والحوافز</h5>
+                          <p className="text-muted-foreground">
+                            - الفنيون المتميزون يحصلون على مكافآت شهرية
+                            <br />- تخفيض نسبة العمولة للفنيين ذوي التقييم العالي
+                          </p>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              ⚠️ <strong>تنبيه:</strong> بالضغط على "إرسال الطلب"، أنت توافق على جميع الشروط والأحكام المذكورة أعلاه
+            </p>
+          </div>
+
+          <div className="flex gap-4 justify-between pt-6">
+            <Button type="button" variant="outline" onClick={onBack}>
+              رجوع
+            </Button>
+            <Button 
+              type="submit"
+              size="lg"
+              className="min-w-[200px]"
+            >
+              إرسال الطلب 🚀
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+}

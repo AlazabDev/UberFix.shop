@@ -5,11 +5,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { RegistrationStepper } from "@/components/technician-registration/RegistrationStepper";
 import { TechnicianRegistrationData } from "@/types/technician-registration";
 import { BasicInfoStep } from "@/components/technician-registration/steps/BasicInfoStep";
+import { AddressStep } from "@/components/technician-registration/steps/AddressStep";
+import { InsuranceStep } from "@/components/technician-registration/steps/InsuranceStep";
+import { RatesStep } from "@/components/technician-registration/steps/RatesStep";
+import { TradesStep } from "@/components/technician-registration/steps/TradesStep";
+import { CoverageStep } from "@/components/technician-registration/steps/CoverageStep";
+import { ExtendedStep } from "@/components/technician-registration/steps/ExtendedStep";
+import { UploadsStep } from "@/components/technician-registration/steps/UploadsStep";
+import { SubmitStep } from "@/components/technician-registration/steps/SubmitStep";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const STEPS = [
   { id: 'basic', label: 'الأساسيات' },
+  { id: 'address', label: 'العنوان' },
+  { id: 'insurance', label: 'التأمين' },
+  { id: 'rates', label: 'الأسعار' },
+  { id: 'trades', label: 'المهن' },
+  { id: 'coverage', label: 'التغطية' },
+  { id: 'extended', label: 'إضافية' },
+  { id: 'uploads', label: 'المرفقات' },
+  { id: 'submit', label: 'الإرسال' },
 ];
 
 export default function TechnicianRegistrationWizard() {
@@ -169,22 +185,15 @@ export default function TechnicianRegistrationWizard() {
         </Card>
 
         <Card className="p-8">
-          {currentStep === 0 && (
-            <BasicInfoStep
-              data={formData}
-              onNext={handleNext}
-              onSaveAndExit={handleSaveAndExit}
-            />
-          )}
-          
-          {currentStep > 0 && (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">باقي الخطوات قيد التطوير</p>
-              <Button onClick={() => navigate('/dashboard')}>
-                العودة للوحة التحكم
-              </Button>
-            </div>
-          )}
+          {currentStep === 0 && <BasicInfoStep data={formData} onNext={handleNext} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 1 && <AddressStep data={formData} onNext={handleNext} onBack={handleBack} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 2 && <InsuranceStep data={formData} onNext={handleNext} onBack={handleBack} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 3 && <RatesStep data={formData} onNext={handleNext} onBack={handleBack} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 4 && <TradesStep data={formData} onNext={handleNext} onBack={handleBack} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 5 && <CoverageStep data={formData} onNext={handleNext} onBack={handleBack} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 6 && <ExtendedStep data={formData} onNext={handleNext} onBack={handleBack} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 7 && <UploadsStep data={formData} onNext={handleNext} onBack={handleBack} onSaveAndExit={handleSaveAndExit} />}
+          {currentStep === 8 && <SubmitStep data={formData} onSubmit={submitRegistration} onBack={handleBack} />}
         </Card>
       </div>
     </div>
