@@ -141,13 +141,6 @@ export default function ServiceMap() {
 
     const initMap = async () => {
       try {
-        const { data, error } = await supabase
-          .from("app_settings")
-          .select("id")
-          .single();
-
-        if (error) throw error;
-        
         if (typeof window.google === "undefined" || !window.google.maps) {
           await loadGoogleMaps();
           await new Promise((resolve) => setTimeout(resolve, 500));

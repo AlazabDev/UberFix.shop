@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseReady } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
 interface AuthWrapperProps {
@@ -14,30 +14,49 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user || null;
-      setUser(currentUser);
-      setEmailConfirmed(!!currentUser?.email_confirmed_at);
+    if (!supabaseReady) {
       setLoading(false);
-    });
+      return;
+    }
+
+    let isMounted = true;
+
+    // Check initial session
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!isMounted) return;
+        const currentUser = session?.user || null;
+        setUser(currentUser);
+        setEmailConfirmed(!!currentUser?.email_confirmed_at);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error loading session', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        const newUser = session?.user || null;
-        setUser(newUser);
-        setEmailConfirmed(!!newUser?.email_confirmed_at);
-        setLoading(false);
-        
-        // التوجيه التلقائي لصفحة الداشبورد بعد نجاح تسجيل الدخول وتأكيد البريد
-        if (event === 'SIGNED_IN' && newUser && newUser.email_confirmed_at) {
-          navigate('/dashboard', { replace: true });
-        }
-      }
-    );
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      const newUser = session?.user || null;
+      setUser(newUser);
+      setEmailConfirmed(!!newUser?.email_confirmed_at);
+      setLoading(false);
 
-    return () => subscription.unsubscribe();
+      // التوجيه التلقائي لصفحة الداشبورد بعد نجاح تسجيل الدخول وتأكيد البريد
+      if (event === 'SIGNED_IN' && newUser && newUser.email_confirmed_at) {
+        navigate('/dashboard', { replace: true });
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   if (loading) {
@@ -77,6 +96,20 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
           >
             تسجيل الخروج
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!supabaseReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4 text-center">
+        <div className="space-y-3 max-w-md">
+          <p className="text-lg font-semibold text-foreground">لا يمكن الاتصال بقاعدة البيانات</p>
+          <p className="text-muted-foreground text-sm">
+            يرجى التحقق من إعدادات Supabase (المتغيرات VITE_SUPABASE_URL و VITE_SUPABASE_PUBLISHABLE_KEY)
+            أو المحاولة مرة أخرى لاحقاً. سيتم تشغيل التطبيق بوضع القراءة المحدود إلى أن يتم تصحيح الإعدادات.
+          </p>
         </div>
       </div>
     );
