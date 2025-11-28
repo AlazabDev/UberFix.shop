@@ -77,22 +77,56 @@ export default function TechnicianRegistrationWizard() {
       const updatedData = { ...formData, ...stepData };
       setFormData(updatedData);
 
+      // Extract arrays for junction tables
+      const { services, trades, coverage_areas, documents, ...profileData } = updatedData;
+
       if (technicianId) {
-        const { error } = await supabase
+        // Update main profile
+        const { error: profileError } = await supabase
           .from('technician_profiles')
-          .update({ ...updatedData, updated_at: new Date().toISOString() })
+          .update({ ...profileData, updated_at: new Date().toISOString() })
           .eq('id', technicianId);
 
-        if (error) throw error;
+        if (profileError) throw profileError;
+
+        // Update junction tables (delete and re-insert for simplicity)
+        if (services && services.length > 0) {
+          await supabase.from('technician_service_prices').delete().eq('technician_id', technicianId);
+          await supabase.from('technician_service_prices').insert(
+            services.map(s => ({ technician_id: technicianId, ...s }))
+          );
+        }
+
+        if (trades && trades.length > 0) {
+          await supabase.from('technician_trades').delete().eq('technician_id', technicianId);
+          await supabase.from('technician_trades').insert(
+            trades.map(t => ({ technician_id: technicianId, ...t }))
+          );
+        }
+
+        if (coverage_areas && coverage_areas.length > 0) {
+          await supabase.from('technician_coverage_areas').delete().eq('technician_id', technicianId);
+          await supabase.from('technician_coverage_areas').insert(
+            coverage_areas.map(c => ({ technician_id: technicianId, ...c }))
+          );
+        }
+
+        if (documents && documents.length > 0) {
+          await supabase.from('technician_documents').delete().eq('technician_id', technicianId);
+          await supabase.from('technician_documents').insert(
+            documents.map(d => ({ technician_id: technicianId, ...d }))
+          );
+        }
       } else {
+        // Create new profile
         const { data, error } = await supabase
           .from('technician_profiles')
           .insert([{
-            company_name: updatedData.company_name || '',
-            email: updatedData.email || user.email || '',
-            phone: updatedData.phone || '',
-            full_name: updatedData.full_name || '',
-            ...updatedData,
+            company_name: profileData.company_name || '',
+            email: profileData.email || user.email || '',
+            phone: profileData.phone || '',
+            full_name: profileData.full_name || '',
+            ...profileData,
             user_id: user.id,
             status: 'draft',
           }] as any)
@@ -101,6 +135,31 @@ export default function TechnicianRegistrationWizard() {
 
         if (error) throw error;
         setTechnicianId(data.id);
+
+        // Insert into junction tables
+        if (services && services.length > 0) {
+          await supabase.from('technician_service_prices').insert(
+            services.map(s => ({ technician_id: data.id, ...s }))
+          );
+        }
+
+        if (trades && trades.length > 0) {
+          await supabase.from('technician_trades').insert(
+            trades.map(t => ({ technician_id: data.id, ...t }))
+          );
+        }
+
+        if (coverage_areas && coverage_areas.length > 0) {
+          await supabase.from('technician_coverage_areas').insert(
+            coverage_areas.map(c => ({ technician_id: data.id, ...c }))
+          );
+        }
+
+        if (documents && documents.length > 0) {
+          await supabase.from('technician_documents').insert(
+            documents.map(d => ({ technician_id: data.id, ...d }))
+          );
+        }
       }
 
       toast({
