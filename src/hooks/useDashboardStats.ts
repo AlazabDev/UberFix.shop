@@ -49,25 +49,30 @@ export function useDashboardStats() {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const requestsArray = requests || [];
 
       // Calculate statistics
-      const totalRequests = requests?.length || 0;
-      const pendingRequests = requests?.filter(r => r.status === 'Open').length || 0;
-      const completedRequests = requests?.filter(r => r.status === 'Completed').length || 0;
-      const todayRequests = requests?.filter(r => new Date(r.created_at) >= today).length || 0;
-      const monthRequests = requests?.filter(r => new Date(r.created_at) >= monthStart).length || 0;
+      const totalRequests = requestsArray.length;
+      const pendingRequests = requestsArray.filter(r => 
+        r.status === 'Open' || r.status === 'Waiting' || r.workflow_stage === 'submitted'
+      ).length;
+      const completedRequests = requestsArray.filter(r => 
+        r.status === 'Completed' || r.workflow_stage === 'completed'
+      ).length;
+      const todayRequests = requestsArray.filter(r => new Date(r.created_at) >= today).length;
+      const monthRequests = requestsArray.filter(r => new Date(r.created_at) >= monthStart).length;
 
-      const highPriority = requests?.filter(r => r.priority === 'high').length || 0;
-      const mediumPriority = requests?.filter(r => r.priority === 'medium').length || 0;
-      const lowPriority = requests?.filter(r => r.priority === 'low').length || 0;
+      const highPriority = requestsArray.filter(r => r.priority === 'high' || r.priority === 'urgent').length;
+      const mediumPriority = requestsArray.filter(r => r.priority === 'medium').length;
+      const lowPriority = requestsArray.filter(r => r.priority === 'low').length;
 
-      const submitted = requests?.filter(r => r.workflow_stage === 'SUBMITTED').length || 0;
-      const assigned = requests?.filter(r => r.workflow_stage === 'ASSIGNED').length || 0;
-      const inProgress = requests?.filter(r => r.workflow_stage === 'IN_PROGRESS').length || 0;
-      const workflowCompleted = requests?.filter(r => r.workflow_stage === 'COMPLETED').length || 0;
+      const submitted = requestsArray.filter(r => r.workflow_stage === 'submitted').length;
+      const assigned = requestsArray.filter(r => r.workflow_stage === 'assigned').length;
+      const inProgress = requestsArray.filter(r => r.workflow_stage === 'in_progress').length;
+      const workflowCompleted = requestsArray.filter(r => r.workflow_stage === 'completed').length;
 
-      const totalBudget = requests?.reduce((sum, r) => sum + (r.estimated_cost || 0), 0) || 0;
-      const actualCost = requests?.reduce((sum, r) => sum + (r.actual_cost || 0), 0) || 0;
+      const totalBudget = requestsArray.reduce((sum, r) => sum + (Number(r.estimated_cost) || 0), 0);
+      const actualCost = requestsArray.reduce((sum, r) => sum + (Number(r.actual_cost) || 0), 0);
       const completionRate = totalRequests > 0 ? (completedRequests / totalRequests) * 100 : 0;
 
       setStats({
@@ -87,47 +92,6 @@ export function useDashboardStats() {
         assigned_count: assigned,
         in_progress_count: inProgress,
         workflow_completed_count: workflowCompleted,
-        last_updated: new Date().toISOString(),
-      });
-
-      const { data: requests, error: fetchError } = await supabase
-        .from('maintenance_requests')
-        .select('status, priority, created_at, estimated_cost, actual_cost, workflow_stage');
-
-      if (fetchError) throw fetchError;
-
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const requestsArray = requests || [];
-
-      setStats({
-        total_requests: requestsArray.length,
-        pending_requests: requestsArray.filter(r => 
-          r.status === 'Open' || r.status === 'Waiting' || r.workflow_stage === 'submitted'
-        ).length,
-        today_requests: requestsArray.filter(r => 
-          new Date(r.created_at) >= today
-        ).length,
-        completed_requests: requestsArray.filter(r => 
-          r.status === 'Completed' || r.workflow_stage === 'completed'
-        ).length,
-        this_month_requests: requestsArray.filter(r => 
-          new Date(r.created_at) >= monthStart
-        ).length,
-        total_budget: requestsArray.reduce((sum, r) => sum + (Number(r.estimated_cost) || 0), 0),
-        actual_cost: requestsArray.reduce((sum, r) => sum + (Number(r.actual_cost) || 0), 0),
-        completion_rate: requestsArray.length > 0 
-          ? (requestsArray.filter(r => r.status === 'Completed').length / requestsArray.length) * 100 
-          : 0,
-        avg_completion_days: 0,
-        high_priority_count: requestsArray.filter(r => r.priority === 'high' || r.priority === 'urgent').length,
-        medium_priority_count: requestsArray.filter(r => r.priority === 'medium').length,
-        low_priority_count: requestsArray.filter(r => r.priority === 'low').length,
-        submitted_count: requestsArray.filter(r => r.workflow_stage === 'submitted').length,
-        assigned_count: requestsArray.filter(r => r.workflow_stage === 'assigned').length,
-        in_progress_count: requestsArray.filter(r => r.workflow_stage === 'in_progress').length,
-        workflow_completed_count: requestsArray.filter(r => r.workflow_stage === 'completed').length,
         last_updated: new Date().toISOString(),
       });
 
@@ -156,25 +120,16 @@ export function useDashboardStats() {
       .channel('dashboard-stats-updates')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'maintenance_requests' },
-
         () => {
           fetchStats();
         }
-
-        () => fetchStats()
-
       )
       .subscribe();
 
     return () => {
-
       channel.unsubscribe().then(() => {
         supabase.removeChannel(channel);
       });
-
-      channel.unsubscribe();
-      supabase.removeChannel(channel);
-
     };
   }, []);
 
