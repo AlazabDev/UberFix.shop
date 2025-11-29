@@ -6,11 +6,8 @@ content = """Fix all ESLint warnings in the entire project without breaking func
 - Fix any TypeScript implicit-any or missing return type warnings.
 - Clean unreachable code.
 - Ensure final ESLint output = 0 warnings.
-Apply to all .ts and .tsx files in src/components, src/pages, src/hooks, src/utils, src/all.
+Apply to all .ts and .tsx files in src/components, src/pages, src/hooks, src/utils, src/all files.
 """
-
- uberfix.shop@1.0.0 lint
-> eslint --cache --cache-location .eslintcache "src/**/*.{ts,tsx}" "supabase/**/*.ts" "scripts/**/*.{ts,tsx}" --no-error-on-unmatched-pattern
 
 
 E:\dev\UberFix.shop\scripts\load-test.ts
@@ -70,8 +67,8 @@ E:\dev\UberFix.shop\src\components\landing\VendorsList.tsx
   309:10  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
 
 E:\dev\UberFix.shop\src\components\maps\InteractiveMap.tsx
-  227:16  warning  '_e' is defined but never used                                                                             @typescript-eslint/no-unused-vars
-  231:6   warning  React Hook useEffect has a missing dependency: 'height'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  228:16  warning  '_e' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  232:6   warning  React Hook useEffect has a missing dependency: 'height'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
 
 E:\dev\UberFix.shop\src\components\properties\PropertyActionsDialog.tsx
   44:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -120,6 +117,34 @@ E:\dev\UberFix.shop\src\components\settings\PlatformSettings.tsx
   12:11  warning  'preferences' is assigned a value but never used                       @typescript-eslint/no-unused-vars
   19:29  warning  'key' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
   20:6   warning  'val' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+E:\dev\UberFix.shop\src\components\technician-registration\steps\AddressStep.tsx
+  39:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\dev\UberFix.shop\src\components\technician-registration\steps\CoverageStep.tsx
+   4:38  warning  'CoverageArea' is defined but never used                                      @typescript-eslint/no-unused-vars
+  34:40  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  35:63  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+  65:49  warning  'fieldIndex' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+E:\dev\UberFix.shop\src\components\technician-registration\steps\RatesStep.tsx
+   4:38  warning  'ServicePrice' is defined but never used  @typescript-eslint/no-unused-vars
+  38:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  95:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\dev\UberFix.shop\src\components\technician-registration\steps\TradesStep.tsx
+   4:38  warning  'TechnicianTrade' is defined but never used  @typescript-eslint/no-unused-vars
+  34:48  warning  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  67:37  warning  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+E:\dev\UberFix.shop\src\components\technician-registration\steps\UploadsStep.tsx
+    4:38  warning  'TechnicianDocument' is defined but never used   @typescript-eslint/no-unused-vars
+   65:41  warning  'uploadData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   79:40  warning  Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   87:21  warning  Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  127:51  warning  Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
 
 E:\dev\UberFix.shop\src\components\ui\badge.tsx
   36:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
@@ -190,7 +215,7 @@ E:\dev\UberFix.shop\src\hooks\useCachedQuery.ts
   47:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\dev\UberFix.shop\src\hooks\useDashboardStats.ts
-  105:6  warning  React Hook useEffect has a missing dependency: 'fetchStats'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  134:6  warning  React Hook useEffect has a missing dependency: 'fetchStats'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
 
 E:\dev\UberFix.shop\src\hooks\useDebounce.ts
   19:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -255,9 +280,9 @@ E:\dev\UberFix.shop\src\hooks\useTechnicianLocation.ts
 E:\dev\UberFix.shop\src\hooks\useTechnicians.ts
    22:20  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
    42:11  warning  'toast' is assigned a value but never used                                                                           @typescript-eslint/no-unused-vars
-   53:32  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
-   81:59  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
-  112:6   warning  React Hook useEffect has a missing dependency: 'fetchTechnicians'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   58:32  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   91:59  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  124:6   warning  React Hook useEffect has a missing dependency: 'fetchTechnicians'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
 
 E:\dev\UberFix.shop\src\hooks\useUserRoles.ts
    49:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
@@ -267,28 +292,8 @@ E:\dev\UberFix.shop\src\hooks\useVendorLocations.ts
    32:6  warning  React Hook useEffect has a missing dependency: 'fetchVendorLocations'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
   110:5  warning  'maxDistance' is assigned a value but never used. Allowed unused args must match /^_/u                                   @typescript-eslint/no-unused-vars
 
-E:\dev\UberFix.shop\src\lib\analytics.ts
-    7:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-   98:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  131:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  142:62  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  213:74  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  217:76  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
 E:\dev\UberFix.shop\src\lib\googleMapsLoader.ts
-  92:32  warning  'apiKey' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
-
-E:\dev\UberFix.shop\src\lib\monitoring.ts
-   12:18  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
-   23:24  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
-   88:57  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
-  202:51  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
-  206:7   warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
-  284:16  warning  'e' is defined but never used                                                      @typescript-eslint/no-unused-vars
-  324:56  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
-  335:35  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
-  348:38  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
-  372:71  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  42:36  error  Promise executor functions should not be async  no-async-promise-executor
 
 E:\dev\UberFix.shop\src\lib\smartAuth.ts
   22:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -400,9 +405,8 @@ E:\dev\UberFix.shop\src\pages\maintenance\RequestLifecycleJourney.tsx
 
 E:\dev\UberFix.shop\src\pages\maintenance\ServiceMap.tsx
    35:11  warning  'Technician' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
-  144:17  warning  'data' is assigned a value but never used                                                                                @typescript-eslint/no-unused-vars
-  302:6   warning  React Hook useEffect has a missing dependency: 'handleRequestService'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
-  304:45  warning  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  288:6   warning  React Hook useEffect has a missing dependency: 'handleRequestService'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  290:45  warning  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
 
 E:\dev\UberFix.shop\src\pages\messages\MessageLogs.tsx
    22:14  warning  Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
@@ -460,8 +464,11 @@ E:\dev\UberFix.shop\src\pages\technicians\TechnicianDashboard.tsx
   51:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   61:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
-E:\dev\UberFix.shop\src\pages\technicians\TechnicianRegistration.tsx
-  88:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+E:\dev\UberFix.shop\src\pages\technicians\TechnicianRegistrationWizard.tsx
+   17:10  warning  'Button' is defined but never used        @typescript-eslint/no-unused-vars
+  132:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\dev\UberFix.shop\src\pages\technicians\TechnicianTaskManagement.tsx
    16:3   warning  'Camera' is defined but never used        @typescript-eslint/no-unused-vars
@@ -497,4 +504,4 @@ E:\dev\UberFix.shop\src\utils\technicianPerformance.ts
     2:10  warning  'TechnicianPerformance' is defined but never used  @typescript-eslint/no-unused-vars
   187:34  warning  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
 
-✖ 282 problems (1 error, 281 warnings)
+✖ 286 problems (2 errors, 284 warnings)
