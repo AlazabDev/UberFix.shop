@@ -341,32 +341,47 @@ export type Database = {
         Row: {
           address: string | null
           branch: string
+          branch_name: string | null
           branch_type: string | null
+          city: string | null
+          district: string | null
           icon: string | null
           id: string
           latitude: string | null
           link: string | null
           longitude: string | null
+          phone: string | null
+          status: string | null
         }
         Insert: {
           address?: string | null
           branch: string
+          branch_name?: string | null
           branch_type?: string | null
+          city?: string | null
+          district?: string | null
           icon?: string | null
           id: string
           latitude?: string | null
           link?: string | null
           longitude?: string | null
+          phone?: string | null
+          status?: string | null
         }
         Update: {
           address?: string | null
           branch?: string
+          branch_name?: string | null
           branch_type?: string | null
+          city?: string | null
+          district?: string | null
           icon?: string | null
           id?: string
           latitude?: string | null
           link?: string | null
           longitude?: string | null
+          phone?: string | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -2586,7 +2601,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technician_coverage_areas_technician_id_fkey"
+            foreignKeyName: "technician_coverage_areas_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_coverage_areas_technician_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
@@ -2686,7 +2708,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "technician_documents_technician_id_fkey"
+            foreignKeyName: "technician_documents_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_documents_technician_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
@@ -3194,6 +3223,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "technician_service_prices_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_service_prices_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -3201,7 +3237,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technician_service_prices_technician_id_fkey"
+            foreignKeyName: "technician_service_prices_technician_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
@@ -3440,7 +3476,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technician_trades_technician_id_fkey"
+            foreignKeyName: "technician_trades_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_trades_technician_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
@@ -3816,6 +3859,7 @@ export type Database = {
           specialization: string
           standard_rate: number | null
           status: string | null
+          technician_profile_id: string | null
           total_reviews: number | null
           updated_at: string | null
           verification_center_id: string | null
@@ -3857,6 +3901,7 @@ export type Database = {
           specialization: string
           standard_rate?: number | null
           status?: string | null
+          technician_profile_id?: string | null
           total_reviews?: number | null
           updated_at?: string | null
           verification_center_id?: string | null
@@ -3898,6 +3943,7 @@ export type Database = {
           specialization?: string
           standard_rate?: number | null
           status?: string | null
+          technician_profile_id?: string | null
           total_reviews?: number | null
           updated_at?: string | null
           verification_center_id?: string | null
@@ -3918,6 +3964,13 @@ export type Database = {
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technicians_technician_profile_id_fkey"
+            columns: ["technician_profile_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4062,6 +4115,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_technician_profile: {
+        Args: { profile_id: string }
+        Returns: string
+      }
       calculate_distance: {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
