@@ -101,6 +101,9 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.send-unified-notification]
+verify_jwt = false
+
+[functions.approve-technician]
 verify_jwt = true
 
 [functions.background-jobs]
@@ -123,15 +126,6 @@ verify_jwt = true
 
 [functions.receive-twilio-message]
 verify_jwt = false
-
-[functions.rollback-version]
-verify_jwt = true
-
-[functions.safe-update]
-verify_jwt = true
-
-[functions.sla-manager]
-verify_jwt = true
 
 [functions.version-history]
 verify_jwt = true
