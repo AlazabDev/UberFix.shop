@@ -1,5 +1,8 @@
 project_id = "zrrffsjbfkphridqyais"
 
+[functions.auth-callback]
+verify_jwt = false
+
 [api]
 enabled = true
 port = 54321
