@@ -12,8 +12,6 @@ import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
 import { Loader2 } from "lucide-react";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
-import { useMaintenanceLock } from "@/hooks/useMaintenanceLock";
-import { MaintenanceOverlay } from "@/components/MaintenanceOverlay";
 
 const queryClient = new QueryClient({
   defaultOptions: {
