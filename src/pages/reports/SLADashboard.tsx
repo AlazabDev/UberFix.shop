@@ -142,9 +142,9 @@ export default function SLADashboard() {
   useEffect(() => {
     fetchSLAData();
     
-    // تحديث كل دقيقة
-    const interval = setInterval(fetchSLAData, 60000);
-    return () => clearInterval(interval);
+    // Periodic updates DISABLED
+    // const interval = setInterval(fetchSLAData, 60000);
+    // return () => clearInterval(interval);
   }, []);
 
   const getViolationLabel = (type: string) => {

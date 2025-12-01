@@ -34,20 +34,20 @@ export const useAppointments = () => {
   useEffect(() => {
     fetchAppointments();
 
-    // Subscribe to real-time updates
-    const channel = supabase
-      .channel('appointments-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'appointments' },
-        () => {
-          fetchAppointments();
-        }
-      )
-      .subscribe();
+    // Real-time updates DISABLED
+    // const channel = supabase
+    //   .channel('appointments-changes')
+    //   .on('postgres_changes', 
+    //     { event: '*', schema: 'public', table: 'appointments' },
+    //     () => {
+    //       fetchAppointments();
+    //     }
+    //   )
+    //   .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // return () => {
+    //   supabase.removeChannel(channel);
+    // };
   }, []);
 
   const fetchAppointments = async () => {

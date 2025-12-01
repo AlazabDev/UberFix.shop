@@ -21,9 +21,9 @@ class ErrorTracker {
   private flushInterval = 30000; // 30 seconds
 
   constructor() {
-    // Auto-flush queue periodically
+    // Auto-flush disabled - manual flush only
     if (this.isEnabled && typeof window !== 'undefined') {
-      setInterval(() => this.flushQueue(), this.flushInterval);
+      // setInterval(() => this.flushQueue(), this.flushInterval); // DISABLED
       
       // Flush on page unload
       window.addEventListener('beforeunload', () => this.flushQueue());

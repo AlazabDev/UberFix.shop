@@ -124,19 +124,19 @@ export default function ProductionMonitor() {
     };
   }, []);
 
-  // تحديث دوري للحالة والمقاييس
+  // Periodic updates DISABLED
   useEffect(() => {
-    const interval = setInterval(() => {
-      checkSystemStatus();
-      collectPerformanceMetrics();
-      setErrorQueue({ queueLength: errorTracker.getQueueSize(), isOnline: navigator.onLine });
-    }, 30000); // كل 30 ثانية
+    // const interval = setInterval(() => {
+    //   checkSystemStatus();
+    //   collectPerformanceMetrics();
+    //   setErrorQueue({ queueLength: errorTracker.getQueueSize(), isOnline: navigator.onLine });
+    // }, 30000);
 
     // فحص فوري عند التحميل
     checkSystemStatus();
     collectPerformanceMetrics();
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   const getStatusColor = (status: string) => {
