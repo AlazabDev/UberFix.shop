@@ -5,15 +5,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CACHE_TTL = {
-  categories: 3600,           // 1 hour
-  services: 3600,             // 1 hour
-  cities: 86400,              // 24 hours
-  districts: 86400,           // 24 hours
-  profiles: 900,              // 15 minutes
-  api_responses: 300,         // 5 minutes for API responses
-  technicians: 1800,          // 30 minutes
-  properties: 600,            // 10 minutes
-  maintenance_requests: 120,  // 2 minutes
+  categories: 3600, // 1 hour
+  services: 3600,   // 1 hour
+  cities: 86400,    // 24 hours
+  districts: 86400, // 24 hours
+  profiles: 900,    // 15 minutes
 } as const;
 
 // In-memory cache
@@ -59,7 +55,6 @@ serve(async (req) => {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": `public, max-age=${Math.floor((cached.expires - Date.now()) / 1000)}`,
-                "X-Cache": "HIT",
               },
             }
           );
@@ -97,21 +92,6 @@ serve(async (req) => {
             .eq("city_id", cityId)
             .order("name_ar");
           data = districts;
-        } else if (table === "technicians") {
-          const { data: technicians } = await supabase
-            .from("technicians")
-            .select("id, full_name, specialization, rating, city_id, district_id, is_available")
-            .eq("status", "active")
-            .order("rating", { ascending: false })
-            .limit(50);
-          data = technicians;
-        } else if (table === "properties") {
-          const { data: properties } = await supabase
-            .from("properties")
-            .select("id, name, address, city_id, district_id, type, status")
-            .order("created_at", { ascending: false })
-            .limit(100);
-          data = properties;
         }
 
         // Cache the result
@@ -126,37 +106,8 @@ serve(async (req) => {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
             "Cache-Control": `public, max-age=${ttl}`,
-            "X-Cache": "MISS",
           },
         });
-      }
-
-      case "set": {
-        // Manual cache set for API responses
-        if (!key) {
-          return new Response(JSON.stringify({ error: "Missing key" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-
-        const body = await req.json();
-        const { data: cacheData, ttl = 300 } = body;
-
-        cache.set(key, {
-          data: cacheData,
-          expires: Date.now() + ttl * 1000,
-        });
-
-        return new Response(
-          JSON.stringify({ success: true, message: "Cache set successfully" }),
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-          }
-        );
       }
 
       case "invalidate": {

@@ -60,7 +60,7 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
   const updateWorkflowStage = async (newStage: WorkflowStage) => {
     setLoading(true);
     try {
-      const updates: Record<string, string | number> = {
+      const updates: Record<string, string> = {
         workflow_stage: newStage,
       };
 
@@ -91,7 +91,7 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
       if (onUpdate) {
       onUpdate();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMsg = error instanceof Error ? error.message : "فشل في تحديث المرحلة";
       console.error('Error updating workflow:', error);
       toast({

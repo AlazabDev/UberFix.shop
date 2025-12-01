@@ -99,18 +99,13 @@ export const PopupTechnician = memo(({
 
         <div className="grid grid-cols-2 gap-3">
           <Button
-            onClick={() => {
-              onRequestService?.(technician.id);
-              onClose();
-            }}
+            onClick={() => onRequestService?.(technician.id)}
             className="bg-[hsl(var(--warning))] text-[#111] hover:bg-[hsl(var(--warning))]/90 font-bold"
           >
             طلب الخدمة
           </Button>
           <Button
-            onClick={() => {
-              onContact?.(technician.id);
-            }}
+            onClick={() => onContact?.(technician.id)}
             variant="outline"
             className="border-border"
           >

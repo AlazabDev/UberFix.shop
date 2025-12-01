@@ -223,12 +223,12 @@ export function InteractiveMap({
           mapDivRef.current = null;
         }
 
-      geocoderRef.current = null;
-      } catch (_e) {
-        // Cleanup error, safe to ignore
+        geocoderRef.current = null;
+      } catch (error) {
+        console.warn("Cleanup error (safe to ignore):", error);
       }
     };
-  }, [loadGoogleMaps, onLocationChange, currentLat, currentLng]);
+  }, []); // Run ONCE only
 
   // Update marker position when coordinates change
   useEffect(() => {

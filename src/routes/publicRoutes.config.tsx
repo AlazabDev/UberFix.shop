@@ -24,7 +24,6 @@ const Projects = lazy(() => import("@/pages/projects/Projects"));
 const Map = lazy(() => import("@/pages/Map"));
 const PWASettings = lazy(() => import("@/pages/settings/PWASettings"));
 const QuickRequest = lazy(() => import("@/pages/QuickRequest"));
-const QuickRequestFromMap = lazy(() => import("@/pages/QuickRequestFromMap"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
@@ -50,6 +49,5 @@ export const publicRoutes = [
   { path: "/map", element: <Map /> },
   { path: "/pwa-settings", element: <PWASettings /> },
   { path: "/quick-request/:propertyId", element: <QuickRequest /> },
-  { path: "/quick-request", element: <QuickRequestFromMap /> },
   { path: "*", element: <NotFound /> },
 ];

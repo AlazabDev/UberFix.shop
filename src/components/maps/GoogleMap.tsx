@@ -14,7 +14,7 @@ interface MapMarker {
   type?: 'vendor' | 'request' | 'user' | 'branch';
   icon?: string;
   color?: string;
-  data?: Record<string, string | number | boolean>;
+  data?: Record<string, unknown>;
 }
 
 interface GoogleMapProps {
