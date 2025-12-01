@@ -45,16 +45,7 @@ const App = () => {
 };
 
 const MaintenanceLockWrapper = () => {
-  const { data: lockStatus, isLoading } = useMaintenanceLock();
-
-  if (isLoading) {
-    return <LoadingFallback />;
-  }
-
-  if (lockStatus?.isLocked) {
-    return <MaintenanceOverlay message={lockStatus.message} />;
-  }
-
+  // تعطيل فحص وضع الصيانة مؤقتاً لحل مشكلة التحميل
   return (
     <ThemeProvider
       attribute="class"
