@@ -56,23 +56,24 @@ export const useUserRoles = (): UserRoles => {
   useEffect(() => {
     fetchUserRoles();
 
-    const channel = supabase
-      .channel('user-roles-changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'profiles'
-        },
-        () => {
-          fetchUserRoles();
-        }
-      )
-      .subscribe();
+    // Real-time subscription DISABLED
+    // const channel = supabase
+    //   .channel('user-roles-changes')
+    //   .on('postgres_changes', 
+    //     { 
+    //       event: '*', 
+    //       schema: 'public', 
+    //       table: 'profiles'
+    //     },
+    //     () => {
+    //       fetchUserRoles();
+    //     }
+    //   )
+    //   .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // return () => {
+    //   supabase.removeChannel(channel);
+    // };
   }, [fetchUserRoles]);
 
   const hasRole = (role: AppRole): boolean => {

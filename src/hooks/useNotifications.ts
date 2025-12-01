@@ -63,20 +63,20 @@ export const useNotifications = () => {
   useEffect(() => {
     fetchNotifications();
 
-    // Subscribe to real-time notifications
-    const channel = supabase
-      .channel('notifications-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'notifications' },
-        () => {
-          fetchNotifications();
-        }
-      )
-      .subscribe();
+    // Real-time notifications DISABLED
+    // const channel = supabase
+    //   .channel('notifications-changes')
+    //   .on('postgres_changes', 
+    //     { event: '*', schema: 'public', table: 'notifications' },
+    //     () => {
+    //       fetchNotifications();
+    //     }
+    //   )
+    //   .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // return () => {
+    //   supabase.removeChannel(channel);
+    // };
   }, [fetchNotifications]);
 
   const markAsRead = async (notificationId: string) => {
