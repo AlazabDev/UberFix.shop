@@ -13,7 +13,7 @@ export interface BranchLocation {
 export interface TechnicianLocation {
   id: string;
   name: string;
-  specialization: 'plumber' | 'carpenter' | 'electrician' | 'painter' | 'ac_technician' | string;
+  specialization: 'plumber' | 'carpenter' | 'electrician' | 'painter';
   rating: number;
   total_reviews: number;
   status: 'available' | 'busy' | 'soon';
@@ -24,7 +24,6 @@ export interface TechnicianLocation {
   available_to?: string;
   phone?: string;
   profile_image?: string;
-  icon_url?: string; // رابط الأيقونة من قاعدة البيانات
 }
 
 export interface MapPin {

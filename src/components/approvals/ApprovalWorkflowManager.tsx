@@ -151,7 +151,7 @@ export function ApprovalWorkflowManager() {
           is_active: editingWorkflow.is_active,
         })
         .select()
-        .maybeSingle();
+        .single();
 
       if (workflowError) throw workflowError;
 

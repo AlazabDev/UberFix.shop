@@ -18,22 +18,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          # لا تستخدم cache: pnpm هنا لأن فيه مشاكل مع jobs كثيرة
 
-      - name: Install npm
-      
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install dependencies
-        run: npm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Type check
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Run Unit Tests
-        run: npm run test:unit
+        run: pnpm run test:unit
 
       - name: Upload Unit Test Coverage
         uses: actions/upload-artifact@v4

@@ -106,7 +106,7 @@ export function NewInvoiceForm({ onSuccess, onCancel }: NewInvoiceFormProps) {
           invoice_number: '', // Temporary, will be set by trigger
         }])
         .select()
-        .maybeSingle();
+        .single();
 
       if (invoiceError) throw invoiceError;
 

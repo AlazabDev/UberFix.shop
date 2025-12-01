@@ -13,7 +13,7 @@ export default function TechnicianVerification() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [technicianId, setTechnicianId] = useState<string | null>(null);
+  const [applicationId, setApplicationId] = useState<string | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<string>("pending");
   const [files, setFiles] = useState({
     nationalIdFront: null as File | null,
@@ -30,30 +30,30 @@ export default function TechnicianVerification() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: profile } = await supabase
-        .from("technician_profiles")
+      const { data: application } = await supabase
+        .from("technician_applications")
         .select("id, status")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .single();
 
-      if (!profile) {
+      if (!application) {
         toast({
           title: "خطأ",
           description: "يجب التسجيل كفني أولاً",
           variant: "destructive",
         });
-        navigate("/technicians/registration/wizard");
+        navigate("/technicians/register");
         return;
       }
 
-      setTechnicianId(profile.id);
+      setApplicationId(application.id);
 
       // Check if verification already exists
       const { data: verification } = await supabase
         .from("technician_verifications")
         .select("verification_status")
-        .eq("technician_id", profile.id)
-        .maybeSingle();
+        .eq("application_id", application.id)
+        .single();
 
       if (verification) {
         setVerificationStatus(verification.verification_status);
@@ -106,7 +106,7 @@ export default function TechnicianVerification() {
       const { error } = await supabase
         .from("technician_verifications")
         .insert({
-          technician_id: technicianId!,
+          application_id: applicationId!,
           national_id_front: nationalIdFrontUrl,
           national_id_back: nationalIdBackUrl,
           selfie_image: selfieUrl,
@@ -153,7 +153,7 @@ export default function TechnicianVerification() {
     );
   }
 
-  if (verificationStatus === "pending" && technicianId) {
+  if (verificationStatus === "pending" && applicationId) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
         <Card className="max-w-md w-full">

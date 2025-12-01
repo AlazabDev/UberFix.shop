@@ -49,7 +49,7 @@ serve(async (req) => {
     console.error('❌ Error in get-maps-key function:', error);
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : String(error),
+        error: error.message,
         message: 'حدث خطأ أثناء جلب مفتاح API'
       }),
       { 

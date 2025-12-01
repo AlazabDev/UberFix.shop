@@ -60,8 +60,8 @@ const menuItems = [
   },
   {
     icon: MapPin,
-    label: "خريطة الخدمات",
-    href: "/service-map"
+    label: "الخريطة",
+    href: "/map"
   },
   {
     icon: FileText,

@@ -12,7 +12,7 @@ export default function TechnicianAgreement() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [technicianId, setTechnicianId] = useState<string | null>(null);
+  const [applicationId, setApplicationId] = useState<string | null>(null);
   const [policies, setPolicies] = useState({
     quality: false,
     conduct: false,
@@ -30,25 +30,25 @@ export default function TechnicianAgreement() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: profile } = await supabase
-        .from("technician_profiles")
-        .select("id, status")
+      const { data: application } = await supabase
+        .from("technician_applications")
+        .select("id")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .single();
 
-      if (!profile) {
-        navigate("/technicians/registration/wizard");
+      if (!application) {
+        navigate("/technicians/register");
         return;
       }
 
-      setTechnicianId(profile.id);
+      setApplicationId(application.id);
 
       // Check verification status
       const { data: verification } = await supabase
         .from("technician_verifications")
         .select("verification_status")
-        .eq("technician_id", profile.id)
-        .maybeSingle();
+        .eq("application_id", application.id)
+        .single();
 
       if (!verification || verification.verification_status !== "verified") {
         toast({
@@ -64,8 +64,8 @@ export default function TechnicianAgreement() {
       const { data: existingAgreement } = await supabase
         .from("technician_agreements")
         .select("signed_at")
-        .eq("technician_id", profile.id)
-        .maybeSingle();
+        .eq("application_id", application.id)
+        .single();
 
       if (existingAgreement && existingAgreement.signed_at) {
         navigate("/technicians/training");
@@ -92,7 +92,7 @@ export default function TechnicianAgreement() {
       const { error } = await supabase
         .from("technician_agreements")
         .insert({
-          technician_id: technicianId!,
+          application_id: applicationId!,
           quality_policy_accepted: policies.quality,
           conduct_policy_accepted: policies.conduct,
           pricing_policy_accepted: policies.pricing,
@@ -103,11 +103,11 @@ export default function TechnicianAgreement() {
 
       if (error) throw error;
 
-      // Update profile status
+      // Update application status
       await supabase
-        .from("technician_profiles")
+        .from("technician_applications")
         .update({ status: "approved" })
-        .eq("id", technicianId!);
+        .eq("id", applicationId!);
 
       toast({
         title: "تم التوقيع بنجاح",

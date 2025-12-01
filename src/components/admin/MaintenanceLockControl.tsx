@@ -28,7 +28,7 @@ export function MaintenanceLockControl() {
         .from('app_control')
         .select('*')
         .eq('id', 'global')
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return data;

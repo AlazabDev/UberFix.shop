@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, supabaseReady } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Technician {
@@ -41,31 +41,22 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
-  // استخراج القيم من filter لتجنب infinite loop
-  const filterStatus = filter?.status;
-  const filterSpecialization = filter?.specialization;
-
   const fetchTechnicians = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      if (!supabaseReady) {
-        setTechnicians([]);
-        return;
-      }
 
       let query = (supabase as any)
         .from('technicians')
         .select('*')
         .eq('is_active', true);
 
-      if (filterStatus) {
-        query = query.eq('status', filterStatus);
+      if (filter?.status) {
+        query = query.eq('status', filter.status);
       }
 
-      if (filterSpecialization) {
-        query = query.eq('specialization', filterSpecialization);
+      if (filter?.specialization) {
+        query = query.eq('specialization', filter.specialization);
       }
 
       const { data, error: dbError } = await query.order('rating', { ascending: false });
@@ -83,11 +74,6 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
 
   const fetchSpecializationIcons = async () => {
     try {
-      if (!supabaseReady) {
-        setSpecializationIcons([]);
-        return;
-      }
-
       const { data, error: dbError } = await (supabase as any)
         .from('specialization_icons')
         .select('*')
@@ -105,23 +91,23 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
     fetchTechnicians();
     fetchSpecializationIcons();
 
-    if (!supabaseReady) return;
+    // إضافة realtime subscription
+    const channel = supabase
+      .channel('technicians-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'technicians' },
+        () => {
+          console.warn('🔄 Technicians changed, refetching...');
+          fetchTechnicians();
+        }
+      )
+      .subscribe();
 
-    // Realtime subscription DISABLED
-    // const channel = supabase
-    //   .channel('technicians-changes')
-    //   .on('postgres_changes',
-    //     { event: '*', schema: 'public', table: 'technicians' },
-    //     () => {
-    //       fetchTechnicians();
-    //     }
-    //   )
-    //   .subscribe();
-
-    // return () => {
-    //   supabase.removeChannel(channel);
-    // };
-  }, [filterStatus, filterSpecialization]);
+    return () => {
+      console.warn('🧹 Cleaning up technicians subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [filter?.status, filter?.specialization]);
 
   return {
     technicians,

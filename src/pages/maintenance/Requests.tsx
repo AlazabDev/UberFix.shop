@@ -4,7 +4,6 @@ import { NewRequestForm } from "@/components/forms/NewRequestForm";
 import { MaintenanceRequestsList } from "@/components/maintenance/MaintenanceRequestsList";
 import { MobileMaintenanceList } from "@/components/maintenance/MobileMaintenanceList";
 import { useMediaQuery } from "@/hooks/use-mobile";
-import { AppFooter } from "@/components/shared/AppFooter";
 
 const Requests = () => {
   const [isNewRequestOpen, setIsNewRequestOpen] = useState(false);
@@ -12,6 +11,7 @@ const Requests = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
+      {/* عرض النسخة المحمولة للهواتف والتابلت، والنسخة العادية للحاسوب */}
       {isMobile ? (
         <MobileMaintenanceList onNewRequestClick={() => setIsNewRequestOpen(true)} />
       ) : (
@@ -26,8 +26,6 @@ const Requests = () => {
           <NewRequestForm onSuccess={() => setIsNewRequestOpen(false)} />
         </DialogContent>
       </Dialog>
-
-      <AppFooter />
     </div>
   );
 };

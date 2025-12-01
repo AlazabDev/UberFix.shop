@@ -218,7 +218,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Cache service error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
         headers: {

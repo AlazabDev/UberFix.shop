@@ -2,14 +2,14 @@ import { MapPin } from 'lucide-react';
 
 export const GlobalPresenceSection = () => {
   const locations = [
-    { id: 1, top: '25%', left: '20%', name: 'أوروبا', color: 'from-blue-400 to-blue-600' },
-    { id: 2, top: '35%', left: '15%', name: 'أفريقيا الشمالية', color: 'from-green-400 to-green-600' },
-    { id: 3, top: '50%', left: '25%', name: 'أفريقيا', color: 'from-yellow-400 to-yellow-600' },
-    { id: 4, top: '30%', left: '50%', name: 'الشرق الأوسط', color: 'from-orange-400 to-orange-600' },
-    { id: 5, top: '45%', left: '55%', name: 'جنوب آسيا', color: 'from-purple-400 to-purple-600' },
-    { id: 6, top: '25%', left: '75%', name: 'شرق آسيا', color: 'from-red-400 to-red-600' },
-    { id: 7, top: '55%', left: '80%', name: 'أستراليا', color: 'from-cyan-400 to-cyan-600' },
-    { id: 8, top: '40%', left: '85%', name: 'المحيط الهادئ', color: 'from-pink-400 to-pink-600' },
+    { id: 1, top: '25%', left: '20%', image: '/img/team001.jpg', name: 'أوروبا' },
+    { id: 2, top: '35%', left: '15%', image: '/img/team002.jpg', name: 'أفريقيا الشمالية' },
+    { id: 3, top: '50%', left: '25%', image: '/img/team003.jpg', name: 'أفريقيا' },
+    { id: 4, top: '30%', left: '50%', image: '/img/team004.jpg', name: 'الشرق الأوسط' },
+    { id: 5, top: '45%', left: '55%', image: '/img/team005.jpg', name: 'جنوب آسيا' },
+    { id: 6, top: '25%', left: '75%', image: '/img/team006.jpg', name: 'شرق آسيا' },
+    { id: 7, top: '55%', left: '80%', image: '/img/team007.jpg', name: 'أستراليا' },
+    { id: 8, top: '40%', left: '85%', image: '/img/team008.jpg', name: 'المحيط الهادئ' },
   ];
 
   return (
@@ -84,9 +84,13 @@ export const GlobalPresenceSection = () => {
               >
                 {/* الدبوس */}
                 <div className="relative">
-                  <div className={`absolute -top-12 left-1/2 -translate-x-1/2 bg-gradient-to-br ${location.color} p-1 rounded-full shadow-lg hover:scale-110 transition-transform`}>
-                    <div className="relative w-12 h-12 rounded-full bg-white/90 flex items-center justify-center border-2 border-white">
-                      <MapPin className="w-6 h-6" fill="currentColor" />
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground p-1 rounded-full shadow-lg hover:scale-110 transition-transform">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-background">
+                      <img
+                        src={location.image}
+                        alt={location.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
                   <MapPin className="w-8 h-8 text-primary drop-shadow-lg" fill="currentColor" />

@@ -1,11 +1,13 @@
 import { MAPS_CONFIG } from '@/config/maps';
-import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * Singleton Google Maps Loader
+ * يضمن تحميل Google Maps مرة واحدة فقط في التطبيق
+ */
 class GoogleMapsLoader {
   private static instance: GoogleMapsLoader;
   private loadPromise: Promise<void> | null = null;
   private isLoaded = false;
-  private apiKey: string | null = null;
 
   private constructor() {}
 
@@ -16,80 +18,76 @@ class GoogleMapsLoader {
     return GoogleMapsLoader.instance;
   }
 
-  private async fetchApiKey(): Promise<string> {
-    if (this.apiKey) return this.apiKey;
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('get-maps-key');
-      if (error) throw error;
-      this.apiKey = data?.apiKey || '';
-      return this.apiKey;
-    } catch (err) {
-      console.error('Failed to get Google Maps API key:', err);
-      throw new Error('فشل في الحصول على مفتاح Google Maps');
-    }
-  }
-
+  /**
+   * تحميل Google Maps API
+   */
   async load(): Promise<void> {
+    // If already loaded, return immediately
     if (this.isLoaded && window.google?.maps) {
       return Promise.resolve();
     }
 
+    // If loading is in progress, return the existing promise
     if (this.loadPromise) {
       return this.loadPromise;
     }
 
-    this.loadPromise = new Promise(async (resolve, reject) => {
+    // Start new load
+    this.loadPromise = new Promise((resolve, reject) => {
+      // Check if already loaded
       if (window.google?.maps) {
         this.isLoaded = true;
         resolve();
         return;
       }
 
-      try {
-        const apiKey = await this.fetchApiKey();
-        if (!apiKey) {
-          reject(new Error('Google Maps API key not configured'));
-          return;
-        }
-
-        const libs = MAPS_CONFIG.libraries.join(',');
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libs}&language=ar&region=EG&v=weekly`;
-        script.async = true;
-        script.defer = true;
-        
-        script.onload = () => {
-          this.isLoaded = true;
-          resolve();
-        };
-        
-        script.onerror = () => {
-          this.loadPromise = null;
-          reject(new Error('فشل في تحميل Google Maps'));
-        };
-
-        document.head.appendChild(script);
-      } catch (err) {
-        this.loadPromise = null;
-        reject(err);
+      // Check for API key
+      if (!MAPS_CONFIG.apiKey) {
+        reject(new Error('Google Maps API key is not configured'));
+        return;
       }
+
+      // Create and load script
+      const script = document.createElement('script');
+      script.src = MAPS_CONFIG.getScriptUrl();
+      script.async = true;
+      script.defer = true;
+      
+      script.onload = () => {
+        this.isLoaded = true;
+        resolve();
+      };
+      
+      script.onerror = () => {
+        this.loadPromise = null;
+        reject(new Error('Failed to load Google Maps API'));
+      };
+
+      document.head.appendChild(script);
     });
 
     return this.loadPromise;
   }
 
+  /**
+   * التحقق من تحميل Google Maps
+   */
   isGoogleMapsLoaded(): boolean {
     return this.isLoaded && !!window.google?.maps;
   }
 
+  /**
+   * إعادة تعيين الحالة (للاختبار فقط)
+   */
   reset(): void {
     this.loadPromise = null;
     this.isLoaded = false;
-    this.apiKey = null;
   }
 }
 
+// Export singleton instance
 export const googleMapsLoader = GoogleMapsLoader.getInstance();
-export const loadGoogleMaps = () => googleMapsLoader.load();
+
+// Legacy exports for backward compatibility
+export const loadGoogleMaps = (apiKey?: string) => googleMapsLoader.load();
 export const resetGoogleMapsLoader = () => googleMapsLoader.reset();

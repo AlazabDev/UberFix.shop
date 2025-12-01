@@ -9,7 +9,7 @@ import { Eye, Calendar, Phone, DollarSign, Plus, MapPin } from "lucide-react";
 import { MaintenanceRequestActions } from "./MaintenanceRequestActions";
 import { MaintenanceFilters } from "./MaintenanceFilters";
 import { MaintenanceExport } from "./MaintenanceExport";
-import { MaintenanceStats } from "./MaintenanceStats";
+import { MaintenanceStats } from "../dashboard/MaintenanceStats";
 
 interface MaintenanceRequestsListProps {
   onNewRequestClick?: () => void;
@@ -159,13 +159,7 @@ export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceReques
       </div>
 
       {/* Statistics */}
-      <MaintenanceStats stats={{
-        total: requests?.length || 0,
-        open: requests?.filter(r => r.status === 'Open').length || 0,
-        inProgress: requests?.filter(r => r.status === 'In Progress').length || 0,
-        completed: requests?.filter(r => r.status === 'Completed').length || 0,
-        overdue: 0
-      }} />
+      <MaintenanceStats />
 
       {/* Advanced Filters */}
       <MaintenanceFilters

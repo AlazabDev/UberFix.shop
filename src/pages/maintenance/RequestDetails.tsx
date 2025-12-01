@@ -11,9 +11,9 @@ import { WorkflowDiagram } from "@/components/workflow/WorkflowDiagram";
 import { WorkflowTimeline } from "@/components/requests/WorkflowTimeline";
 import { ApprovalManager } from "@/components/workflow/ApprovalManager";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AppFooter } from "@/components/shared/AppFooter";
 
 export default function RequestDetails() {
   const { id } = useParams<{ id: string }>();
@@ -77,6 +77,7 @@ export default function RequestDetails() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
+      {/* Header with Back Button and Archive */}
       <div className="flex items-center justify-between">
         <Button 
           variant="outline" 
@@ -108,6 +109,7 @@ export default function RequestDetails() {
         </div>
       </div>
 
+      {/* Archived Alert */}
       {isArchived && (
         <Alert>
           <Archive className="h-4 w-4" />
@@ -117,6 +119,7 @@ export default function RequestDetails() {
         </Alert>
       )}
 
+      {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 gap-1">
           <TabsTrigger value="overview" className="gap-1 text-xs sm:text-sm">
@@ -149,6 +152,7 @@ export default function RequestDetails() {
           </TabsTrigger>
         </TabsList>
 
+        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
@@ -164,6 +168,7 @@ export default function RequestDetails() {
           </div>
         </TabsContent>
 
+        {/* Lifecycle Tab */}
         <TabsContent value="lifecycle" className="space-y-4">
           <Card>
             <CardHeader>
@@ -175,6 +180,7 @@ export default function RequestDetails() {
           </Card>
         </TabsContent>
 
+        {/* Workflow Tab */}
         <TabsContent value="workflow" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
@@ -189,6 +195,7 @@ export default function RequestDetails() {
           </div>
         </TabsContent>
 
+        {/* Materials Tab - Coming Soon */}
         <TabsContent value="materials" className="space-y-4">
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">إدارة المواد</h3>
@@ -201,6 +208,7 @@ export default function RequestDetails() {
           </Card>
         </TabsContent>
 
+        {/* Approvals Tab */}
         <TabsContent value="approvals" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ApprovalManager 
@@ -222,6 +230,7 @@ export default function RequestDetails() {
           </div>
         </TabsContent>
 
+        {/* Reports Tab - Coming Soon */}
         <TabsContent value="reports" className="space-y-4">
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">التقارير</h3>
@@ -234,6 +243,7 @@ export default function RequestDetails() {
           </Card>
         </TabsContent>
 
+        {/* Controls Tab */}
         <TabsContent value="controls" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <RequestWorkflowControls request={request} />
@@ -264,8 +274,6 @@ export default function RequestDetails() {
           </div>
         </TabsContent>
       </Tabs>
-
-      <AppFooter />
     </div>
   );
 }

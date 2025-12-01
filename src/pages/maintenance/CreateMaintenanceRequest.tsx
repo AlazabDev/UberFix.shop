@@ -84,7 +84,7 @@ export default function CreateMaintenanceRequest() {
         .from("profiles")
         .select("company_id")
         .eq("id", user.id)
-        .maybeSingle();
+        .single();
 
       if (!profile?.company_id) {
         toast.error("لم يتم العثور على بيانات الشركة");
@@ -122,7 +122,7 @@ export default function CreateMaintenanceRequest() {
           customer_notes: data.notes,
         })
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
 

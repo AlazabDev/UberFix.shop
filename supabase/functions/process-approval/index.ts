@@ -74,12 +74,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Check if already processed
     if (approval.status !== "pending") {
-      const statusMap: Record<string, string> = {
+      const statusText = {
         approved: "تمت الموافقة",
         rejected: "تم الرفض",
         expired: "انتهت الصلاحية"
-      };
-      const statusText = statusMap[approval.status] || "تمت المعالجة";
+      }[approval.status] || "تمت المعالجة";
 
       return new Response(
         generateHtmlResponse(

@@ -38,7 +38,7 @@ export default function QuickRequestFromMap() {
         description: 'يرجى العودة للخريطة واختيار فني',
         variant: 'destructive',
       });
-      navigate('/service-map');
+      navigate('/map');
     }
   }, [navigate, toast]);
 
@@ -55,7 +55,7 @@ export default function QuickRequestFromMap() {
         .from('profiles')
         .select('company_id')
         .eq('id', technician.id)
-        .maybeSingle();
+        .single();
 
       if (!profile?.company_id) {
         throw new Error('لا يمكن تحديد الشركة');
@@ -67,7 +67,7 @@ export default function QuickRequestFromMap() {
         .select('id')
         .eq('company_id', profile.company_id)
         .limit(1)
-        .maybeSingle();
+        .single();
 
       if (!branch) {
         throw new Error('لا يوجد فرع متاح');
@@ -92,7 +92,7 @@ export default function QuickRequestFromMap() {
           channel: 'map',
         }])
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
 
@@ -176,7 +176,7 @@ export default function QuickRequestFromMap() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/service-map')}
+                    onClick={() => navigate('/map')}
                   >
                     تغيير الفني
                   </Button>
@@ -266,7 +266,7 @@ export default function QuickRequestFromMap() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/service-map')}
+                  onClick={() => navigate('/map')}
                   className="flex-1"
                 >
                   رجوع

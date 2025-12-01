@@ -104,7 +104,7 @@ export function InteractiveMap({
         wrapperRef.current.appendChild(mapDiv);
         mapDivRef.current = mapDiv;
 
-        // Create map instance with mapId to prevent warnings
+        // Create map instance
         const mapInstance = new google.maps.Map(mapDiv, {
           center: { lat: currentLat, lng: currentLng },
           zoom: 15,
@@ -112,7 +112,6 @@ export function InteractiveMap({
           streetViewControl: false,
           fullscreenControl: false,
           zoomControl: true,
-          mapId: '8e0a97af9386fef', // Google Maps Map ID to use Advanced Markers
         });
 
         // Create marker

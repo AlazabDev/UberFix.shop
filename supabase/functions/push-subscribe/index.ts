@@ -74,7 +74,7 @@ serve(async (req) => {
     console.error("❌ Error storing push subscription:", error);
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : "Internal server error"
+        error: error.message || "Internal server error" 
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

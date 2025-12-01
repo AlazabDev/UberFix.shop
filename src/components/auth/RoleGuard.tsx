@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AppRole, useUserRoles } from '@/hooks/useUserRoles';
+import { AppRole, useUserRole } from '@/hooks/useUserRole';
 import { User } from '@supabase/supabase-js';
 
 interface RoleGuardProps {
@@ -18,7 +18,7 @@ interface RoleGuardProps {
 export function RoleGuard({ children, allowedRoles, redirectTo = '/dashboard' }: RoleGuardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { roles, loading: rolesLoading } = useUserRoles();
+  const { roles, loading: rolesLoading } = useUserRole(user);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -39,18 +39,6 @@ export function RoleGuard({ children, allowedRoles, redirectTo = '/dashboard' }:
     return () => subscription.unsubscribe();
   }, []);
 
-  // إنشاء نسخة مستقرة من allowedRoles
-  const allowedRolesStr = useMemo(() => allowedRoles.join(','), [allowedRoles]);
-
-  const handleUnauthorized = useCallback(() => {
-    toast({
-      title: 'غير مصرح',
-      description: 'ليس لديك صلاحية للوصول إلى هذه الصفحة',
-      variant: 'destructive',
-    });
-    navigate(redirectTo);
-  }, [toast, navigate, redirectTo]);
-
   useEffect(() => {
     // إذا لم يكن هناك مستخدم أو الأدوار قيد التحميل، لا نفعل شيء
     if (loading || rolesLoading || !user) return;
@@ -59,9 +47,14 @@ export function RoleGuard({ children, allowedRoles, redirectTo = '/dashboard' }:
     const hasAllowedRole = roles.some(role => allowedRoles.includes(role));
 
     if (!hasAllowedRole) {
-      handleUnauthorized();
+      toast({
+        title: 'غير مصرح',
+        description: 'ليس لديك صلاحية للوصول إلى هذه الصفحة',
+        variant: 'destructive',
+      });
+      navigate(redirectTo);
     }
-  }, [user, roles, loading, rolesLoading, allowedRolesStr, handleUnauthorized]);
+  }, [user, roles, loading, rolesLoading, allowedRoles, navigate, redirectTo, toast]);
 
   // إظهار شاشة تحميل أثناء التحقق
   if (loading || rolesLoading) {

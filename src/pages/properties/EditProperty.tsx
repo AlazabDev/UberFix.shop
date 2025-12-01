@@ -21,7 +21,7 @@ export default function EditProperty() {
         .from("properties")
         .select("*")
         .eq("id", id)
-        .maybeSingle();
+        .single();
 
       if (error) {
         toast.error("فشل تحميل بيانات العقار");

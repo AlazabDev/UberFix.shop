@@ -615,7 +615,7 @@ const Testing = () => {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .maybeSingle();
+        .single();
       
       const duration = Date.now() - start;
       updateTestResult(index, { 
@@ -847,7 +847,7 @@ const Testing = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .maybeSingle();
+        .single();
       
       const duration = Date.now() - start;
       

@@ -1,8 +1,5 @@
 project_id = "zrrffsjbfkphridqyais"
 
-[functions.auth-callback]
-verify_jwt = false
-
 [api]
 enabled = true
 port = 54321
@@ -49,6 +46,9 @@ port = 54321
 enabled = false
 port = 54327
 
+[functions.send-notification]
+verify_jwt = true
+
 [functions.error-tracking]
 verify_jwt = true
 
@@ -56,16 +56,25 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.get-maps-key]
+verify_jwt = true
+
+[functions.send-email-notification]
+verify_jwt = false
+
+[functions.send-invoice-email]
 verify_jwt = false
 
 [functions.twilio-delivery-status]
 verify_jwt = false
 
+[functions.send-whatsapp]
+verify_jwt = true
+
 [functions.send-maintenance-notification]
 verify_jwt = true
 
 [functions.send-twilio-message]
-verify_jwt = true
+verify_jwt = false
 
 [functions.calculate-route]
 verify_jwt = true
@@ -73,62 +82,11 @@ verify_jwt = true
 [functions.meta-deauthorize]
 verify_jwt = false
 
-[functions.get-maps-key]
-verify_jwt = true
-
 [functions.meta-delete-data]
 verify_jwt = false
 
 [functions.twilio-fallback]
 verify_jwt = false
 
-[functions.get-property-for-qr]
+[functions.send-approval-email]
 verify_jwt = false
-
-[functions.calculate-monthly-bonuses]
-verify_jwt = true
-
-[functions.send-otp]
-verify_jwt = false
-
-[functions.verify-otp]
-verify_jwt = false
-
-[functions.process-national-id-ocr]
-verify_jwt = true
-
-[functions.assign-technician-to-request]
-verify_jwt = true
-
-[functions.sla-monitor]
-verify_jwt = true
-
-[functions.send-unified-notification]
-verify_jwt = false
-
-[functions.approve-technician]
-verify_jwt = true
-
-[functions.background-jobs]
-verify_jwt = true
-
-[functions.cache-service]
-verify_jwt = true
-
-[functions.get-users]
-verify_jwt = true
-
-[functions.import-gallery-images]
-verify_jwt = true
-
-[functions.process-approval]
-verify_jwt = true
-
-[functions.push-subscribe]
-verify_jwt = true
-
-[functions.receive-twilio-message]
-verify_jwt = false
-
-[functions.version-history]
-verify_jwt = true

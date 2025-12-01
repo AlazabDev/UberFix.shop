@@ -1,15 +1,14 @@
 // بيانات الفروع الكاملة من CSV (مضمنة مباشرة)
 const branches = [
-  [
     {
         "id": "Az-Branch-0001",
         "branch": "Adly Mansour Metro Station",
         "address": "Adly Mansour Central Station, 10th Park inside Metro Station",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/cCoGeE3rBNz1in5k6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.147076,
-        "longitude": 31.421225
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0002",
@@ -17,9 +16,9 @@ const branches = [
         "address": "Agora Mall - Ground Floor - Fifth Settlement",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/tDFSwg3iHs7r7Cie7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0204966,
-        "longitude": 31.528987
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4284756,
+        "longitude": 30.0084868
     },
     {
         "id": "Az-Branch-0003",
@@ -27,9 +26,39 @@ const branches = [
         "address": "Ain Shams University - Faculty of Law",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/AV7oNVy3zv1ELvBz8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0748834,
-        "longitude": 31.2864456
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2864456,
+        "longitude": 30.0772428
+    },
+    {
+        "id": "Az-Branch-0001",
+        "branch": "Adly Mansour Metro Station",
+        "address": "Adly Mansour Central Station, 10th Park inside Metro Station",
+        "branch_type": "Branch",
+        "link": "https://goo.gl/maps/cCoGeE3rBNz1in5k6",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
+    },
+    {
+        "id": "Az-Branch-0002",
+        "branch": "Agora Mall",
+        "address": "Agora Mall - Ground Floor - Fifth Settlement",
+        "branch_type": "Booth",
+        "link": "https://goo.gl/maps/tDFSwg3iHs7r7Cie7",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4284756,
+        "longitude": 30.0084868
+    },
+    {
+        "id": "Az-Branch-0003",
+        "branch": "Ain Shams Law",
+        "address": "Ain Shams University - Faculty of Law",
+        "branch_type": "Booth",
+        "link": "https://maps.app.goo.gl/AV7oNVy3zv1ELvBz8",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2864456,
+        "longitude": 30.0772428
     },
     {
         "id": "Az-Branch-0004",
@@ -37,9 +66,9 @@ const branches = [
         "address": "Ain Shams University -Faculty Of Commerce",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/LGGAzW8ZAf7pYVz49",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0746829,
-        "longitude": 31.2873348
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2873348,
+        "longitude": 30.0746829
     },
     {
         "id": "Az-Branch-0005",
@@ -47,9 +76,9 @@ const branches = [
         "address": "Ain Shams University - Faculty of Arts",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/ubdBiMwJz1ofBZKc9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0767007,
-        "longitude": 31.287256
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.287256,
+        "longitude": 30.0767007
     },
     {
         "id": "Az-Branch-0006",
@@ -57,9 +86,9 @@ const branches = [
         "address": "Old Airport T1",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/q3bVw53xkvkSTyVY6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1282778,
-        "longitude": 31.4025278
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0007",
@@ -67,9 +96,9 @@ const branches = [
         "address": "New Airport Terminal 2",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/acYTr6K66V12g5gV7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1116111,
-        "longitude": 31.4023889
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0008",
@@ -77,9 +106,9 @@ const branches = [
         "address": "Airport T2 in front of the Multi Garage",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/2yj2q8Lvr3SYtuPr7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1142693,
-        "longitude": 31.4022617
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0009",
@@ -87,9 +116,9 @@ const branches = [
         "address": "New Airport 3 - corridor F",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/dwB7C6nbsmmdHup27",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1103817,
-        "longitude": 31.3986981
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0010",
@@ -97,9 +126,9 @@ const branches = [
         "address": "New Airport 3 - corridor G",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/LNAnfYghUxvz4DKa7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1098611,
-        "longitude": 31.3899722
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0011",
@@ -107,9 +136,9 @@ const branches = [
         "address": "South 90th Street, Fifth Settlement, in front of Concord Plaza Mall.",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/hBdajgjKRiKwizs68",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0260887,
-        "longitude": 31.4834156
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4430295,
+        "longitude": 30.0122123
     },
     {
         "id": "Az-Branch-0012",
@@ -117,9 +146,9 @@ const branches = [
         "address": "Al-Husseiny Mall, Al-Tagamoa, next to the first Nakheel Compound, New Cairo, Cairo Governorate",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/QgtpeeRQtzSKS2tBA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0633118,
-        "longitude": 31.4450664
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4226647,
+        "longitude": 30.0549189
     },
     {
         "id": "Az-Branch-0013",
@@ -127,9 +156,9 @@ const branches = [
         "address": "93 Kasr El Aini Street, Shop No. 13/9, next to Rosa El Youssef",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/QX7FJT9c3cxH7xTp6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.035662,
-        "longitude": 31.2339415
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2351475,
+        "longitude": 30.0386053
     },
     {
         "id": "Az-Branch-0014",
@@ -137,9 +166,9 @@ const branches = [
         "address": "Food Court",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/9NsrymCfMnZCbqPG8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0710762,
-        "longitude": 31.514647
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0015",
@@ -147,9 +176,9 @@ const branches = [
         "address": "Al-Tetch Stadium in front of the halls gate",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/ahi3wAVxyLpubKaJA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0439971,
-        "longitude": 31.2224035
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2236173,
+        "longitude": 30.0450029
     },
     {
         "id": "Az-Branch-0016",
@@ -157,9 +186,9 @@ const branches = [
         "address": "International Conference Center El-Moshir Tantawy Axis -next to Hall 1",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/XzdhdTJMkSDMxhAQ9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.014307,
-        "longitude": 31.3846512
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3737777,
+        "longitude": 30.0214702
     },
     {
         "id": "Az-Branch-0017",
@@ -167,9 +196,9 @@ const branches = [
         "address": "International Conference Center El-Moshir Tantawy Axis -next to Hall 4",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/XzdhdTJMkSDMxhAQ9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.014307,
-        "longitude": 31.3846512
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3737777,
+        "longitude": 30.0214702
     },
     {
         "id": "Az-Branch-0018",
@@ -177,9 +206,9 @@ const branches = [
         "address": "Almaza Avenue New Mall next to Misr Aviation Hospital - Heliopolis",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/xvBehnUFj96AgD8H6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0927336,
-        "longitude": 31.3474932
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3438507,
+        "longitude": 30.112315
     },
     {
         "id": "Az-Branch-0019",
@@ -187,9 +216,9 @@ const branches = [
         "address": "Arabella New Mall, Third Settlement, Next to Ezz El Din Pharmacy, New Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/hzDm6h8BC2dC4UHS8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9915895,
-        "longitude": 31.4320094
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3181252,
+        "longitude": 30.1253988
     },
     {
         "id": "Az-Branch-0020",
@@ -197,9 +226,9 @@ const branches = [
         "address": "Avenue Mall, next to the Civil Registry, second floor, New Cairo, Rehab, Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/E5hpiSJcoJ41C9Yr9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0585518,
-        "longitude": 31.5091062
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.5091062,
+        "longitude": 30.0585518
     },
     {
         "id": "Az-Branch-0021",
@@ -207,9 +236,9 @@ const branches = [
         "address": "12 Bavaria Town beside EG-Bank infront of El Baron",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/f1bTqVRgSAeGRNc98",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9808865,
-        "longitude": 31.340971
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0022",
@@ -217,9 +246,9 @@ const branches = [
         "address": "Ring Road with the ninety Street In front of the fountain , next to the Police Academy",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/gMdKQZVhuY1tGbqb6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0305315,
-        "longitude": 31.4074042
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.1970426,
+        "longitude": 30.0911375
     },
     {
         "id": "Az-Branch-0023",
@@ -227,9 +256,9 @@ const branches = [
         "address": "Avenue Mall - Group 130 Al Rehab 2, Al Rehab City",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/YgT9F7Kymfu4hfDP9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0579448,
-        "longitude": 31.509505
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.5091062,
+        "longitude": 30.0585518
     },
     {
         "id": "Az-Branch-0024",
@@ -237,9 +266,9 @@ const branches = [
         "address": "El-Aziz Bellah, El-Zaytoun Sharkeya, Zaytoun",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/g4cbyDvgDC7GZoZv7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0994727,
-        "longitude": 31.3145251
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3120176,
+        "longitude": 30.1016852
     },
     {
         "id": "Az-Branch-0025",
@@ -247,9 +276,9 @@ const branches = [
         "address": "Carrefour Market - Mirage Mall -The 1st Settlement",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/c3VxYAYnWKCENm9h7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0796107,
-        "longitude": 31.4545719
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.455272,
+        "longitude": 30.0797679
     },
     {
         "id": "Az-Branch-0026",
@@ -257,9 +286,9 @@ const branches = [
         "address": "90th Street . Mivida Compound-5th Settlement",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/wqik8ufv9WKBNHW1A",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0177715,
-        "longitude": 31.5344212
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4430295,
+        "longitude": 30.0122123
     },
     {
         "id": "Az-Branch-0027",
@@ -267,9 +296,9 @@ const branches = [
         "address": "Extension of Wali Al Aahd St , Hadaeq Al Qubbah",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/kMsrucabsiAM358w7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0876712,
-        "longitude": 31.283871
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2829051,
+        "longitude": 30.0860406
     },
     {
         "id": "Az-Branch-0028",
@@ -277,9 +306,9 @@ const branches = [
         "address": "Salah Salem Road beside Air Force House , Nasr City -Cairo",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/tEqrwqnYuwrQCM5J7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0824734,
-        "longitude": 31.3216359
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3217036,
+        "longitude": 30.0826897
     },
     {
         "id": "Az-Branch-0029",
@@ -287,9 +316,9 @@ const branches = [
         "address": "Suez Road, Sheraton Al Matar, Nasr City.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/w1ZJy375FvhWq5xH9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0817356,
-        "longitude": 31.3649561
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4069558,
+        "longitude": 30.0813982
     },
     {
         "id": "Az-Branch-0030",
@@ -297,9 +326,9 @@ const branches = [
         "address": "79 Axis, First New Cairo",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/h4PbnaCPcYB3CrP27",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0028909,
-        "longitude": 31.4243558
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4272709,
+        "longitude": 30.0040701
     },
     {
         "id": "Az-Branch-0031",
@@ -307,9 +336,9 @@ const branches = [
         "address": "Mostafa Fahmy Street, Helwan, Cairo.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/dVhXCUZZfWGza32T9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.8500284,
-        "longitude": 31.325404
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.332609,
+        "longitude": 29.8507406
     },
     {
         "id": "Az-Branch-0032",
@@ -317,9 +346,9 @@ const branches = [
         "address": "Carrefour Mega Mall - 5th Settlement - New Cairo.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/Pyu7w1onEUXwidoz5",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9790989,
-        "longitude": 31.4340882
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4284756,
+        "longitude": 30.0084868
     },
     {
         "id": "Az-Branch-0033",
@@ -327,9 +356,9 @@ const branches = [
         "address": "Carrefour New Maadi.",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/pn5MGmXFKGCN6LPb7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9826933,
-        "longitude": 31.3158296
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2569138,
+        "longitude": 29.9601561
     },
     {
         "id": "Az-Branch-0034",
@@ -337,9 +366,9 @@ const branches = [
         "address": "4 Anwar Mufti.st, - Al Nasser Street - Nasr City",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/MFcKoio1uPU662iX6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0676097,
-        "longitude": 31.3300705
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3655989,
+        "longitude": 30.051085
     },
     {
         "id": "Az-Branch-0035",
@@ -347,9 +376,9 @@ const branches = [
         "address": "55 Corniche El Nil, Tora Al Asmnt, Maadi",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/M8gRuY2H26spMKZX7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9291416,
-        "longitude": 31.2816489
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2358387,
+        "longitude": 29.9721971
     },
     {
         "id": "Az-Branch-0036",
@@ -357,9 +386,9 @@ const branches = [
         "address": "Ring Road with the ninety Street next to Carrefour , next to the Police Academy",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/ea2n2gkGVzUvfgUZ8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0305315,
-        "longitude": 31.4074042
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.1970426,
+        "longitude": 30.0911375
     },
     {
         "id": "Az-Branch-0037",
@@ -367,9 +396,9 @@ const branches = [
         "address": "Chillout Gas station - Al Rehab - New Cairo.",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/RWfKL1BueiUhKYEg7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0728444,
-        "longitude": 31.4740266
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4399347,
+        "longitude": 30.0523625
     },
     {
         "id": "Az-Branch-0038",
@@ -377,9 +406,9 @@ const branches = [
         "address": "The entrance to AlShouyfat - the first entrance to the Compound Golf Katameya - Gas station Chillout.",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/upnXQ4b6jMZZ2RcX6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0060293,
-        "longitude": 31.3998837
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0039",
@@ -387,9 +416,9 @@ const branches = [
         "address": "Almaza Airport, Sheraton ,Airport, Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/xzShV5NhMo6VGCfd7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0807204,
-        "longitude": 31.3649881
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3637684,
+        "longitude": 30.0902034
     },
     {
         "id": "Az-Branch-0040",
@@ -397,9 +426,9 @@ const branches = [
         "address": "Ring Road - Eastern Basateen - Al Basateen - Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/UhuQfiBRGZyJdbRa9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9833473,
-        "longitude": 31.3163386
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2672487,
+        "longitude": 29.9908998
     },
     {
         "id": "Az-Branch-0041",
@@ -407,9 +436,9 @@ const branches = [
         "address": "Omar Ibn El Khattab St ,City Stars Mall , 1st Floor , Nasr City",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/g1iT1qSxeRaWcif26",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0739545,
-        "longitude": 31.3443307
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3473235,
+        "longitude": 30.0734298
     },
     {
         "id": "Az-Branch-0042",
@@ -417,9 +446,9 @@ const branches = [
         "address": "Omar Ibn El Khattab St ,City Stars Mall , 4th Floor , Nasr City",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/g1iT1qSxeRaWcif26",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0739545,
-        "longitude": 31.3443307
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3473235,
+        "longitude": 30.0734298
     },
     {
         "id": "Az-Branch-0043",
@@ -427,9 +456,9 @@ const branches = [
         "address": "Civilization Museum - Al Fustat",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/Kh6HwDatBpo4xtTa9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.00841,
-        "longitude": 31.248246
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2482393,
+        "longitude": 30.0085929
     },
     {
         "id": "Az-Branch-0044",
@@ -437,9 +466,9 @@ const branches = [
         "address": "Faculty of Education, in front of ChillOut Roxy gas station inside the college",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/jeu5QFPEp1jUtSRF6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0917708,
-        "longitude": 31.3104575
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0045",
@@ -447,9 +476,9 @@ const branches = [
         "address": "Ninety Street, Fifth Settlement, Concord Plaza Mall",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/DZ5c5rx7bzUtnkDJ9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0248976,
-        "longitude": 31.4825881
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4839369,
+        "longitude": 30.0250478
     },
     {
         "id": "Az-Branch-0046",
@@ -457,9 +486,9 @@ const branches = [
         "address": "District 5 Mall-Ain El Soukhna Road-Industrial Area",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/RAsQs8hgjBAGEewk8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9729167,
-        "longitude": 31.4554722
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4524509,
+        "longitude": 29.9548669
     },
     {
         "id": "Az-Branch-0047",
@@ -467,9 +496,9 @@ const branches = [
         "address": "Ninety Street, Fifth Settlement",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/ZtVDDa38EhpdKSn68",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0167616,
-        "longitude": 31.4118863
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4430295,
+        "longitude": 30.0122123
     },
     {
         "id": "Az-Branch-0048",
@@ -477,9 +506,9 @@ const branches = [
         "address": "East Hub Mall Madinaty front of Craft Zone",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/LmRxShwCr9NDhxUv9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0735556,
-        "longitude": 31.6736667
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6701903,
+        "longitude": 30.0733606
     },
     {
         "id": "Az-Branch-0049",
@@ -487,9 +516,9 @@ const branches = [
         "address": "Egypt Station , Ramsis Square, Al Fagalah, Al Azbakeya, Cairo Governorate",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/xCpugxzkiTpMLg189",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0632299,
-        "longitude": 31.2469369
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2474809,
+        "longitude": 30.0624241
     },
     {
         "id": "Az-Branch-0050",
@@ -497,9 +526,9 @@ const branches = [
         "address": "Misr Station, Ramses Square, Faggala, Azbakeya, Cairo Governorate, in front of the station",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/xCpugxzkiTpMLg189",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0632299,
-        "longitude": 31.2469369
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.24657,
+        "longitude": 30.0623791
     },
     {
         "id": "Az-Branch-0051",
@@ -507,9 +536,9 @@ const branches = [
         "address": "18 Nazih Khalifa Street, El Korba, Heliopolis, in front of Al-Thawra Hospital , Next to CIB Bank",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/v9PCxE8ibNvozbct7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0907595,
-        "longitude": 31.326635
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3264289,
+        "longitude": 30.0912698
     },
     {
         "id": "Az-Branch-0052",
@@ -517,9 +546,9 @@ const branches = [
         "address": "62 Street 9 next to the Maadi Sknat station",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/NpH1VCqTiSXcEAwA6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9554934,
-        "longitude": 31.2615387
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2544636,
+        "longitude": 29.9658773
     },
     {
         "id": "Az-Branch-0053",
@@ -527,9 +556,9 @@ const branches = [
         "address": "81 Main Manial Street.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/yhqCevNgGcXrNjQJ7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.02275,
-        "longitude": 31.22575
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2252229,
+        "longitude": 30.0187845
     },
     {
         "id": "Az-Branch-0054",
@@ -537,9 +566,9 @@ const branches = [
         "address": "Sadat Axis , Beginning of New Cairo , Cairo Governorate",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/LZhZve8kxJrkaJHc7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0540963,
-        "longitude": 31.4913072
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4692235,
+        "longitude": 30.0534103
     },
     {
         "id": "Az-Branch-0055",
@@ -547,9 +576,9 @@ const branches = [
         "address": "In front of American University Gate 5 - Point 90 Mall",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/7w54UNjQNtxoVqAL8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0197434,
-        "longitude": 31.49475
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0056",
@@ -557,9 +586,9 @@ const branches = [
         "address": "Gateway Mall, next to Alfa Market, Gate 13, Al Rehab",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/M2Skfw4pNEAqtD9G8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0638046,
-        "longitude": 31.4792175
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4796217,
+        "longitude": 30.0641894
     },
     {
         "id": "Az-Branch-0057",
@@ -567,9 +596,9 @@ const branches = [
         "address": "Chillout ElChouyfat Gas Station, next to Triumph Hotel Fifth Settlement , New Cairo",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/r6HM1SAJ2zmK56Ho7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0063838,
-        "longitude": 31.4003963
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4284756,
+        "longitude": 30.0084868
     },
     {
         "id": "Az-Branch-0058",
@@ -577,9 +606,9 @@ const branches = [
         "address": "Girls College- Merghany - inside the college",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/oJc4GeXNtvpCGhuRA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0811095,
-        "longitude": 31.3289564
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.333331,
+        "longitude": 30.0852514
     },
     {
         "id": "Az-Branch-0059",
@@ -587,9 +616,9 @@ const branches = [
         "address": "Al Manteqah al Sadesah, Nasr City, Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/C4ewx5x9xt84e68B8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0538578,
-        "longitude": 31.3136444
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3558103,
+        "longitude": 30.0647818
     },
     {
         "id": "Az-Branch-0060",
@@ -597,9 +626,9 @@ const branches = [
         "address": "Sixth district, Next to Zanusi Company Nasr City, Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/xATXybKmy4P9xy58A",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0464349,
-        "longitude": 31.3185799
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.38149,
+        "longitude": 30.0205814
     },
     {
         "id": "Az-Branch-0061",
@@ -607,9 +636,9 @@ const branches = [
         "address": "156 Egypt and Sudan Street, next to Al-Youm Fish Restaurant",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/c8J8HnhMnahZZ6wE8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0871201,
-        "longitude": 31.2879295
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.1937874,
+        "longitude": 30.044242
     },
     {
         "id": "Az-Branch-0062",
@@ -617,9 +646,9 @@ const branches = [
         "address": "Heliopolis Star",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/qfcBCgXbxRdEoeSYA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9863056,
-        "longitude": 31.5301389
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0063",
@@ -627,9 +656,9 @@ const branches = [
         "address": "40 Ragheb Street, intersection of Mohamed Sayed Ahmed Street, in front of KFC and Jad Restaurant",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/iBv2jCzVxnwu9tgT7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.847434,
-        "longitude": 31.331683
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0064",
@@ -637,9 +666,9 @@ const branches = [
         "address": "Helwan University - next to the commercial center - and runway 4",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/BCQWNDqhB2KFAR1D8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.8666956,
-        "longitude": 31.317214
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3153857,
+        "longitude": 29.8669319
     },
     {
         "id": "Az-Branch-0065",
@@ -647,9 +676,9 @@ const branches = [
         "address": "Lake House, 90th Street, next to Doucid Hotel, inside Lake House Club",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/aCDviJhqmrHgzXqj7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.024044,
-        "longitude": 31.4544754
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4536429,
+        "longitude": 30.0244686
     },
     {
         "id": "Az-Branch-0066",
@@ -657,9 +686,9 @@ const branches = [
         "address": "Ninety Street, behind the Air Force Hospital, Fifth Settlement",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/TjutLCT46KNRJBsW6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0195058,
-        "longitude": 31.4359909
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4430295,
+        "longitude": 30.0122123
     },
     {
         "id": "Az-Branch-0067",
@@ -667,9 +696,9 @@ const branches = [
         "address": "Lulu District Mall - Wadi Degla after National Gas Station",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/GeCYYoKvbGXBM4sE7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.091003,
-        "longitude": 31.3807897
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4029959,
+        "longitude": 30.0513412
     },
     {
         "id": "Az-Branch-0068",
@@ -677,9 +706,9 @@ const branches = [
         "address": "First Settlement, Lulu Market Mall, next to the Police Academy, first floor",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/3hyfFLWgvHtgtBWF9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0533679,
-        "longitude": 31.4307569
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0069",
@@ -687,9 +716,9 @@ const branches = [
         "address": "50th Street Zahraa Al Maadi, next to KFC and QNB Bank",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/hfmjGV8SZVM2jED56",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9725084,
-        "longitude": 31.3150692
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3037388,
+        "longitude": 29.9619427
     },
     {
         "id": "Az-Branch-0070",
@@ -697,9 +726,9 @@ const branches = [
         "address": "Street 216, Ezbet Fahmy, From Laselki St.",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/KQ9P67kNMutU4UEc8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9712222,
-        "longitude": 31.2796111
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2795046,
+        "longitude": 29.9704816
     },
     {
         "id": "Az-Branch-0071",
@@ -707,9 +736,9 @@ const branches = [
         "address": "Madinaty Road in front of Carrefour",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/37Trn15YFRUAPmbL8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1071425,
-        "longitude": 31.6292891
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6232599,
+        "longitude": 30.0939533
     },
     {
         "id": "Az-Branch-0072",
@@ -717,9 +746,9 @@ const branches = [
         "address": "Open Air Mall Building F",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/Pm5vHeCrZzbdhYqNA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1062393,
-        "longitude": 31.6260204
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6265251,
+        "longitude": 30.1086266
     },
     {
         "id": "Az-Branch-0073",
@@ -727,9 +756,9 @@ const branches = [
         "address": "Madinaty ,Craft Zone , New Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/U9wUDiDNgE9tmY1J9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0728092,
-        "longitude": 31.6693134
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6745522,
+        "longitude": 30.0728961
     },
     {
         "id": "Az-Branch-0074",
@@ -737,9 +766,9 @@ const branches = [
         "address": "90 Makram Ebeid Street, Nasr City, next to Cafe Beanos",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/eDkUf1DMsP2pevNm6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0657406,
-        "longitude": 31.3443344
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3443287,
+        "longitude": 30.0656806
     },
     {
         "id": "Az-Branch-0075",
@@ -747,9 +776,9 @@ const branches = [
         "address": "105 El-Sayed El-Marghani Street, Heliopolis, next to tortina For Sweets",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/DBJRkhjaqMo7LzAd7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0883033,
-        "longitude": 31.33811
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3349789,
+        "longitude": 30.087283
     },
     {
         "id": "Az-Branch-0076",
@@ -757,9 +786,9 @@ const branches = [
         "address": "17 El Ahram St., In front of Normandy Cinema , El Korba",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/PfzRCZBsfqWScjW87",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0913137,
-        "longitude": 31.3221881
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.293882,
+        "longitude": 30.0124784
     },
     {
         "id": "Az-Branch-0077",
@@ -767,9 +796,9 @@ const branches = [
         "address": "6 El-Batrawy St",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/ngYEA4fk8mYRYz1X7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0603793,
-        "longitude": 31.3307936
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3308338,
+        "longitude": 30.061516
     },
     {
         "id": "Az-Branch-0078",
@@ -777,9 +806,9 @@ const branches = [
         "address": "18 Al Khalifa Al Ma'mun, Manshiet al-Bakri",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/ZwDZ33Zw1CN4V7p96",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0870089,
-        "longitude": 31.3033767
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.0054491,
+        "longitude": 31.2583338
     },
     {
         "id": "Az-Branch-0079",
@@ -787,9 +816,9 @@ const branches = [
         "address": "17 El Ahram St., In front of Normandy Cinema , El Korba",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/Q7vhuuwMsdtVpo889",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0913136,
-        "longitude": 31.322188
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.293882,
+        "longitude": 30.0124784
     },
     {
         "id": "Az-Branch-0080",
@@ -797,9 +826,9 @@ const branches = [
         "address": "Booth18 Al Khalifa Al Ma'mun, Manshiet al-Bakri",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/dNCbvm9bXqNdUqEN9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0869953,
-        "longitude": 31.3033774
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2568878,
+        "longitude": 30.0164728
     },
     {
         "id": "Az-Branch-0081",
@@ -807,9 +836,9 @@ const branches = [
         "address": "84 Hassan Ma'moon, Al Manteqah as Sadesah, Ahly Club St, Nasr City",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/ibr5k1hsfwyyZXbq5",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0678065,
-        "longitude": 31.3565308
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3558022,
+        "longitude": 30.0706402
     },
     {
         "id": "Az-Branch-0082",
@@ -817,9 +846,9 @@ const branches = [
         "address": "16, 9 Street El Nafoura Sq. Mokattam, Cairo In Front Of National Bank Of Egypt",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/yDxBR4RZXMhLJw8X8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0148165,
-        "longitude": 31.2809539
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2845269,
+        "longitude": 30.0143296
     },
     {
         "id": "Az-Branch-0083",
@@ -827,9 +856,9 @@ const branches = [
         "address": "Ground Floor, Rehab Mall, Talaat Mostafa Street.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/7unXh2dT6mU8M31Q9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0616667,
-        "longitude": 31.4816667
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4875239,
+        "longitude": 30.0593393
     },
     {
         "id": "Az-Branch-0084",
@@ -837,9 +866,9 @@ const branches = [
         "address": "53 Masr - Helwan Agriculture Road, Maadi.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/S5GeHJFNGnqJkhw69",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9651961,
-        "longitude": 31.2487462
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2503285,
+        "longitude": 29.961073
     },
     {
         "id": "Az-Branch-0085",
@@ -847,9 +876,9 @@ const branches = [
         "address": "Inside Panorama El Shorouk Mall, El Shorouk City, New Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/1E5CmFJsmkEng2QX8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1367527,
-        "longitude": 31.6131535
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6135435,
+        "longitude": 30.1365326
     },
     {
         "id": "Az-Branch-0086",
@@ -857,9 +886,9 @@ const branches = [
         "address": "The Fifth Settlement, after the American University, the club inside the Mivida Compound",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/W5wAKE9HK9nkw5fY6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0074668,
-        "longitude": 31.536321
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4284756,
+        "longitude": 30.0084868
     },
     {
         "id": "Az-Branch-0087",
@@ -867,9 +896,9 @@ const branches = [
         "address": "23 , 9 Street , Mokattam.",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/etMZwjQigyL2rXTW9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.014225,
-        "longitude": 31.2848225
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2544067,
+        "longitude": 29.965869
     },
     {
         "id": "Az-Branch-0088",
@@ -877,9 +906,9 @@ const branches = [
         "address": "Middle plateau,Salah El Din St. Gate (B31), in front of Carrefour and Adidas store",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/mYUn1PgKxC12mZjXA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9855462,
-        "longitude": 31.3222179
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3324326,
+        "longitude": 30.0930789
     },
     {
         "id": "Az-Branch-0089",
@@ -887,9 +916,9 @@ const branches = [
         "address": "One Kattameya - Al Morshedy Complex - Mohamed Zaki Square - Building 214",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/akdvbWgJtGTUUg7S8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9810426,
-        "longitude": 31.3563967
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4095335,
+        "longitude": 29.978617
     },
     {
         "id": "Az-Branch-0090",
@@ -897,9 +926,9 @@ const branches = [
         "address": "16 Mostafa El Nahhas, 6th District, Nasr City, next to Primus Pizza",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/aqhY9D6EQBktMzM67",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0541432,
-        "longitude": 31.3416494
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3308287,
+        "longitude": 30.0647747
     },
     {
         "id": "Az-Branch-0091",
@@ -907,9 +936,9 @@ const branches = [
         "address": "Market Jamal Salama next to Nuzha Traffic Department - Sheraton",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/sKcGtVEQjMbaUdHP8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0982355,
-        "longitude": 31.3816101
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3814285,
+        "longitude": 30.0983838
     },
     {
         "id": "Az-Branch-0092",
@@ -917,9 +946,9 @@ const branches = [
         "address": "5 Al Ramla street, El-Bostan, Heliopolis, Cairo Governorate",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/RPTeZwdiEZ9x8q1B8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0955042,
-        "longitude": 31.3289679
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3288922,
+        "longitude": 30.0955757
     },
     {
         "id": "Az-Branch-0093",
@@ -927,9 +956,9 @@ const branches = [
         "address": "Open Air Mall - next to Asfour Crystal Shop",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/EsHa2vU3j3VQdHPH7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1077047,
-        "longitude": 31.624416
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6265251,
+        "longitude": 30.1086266
     },
     {
         "id": "Az-Branch-0094",
@@ -937,9 +966,9 @@ const branches = [
         "address": "Open Air Mall -Kids Area-Polt C",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/hgwPzLJ9DWqhdsPp9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1070405,
-        "longitude": 31.6280742
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0095",
@@ -947,9 +976,9 @@ const branches = [
         "address": "105 Omar Ibn El-Khattab, Almazah, Heliopolis",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/4KKGJUEM8DrTzxRH9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0873291,
-        "longitude": 31.3457867
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3457243,
+        "longitude": 30.0872056
     },
     {
         "id": "Az-Branch-0096",
@@ -957,9 +986,9 @@ const branches = [
         "address": "Main Zahraa Street in Zahraa Al Maadi, Rihana Plaza Tower , near to Vodafone",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/yYnzajoRb87Z9GFKA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9611396,
-        "longitude": 31.2969722
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3057941,
+        "longitude": 29.9617319
     },
     {
         "id": "Az-Branch-0097",
@@ -967,9 +996,9 @@ const branches = [
         "address": "Plot 425, 90th Street. Sector 3, 5th Compound, New cairo.",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/WGGrVAAs7xQn2VzMA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0277111,
-        "longitude": 31.488742
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4430198,
+        "longitude": 30.0122171
     },
     {
         "id": "Az-Branch-0098",
@@ -977,9 +1006,9 @@ const branches = [
         "address": "7A Nile Corniche, Dallah Tower, Maadi District, Cairo",
         "branch_type": "Booth",
         "link": "https://maps.google.com/maps?q=29.961395631.2472813&z=17&hl=en",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9613956,
-        "longitude": 31.2472813
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2471993,
+        "longitude": 29.9619698
     },
     {
         "id": "Az-Branch-0099",
@@ -987,9 +1016,9 @@ const branches = [
         "address": "7 El-Nasr Rd, 6th District, Nasr City",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/BRFsEG73CparcMdGA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0685844,
-        "longitude": 31.3428459
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3426152,
+        "longitude": 30.0689257
     },
     {
         "id": "Az-Branch-0100",
@@ -997,9 +1026,9 @@ const branches = [
         "address": "Pearl Mall, 90th Street intersection on the main axis",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/WeWSBfsk8K3n1qxa6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0023038,
-        "longitude": 31.5032772
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4430295,
+        "longitude": 30.0122123
     },
     {
         "id": "Az-Branch-0101",
@@ -1007,9 +1036,9 @@ const branches = [
         "address": "Petrojet branch inside the company. Working hours are from Sunday to Thursday from 8 am to 3 pm",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/RNM7WKXUCoMwfNEa7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0202248,
-        "longitude": 31.4143922
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0102",
@@ -1017,9 +1046,9 @@ const branches = [
         "address": "Petrojet Company, 90th Street, next to Downtown Mall",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/DEcvdLuLSUQzod6x9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0202248,
-        "longitude": 31.4143922
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0103",
@@ -1027,9 +1056,9 @@ const branches = [
         "address": "56 Qasr El Nil in front of Wafa Bank & Alex Bank",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/VwrGXTnJqUWqeNpE7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0492997,
-        "longitude": 31.2463302
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2325889,
+        "longitude": 30.0432583
     },
     {
         "id": "Az-Branch-0104",
@@ -1037,9 +1066,9 @@ const branches = [
         "address": "Residence Hotel - First Settlement-Inside the Hotel",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/c6NshQgjNERzeHsk7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0387263,
-        "longitude": 31.4401181
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0105",
@@ -1047,9 +1076,9 @@ const branches = [
         "address": "El Sadat Rd, El Shorouk, beside Terrace Mall",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/LSKuW4Tvc53u3C8p8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1526071,
-        "longitude": 31.6268152
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6269635,
+        "longitude": 30.1509886
     },
     {
         "id": "Az-Branch-0106",
@@ -1057,9 +1086,9 @@ const branches = [
         "address": "6 Roxy St, in front of Merryland Park behind Othman Ahmed Othman Buildings",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/uC2VYyj3SZkE62Su9",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0958364,
-        "longitude": 31.3149386
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0107",
@@ -1067,9 +1096,9 @@ const branches = [
         "address": "Omar Ibn El Khattab St ,City Stars Mall , Nasr City",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/sui4wWBJmfvKeo12A",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0740178,
-        "longitude": 31.345573
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3473235,
+        "longitude": 30.0734298
     },
     {
         "id": "Az-Branch-0108",
@@ -1077,9 +1106,9 @@ const branches = [
         "address": "22 A, The Waterway Compound, New cairo, Inside W Mall, Ground Floor.",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/PBMyhgdMvvtP4qYL7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0406391,
-        "longitude": 31.4754475
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4771017,
+        "longitude": 30.041309
     },
     {
         "id": "Az-Branch-0109",
@@ -1087,9 +1116,9 @@ const branches = [
         "address": "24 Sayed Zakaria Street Sheraton , In front of cilantro",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/mCY8bCvs4TwJCvVv8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1029414,
-        "longitude": 31.3734759
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3771676,
+        "longitude": 30.098542
     },
     {
         "id": "Az-Branch-0110",
@@ -1097,9 +1126,9 @@ const branches = [
         "address": "13 Sherif Street, Downtown, next to the Ministry of Endowments",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/c4VM3P1fJi3FgYu27",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0466728,
-        "longitude": 31.24225
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0111",
@@ -1107,9 +1136,9 @@ const branches = [
         "address": "El Shorouk City, Gate 1, Cairo Ismailia Road",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/JEVCiy2TCjcXVQKg7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1739617,
-        "longitude": 31.5941382
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.627228,
+        "longitude": 30.1861714
     },
     {
         "id": "Az-Branch-0112",
@@ -1117,9 +1146,9 @@ const branches = [
         "address": "70th Shoubra Street , Between Massara & Rood El Farag.",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/LJ8N6abPWV491AQ99",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0759771,
-        "longitude": 31.2450538
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0113",
@@ -1127,9 +1156,9 @@ const branches = [
         "address": "41 A Shubra Street",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/9Had4yBkSaHBG9BD8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0661537,
-        "longitude": 31.2449558
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2451556,
+        "longitude": 30.0660601
     },
     {
         "id": "Az-Branch-0114",
@@ -1137,9 +1166,9 @@ const branches = [
         "address": "Administrative Capital, Government District, next to the Ministry of Finance, Sixty Mall",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/apP5cMxSoHVr6bAo7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0117601,
-        "longitude": 31.7395431
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.7320231,
+        "longitude": 30.0185865
     },
     {
         "id": "Az-Branch-0115",
@@ -1147,9 +1176,9 @@ const branches = [
         "address": "90th Street, South Gate Mall, next to Banque Misr, the front side parallel to Concord Plaza Mall",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/fEpFjhn1sr9hrEg27",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0255585,
-        "longitude": 31.4795685
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0116",
@@ -1157,9 +1186,9 @@ const branches = [
         "address": "City Plaza Mall - Al-Shuhada Road - next to the British University and Al-Shorouk Academy - Al-Shorouk",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/VkVNNBsXX8HqpUBp6",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1144124,
-        "longitude": 31.6066092
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.6066106,
+        "longitude": 30.1143316
     },
     {
         "id": "Az-Branch-0117",
@@ -1167,9 +1196,9 @@ const branches = [
         "address": "North 90th Street,Inside Spinneys Maxim Mall,Fifth Settlement",
         "branch_type": "Booth",
         "link": "https://maps.app.goo.gl/BUTj1tZqDmwayizEA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0294848,
-        "longitude": 31.49659
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.496699,
+        "longitude": 30.0295773
     },
     {
         "id": "Az-Branch-0118",
@@ -1177,9 +1206,9 @@ const branches = [
         "address": "Banks Center , 90th Street , First New Cairo.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/wp2YqwJcDG2ev9H47",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.018422,
-        "longitude": 31.4254821
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4216236,
+        "longitude": 30.0182829
     },
     {
         "id": "Az-Branch-0119",
@@ -1187,9 +1216,9 @@ const branches = [
         "address": "Street 250, Maadi at Sarayat Al Gharbeyah, opposite to Maadi Grand Mall.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/zzJK2bNZR2SFVS8A7",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9662934,
-        "longitude": 31.2699352
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2701317,
+        "longitude": 29.9656959
     },
     {
         "id": "Az-Branch-0120",
@@ -1197,9 +1226,9 @@ const branches = [
         "address": "End of AUC St, beside Banque Misr, 3rd Settlement",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/PfknvHxXunu6vrrY8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0034301,
-        "longitude": 31.5035802
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     },
     {
         "id": "Az-Branch-0121",
@@ -1207,9 +1236,9 @@ const branches = [
         "address": "Hub, 50 Mall Zahraa Al Maadi, Cairo",
         "branch_type": "Branch",
         "link": "https://goo.gl/maps/LhAUQZqTZqSa2dpQA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 29.9679497,
-        "longitude": 31.3147981
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3144469,
+        "longitude": 29.9691862
     },
     {
         "id": "Az-Branch-0122",
@@ -1217,9 +1246,9 @@ const branches = [
         "address": "Park Mall ,5th Settlement, in front of Lulu Hypermarket beside Porto Cairo Hotel near to American Uni.",
         "branch_type": "Booth",
         "link": "https://goo.gl/maps/zjRa5qDosrUr8KJf8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0267131,
-        "longitude": 31.4980109
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4284756,
+        "longitude": 30.0084868
     },
     {
         "id": "Az-Branch-0123",
@@ -1227,9 +1256,9 @@ const branches = [
         "address": "9 El Batrawy Street, Genena Mall, Nasr City",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/CnRxwhD31VjUz6wBA",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.0609375,
-        "longitude": 31.3326875
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3321901,
+        "longitude": 30.060953
     },
     {
         "id": "Az-Branch-0124",
@@ -1237,12 +1266,82 @@ const branches = [
         "address": "45 Abu Bakr Al-Siddiq St., Intersection of Haroun St., Court Square, Heliopolis, Cairo, in front of Al-Nasr Schools.",
         "branch_type": "Branch",
         "link": "https://maps.app.goo.gl/HEctf2R2vbdi7UVp8",
-        "icon": "https://al-azab.co/img/icon-5060.png",
-        "latitude": 30.1009521,
-        "longitude": 31.3329315
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.3326398,
+        "longitude": 30.1021743
+    },
+    {
+        "id": "Az-Branch-0125",
+        "branch": "Up Town-Moktam",
+        "address": "The new plaza in front of Celestia Gardens",
+        "branch_type": "Branch",
+        "link": "https://maps.app.goo.gl/r3KheWF8sx4ARhCe6",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
+    },
+    {
+        "id": "Az-Branch-0126",
+        "branch": "Wadi Degla - Settlement",
+        "address": "Nakheel Compound - First Settlement - Wadi Degla Club - Tennis Area",
+        "branch_type": "Branch",
+        "link": "https://www.abuauf.com/en/branches",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4226647,
+        "longitude": 30.0549189
+    },
+    {
+        "id": "Az-Branch-0127",
+        "branch": "Wadi Degla Maadi",
+        "address": "The 4th part Zahraa Maadi beside the Kuwaiti mosque inside the club Gate 4",
+        "branch_type": "Branch",
+        "link": "https://maps.app.goo.gl/osbhsb4jPVThDyZR7",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2589346,
+        "longitude": 29.9595144
+    },
+    {
+        "id": "Az-Branch-0128",
+        "branch": "Watania-Al Rehab",
+        "address": "In front of Gate 1 Al-Rehab - Cairo Tahrir Axis",
+        "branch_type": "Branch",
+        "link": "https://goo.gl/maps/sA5ikk1JVTHkai2b9",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.4994979,
+        "longitude": 30.0545161
+    },
+    {
+        "id": "Az-Branch-0129",
+        "branch": "Watanya El-Maadi",
+        "address": "SaKr Kuraish Road, in front of Banque Misr, From Al-Nasr Street, next to American Aid and McDonald's",
+        "branch_type": "Branch",
+        "link": "https://maps.app.goo.gl/XfSSSiQYn3UjNxXL6",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.0152768,
+        "longitude": 29.9736306
+    },
+    {
+        "id": "Az-Branch-0130",
+        "branch": "Zamalek Brazil",
+        "address": "5 Brazil Street, Zamalek, in front of Orange",
+        "branch_type": "Branch",
+        "link": "https://goo.gl/maps/dztma2e4jg4zdWby5",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 31.2226419,
+        "longitude": 30.0607482
+    },
+    {
+        "id": "Az-Branch-0131",
+        "branch": "Zamalek Taha Husein",
+        "address": "2 Taha Hussein, in front of Al Yamamah Center, next to the National Bank of Kuwait. Shop More at Physical Stores Online Stores",
+        "branch_type": "Branch",
+        "link": "https://maps.app.goo.gl/Ux8HGCLXh9oNTFrr6",
+        "icon": "https://al-azab.co/img/beachpin.png",
+        "latitude": 30.802498,
+        "longitude": 26.820553
     }
- ]
-]
+];
+
 // المتغيرات العامة
 let map;
 let markers = [];
@@ -1336,7 +1435,7 @@ function setMarkers(map) {
             title: branch.branch,
             icon: {
                 url: branch.branch_type === 'Branch' 
-                    ? 'https://al-azab.co/img/icon-5060.png'
+                    ? 'https://al-azab.co/img/beachpin.png'
                     : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                         <svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="16" cy="16" r="12" fill="#e67e22" stroke="white" stroke-width="2"/>

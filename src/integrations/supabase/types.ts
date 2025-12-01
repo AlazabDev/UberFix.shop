@@ -341,47 +341,32 @@ export type Database = {
         Row: {
           address: string | null
           branch: string
-          branch_name: string | null
           branch_type: string | null
-          city: string | null
-          district: string | null
           icon: string | null
           id: string
           latitude: string | null
           link: string | null
           longitude: string | null
-          phone: string | null
-          status: string | null
         }
         Insert: {
           address?: string | null
           branch: string
-          branch_name?: string | null
           branch_type?: string | null
-          city?: string | null
-          district?: string | null
           icon?: string | null
           id: string
           latitude?: string | null
           link?: string | null
           longitude?: string | null
-          phone?: string | null
-          status?: string | null
         }
         Update: {
           address?: string | null
           branch?: string
-          branch_name?: string | null
           branch_type?: string | null
-          city?: string | null
-          district?: string | null
           icon?: string | null
           id?: string
           latitude?: string | null
           link?: string | null
           longitude?: string | null
-          phone?: string | null
-          status?: string | null
         }
         Relationships: []
       }
@@ -526,6 +511,13 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "districts_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "vw_cities_public"
             referencedColumns: ["id"]
           },
         ]
@@ -958,31 +950,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_mr_branch"
-            columns: ["branch_id"]
+            foreignKeyName: "maintenance_requests_assigned_vendor_id_fkey"
+            columns: ["assigned_vendor_id"]
             isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_mr_category"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_mr_company"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_mr_property"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1267,39 +1238,6 @@ export type Database = {
           },
         ]
       }
-      otp_verifications: {
-        Row: {
-          action: string | null
-          created_at: string | null
-          expires_at: string
-          id: string
-          otp_code: string
-          phone: string
-          verified: boolean | null
-          verified_at: string | null
-        }
-        Insert: {
-          action?: string | null
-          created_at?: string | null
-          expires_at: string
-          id?: string
-          otp_code: string
-          phone: string
-          verified?: boolean | null
-          verified_at?: string | null
-        }
-        Update: {
-          action?: string | null
-          created_at?: string | null
-          expires_at?: string
-          id?: string
-          otp_code?: string
-          phone?: string
-          verified?: boolean | null
-          verified_at?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1582,6 +1520,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "properties_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "vw_cities_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "properties_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
@@ -1810,20 +1755,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_review_request"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_review_technician"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "reviews_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
@@ -1855,210 +1786,6 @@ export type Database = {
           role?: string
         }
         Relationships: []
-      }
-      service_addons: {
-        Row: {
-          additional_price: number
-          created_at: string | null
-          description: string | null
-          duration_hours: number | null
-          id: number
-          name: string
-          service_item_id: number | null
-        }
-        Insert: {
-          additional_price: number
-          created_at?: string | null
-          description?: string | null
-          duration_hours?: number | null
-          id?: number
-          name: string
-          service_item_id?: number | null
-        }
-        Update: {
-          additional_price?: number
-          created_at?: string | null
-          description?: string | null
-          duration_hours?: number | null
-          id?: number
-          name?: string
-          service_item_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_addons_service_item_id_fkey"
-            columns: ["service_item_id"]
-            isOneToOne: false
-            referencedRelation: "service_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_categories: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          icon: string | null
-          id: number
-          is_active: boolean | null
-          name: string
-          sort_order: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          icon?: string | null
-          id?: number
-          is_active?: boolean | null
-          name: string
-          sort_order?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          icon?: string | null
-          id?: number
-          is_active?: boolean | null
-          name?: string
-          sort_order?: number | null
-        }
-        Relationships: []
-      }
-      service_items: {
-        Row: {
-          base_price: number
-          created_at: string | null
-          description: string | null
-          duration_hours: number | null
-          id: number
-          image_url: string | null
-          is_active: boolean | null
-          name: string
-          subcategory_id: number | null
-        }
-        Insert: {
-          base_price: number
-          created_at?: string | null
-          description?: string | null
-          duration_hours?: number | null
-          id?: number
-          image_url?: string | null
-          is_active?: boolean | null
-          name: string
-          subcategory_id?: number | null
-        }
-        Update: {
-          base_price?: number
-          created_at?: string | null
-          description?: string | null
-          duration_hours?: number | null
-          id?: number
-          image_url?: string | null
-          is_active?: boolean | null
-          name?: string
-          subcategory_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_items_subcategory_id_fkey"
-            columns: ["subcategory_id"]
-            isOneToOne: false
-            referencedRelation: "service_subcategories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_orders: {
-        Row: {
-          created_at: string | null
-          customer_id: number
-          description: string | null
-          id: number
-          location: string | null
-          package_id: number | null
-          service_item_id: number
-          status: string | null
-          technician_id: number | null
-          total_price: number
-        }
-        Insert: {
-          created_at?: string | null
-          customer_id: number
-          description?: string | null
-          id?: number
-          location?: string | null
-          package_id?: number | null
-          service_item_id: number
-          status?: string | null
-          technician_id?: number | null
-          total_price: number
-        }
-        Update: {
-          created_at?: string | null
-          customer_id?: number
-          description?: string | null
-          id?: number
-          location?: string | null
-          package_id?: number | null
-          service_item_id?: number
-          status?: string | null
-          technician_id?: number | null
-          total_price?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_orders_package_id_fkey"
-            columns: ["package_id"]
-            isOneToOne: false
-            referencedRelation: "service_packages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_orders_service_item_id_fkey"
-            columns: ["service_item_id"]
-            isOneToOne: false
-            referencedRelation: "service_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_packages: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          features: Json | null
-          id: number
-          package_name: string
-          price: number
-          service_item_id: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          features?: Json | null
-          id?: number
-          package_name: string
-          price: number
-          service_item_id?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          features?: Json | null
-          id?: number
-          package_name?: string
-          price?: number
-          service_item_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_packages_service_item_id_fkey"
-            columns: ["service_item_id"]
-            isOneToOne: false
-            referencedRelation: "service_items"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       service_prices: {
         Row: {
@@ -2095,51 +1822,12 @@ export type Database = {
           },
         ]
       }
-      service_subcategories: {
-        Row: {
-          category_id: number | null
-          created_at: string | null
-          description: string | null
-          icon: string | null
-          id: number
-          is_active: boolean | null
-          name: string
-        }
-        Insert: {
-          category_id?: number | null
-          created_at?: string | null
-          description?: string | null
-          icon?: string | null
-          id?: number
-          is_active?: boolean | null
-          name: string
-        }
-        Update: {
-          category_id?: number | null
-          created_at?: string | null
-          description?: string | null
-          icon?: string | null
-          id?: number
-          is_active?: boolean | null
-          name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_subcategories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "service_categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       services: {
         Row: {
           base_price: number | null
           category_id: string | null
           code: string
           created_at: string | null
-          description: string | null
           description_ar: string | null
           description_en: string | null
           icon_url: string | null
@@ -2152,7 +1840,7 @@ export type Database = {
           name_en: string | null
           pricing_type: string
           sort_order: number | null
-          subcategory_id: string | null
+          subcategory_id: string
           unit: string | null
           updated_at: string | null
         }
@@ -2161,7 +1849,6 @@ export type Database = {
           category_id?: string | null
           code: string
           created_at?: string | null
-          description?: string | null
           description_ar?: string | null
           description_en?: string | null
           icon_url?: string | null
@@ -2174,7 +1861,7 @@ export type Database = {
           name_en?: string | null
           pricing_type?: string
           sort_order?: number | null
-          subcategory_id?: string | null
+          subcategory_id: string
           unit?: string | null
           updated_at?: string | null
         }
@@ -2183,7 +1870,6 @@ export type Database = {
           category_id?: string | null
           code?: string
           created_at?: string | null
-          description?: string | null
           description_ar?: string | null
           description_en?: string | null
           icon_url?: string | null
@@ -2196,7 +1882,7 @@ export type Database = {
           name_en?: string | null
           pricing_type?: string
           sort_order?: number | null
-          subcategory_id?: string | null
+          subcategory_id?: string
           unit?: string | null
           updated_at?: string | null
         }
@@ -2332,6 +2018,7 @@ export type Database = {
       }
       technician_agreements: {
         Row: {
+          application_id: string | null
           conduct_policy_accepted: boolean | null
           created_at: string | null
           customer_respect_policy_accepted: boolean | null
@@ -2341,9 +2028,9 @@ export type Database = {
           punctuality_policy_accepted: boolean | null
           quality_policy_accepted: boolean | null
           signed_at: string | null
-          technician_id: string
         }
         Insert: {
+          application_id?: string | null
           conduct_policy_accepted?: boolean | null
           created_at?: string | null
           customer_respect_policy_accepted?: boolean | null
@@ -2353,9 +2040,9 @@ export type Database = {
           punctuality_policy_accepted?: boolean | null
           quality_policy_accepted?: boolean | null
           signed_at?: string | null
-          technician_id: string
         }
         Update: {
+          application_id?: string | null
           conduct_policy_accepted?: boolean | null
           created_at?: string | null
           customer_respect_policy_accepted?: boolean | null
@@ -2365,14 +2052,89 @@ export type Database = {
           punctuality_policy_accepted?: boolean | null
           quality_policy_accepted?: boolean | null
           signed_at?: string | null
-          technician_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "technician_agreements_technician_id_fkey"
-            columns: ["technician_id"]
+            foreignKeyName: "technician_agreements_application_id_fkey"
+            columns: ["application_id"]
             isOneToOne: false
-            referencedRelation: "technician_profiles"
+            referencedRelation: "technician_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technician_applications: {
+        Row: {
+          alternative_contact: string | null
+          city_id: number | null
+          created_at: string | null
+          district_id: number | null
+          full_name: string
+          home_address: string | null
+          id: string
+          national_id: string
+          phone: string
+          profile_image: string | null
+          specialization: string
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          years_of_experience: number | null
+        }
+        Insert: {
+          alternative_contact?: string | null
+          city_id?: number | null
+          created_at?: string | null
+          district_id?: number | null
+          full_name: string
+          home_address?: string | null
+          id?: string
+          national_id: string
+          phone: string
+          profile_image?: string | null
+          specialization: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          years_of_experience?: number | null
+        }
+        Update: {
+          alternative_contact?: string | null
+          city_id?: number | null
+          created_at?: string | null
+          district_id?: number | null
+          full_name?: string
+          home_address?: string | null
+          id?: string
+          national_id?: string
+          phone?: string
+          profile_image?: string | null
+          specialization?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          years_of_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_applications_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_applications_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "vw_cities_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_applications_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
             referencedColumns: ["id"]
           },
         ]
@@ -2410,350 +2172,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_badge_technician"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technician_badges_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_complaints: {
-        Row: {
-          complaint_type: string
-          created_at: string
-          customer_id: string | null
-          description: string
-          id: string
-          penalty_applied: number | null
-          request_id: string | null
-          resolution: string | null
-          resolved_at: string | null
-          resolved_by: string | null
-          severity: string | null
-          status: string | null
-          technician_id: string
-          updated_at: string
-        }
-        Insert: {
-          complaint_type: string
-          created_at?: string
-          customer_id?: string | null
-          description: string
-          id?: string
-          penalty_applied?: number | null
-          request_id?: string | null
-          resolution?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          severity?: string | null
-          status?: string | null
-          technician_id: string
-          updated_at?: string
-        }
-        Update: {
-          complaint_type?: string
-          created_at?: string
-          customer_id?: string | null
-          description?: string
-          id?: string
-          penalty_applied?: number | null
-          request_id?: string | null
-          resolution?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          severity?: string | null
-          status?: string | null
-          technician_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_complaints_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_complaints_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_complaints_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_complaints_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_coverage: {
-        Row: {
-          city_id: number | null
-          created_at: string | null
-          district_id: number | null
-          id: string
-          radius_km: number | null
-          technician_id: string
-        }
-        Insert: {
-          city_id?: number | null
-          created_at?: string | null
-          district_id?: number | null
-          id?: string
-          radius_km?: number | null
-          technician_id: string
-        }
-        Update: {
-          city_id?: number | null
-          created_at?: string | null
-          district_id?: number | null
-          id?: string
-          radius_km?: number | null
-          technician_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_coverage_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_coverage_district_id_fkey"
-            columns: ["district_id"]
-            isOneToOne: false
-            referencedRelation: "districts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_coverage_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_coverage_areas: {
-        Row: {
-          city_id: number | null
-          city_name: string | null
-          created_at: string | null
-          district_id: number | null
-          district_name: string | null
-          id: string
-          radius_km: number | null
-          technician_id: string
-        }
-        Insert: {
-          city_id?: number | null
-          city_name?: string | null
-          created_at?: string | null
-          district_id?: number | null
-          district_name?: string | null
-          id?: string
-          radius_km?: number | null
-          technician_id: string
-        }
-        Update: {
-          city_id?: number | null
-          city_name?: string | null
-          created_at?: string | null
-          district_id?: number | null
-          district_name?: string | null
-          id?: string
-          radius_km?: number | null
-          technician_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_coverage_areas_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_coverage_areas_district_id_fkey"
-            columns: ["district_id"]
-            isOneToOne: false
-            referencedRelation: "districts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_coverage_areas_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_coverage_areas_technician_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_daily_stats: {
-        Row: {
-          average_arrival_time: number | null
-          average_rating: number | null
-          average_response_time: number | null
-          complaints_received: number | null
-          created_at: string
-          date: string
-          id: string
-          technician_id: string
-          total_earnings: number | null
-          updated_at: string
-          visits_accepted: number | null
-          visits_assigned: number | null
-          visits_cancelled: number | null
-          visits_completed: number | null
-          visits_rejected: number | null
-        }
-        Insert: {
-          average_arrival_time?: number | null
-          average_rating?: number | null
-          average_response_time?: number | null
-          complaints_received?: number | null
-          created_at?: string
-          date?: string
-          id?: string
-          technician_id: string
-          total_earnings?: number | null
-          updated_at?: string
-          visits_accepted?: number | null
-          visits_assigned?: number | null
-          visits_cancelled?: number | null
-          visits_completed?: number | null
-          visits_rejected?: number | null
-        }
-        Update: {
-          average_arrival_time?: number | null
-          average_rating?: number | null
-          average_response_time?: number | null
-          complaints_received?: number | null
-          created_at?: string
-          date?: string
-          id?: string
-          technician_id?: string
-          total_earnings?: number | null
-          updated_at?: string
-          visits_accepted?: number | null
-          visits_assigned?: number | null
-          visits_cancelled?: number | null
-          visits_completed?: number | null
-          visits_rejected?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_daily_stats_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_documents: {
-        Row: {
-          document_type: Database["public"]["Enums"]["document_type_enum"]
-          file_name: string
-          file_size: number | null
-          file_url: string
-          id: string
-          technician_id: string
-          uploaded_at: string | null
-        }
-        Insert: {
-          document_type: Database["public"]["Enums"]["document_type_enum"]
-          file_name: string
-          file_size?: number | null
-          file_url: string
-          id?: string
-          technician_id: string
-          uploaded_at?: string | null
-        }
-        Update: {
-          document_type?: Database["public"]["Enums"]["document_type_enum"]
-          file_name?: string
-          file_size?: number | null
-          file_url?: string
-          id?: string
-          technician_id?: string
-          uploaded_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_documents_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_documents_technician_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_level_history: {
-        Row: {
-          achieved_at: string
-          created_at: string
-          id: string
-          level: string
-          previous_level: string | null
-          requirements_met: Json
-          technician_id: string
-        }
-        Insert: {
-          achieved_at?: string
-          created_at?: string
-          id?: string
-          level: string
-          previous_level?: string | null
-          requirements_met: Json
-          technician_id: string
-        }
-        Update: {
-          achieved_at?: string
-          created_at?: string
-          id?: string
-          level?: string
-          previous_level?: string | null
-          requirements_met?: Json
-          technician_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_level_history_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
@@ -2791,122 +2210,9 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_level_technician"
-            columns: ["technician_id"]
-            isOneToOne: true
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technician_levels_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: true
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_location: {
-        Row: {
-          lat: number | null
-          lng: number | null
-          technician_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          lat?: number | null
-          lng?: number | null
-          technician_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          lat?: number | null
-          lng?: number | null
-          technician_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_location_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: true
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_monthly_bonuses: {
-        Row: {
-          acceptance_rate: number | null
-          average_arrival_time: number | null
-          average_rating: number | null
-          average_response_time: number | null
-          cancellation_rate: number | null
-          commitment_bonus: number | null
-          complaints_count: number | null
-          created_at: string
-          id: string
-          month: string
-          paid_at: string | null
-          quality_bonus: number | null
-          status: string | null
-          super_pro_bonus: number | null
-          technician_id: string
-          time_bonus: number | null
-          top_rated_bonus: number | null
-          total_bonus: number
-          updated_at: string
-          visits_completed: number
-        }
-        Insert: {
-          acceptance_rate?: number | null
-          average_arrival_time?: number | null
-          average_rating?: number | null
-          average_response_time?: number | null
-          cancellation_rate?: number | null
-          commitment_bonus?: number | null
-          complaints_count?: number | null
-          created_at?: string
-          id?: string
-          month: string
-          paid_at?: string | null
-          quality_bonus?: number | null
-          status?: string | null
-          super_pro_bonus?: number | null
-          technician_id: string
-          time_bonus?: number | null
-          top_rated_bonus?: number | null
-          total_bonus?: number
-          updated_at?: string
-          visits_completed?: number
-        }
-        Update: {
-          acceptance_rate?: number | null
-          average_arrival_time?: number | null
-          average_rating?: number | null
-          average_response_time?: number | null
-          cancellation_rate?: number | null
-          commitment_bonus?: number | null
-          complaints_count?: number | null
-          created_at?: string
-          id?: string
-          month?: string
-          paid_at?: string | null
-          quality_bonus?: number | null
-          status?: string | null
-          super_pro_bonus?: number | null
-          technician_id?: string
-          time_bonus?: number | null
-          top_rated_bonus?: number | null
-          total_bonus?: number
-          updated_at?: string
-          visits_completed?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_monthly_bonuses_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
@@ -2966,322 +2272,9 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_perf_technician"
-            columns: ["technician_id"]
-            isOneToOne: true
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technician_performance_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: true
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_portfolio: {
-        Row: {
-          created_at: string
-          description: string | null
-          display_order: number | null
-          id: string
-          is_featured: boolean | null
-          media_type: string
-          media_urls: string[]
-          technician_id: string
-          title: string
-          updated_at: string
-          work_type: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          id?: string
-          is_featured?: boolean | null
-          media_type: string
-          media_urls: string[]
-          technician_id: string
-          title: string
-          updated_at?: string
-          work_type?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          id?: string
-          is_featured?: boolean | null
-          media_type?: string
-          media_urls?: string[]
-          technician_id?: string
-          title?: string
-          updated_at?: string
-          work_type?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_portfolio_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_profiles: {
-        Row: {
-          accepts_emergency_jobs: boolean | null
-          accepts_national_contracts: boolean | null
-          accounting_email: string | null
-          accounting_name: string | null
-          accounting_phone: string | null
-          additional_notes: string | null
-          agree_payment_terms: boolean | null
-          agree_terms: boolean | null
-          building_no: string | null
-          city_id: number | null
-          company_model: string | null
-          company_name: string
-          company_type: string | null
-          contact_name: string | null
-          country: string | null
-          created_at: string | null
-          district_id: number | null
-          email: string
-          floor: string | null
-          full_name: string
-          has_insurance: boolean | null
-          id: string
-          insurance_company_name: string | null
-          insurance_notes: string | null
-          landmark: string | null
-          number_of_inhouse_technicians: number | null
-          number_of_office_staff: number | null
-          phone: string
-          policy_expiry_date: string | null
-          policy_number: string | null
-          preferred_language: string | null
-          pricing_notes: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          service_email: string | null
-          status: string | null
-          street_address: string | null
-          submitted_at: string | null
-          terms_accepted_at: string | null
-          unit: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          accepts_emergency_jobs?: boolean | null
-          accepts_national_contracts?: boolean | null
-          accounting_email?: string | null
-          accounting_name?: string | null
-          accounting_phone?: string | null
-          additional_notes?: string | null
-          agree_payment_terms?: boolean | null
-          agree_terms?: boolean | null
-          building_no?: string | null
-          city_id?: number | null
-          company_model?: string | null
-          company_name: string
-          company_type?: string | null
-          contact_name?: string | null
-          country?: string | null
-          created_at?: string | null
-          district_id?: number | null
-          email: string
-          floor?: string | null
-          full_name: string
-          has_insurance?: boolean | null
-          id?: string
-          insurance_company_name?: string | null
-          insurance_notes?: string | null
-          landmark?: string | null
-          number_of_inhouse_technicians?: number | null
-          number_of_office_staff?: number | null
-          phone: string
-          policy_expiry_date?: string | null
-          policy_number?: string | null
-          preferred_language?: string | null
-          pricing_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          service_email?: string | null
-          status?: string | null
-          street_address?: string | null
-          submitted_at?: string | null
-          terms_accepted_at?: string | null
-          unit?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          accepts_emergency_jobs?: boolean | null
-          accepts_national_contracts?: boolean | null
-          accounting_email?: string | null
-          accounting_name?: string | null
-          accounting_phone?: string | null
-          additional_notes?: string | null
-          agree_payment_terms?: boolean | null
-          agree_terms?: boolean | null
-          building_no?: string | null
-          city_id?: number | null
-          company_model?: string | null
-          company_name?: string
-          company_type?: string | null
-          contact_name?: string | null
-          country?: string | null
-          created_at?: string | null
-          district_id?: number | null
-          email?: string
-          floor?: string | null
-          full_name?: string
-          has_insurance?: boolean | null
-          id?: string
-          insurance_company_name?: string | null
-          insurance_notes?: string | null
-          landmark?: string | null
-          number_of_inhouse_technicians?: number | null
-          number_of_office_staff?: number | null
-          phone?: string
-          policy_expiry_date?: string | null
-          policy_number?: string | null
-          preferred_language?: string | null
-          pricing_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          service_email?: string | null
-          status?: string | null
-          street_address?: string | null
-          submitted_at?: string | null
-          terms_accepted_at?: string | null
-          unit?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_profiles_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_profiles_district_id_fkey"
-            columns: ["district_id"]
-            isOneToOne: false
-            referencedRelation: "districts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_service_prices: {
-        Row: {
-          created_at: string | null
-          emergency_price: number | null
-          id: string
-          material_markup_percent: number | null
-          min_job_value: number | null
-          night_weekend_price: number | null
-          platform_price: number | null
-          service_id: number
-          service_name: string | null
-          standard_price: number
-          technician_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          emergency_price?: number | null
-          id?: string
-          material_markup_percent?: number | null
-          min_job_value?: number | null
-          night_weekend_price?: number | null
-          platform_price?: number | null
-          service_id: number
-          service_name?: string | null
-          standard_price: number
-          technician_id: string
-        }
-        Update: {
-          created_at?: string | null
-          emergency_price?: number | null
-          id?: string
-          material_markup_percent?: number | null
-          min_job_value?: number | null
-          night_weekend_price?: number | null
-          platform_price?: number | null
-          service_id?: number
-          service_name?: string | null
-          standard_price?: number
-          technician_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_service_prices_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_service_prices_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "service_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_service_prices_technician_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_services: {
-        Row: {
-          created_at: string | null
-          experience_years: number | null
-          id: string
-          is_primary: boolean | null
-          service_id: string
-          technician_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          experience_years?: number | null
-          id?: string
-          is_primary?: boolean | null
-          service_id: string
-          technician_id: string
-        }
-        Update: {
-          created_at?: string | null
-          experience_years?: number | null
-          id?: string
-          is_primary?: boolean | null
-          service_id?: string
-          technician_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_services_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_services_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
@@ -3322,13 +2315,6 @@ export type Database = {
           technician_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_skill_technician"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "technician_skill_tests_technician_id_fkey"
             columns: ["technician_id"]
@@ -3407,20 +2393,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_task_request"
-            columns: ["maintenance_request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_task_technician"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technician_tasks_maintenance_request_id_fkey"
             columns: ["maintenance_request_id"]
             isOneToOne: false
@@ -3432,61 +2404,6 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_trades: {
-        Row: {
-          can_handle_heavy_projects: boolean | null
-          category_id: number
-          category_name: string | null
-          created_at: string | null
-          id: string
-          licenses_or_certifications: string | null
-          technician_id: string
-          years_of_experience: number | null
-        }
-        Insert: {
-          can_handle_heavy_projects?: boolean | null
-          category_id: number
-          category_name?: string | null
-          created_at?: string | null
-          id?: string
-          licenses_or_certifications?: string | null
-          technician_id: string
-          years_of_experience?: number | null
-        }
-        Update: {
-          can_handle_heavy_projects?: boolean | null
-          category_id?: number
-          category_name?: string | null
-          created_at?: string | null
-          id?: string
-          licenses_or_certifications?: string | null
-          technician_id?: string
-          years_of_experience?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_trades_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "service_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_trades_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_trades_technician_profile_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3541,285 +2458,49 @@ export type Database = {
           },
         ]
       }
-      technician_transactions: {
-        Row: {
-          amount: number
-          created_at: string
-          description: string | null
-          id: string
-          metadata: Json | null
-          net_amount: number
-          platform_fee: number | null
-          request_id: string | null
-          status: string
-          technician_id: string
-          transaction_type: string
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          net_amount: number
-          platform_fee?: number | null
-          request_id?: string | null
-          status?: string
-          technician_id: string
-          transaction_type: string
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          net_amount?: number
-          platform_fee?: number | null
-          request_id?: string | null
-          status?: string
-          technician_id?: string
-          transaction_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_transactions_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_transactions_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       technician_verifications: {
         Row: {
+          application_id: string | null
           created_at: string | null
           id: string
           national_id_back: string | null
           national_id_front: string | null
           rejection_reason: string | null
           selfie_image: string | null
-          technician_id: string
           verification_status: string | null
           verified_at: string | null
           verified_by: string | null
         }
         Insert: {
+          application_id?: string | null
           created_at?: string | null
           id?: string
           national_id_back?: string | null
           national_id_front?: string | null
           rejection_reason?: string | null
           selfie_image?: string | null
-          technician_id: string
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
         }
         Update: {
+          application_id?: string | null
           created_at?: string | null
           id?: string
           national_id_back?: string | null
           national_id_front?: string | null
           rejection_reason?: string | null
           selfie_image?: string | null
-          technician_id?: string
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "technician_verifications_technician_id_fkey"
-            columns: ["technician_id"]
+            foreignKeyName: "technician_verifications_application_id_fkey"
+            columns: ["application_id"]
             isOneToOne: false
-            referencedRelation: "technician_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_wallet: {
-        Row: {
-          balance_current: number
-          balance_locked: number
-          balance_pending: number
-          created_at: string
-          id: string
-          last_withdrawal_at: string | null
-          minimum_withdrawal: number
-          technician_id: string
-          total_earnings: number
-          total_withdrawn: number
-          updated_at: string
-        }
-        Insert: {
-          balance_current?: number
-          balance_locked?: number
-          balance_pending?: number
-          created_at?: string
-          id?: string
-          last_withdrawal_at?: string | null
-          minimum_withdrawal?: number
-          technician_id: string
-          total_earnings?: number
-          total_withdrawn?: number
-          updated_at?: string
-        }
-        Update: {
-          balance_current?: number
-          balance_locked?: number
-          balance_pending?: number
-          created_at?: string
-          id?: string
-          last_withdrawal_at?: string | null
-          minimum_withdrawal?: number
-          technician_id?: string
-          total_earnings?: number
-          total_withdrawn?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_wallet_technician"
-            columns: ["technician_id"]
-            isOneToOne: true
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_wallet_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: true
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_withdrawals: {
-        Row: {
-          account_details: Json
-          amount: number
-          created_at: string
-          id: string
-          method: string
-          notes: string | null
-          processed_at: string | null
-          processed_by: string | null
-          rejection_reason: string | null
-          requested_at: string
-          status: string
-          technician_id: string
-          updated_at: string
-        }
-        Insert: {
-          account_details?: Json
-          amount: number
-          created_at?: string
-          id?: string
-          method: string
-          notes?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          rejection_reason?: string | null
-          requested_at?: string
-          status?: string
-          technician_id: string
-          updated_at?: string
-        }
-        Update: {
-          account_details?: Json
-          amount?: number
-          created_at?: string
-          id?: string
-          method?: string
-          notes?: string | null
-          processed_at?: string | null
-          processed_by?: string | null
-          rejection_reason?: string | null
-          requested_at?: string
-          status?: string
-          technician_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_withdrawal_technician"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_withdrawals_processed_by_fkey"
-            columns: ["processed_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_withdrawals_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_work_zones: {
-        Row: {
-          city_id: number | null
-          created_at: string
-          district_id: number | null
-          id: string
-          is_primary: boolean | null
-          technician_id: string
-        }
-        Insert: {
-          city_id?: number | null
-          created_at?: string
-          district_id?: number | null
-          id?: string
-          is_primary?: boolean | null
-          technician_id: string
-        }
-        Update: {
-          city_id?: number | null
-          created_at?: string
-          district_id?: number | null
-          id?: string
-          is_primary?: boolean | null
-          technician_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_work_zones_city_id_fkey"
-            columns: ["city_id"]
-            isOneToOne: false
-            referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_work_zones_district_id_fkey"
-            columns: ["district_id"]
-            isOneToOne: false
-            referencedRelation: "districts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_work_zones_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
+            referencedRelation: "technician_applications"
             referencedColumns: ["id"]
           },
         ]
@@ -3846,26 +2527,20 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_verified: boolean | null
-          lat: number | null
           level: string
-          lng: number | null
           location_updated_at: string | null
           name: string
           phone: string | null
-          primary_service_id: string | null
           profile_image: string | null
           rating: number | null
           service_area_radius: number | null
           specialization: string
-          standard_rate: number | null
           status: string | null
-          technician_profile_id: string | null
           total_reviews: number | null
           updated_at: string | null
           verification_center_id: string | null
           verification_notes: string | null
           verified_at: string | null
-          visit_fee: number | null
         }
         Insert: {
           application_id?: string | null
@@ -3888,26 +2563,20 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
-          lat?: number | null
           level?: string
-          lng?: number | null
           location_updated_at?: string | null
           name: string
           phone?: string | null
-          primary_service_id?: string | null
           profile_image?: string | null
           rating?: number | null
           service_area_radius?: number | null
           specialization: string
-          standard_rate?: number | null
           status?: string | null
-          technician_profile_id?: string | null
           total_reviews?: number | null
           updated_at?: string | null
           verification_center_id?: string | null
           verification_notes?: string | null
           verified_at?: string | null
-          visit_fee?: number | null
         }
         Update: {
           application_id?: string | null
@@ -3930,26 +2599,20 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
-          lat?: number | null
           level?: string
-          lng?: number | null
           location_updated_at?: string | null
           name?: string
           phone?: string | null
-          primary_service_id?: string | null
           profile_image?: string | null
           rating?: number | null
           service_area_radius?: number | null
           specialization?: string
-          standard_rate?: number | null
           status?: string | null
-          technician_profile_id?: string | null
           total_reviews?: number | null
           updated_at?: string | null
           verification_center_id?: string | null
           verification_notes?: string | null
           verified_at?: string | null
-          visit_fee?: number | null
         }
         Relationships: [
           {
@@ -3960,17 +2623,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "technicians_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "vw_cities_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technicians_district_id_fkey"
             columns: ["district_id"]
             isOneToOne: false
             referencedRelation: "districts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technicians_technician_profile_id_fkey"
-            columns: ["technician_profile_id"]
-            isOneToOne: false
-            referencedRelation: "technician_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4112,13 +2775,57 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dashboard_stats: {
+        Row: {
+          actual_cost: number | null
+          assigned_count: number | null
+          avg_completion_days: number | null
+          completed_requests: number | null
+          completion_rate: number | null
+          high_priority_count: number | null
+          in_progress_count: number | null
+          last_updated: string | null
+          low_priority_count: number | null
+          medium_priority_count: number | null
+          pending_requests: number | null
+          submitted_count: number | null
+          this_month_requests: number | null
+          today_requests: number | null
+          total_budget: number | null
+          total_requests: number | null
+          workflow_completed_count: number | null
+        }
+        Relationships: []
+      }
+      monthly_stats: {
+        Row: {
+          completed_requests: number | null
+          completion_rate: number | null
+          month: string | null
+          pending_requests: number | null
+          total_actual: number | null
+          total_estimated: number | null
+          total_requests: number | null
+        }
+        Relationships: []
+      }
+      vw_cities_public: {
+        Row: {
+          id: number | null
+          name_ar: string | null
+        }
+        Insert: {
+          id?: number | null
+          name_ar?: string | null
+        }
+        Update: {
+          id?: number | null
+          name_ar?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      approve_technician_profile: {
-        Args: { profile_id: string }
-        Returns: string
-      }
       calculate_distance: {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
@@ -4288,14 +2995,6 @@ export type Database = {
         | "accounting"
         | "engineering"
         | "dispatcher"
-      company_model_enum: "local_provider" | "third_party"
-      company_type_enum: "individual" | "small_team" | "company"
-      document_type_enum:
-        | "tax_card"
-        | "commercial_registration"
-        | "national_id"
-        | "insurance_certificate"
-        | "professional_license"
       maintenance_stage:
         | "DRAFT"
         | "SUBMITTED"
@@ -4358,13 +3057,6 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
-      technician_status:
-        | "draft"
-        | "pending_review"
-        | "approved"
-        | "rejected"
-        | "active"
-        | "suspended"
       update_type:
         | "status_change"
         | "assignment"
@@ -4521,15 +3213,6 @@ export const Constants = {
         "engineering",
         "dispatcher",
       ],
-      company_model_enum: ["local_provider", "third_party"],
-      company_type_enum: ["individual", "small_team", "company"],
-      document_type_enum: [
-        "tax_card",
-        "commercial_registration",
-        "national_id",
-        "insurance_certificate",
-        "professional_license",
-      ],
       maintenance_stage: [
         "DRAFT",
         "SUBMITTED",
@@ -4596,14 +3279,6 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
-      ],
-      technician_status: [
-        "draft",
-        "pending_review",
-        "approved",
-        "rejected",
-        "active",
-        "suspended",
       ],
       update_type: [
         "status_change",

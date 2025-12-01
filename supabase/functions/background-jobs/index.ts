@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
         .from('background_jobs')
         .select('*')
         .eq('status', 'pending')
-        .filter('attempts', 'lt', 'max_attempts')
+        .lt('attempts', supabase.raw('max_attempts'))
         .or(`scheduled_at.is.null,scheduled_at.lte.${new Date().toISOString()}`)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: true })
@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
             .update({
               status: newStatus,
               attempts: newAttempts,
-              error: error instanceof Error ? error.message : String(error),
+              error: error.message,
               last_attempt_at: new Date().toISOString(),
             })
             .eq('id', job.id);
@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Background jobs error:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

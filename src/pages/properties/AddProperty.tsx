@@ -3,7 +3,6 @@ import { PropertyForm } from "@/components/forms/PropertyForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { AppFooter } from "@/components/shared/AppFooter";
 
 export default function AddProperty() {
   const navigate = useNavigate();
@@ -32,7 +31,17 @@ export default function AddProperty() {
         </CardContent>
       </Card>
 
-      <AppFooter />
+      {/* Footer */}
+      <div className="mt-8 text-center text-xs text-muted-foreground space-x-4 space-x-reverse">
+        <a href="#" className="hover:text-primary">دليل المستخدم</a>
+        <span>•</span>
+        <a href="#" className="hover:text-primary">شروط الاستخدام</a>
+        <span>•</span>
+        <a href="#" className="hover:text-primary">سياسة الخصوصية</a>
+        <div className="mt-2">
+          جميع الحقوق محفوظة © 2025 بواسطة UberFix.shop - v2.0.0
+        </div>
+      </div>
     </div>
   );
 }

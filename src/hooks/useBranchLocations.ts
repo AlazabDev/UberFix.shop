@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, supabaseReady } from '@/integrations/supabase/client';
-import { fallbackBranches } from '@/data/fallbackBranches';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface BranchLocation {
   id: string;
@@ -23,36 +22,28 @@ export const useBranchLocations = () => {
       setLoading(true);
       setError(null);
 
-      if (!supabaseReady) {
-        setBranches(fallbackBranches);
-        return;
-      }
-
       const { data, error: dbError } = await supabase
         .from('branch_locations')
         .select('*')
         .order('branch');
 
       if (dbError) throw dbError;
-
+      
       // Filter out branches without coordinates
       const validBranches = (data || []).filter(
-        (branch: BranchLocation) =>
-          branch.latitude &&
-          branch.longitude &&
-          !isNaN(parseFloat(branch.latitude)) &&
+        (branch: BranchLocation) => 
+          branch.latitude && 
+          branch.longitude && 
+          !isNaN(parseFloat(branch.latitude)) && 
           !isNaN(parseFloat(branch.longitude))
       );
-
-      // Use fallback sample data if database is empty
-      if (validBranches.length === 0) {
-        setBranches(fallbackBranches);
-      } else {
-        setBranches(validBranches as BranchLocation[]);
-      }
+      
+      setBranches(validBranches as BranchLocation[]);
+      console.warn(`✅ Loaded ${validBranches.length} branch locations`);
     } catch (err) {
+      console.error('❌ Error fetching branch locations:', err);
       setError(err as Error);
-      setBranches(fallbackBranches);
+      setBranches([]);
     } finally {
       setLoading(false);
     }

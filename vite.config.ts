@@ -20,7 +20,6 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom"],
   },
   build: {
     target: 'es2020',
@@ -35,7 +34,6 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        format: "es",
         manualChunks: (id) => {
           // React core
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {

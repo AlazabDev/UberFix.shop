@@ -39,6 +39,8 @@ export const useVendorRouting = ({
       setError(null);
 
       try {
+        console.warn('🚗 Calculating route via edge function...');
+        
         const { data, error: functionError } = await supabase.functions.invoke('calculate-route', {
           body: {
             origin: { lat: vendorLat, lng: vendorLng },
@@ -54,8 +56,10 @@ export const useVendorRouting = ({
           throw new Error(data.message || 'فشل حساب المسار');
         }
 
+        console.warn('✅ Route calculated:', data);
         setRouteInfo(data);
       } catch (err) {
+        console.error('Error calculating route:', err);
         setError(err instanceof Error ? err.message : 'فشل حساب المسار');
       } finally {
         setLoading(false);
@@ -63,6 +67,11 @@ export const useVendorRouting = ({
     };
 
     calculateRoute();
+    
+    // Recalculate every 30 seconds for real-time updates
+    const interval = setInterval(calculateRoute, 30000);
+    
+    return () => clearInterval(interval);
   }, [vendorLat, vendorLng, destinationLat, destinationLng]);
 
   return { routeInfo, loading, error };

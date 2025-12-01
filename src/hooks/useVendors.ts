@@ -27,20 +27,20 @@ export const useVendors = () => {
   useEffect(() => {
     fetchVendors();
 
-    // Real-time updates DISABLED
-    // const channel = supabase
-    //   .channel('vendors-changes')
-    //   .on('postgres_changes', 
-    //     { event: '*', schema: 'public', table: 'vendors' },
-    //     () => {
-    //       fetchVendors();
-    //     }
-    //   )
-    //   .subscribe();
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('vendors-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'vendors' },
+        () => {
+          fetchVendors();
+        }
+      )
+      .subscribe();
 
-    // return () => {
-    //   supabase.removeChannel(channel);
-    // };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchVendors = async () => {
@@ -66,7 +66,7 @@ export const useVendors = () => {
         .from('vendors')
         .insert([vendorData])
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return { success: true, data };
@@ -82,7 +82,7 @@ export const useVendors = () => {
         .update(updates)
         .eq('id', id)
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return { success: true, data };

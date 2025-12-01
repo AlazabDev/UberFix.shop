@@ -137,7 +137,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
-        .maybeSingle();
+        .single();
 
       if (profileError || !profile?.company_id) {
         console.error('Profile error:', profileError);
@@ -150,7 +150,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
         .select('id')
         .eq('company_id', profile.company_id)
         .limit(1)
-        .maybeSingle();
+        .single();
 
       if (branchError || !branch) {
         console.error('Branch error:', branchError);
@@ -185,7 +185,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
         .from('maintenance_requests')
         .insert([requestData])
         .select()
-        .maybeSingle();
+        .single();
 
       if (requestError) {
         console.error('Submit error:', requestError);

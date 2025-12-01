@@ -135,24 +135,25 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
   useEffect(() => {
     fetchRequests(initialPage);
 
-    // Real-time subscription DISABLED
-    // const channel = supabase
-    //   .channel('maintenance-requests-paginated')
-    //   .on('postgres_changes', 
-    //     { event: '*', schema: 'public', table: 'maintenance_requests' },
-    //     (payload) => {
-    //       console.warn('🔄 Maintenance requests changed:', payload.eventType);
-    //       fetchRequests(pagination.currentPage);
-    //     }
-    //   )
-    //   .subscribe();
+    // Real-time subscription للتحديثات
+    const channel = supabase
+      .channel('maintenance-requests-paginated')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'maintenance_requests' },
+        (payload) => {
+          console.warn('🔄 Maintenance requests changed:', payload.eventType);
+          // إعادة جلب الصفحة الحالية للحصول على آخر تحديث
+          fetchRequests(pagination.currentPage);
+        }
+      )
+      .subscribe();
 
-    // return () => {
-    //   console.warn('🧹 Cleaning up paginated requests subscription');
-    //   channel.unsubscribe().then(() => {
-    //     supabase.removeChannel(channel);
-    //   });
-    // };
+    return () => {
+      console.warn('🧹 Cleaning up paginated requests subscription');
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
+    };
   }, [filters.status, filters.priority, filters.workflow_stage, filters.search]);
 
   return {

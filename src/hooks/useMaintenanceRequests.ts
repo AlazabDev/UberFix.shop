@@ -102,7 +102,7 @@ export function useMaintenanceRequests() {
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
-        .maybeSingle();
+        .single();
       
       if (profileError || !profile?.company_id) {
         throw new Error("حدث خطأ في جلب بيانات المستخدم. يرجى تسجيل الخروج والدخول مرة أخرى.");
@@ -114,7 +114,7 @@ export function useMaintenanceRequests() {
         .select('id')
         .eq('company_id', profile.company_id)
         .limit(1)
-        .maybeSingle();
+        .single();
       
       if (branchError || !branch) {
         throw new Error("حدث خطأ في جلب بيانات الفرع. يرجى تسجيل الخروج والدخول مرة أخرى.");
@@ -132,7 +132,7 @@ export function useMaintenanceRequests() {
           branch_id: branch.id
         })
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
 
@@ -194,14 +194,14 @@ export function useMaintenanceRequests() {
         .from('maintenance_requests')
         .select('status, workflow_stage, client_phone')
         .eq('id', id)
-        .maybeSingle();
+        .single();
 
       const { data, error } = await supabase
         .from('maintenance_requests')
         .update(updates as any)
         .eq('id', id)
         .select()
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
 
@@ -335,22 +335,25 @@ export function useMaintenanceRequests() {
   useEffect(() => {
     fetchRequests();
 
-    // Realtime subscription DISABLED
-    // const channel = supabase
-    //   .channel('maintenance-requests-changes')
-    //   .on('postgres_changes', 
-    //     { event: '*', schema: 'public', table: 'maintenance_requests' },
-    //     () => {
-    //       fetchRequests();
-    //     }
-    //   )
-    //   .subscribe();
+    // إضافة realtime subscription مع cleanup صحيح
+    const channel = supabase
+      .channel('maintenance-requests-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'maintenance_requests' },
+        (payload) => {
+          console.warn('🔄 Maintenance requests changed:', payload.eventType);
+          fetchRequests();
+        }
+      )
+      .subscribe();
 
-    // return () => {
-    //   channel.unsubscribe().then(() => {
-    //     supabase.removeChannel(channel);
-    //   });
-    // };
+    // Cleanup function محسّنة
+    return () => {
+      console.warn('🧹 Cleaning up maintenance requests subscription');
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
+    };
   }, []);
 
   return {
