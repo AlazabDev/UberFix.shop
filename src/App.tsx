@@ -47,7 +47,15 @@ const App = () => {
 const MaintenanceLockWrapper = () => {
   const { data: lockStatus, isLoading } = useMaintenanceLock();
 
-  if (isLoading) {
+  // Timeout after 5 seconds to prevent indefinite loading
+  const [timeoutReached, setTimeoutReached] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => setTimeoutReached(true), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading && !timeoutReached) {
     return <LoadingFallback />;
   }
 
