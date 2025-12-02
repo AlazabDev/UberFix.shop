@@ -21,7 +21,6 @@ import { ChartTooltip } from "@/components/ui/chart";
 import { Download, RefreshCw, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
 
 export function MaintenanceReportDashboard() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
@@ -38,9 +37,9 @@ export function MaintenanceReportDashboard() {
     completion_date?: string;
     store_id?: string;
   }>>([]);
-  const [archiveRequests, setArchiveRequests] = useState<Array<{ 
-    id: string; 
-    service_type?: string; 
+  const [archiveRequests, setArchiveRequests] = useState<Array<{
+    id: string;
+    service_type?: string;
     actual_cost?: number; 
     created_at?: string;
     title?: string;
@@ -51,7 +50,6 @@ export function MaintenanceReportDashboard() {
     store_id?: string;
   }>>([]);
   const [loading, setLoading] = useState(false);
-  const _navigate = useNavigate();
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
@@ -72,7 +70,7 @@ export function MaintenanceReportDashboard() {
 
       setCompletedRequests(completed || []);
       setArchiveRequests(archived || []);
-    } catch (_error) {
+    } catch {
       // Error handled silently
     } finally {
       setLoading(false);

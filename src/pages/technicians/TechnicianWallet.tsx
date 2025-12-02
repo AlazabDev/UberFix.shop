@@ -60,11 +60,13 @@ export default function TechnicianWallet() {
       }
 
       // Get or create wallet
-      let { data: walletData, error } = await supabase
+      const { data, error } = await supabase
         .from('technician_wallet')
         .select('*')
         .eq('technician_id', techData.id)
         .single();
+
+      let walletData = data;
 
       if (error && error.code === 'PGRST116') {
         // Create wallet if doesn't exist

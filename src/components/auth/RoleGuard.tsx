@@ -61,7 +61,7 @@ export function RoleGuard({ children, allowedRoles, redirectTo = '/dashboard' }:
     if (!hasAllowedRole) {
       handleUnauthorized();
     }
-  }, [user, roles, loading, rolesLoading, allowedRolesStr, handleUnauthorized]);
+  }, [user, roles, loading, rolesLoading, allowedRoles, allowedRolesStr, handleUnauthorized]);
 
   // إظهار شاشة تحميل أثناء التحقق
   if (loading || rolesLoading) {

@@ -225,11 +225,11 @@ export function InteractiveMap({
         }
 
       geocoderRef.current = null;
-      } catch (_e) {
+      } catch {
         // Cleanup error, safe to ignore
       }
     };
-  }, [loadGoogleMaps, onLocationChange, currentLat, currentLng]);
+  }, [loadGoogleMaps, onLocationChange, currentLat, currentLng, height]);
 
   // Update marker position when coordinates change
   useEffect(() => {

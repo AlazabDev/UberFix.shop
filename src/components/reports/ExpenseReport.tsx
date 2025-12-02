@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ export function ExpenseReport() {
   const [expenses, setExpenses] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error }: { data: Array<Record<string, unknown>> | null; error: unknown } = await supabase
@@ -31,11 +31,11 @@ export function ExpenseReport() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate]);
 
   useEffect(() => {
     fetchExpenses();
-  }, [startDate, endDate, fetchExpenses]);
+  }, [fetchExpenses]);
 
   const totalExpenses = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const maintenanceExpenses = expenses.filter(e => e.category === 'maintenance')

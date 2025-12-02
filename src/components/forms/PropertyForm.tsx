@@ -249,7 +249,7 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         
         toast.success("تم تحديث العقار بنجاح");
       } else {
-        const { data: _newProperty, error } = await supabase
+        const { error } = await supabase
           .from("properties")
           .insert([propertyData])
           .select()

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,11 +34,7 @@ export function PropertyLifecycleReport({ propertyId }: { propertyId?: string })
   const [data, setData] = useState<PropertyLifecycleData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLifecycleData();
-  }, [propertyId]);
-
-  const fetchLifecycleData = async () => {
+  const fetchLifecycleData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -111,7 +107,11 @@ export function PropertyLifecycleReport({ propertyId }: { propertyId?: string })
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyId]);
+
+  useEffect(() => {
+    fetchLifecycleData();
+  }, [fetchLifecycleData]);
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
