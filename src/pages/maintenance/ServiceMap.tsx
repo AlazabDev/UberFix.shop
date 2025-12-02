@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, User, MapPin, Phone, Star } from "lucide-react";
+import { Search, User, MapPin, Phone, Star, FileText, Home, ClipboardList, Settings as SettingsIcon, Cog, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,12 +8,56 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { loadGoogleMaps } from "@/lib/googleMapsLoader";
 import { useTechnicians } from "@/hooks/useTechnicians";
+import { useBranchLocations, BranchLocation } from "@/hooks/useBranchLocations";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { NotificationsList } from "@/components/notifications/NotificationsList";
+import { TechnicianPopup } from "@/components/maps/TechnicianPopup";
+import { BranchPopup } from "@/components/maps/BranchPopup";
+import { BranchInfoCard } from "@/components/maps/BranchInfoCard";
+import { createRoot } from "react-dom/client";
 
-const specialties = [
-  { id: "paint", label: "دهان", icon: "🎨" },
-  { id: "carpentry", label: "نجار", icon: "🔨" },
-  { id: "electrical", label: "كهربائي", icon: "⚡" },
-  { id: "plumbing", label: "سباك", icon: "🔧" },
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
+interface Technician {
+  id: string;
+  name: string;
+  phone: string | null;
+  latitude: number;
+  longitude: number;
+  specialization: string | null;
+  rating: number | null;
+  status: "available" | "busy" | "offline";
+}
+
+interface UserData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  role: "مسؤول" | "مدير" | "موظف" | "فني" | "عميل";
+}
+
+const SPECIALTIES = [
+  { id: "all", label: "كل التخصصات", icon: "🛠️" },
+  { id: "electrician", label: "كهرباء", icon: "⚡" },
+  { id: "plumber", label: "سباكة", icon: "🚿" },
+  { id: "ac_technician", label: "تكييف", icon: "❄️" },
+  { id: "carpenter", label: "نجارة", icon: "🪵" },
+  { id: "painter", label: "دهانات", icon: "🎨" },
 ];
 
 export default function ServiceMap() {
@@ -22,99 +66,212 @@ export default function ServiceMap() {
   const [mapError, setMapError] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<BranchLocation | null>(null);
 
   const { technicians, loading } = useTechnicians();
+  const { branches } = useBranchLocations();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedBranch && branches && branches.length > 0) {
+      setSelectedBranch(branches[0]);
+    }
+  }, [branches, selectedBranch]);
+
+  const fetchUserData = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, avatar_url, role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setUserData({
+        email: user.email || "",
+        firstName: profile?.first_name || "مستخدم",
+        lastName: profile?.last_name || "",
+        avatarUrl: profile?.avatar_url || null,
+        role:
+          profile?.role === "admin"
+            ? "مسؤول"
+            : profile?.role === "manager"
+            ? "مدير"
+            : profile?.role === "staff"
+            ? "موظف"
+            : profile?.role === "vendor"
+            ? "فني"
+            : "عميل",
+      });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "تم تسجيل الخروج",
+        description: "نراك قريباً",
+      });
+      navigate("/login");
+    } catch {
+      toast({
+        title: "خطأ في تسجيل الخروج",
+        description: "يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
-    let retryCount = 0;
-    const maxRetries = 3;
-    
+
     const initMap = async () => {
       try {
-        console.warn("🗺️ Starting map initialization...");
-        
-        const { data, error } = await supabase.functions.invoke("get-maps-key");
-        
-        if (error) {
-          console.error("❌ Failed to get API key:", error);
-          if (mounted && retryCount < maxRetries) {
-            retryCount++;
-            console.warn(`🔄 Retrying... (${retryCount}/${maxRetries})`);
-            setTimeout(() => initMap(), 2000);
-            return;
-          }
-          if (mounted) {
-            setMapError(true);
-            console.error("❌ Max retries reached, showing error message");
-          }
-          return;
-        }
-        
-        if (!data?.apiKey) {
-          console.error("❌ No API key returned from edge function");
-          if (mounted) setMapError(true);
-          return;
-        }
-        
-        console.warn("✅ API key received successfully:", data.apiKey.substring(0, 15) + "...");
-
-        
-        // تحقق من وجود Google Maps
-        if (typeof window.google !== 'undefined' && window.google.maps) {
-          console.warn("✅ Google Maps already loaded, reusing instance");
-        } else {
-          console.warn("📦 Loading Google Maps script with key...");
-          try {
-            await loadGoogleMaps(data.apiKey);
-            console.warn("✅ Google Maps script loaded successfully");
-          } catch (loadError) {
-            console.error("❌ Error loading Google Maps script:", loadError);
-            if (mounted) setMapError(true);
-            return;
-          }
-        }
-
-        // انتظر قليلاً للتأكد من تحميل Google Maps
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (typeof window.google === 'undefined' || !window.google.maps) {
-          throw new Error("Google Maps failed to load");
+        if (typeof window.google === "undefined" || !window.google.maps) {
+          await loadGoogleMaps();
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
         if (mapRef.current && !mapInstanceRef.current && mounted) {
-          console.warn("🗺️ Creating map instance...");
           mapInstanceRef.current = new google.maps.Map(mapRef.current, {
             center: { lat: 30.0444, lng: 31.2357 },
             zoom: 13,
-            mapTypeControl: false,
+            mapTypeControl: true,
             fullscreenControl: true,
-            streetViewControl: false,
+            streetViewControl: true,
             zoomControl: true,
-            styles: [
-              {
-                featureType: "poi",
-                stylers: [{ visibility: "off" }],
-              },
-            ],
-          });
-          
-          console.warn("✅ Map instance created successfully");
-          
-          // أضف حدث للتأكد من تحميل الخريطة
-          google.maps.event.addListenerOnce(mapInstanceRef.current, 'idle', () => {
-            console.warn("✅ Map is fully loaded and idle");
           });
         }
+
+        if (!mapInstanceRef.current) return;
+
+        // Clear existing markers
+        markersRef.current.forEach((marker) => {
+          marker.map = null;
+        });
+        markersRef.current = [];
+
+        // Add branch markers from database
+        branches.forEach((branch) => {
+          if (!branch.latitude || !branch.longitude) return;
+
+          const lat = parseFloat(branch.latitude);
+          const lng = parseFloat(branch.longitude);
+
+          if (isNaN(lat) || isNaN(lng)) return;
+
+          const markerContent = document.createElement("img");
+          markerContent.src = branch.icon || "/icons/properties/icon-5060.png";
+          markerContent.style.cssText =
+            "width: 50px; height: 60px; cursor: pointer; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));";
+          markerContent.alt = branch.branch;
+
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            map: mapInstanceRef.current!,
+            position: { lat, lng },
+            content: markerContent,
+            title: branch.branch,
+            zIndex: 100,
+          });
+
+          const infoWindow = new google.maps.InfoWindow();
+          marker.addListener("click", () => {
+            setSelectedBranch(branch);
+            const div = document.createElement("div");
+            const root = createRoot(div);
+            root.render(
+              <BranchPopup id={branch.id} name={branch.branch} address={branch.address || "لا يوجد عنوان"} status="Active" />
+            );
+            infoWindow.setContent(div);
+            infoWindow.open(mapInstanceRef.current!, marker);
+          });
+
+          markersRef.current.push(marker);
+        });
+
+        // Add technician markers with real data
+        technicians.forEach((tech) => {
+          if (!tech.current_latitude || !tech.current_longitude) return;
+
+          const lat = Number(tech.current_latitude);
+          const lng = Number(tech.current_longitude);
+
+          if (isNaN(lat) || isNaN(lng)) return;
+
+          const markerContent = document.createElement("div");
+          markerContent.className = "relative flex items-center justify-center";
+
+          const pin = document.createElement("div");
+          pin.className =
+            "w-11 h-11 rounded-full border-2 border-primary bg-background flex items-center justify-center shadow-lg";
+
+          const icon = document.createElement("div");
+          icon.className = "text-xl";
+
+          if (tech.specialization?.toLowerCase().includes("كهرب") || tech.specialization?.toLowerCase().includes("elect")) {
+            icon.textContent = "⚡";
+          } else if (tech.specialization?.toLowerCase().includes("سباك") || tech.specialization?.toLowerCase().includes("plumb")) {
+            icon.textContent = "🚿";
+          } else if (tech.specialization?.toLowerCase().includes("تكييف") || tech.specialization?.toLowerCase().includes("ac")) {
+            icon.textContent = "❄️";
+          } else if (tech.specialization?.toLowerCase().includes("نجار") || tech.specialization?.toLowerCase().includes("carp")) {
+            icon.textContent = "🪵";
+          } else if (tech.specialization?.toLowerCase().includes("دهان") || tech.specialization?.toLowerCase().includes("paint")) {
+            icon.textContent = "🎨";
+          } else {
+            icon.textContent = "🛠️";
+          }
+
+          pin.appendChild(icon);
+          markerContent.appendChild(pin);
+
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            map: mapInstanceRef.current!,
+            position: { lat, lng },
+            content: markerContent,
+            title: tech.name || "فني",
+            zIndex: 200,
+          });
+
+          const infoWindow = new google.maps.InfoWindow();
+          const techStatus = tech.status === "busy" ? "busy" : tech.status === "online" ? "available" : "soon";
+
+          marker.addListener("click", () => {
+            const div = document.createElement("div");
+            const root = createRoot(div);
+            root.render(
+              <TechnicianPopup
+                name={tech.name || "فني غير معروف"}
+                specialization={tech.specialization || "خدمة صيانة"}
+                rating={tech.rating || 4.5}
+                totalReviews={12}
+                status={techStatus}
+                availableIn={techStatus === "soon" ? 40 : undefined}
+                onRequestService={() => handleRequestService(tech)}
+              />
+            );
+            infoWindow.setContent(div);
+            infoWindow.open(mapInstanceRef.current!, marker);
+          });
+
+          markersRef.current.push(marker);
+        });
       } catch (error) {
-        console.error("❌ Map loading error:", error);
-        if (mounted && retryCount < maxRetries) {
-          retryCount++;
-          console.warn(`🔄 Retrying after error... (${retryCount}/${maxRetries})`);
-          setTimeout(() => initMap(), 2000);
-          return;
-        }
+        console.error("Map error:", error);
         if (mounted) setMapError(true);
       }
     };
@@ -123,34 +280,32 @@ export default function ServiceMap() {
 
     return () => {
       mounted = false;
-      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current.forEach((marker) => {
+        marker.map = null;
+      });
       markersRef.current = [];
     };
-  }, []);
+  }, [technicians, branches]);
 
-  useEffect(() => {
-    if (!mapInstanceRef.current || !technicians.length) return;
-
-    // Clear existing markers
-    markersRef.current.forEach((marker) => marker.setMap(null));
-    markersRef.current = [];
-
-    // Add markers for technicians
-    technicians.forEach((tech) => {
-      if (tech.current_latitude && tech.current_longitude) {
-        const marker = new google.maps.Marker({
-          position: { lat: tech.current_latitude, lng: tech.current_longitude },
-          map: mapInstanceRef.current!,
-          title: tech.name || "فني",
-        });
-        markersRef.current.push(marker);
-      }
+  const handleRequestService = (technician: any) => {
+    navigate("/quick-request-from-map", {
+      state: {
+        technicianId: technician.id,
+        technicianName: technician.name,
+        technicianPhone: technician.phone,
+        specialization: technician.specialization,
+      },
     });
-  }, [technicians]);
+  };
+
+  const handleQuickRequest = () => {
+    navigate("/quick-request-from-map");
+  };
 
   const filteredTechnicians = technicians.filter((tech) => {
     const matchesSpecialty =
       !selectedSpecialty ||
+      selectedSpecialty === "all" ||
       tech.specialization?.toLowerCase().includes(selectedSpecialty.toLowerCase());
     const matchesSearch =
       !searchQuery ||
@@ -160,216 +315,244 @@ export default function ServiceMap() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F4F5F7] flex flex-col" dir="rtl">
-      {/* Header */}
-      <header className="bg-[#0B0B3B] text-white px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-background flex flex-col" dir="rtl">
+      <header className="bg-card/95 backdrop-blur-md border-b border-border flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#F5BF23] rounded-full flex items-center justify-center">
-            <Phone className="w-5 h-5 text-[#0B0B3B]" />
+          <div className="relative w-9 h-9 bg-gradient-to-br from-primary/80 to-primary/70 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="relative">
+              <span className="text-primary-foreground font-bold text-base">A</span>
+              <Cog
+                className="absolute -top-1 -right-1 h-2.5 w-2.5 text-primary-foreground/80 animate-spin"
+                style={{ animationDuration: "8s" }}
+              />
+            </div>
           </div>
-          <div className="text-right">
-            <h1 className="text-xl font-bold">UberFix.shop</h1>
-            <p className="text-xs text-gray-300">خدمات الصيانة المنزلية</p>
+          <div className="hidden sm:block">
+            <h1 className="text-lg font-bold text-primary">UberFix.shop</h1>
+            <p className="text-xs text-muted-foreground">Quick Maintenance Methods – خريطة الخدمات</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white hover:bg-white/10"
-        >
-          <User className="w-5 h-5" />
-        </Button>
+
+        <div className="flex items-center gap-3">
+          <NotificationsList />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-border/60">
+                <Avatar className="h-9 w-9">
+                  {userData?.avatarUrl ? (
+                    <AvatarImage src={userData.avatarUrl} alt={userData.firstName} />
+                  ) : (
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {userData?.firstName?.[0] || "U"}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {userData ? `${userData.firstName} ${userData.lastName}` : "مستخدم"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{userData?.email || "user@example.com"}</p>
+                  <p className="text-xs text-primary font-semibold">{userData?.role || "عميل"}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                  <Home className="mr-2 h-4 w-4" />
+                  <span>لوحة التحكم</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>الملف الشخصي</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  <span>الإعدادات</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/maintenance-requests")}>
+                  <ClipboardList className="mr-2 h-4 w-4" />
+                  <span>طلبات الصيانة</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>تسجيل الخروج</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
-      {/* Search Bar */}
-      <div className="bg-white px-6 py-4 shadow-sm">
-        <div className="relative max-w-4xl mx-auto">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="ابحث عن خدمة أو موقع..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10 h-12 text-right"
-          />
-        </div>
-      </div>
+      <main className="flex-1 flex flex-col lg:flex-row">
+        <div className="flex-1 flex flex-col">
+          <div className="border-b border-border bg-card/80 backdrop-blur-sm px-4 py-3 flex flex-col gap-3">
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <div className="flex-1 flex items-center gap-2">
+                <div className="relative flex-1">
+                  <span className="absolute inset-y-0 right-3 flex items-center text-muted-foreground">
+                    <Search className="w-4 h-4" />
+                  </span>
+                  <Input
+                    placeholder="ابحث باسم الفني أو نوع الخدمة..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pr-9"
+                  />
+                </div>
+                <Button variant="outline" size="icon" onClick={handleQuickRequest} className="hidden md:inline-flex">
+                  <MapPin className="w-4 h-4" />
+                </Button>
+              </div>
 
-      {/* Specialty Filters */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
-        <div className="flex gap-2 overflow-x-auto">
-          {specialties.map((specialty) => (
-            <Button
-              key={specialty.id}
-              variant={selectedSpecialty === specialty.label ? "default" : "outline"}
-              onClick={() =>
-                setSelectedSpecialty(
-                  selectedSpecialty === specialty.label ? null : specialty.label
-                )
-              }
-              className={`whitespace-nowrap ${
-                selectedSpecialty === specialty.label
-                  ? "bg-[#0B0B3B] text-white hover:bg-[#0B0B3B]/90"
-                  : "border-gray-300"
-              }`}
-            >
-              <span className="mr-2">{specialty.icon}</span>
-              {specialty.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+              <div className="flex items-center gap-2 justify-between md:justify-end">
+                <Button variant="outline" size="sm" onClick={handleQuickRequest} className="flex items-center gap-2">
+                  <span>طلب صيانة سريع</span>
+                  <MapPin className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Technicians List */}
-        <aside className="w-80 bg-white border-l border-gray-200 flex flex-col max-h-[calc(100vh-200px)]">
-          <div className="p-4 flex-shrink-0 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-[#0B0B3B] mb-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                اختر نوع الخدمة:
+              </span>
+              {SPECIALTIES.map((specialty) => (
+                <Button
+                  key={specialty.id}
+                  variant={selectedSpecialty === specialty.label ? "default" : "outline"}
+                  size="sm"
+                  onClick={() =>
+                    setSelectedSpecialty(selectedSpecialty === specialty.label ? null : specialty.label)
+                  }
+                  className="whitespace-nowrap"
+                >
+                  <span className="mr-1">{specialty.icon}</span>
+                  {specialty.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 relative">
+            {mapError ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/40">
+                <Card className="p-6 max-w-md text-center space-y-3">
+                  <div className="flex items-center justify-center gap-2 text-primary mb-2">
+                    <MapPin className="w-5 h-5" />
+                    <span className="font-semibold">خريطة الخدمات غير متاحة حالياً</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    حدث خطأ أثناء تحميل خرائط Google. يرجى التأكد من إعداد مفتاح الخرائط في لوحة إعدادات النظام.
+                  </p>
+                  <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    إعادة المحاولة
+                  </Button>
+                </Card>
+              </div>
+            ) : (
+              <div ref={mapRef} className="w-full h-[600px] md:h-[calc(100vh-180px)] bg-muted" />
+            )}
+          </div>
+        </div>
+
+        <aside className="w-80 bg-card border-l border-border flex flex-col max-h-[calc(100vh-180px)]">
+          {/* Branch Info Section */}
+          <div className="p-3 flex-shrink-0 border-b border-border">
+            <BranchInfoCard
+              id={selectedBranch?.id || "Az-Shop-0000"}
+              name={selectedBranch?.branch_type || selectedBranch?.branch || "فرع غير محدد"}
+              location={selectedBranch?.branch || selectedBranch?.address || "لم يتم اختيار فرع"}
+              status="Active"
+            />
+          </div>
+
+          {/* Available Services */}
+          <div className="p-3 flex-shrink-0 border-b border-border">
+            <h2 className="text-base font-bold text-foreground mb-1">
               الخدمات المتاحة ({filteredTechnicians.length})
             </h2>
-            <p className="text-sm text-gray-500">
-              اختر فني من القائمة أدناه
-            </p>
           </div>
-          
-          <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div className="space-y-3">
 
+          <div className="flex-1 overflow-y-auto px-3 py-3">
+            <div className="space-y-2">
               {loading ? (
-                <div className="text-center py-8 text-gray-500">جاري التحميل...</div>
+                <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
               ) : filteredTechnicians.length > 0 ? (
-                filteredTechnicians.map((tech) => (
-                  <Card key={tech.id} className="p-4 hover:shadow-md transition-shadow">
-                    <div className="flex gap-3">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={tech.profile_image || undefined} />
-                        <AvatarFallback className="bg-[#F5BF23] text-[#0B0B3B]">
-                          {tech.name?.charAt(0) || "ف"}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <h3 className="font-semibold text-[#0B0B3B]">
-                            {tech.name || "فني"}
-                          </h3>
-                          <Badge
-                            variant="secondary"
-                            className={
-                              tech.status === "online"
-                                ? "bg-green-100 text-green-700"
-                                : tech.status === "busy"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-gray-100 text-gray-700"
-                            }
-                          >
-                            {tech.status === "online"
-                              ? "متاح الآن"
-                              : tech.status === "busy"
-                              ? "مشغول"
-                              : "غير متاح"}
-                          </Badge>
+                filteredTechnicians.map((tech) => {
+                  const techStatus =
+                    tech.status === "busy" ? "busy" : tech.status === "online" ? "available" : "soon";
+                  return (
+                    <Card
+                      key={tech.id}
+                      className="p-3 cursor-pointer hover:bg-muted/60 transition-colors"
+                      onClick={() => handleRequestService(tech)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <User className="w-5 h-5 text-primary" />
                         </div>
-
-                        <p className="text-sm text-gray-600 mb-2">
-                          {tech.specialization || "فني عام"}
-                        </p>
-
-                        <div className="flex items-center gap-3 text-sm mb-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-[#F5BF23] text-[#F5BF23]" />
-                            <span className="font-medium">
-                              {tech.rating || "5.0"}
-                            </span>
-                            <span className="text-gray-500">
-                              ({tech.total_reviews || 0} تقييم)
-                            </span>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="font-semibold text-sm">{tech.name || "فني مجهول"}</h3>
+                            <Badge
+                              variant="outline"
+                              className={
+                                techStatus === "available"
+                                  ? "border-green-500 text-green-600"
+                                  : techStatus === "busy"
+                                  ? "border-red-500 text-red-600"
+                                  : "border-yellow-500 text-yellow-600"
+                              }
+                            >
+                              {techStatus === "available"
+                                ? "متاح الآن"
+                                : techStatus === "busy"
+                                ? "مشغول اليوم"
+                                : "متاح قريباً"}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>{tech.specialization || "خدمة صيانة"}</span>
+                          </p>
+                          {tech.phone && (
+                            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                              <Phone className="w-3 h-3" />
+                              <span>{tech.phone}</span>
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between mt-1">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                              <span>{tech.rating || 4.5}</span>
+                              <span>({12} تقييم)</span>
+                            </div>
+                            <Button variant="outline" size="sm" className="h-7 px-2 text-[11px]">
+                              <FileText className="w-3 h-3 ml-1" />
+                              تفاصيل الفني
+                            </Button>
                           </div>
                         </div>
-
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">
-                            {tech.hourly_rate || 150} جنيه/ساعة
-                          </span>
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              if (tech.phone) {
-                                console.warn("📞 Calling technician:", tech.name, tech.phone);
-                                window.open(`tel:${tech.phone}`, '_self');
-                              } else {
-                                console.warn("⚠️ No phone number for technician:", tech.name);
-                              }
-                            }}
-                            className="bg-[#0B0B3B] hover:bg-[#0B0B3B]/90 text-white h-8 cursor-pointer"
-                          >
-                            <Phone className="w-3 h-3 ml-1" />
-                            اتصل
-                          </Button>
-                        </div>
                       </div>
-                    </div>
-                  </Card>
-                ))
+                    </Card>
+                  );
+                })
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  لا توجد خدمات متاحة حالياً
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  لا يوجد فنيون متاحون حالياً وفقاً لمعايير البحث المحددة.
                 </div>
               )}
             </div>
           </div>
         </aside>
-
-        {/* Map Area */}
-        <main className="flex-1 relative">
-          {mapError ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-8 h-8 text-red-500" />
-                </div>
-                <h3 className="text-xl font-bold text-[#0B0B3B] mb-2">
-                  عذرًا، حدث خطأ!
-                </h3>
-                <p className="text-gray-600">
-                  لم يمكن تحميل خريطة Google. يرجى المحاولة مرة أخرى لاحقاً.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div ref={mapRef} className="w-full h-full" />
-          )}
-        </main>
-      </div>
-
-      {/* Bottom Navigation */}
-      <nav className="bg-white border-t border-gray-200 px-6 py-3 flex items-center justify-around">
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <User className="w-5 h-5" />
-          <span>الملف الشخصي</span>
-        </Button>
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <MapPin className="w-5 h-5" />
-          <span>الفواتير</span>
-        </Button>
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <Star className="w-5 h-5" />
-          <span>الخدمات المكتملة</span>
-        </Button>
-        <Button variant="ghost" className="flex flex-col items-center gap-1 text-xs">
-          <Phone className="w-5 h-5" />
-          <span>تتبع الطلبات</span>
-        </Button>
-        <Button
-          className="flex flex-col items-center gap-1 text-xs bg-[#0B0B3B] hover:bg-[#0B0B3B]/90 text-white px-6"
-        >
-          <MapPin className="w-5 h-5" />
-          <span>الخريطة</span>
-        </Button>
-      </nav>
+      </main>
     </div>
   );
 }

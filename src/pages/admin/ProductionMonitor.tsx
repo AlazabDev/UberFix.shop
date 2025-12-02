@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, CheckCircle, Activity, Users, Database, Wifi } from "lucide-react";
-import { errorHandler } from "@/lib/errorHandler";
+import { errorTracker } from "@/lib/errorTracking";
 import { PRODUCTION_CONFIG } from "@/lib/productionConfig";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,7 +39,7 @@ export default function ProductionMonitor() {
   });
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [errorQueue, setErrorQueue] = useState(errorHandler.getQueueStatus());
+  const [errorQueue, setErrorQueue] = useState({ queueLength: 0, isOnline: true });
 
   // فحص حالة النظام
   const checkSystemStatus = async () => {
@@ -124,19 +124,19 @@ export default function ProductionMonitor() {
     };
   }, []);
 
-  // تحديث دوري للحالة والمقاييس
+  // Periodic updates DISABLED
   useEffect(() => {
-    const interval = setInterval(() => {
-      checkSystemStatus();
-      collectPerformanceMetrics();
-      setErrorQueue(errorHandler.getQueueStatus());
-    }, 30000); // كل 30 ثانية
+    // const interval = setInterval(() => {
+    //   checkSystemStatus();
+    //   collectPerformanceMetrics();
+    //   setErrorQueue({ queueLength: errorTracker.getQueueSize(), isOnline: navigator.onLine });
+    // }, 30000);
 
     // فحص فوري عند التحميل
     checkSystemStatus();
     collectPerformanceMetrics();
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -156,8 +156,8 @@ export default function ProductionMonitor() {
   };
 
   const clearErrorQueue = () => {
-    errorHandler.clearQueue();
-    setErrorQueue(errorHandler.getQueueStatus());
+    errorTracker.clearQueue();
+    setErrorQueue({ queueLength: 0, isOnline: navigator.onLine });
   };
 
   return (
@@ -316,7 +316,7 @@ export default function ProductionMonitor() {
         </Button>
         
         <Button variant="outline" onClick={() => {
-          errorHandler.logInfo('Manual system check initiated');
+          errorTracker.track('Manual system check initiated', { level: 'info' });
         }}>
           اختبار تسجيل الأحداث
         </Button>

@@ -213,25 +213,25 @@ export const useMessages = (folder: 'inbox' | 'sent' | 'starred' | 'archived' = 
   useEffect(() => {
     fetchMessages();
 
-    // Setup realtime subscription
-    const channel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-        },
-        () => {
-          fetchMessages();
-        }
-      )
-      .subscribe();
+    // Realtime subscription DISABLED
+    // const channel = supabase
+    //   .channel('messages-changes')
+    //   .on(
+    //     'postgres_changes',
+    //     {
+    //       event: '*',
+    //       schema: 'public',
+    //       table: 'messages',
+    //     },
+    //     () => {
+    //       fetchMessages();
+    //     }
+    //   )
+    //   .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // return () => {
+    //   supabase.removeChannel(channel);
+    // };
   }, [folder]);
 
   return {

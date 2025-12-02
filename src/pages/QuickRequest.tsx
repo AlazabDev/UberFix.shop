@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { QuickRequestForm } from "@/components/forms/QuickRequestForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -21,19 +20,45 @@ export default function QuickRequest() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("id", propertyId)
-        .single();
+      try {
+        const functionUrl = `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/get-property-for-qr?propertyId=${propertyId}`;
+        
+        console.log('Fetching property from:', functionUrl);
+        
+        const response = await fetch(functionUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (error) {
-        console.error("Error fetching property:", error);
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Response error:', errorText);
+          throw new Error(`Failed to fetch property: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Property data:', data);
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        if (!data.property) {
+          throw new Error('Property not found');
+        }
+
+        setProperty(data.property);
+      } catch (err) {
+        console.error("Error fetching property:", err);
         toast.error(locale === "ar" ? "خطأ في تحميل بيانات العقار" : "Error loading property data");
-      } else {
-        setProperty(data);
+        setProperty(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchProperty();

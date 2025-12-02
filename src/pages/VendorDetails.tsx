@@ -50,7 +50,7 @@ const VendorDetails = () => {
         .from("vendors")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       setVendor(data);

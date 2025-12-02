@@ -21,10 +21,17 @@ const UserGuide = lazy(() => import("@/pages/public/UserGuide"));
 
 // Other public pages
 const Projects = lazy(() => import("@/pages/projects/Projects"));
-const Map = lazy(() => import("@/pages/Map"));
 const PWASettings = lazy(() => import("@/pages/settings/PWASettings"));
 const QuickRequest = lazy(() => import("@/pages/QuickRequest"));
+const QuickRequestFromMap = lazy(() => import("@/pages/QuickRequestFromMap"));
+const TrackOrders = lazy(() => import("@/pages/TrackOrders"));
+const CompletedServices = lazy(() => import("@/pages/CompletedServices"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+
+// Technician pages
+const TechnicianRegistration = lazy(() => import("@/pages/technicians/TechnicianRegistration"));
+const TechnicianRegistrationWizard = lazy(() => import("@/pages/technicians/TechnicianRegistrationWizard"));
+const RegistrationThankYou = lazy(() => import("@/pages/technicians/RegistrationThankYou"));
 
 /**
  * المسارات العامة (لا تتطلب تسجيل دخول)
@@ -46,8 +53,13 @@ export const publicRoutes = [
   { path: "/projects", element: <Projects /> },
   { path: "/blog", element: <Blog /> },
   { path: "/blog/:slug", element: <BlogPost /> },
-  { path: "/map", element: <Map /> },
   { path: "/pwa-settings", element: <PWASettings /> },
   { path: "/quick-request/:propertyId", element: <QuickRequest /> },
+  { path: "/quick-request", element: <QuickRequestFromMap /> },
+  { path: "/track-orders", element: <TrackOrders /> },
+  { path: "/completed-services", element: <CompletedServices /> },
+  { path: "/technicians/register", element: <TechnicianRegistration /> },
+  { path: "/technicians/registration/wizard", element: <TechnicianRegistrationWizard /> },
+  { path: "/technicians/registration/thank-you", element: <RegistrationThankYou /> },
   { path: "*", element: <NotFound /> },
 ];

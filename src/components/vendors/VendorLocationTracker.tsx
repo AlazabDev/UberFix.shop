@@ -85,7 +85,7 @@ export const VendorLocationTracker = ({
         .from("vendors")
         .select("current_latitude, current_longitude, location_updated_at")
         .eq("id", vendorId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

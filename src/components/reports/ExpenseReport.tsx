@@ -11,13 +11,13 @@ import { ar } from "date-fns/locale";
 export function ExpenseReport() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [expenses, setExpenses] = useState<Array<{ amount?: number; category?: string; [key: string]: unknown }>>([]);
+  const [expenses, setExpenses] = useState<Array<Record<string, unknown>>>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchExpenses = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error }: { data: Array<Record<string, unknown>> | null; error: unknown } = await supabase
         .from('expenses')
         .select('*')
         .gte('expense_date', startDate)
@@ -35,7 +35,7 @@ export function ExpenseReport() {
 
   useEffect(() => {
     fetchExpenses();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, fetchExpenses]);
 
   const totalExpenses = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const maintenanceExpenses = expenses.filter(e => e.category === 'maintenance')

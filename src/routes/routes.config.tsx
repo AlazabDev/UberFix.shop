@@ -3,10 +3,11 @@ import { lazy } from "react";
 // Dashboard & Core
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Documentation = lazy(() => import("@/pages/Documentation"));
+const MonitoringDashboard = lazy(() => import("@/pages/MonitoringDashboard"));
+const BranchManagement = lazy(() => import("@/pages/BranchManagement"));
 
 // Maintenance
 const Requests = lazy(() => import("@/pages/maintenance/Requests"));
-const AllRequests = lazy(() => import("@/pages/maintenance/AllRequests"));
 const RequestDetails = lazy(() => import("@/pages/maintenance/RequestDetails"));
 const RequestLifecycleJourney = lazy(
   () => import("@/pages/maintenance/RequestLifecycleJourney")
@@ -34,15 +35,10 @@ const ArchivedProperties = lazy(
 // Reports
 const Reports = lazy(() => import("@/pages/reports/Reports"));
 const SLADashboard = lazy(() => import("@/pages/reports/SLADashboard"));
-const ExpenseReports = lazy(
-  () => import("@/pages/reports/ExpenseReports")
-);
-const MaintenanceReports = lazy(
-  () => import("@/pages/reports/MaintenanceReports")
-); // الأصلية
-const ProductionReport = lazy(
-  () => import("@/pages/reports/ProductionReport")
-);
+const ExpenseReports = lazy(() => import("@/pages/reports/ExpenseReports"));
+const MaintenanceReports = lazy(() => import("@/pages/reports/MaintenanceReports"));
+const ProductionReport = lazy(() => import("@/pages/reports/ProductionReport"));
+const PropertyLifecycle = lazy(() => import("@/pages/reports/PropertyLifecycle"));
 
 // Admin
 const UserManagement = lazy(
@@ -67,6 +63,15 @@ const TechnicianDashboard = lazy(
 );
 const TechnicianTaskManagement = lazy(
   () => import("@/pages/technicians/TechnicianTaskManagement")
+);
+const TechnicianWallet = lazy(
+  () => import("@/pages/technicians/TechnicianWallet")
+);
+const TechnicianWithdrawal = lazy(
+  () => import("@/pages/technicians/TechnicianWithdrawal")
+);
+const TechnicianEarnings = lazy(
+  () => import("@/pages/technicians/TechnicianEarnings")
 );
 const HallOfExcellence = lazy(
   () => import("@/pages/technicians/HallOfExcellence")
@@ -103,40 +108,23 @@ const Appointments = lazy(() => import("@/pages/Appointments"));
 const Invoices = lazy(() => import("@/pages/Invoices"));
 const UsersPage = lazy(() => import("@/pages/UsersPage"));
 
-/**
- * صفحات جديدة تحت قسم Maintenance
- * (بعد التصحيح — تم إعادة تسمية المتغيّر الثاني فقط)
- */
-const MaintenanceRequestDetail = lazy(
-  () => import("@/pages/maintenance/MaintenanceRequestDetail")
-);
-const MaintenanceReportsPage = lazy(
-  () => import("@/pages/maintenance/MaintenanceReports")
-); // ← هذه كانت سبب المشكلة
-const CreateMaintenanceRequest = lazy(
-  () => import("@/pages/maintenance/CreateMaintenanceRequest")
-);
-const MaintenanceList = lazy(
-  () => import("@/pages/maintenance/MaintenanceList")
-);
-const MaintenanceOverview = lazy(
-  () => import("@/pages/maintenance/MaintenanceOverview")
-);
+// Maintenance Module Pages
+const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
+const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
 
 export const protectedRoutes = [
   { path: "/dashboard", element: <Dashboard />, withLayout: true },
-  { path: "/sla-dashboard", element: <SLADashboard />, withLayout: true },
+  { path: "/monitoring", element: <MonitoringDashboard />, withLayout: true },
+  { path: "/branch-management", element: <BranchManagement />, withLayout: true },
 
   // Maintenance
   { path: "/requests", element: <Requests />, withLayout: true },
-  { path: "/all-requests", element: <AllRequests />, withLayout: true },
   { path: "/requests/:id", element: <RequestDetails />, withLayout: true },
   { path: "/request-lifecycle", element: <RequestLifecycleJourney />, withLayout: true },
   { path: "/service-request", element: <ServiceRequest />, withLayout: true },
   { path: "/maintenance/overview", element: <MaintenanceOverview />, withLayout: true },
-  { path: "/maintenance/list", element: <MaintenanceList />, withLayout: true },
   { path: "/maintenance/create", element: <CreateMaintenanceRequest />, withLayout: true },
-  { path: "/maintenance/:id", element: <MaintenanceRequestDetail />, withLayout: true },
+  { path: "/maintenance/:id", element: <RequestDetails />, withLayout: true },
 
   // Vendors
   { path: "/vendors", element: <Vendors />, withLayout: true },
@@ -144,9 +132,11 @@ export const protectedRoutes = [
 
   // Reports
   { path: "/reports", element: <Reports />, withLayout: true },
+  { path: "/reports/sla", element: <SLADashboard />, withLayout: true },
   { path: "/reports/expenses", element: <ExpenseReports />, withLayout: true },
-  { path: "/reports/maintenance", element: <MaintenanceReports />, withLayout: true }, // الأصلية
-  { path: "/maintenance/reports", element: <MaintenanceReportsPage />, withLayout: true }, // ← الجديدة بعد التصحيح
+  { path: "/reports/maintenance", element: <MaintenanceReports />, withLayout: true },
+  { path: "/reports/production", element: <ProductionReport />, withLayout: true },
+  { path: "/reports/property-lifecycle", element: <PropertyLifecycle />, withLayout: true },
 
   // Properties
   { path: "/properties", element: <Properties />, withLayout: true },
@@ -162,7 +152,6 @@ export const protectedRoutes = [
   { path: "/maintenance-procedures", element: <MaintenanceProcedures />, withLayout: true },
   { path: "/settings", element: <Settings />, withLayout: true },
   { path: "/testing", element: <Testing />, withLayout: true },
-  { path: "/production-report", element: <ProductionReport />, withLayout: true },
   { path: "/production-monitor", element: <ProductionMonitor />, withLayout: true },
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
@@ -176,6 +165,9 @@ export const protectedRoutes = [
   { path: "/technicians/training", element: <TechnicianTraining />, withLayout: true },
   { path: "/technicians/dashboard", element: <TechnicianDashboard />, withLayout: true },
   { path: "/technicians/tasks", element: <TechnicianTaskManagement />, withLayout: true },
+  { path: "/technicians/wallet", element: <TechnicianWallet />, withLayout: true },
+  { path: "/technicians/withdrawal", element: <TechnicianWithdrawal />, withLayout: true },
+  { path: "/technicians/earnings", element: <TechnicianEarnings />, withLayout: true },
   { path: "/hall-of-excellence", element: <HallOfExcellence />, withLayout: true },
 
   // Messages

@@ -66,13 +66,13 @@ export const checkLevelPromotion = async (technicianId: string) => {
       .from("technician_performance")
       .select("*")
       .eq("technician_id", technicianId)
-      .single();
+      .maybeSingle();
 
     const { data: level } = await supabase
       .from("technician_levels")
       .select("*")
       .eq("technician_id", technicianId)
-      .single();
+      .maybeSingle();
 
     if (!performance || !level) return null;
 
@@ -176,7 +176,7 @@ export const selectMonthlyWinners = async (month: string) => {
         .from("monthly_excellence_awards")
         .insert(award)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error inserting award:", error);

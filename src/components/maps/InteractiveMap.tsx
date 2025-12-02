@@ -104,7 +104,7 @@ export function InteractiveMap({
         wrapperRef.current.appendChild(mapDiv);
         mapDivRef.current = mapDiv;
 
-        // Create map instance
+        // Create map instance with mapId to prevent warnings
         const mapInstance = new google.maps.Map(mapDiv, {
           center: { lat: currentLat, lng: currentLng },
           zoom: 15,
@@ -112,6 +112,7 @@ export function InteractiveMap({
           streetViewControl: false,
           fullscreenControl: false,
           zoomControl: true,
+          mapId: '8e0a97af9386fef', // Google Maps Map ID to use Advanced Markers
         });
 
         // Create marker
@@ -223,12 +224,12 @@ export function InteractiveMap({
           mapDivRef.current = null;
         }
 
-        geocoderRef.current = null;
-      } catch (error) {
-        console.warn("Cleanup error (safe to ignore):", error);
+      geocoderRef.current = null;
+      } catch (_e) {
+        // Cleanup error, safe to ignore
       }
     };
-  }, []); // Run ONCE only
+  }, [loadGoogleMaps, onLocationChange, currentLat, currentLng]);
 
   // Update marker position when coordinates change
   useEffect(() => {

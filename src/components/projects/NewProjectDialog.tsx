@@ -56,7 +56,7 @@ export function NewProjectDialog({ onSuccess }: NewProjectDialogProps) {
       setOpen(false);
       form.reset();
       onSuccess?.();
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "حدث خطأ غير متوقع";
       toast({
         title: "خطأ في إنشاء المشروع",

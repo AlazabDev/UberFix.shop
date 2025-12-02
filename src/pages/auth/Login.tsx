@@ -8,8 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Cog, Shield, Users, Wrench } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
-import { useFacebookAuth } from "@/hooks/useFacebookAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -19,7 +17,6 @@ export default function Login() {
   const selectedRole = searchParams.get("role") || "customer";
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { loginWithFacebook, isLoading: isFBLoading, isFBReady } = useFacebookAuth();
 
   const roleConfig = {
     admin: {
@@ -31,7 +28,7 @@ export default function Login() {
     },
     vendor: {
       title: "الفنيون",
-      description: "تسجيل الدخول لحساب الفنيون",
+      description: "هذه البوابة مخصصة للفنيين فقط لاستقبال الطلبات",
       icon: Wrench,
       color: "green",
       bgGradient: "from-green-50/50 to-background dark:from-green-950/20"
@@ -225,22 +222,6 @@ export default function Login() {
                 تسجيل الدخول باستخدام Google
               </Button>
               
-              <div 
-                className="w-full"
-                dangerouslySetInnerHTML={{
-                  __html: `<fb:login-button 
-                    scope="public_profile,email"
-                    onlogin="checkLoginState()"
-                    data-size="large"
-                    data-button-type="continue_with"
-                    data-layout="default"
-                    data-auto-logout-link="false"
-                    data-use-continue-as="false"
-                    data-width="100%">
-                  </fb:login-button>`
-                }}
-              />
-              
               <Button 
                 type="button" 
                 variant="outline" 
@@ -259,6 +240,19 @@ export default function Login() {
                   إنشاء حساب جديد
                 </Link>
               </p>
+              {selectedRole === "vendor" && (
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                    onClick={() => navigate("/technicians/register")}
+                  >
+                    سجل كفني جديد
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               <p className="text-sm">
                 <Link to="/role-selection" className="text-muted-foreground hover:text-primary transition-colors">
                   اختيار نوع حساب آخر

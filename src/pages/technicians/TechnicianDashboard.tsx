@@ -28,7 +28,7 @@ export default function TechnicianDashboard() {
         .from("technician_performance")
         .select("*")
         .eq("technician_id", user.id)
-        .single();
+        .maybeSingle();
 
       setPerformance(perfData);
 
@@ -37,7 +37,7 @@ export default function TechnicianDashboard() {
         .from("technician_levels")
         .select("*")
         .eq("technician_id", user.id)
-        .single();
+        .maybeSingle();
 
       setLevel(levelData as any);
 
