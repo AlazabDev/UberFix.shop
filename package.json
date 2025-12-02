@@ -5,6 +5,7 @@
   "type": "module",
   "engines": {
     "node": ">=20.10.0",
+    "pnpm": ">=10.0.0",
     "npm": ">=10.0.0"
   },
   "scripts": {
@@ -19,8 +20,7 @@
     "check": "npm run lint && npm run typecheck",
     "clean": "bash ./scripts/clean.sh",
     "fix": "bash ./scripts/fix.sh",
-    "test:unit": "vitest --runInBand --coverage",
-    "preinstall": "npx npm-force-resolutions"
+    "test:unit": "vitest --runInBand --coverage"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
