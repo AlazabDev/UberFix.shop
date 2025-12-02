@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 describe('Database Integration', () => {
   let testCompanyId: string;
-  let testBranchId: string;
 
   beforeAll(async () => {
     // Get first company and branch for testing
@@ -14,16 +13,6 @@ describe('Database Integration', () => {
     
     if (companies && companies.length > 0) {
       testCompanyId = companies[0].id;
-
-      const { data: branches } = await supabase
-        .from('branches')
-        .select('id')
-        .eq('company_id', testCompanyId)
-        .limit(1);
-
-      if (branches && branches.length > 0) {
-        testBranchId = branches[0].id;
-      }
     }
   });
 

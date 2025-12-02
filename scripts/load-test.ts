@@ -186,7 +186,7 @@ async function simulateUser(userId: number, endTime: number) {
 
 // Calculate and display statistics
 function displayStats() {
-  console.log('\n=== Load Test Results ===\n');
+  console.warn('\n=== Load Test Results ===\n');
   
   const totalRequests = results.length;
   const successfulRequests = results.filter(r => r.success).length;
@@ -207,20 +207,20 @@ function displayStats() {
   const testDuration = (results[results.length - 1]?.timestamp - results[0]?.timestamp) / 1000;
   const rps = totalRequests / testDuration;
   
-  console.log(`Total Requests: ${totalRequests}`);
-  console.log(`Successful: ${successfulRequests} (${((successfulRequests / totalRequests) * 100).toFixed(2)}%)`);
-  console.log(`Failed: ${failedRequests} (${((failedRequests / totalRequests) * 100).toFixed(2)}%)`);
-  console.log(`\nRequest Rate: ${rps.toFixed(2)} req/s`);
-  console.log(`\nResponse Times:`);
-  console.log(`  Min: ${minDuration}ms`);
-  console.log(`  Max: ${maxDuration}ms`);
-  console.log(`  Avg: ${avgDuration.toFixed(2)}ms`);
-  console.log(`  P50: ${p50}ms`);
-  console.log(`  P95: ${p95}ms`);
-  console.log(`  P99: ${p99}ms`);
+  console.warn(`Total Requests: ${totalRequests}`);
+  console.warn(`Successful: ${successfulRequests} (${((successfulRequests / totalRequests) * 100).toFixed(2)}%)`);
+  console.warn(`Failed: ${failedRequests} (${((failedRequests / totalRequests) * 100).toFixed(2)}%)`);
+  console.warn(`\nRequest Rate: ${rps.toFixed(2)} req/s`);
+  console.warn(`\nResponse Times:`);
+  console.warn(`  Min: ${minDuration}ms`);
+  console.warn(`  Max: ${maxDuration}ms`);
+  console.warn(`  Avg: ${avgDuration.toFixed(2)}ms`);
+  console.warn(`  P50: ${p50}ms`);
+  console.warn(`  P95: ${p95}ms`);
+  console.warn(`  P99: ${p99}ms`);
   
   // Breakdown by endpoint
-  console.log('\n=== Breakdown by Endpoint ===\n');
+  console.warn('\n=== Breakdown by Endpoint ===\n');
   const byEndpoint = results.reduce((acc, r) => {
     if (!acc[r.endpoint]) {
       acc[r.endpoint] = { count: 0, success: 0, totalDuration: 0 };
@@ -234,31 +234,31 @@ function displayStats() {
   Object.entries(byEndpoint).forEach(([endpoint, stats]) => {
     const avgDuration = stats.totalDuration / stats.count;
     const successRate = (stats.success / stats.count) * 100;
-    console.log(`${endpoint}:`);
-    console.log(`  Requests: ${stats.count}`);
-    console.log(`  Success Rate: ${successRate.toFixed(2)}%`);
-    console.log(`  Avg Response Time: ${avgDuration.toFixed(2)}ms\n`);
+    console.warn(`${endpoint}:`);
+    console.warn(`  Requests: ${stats.count}`);
+    console.warn(`  Success Rate: ${successRate.toFixed(2)}%`);
+    console.warn(`  Avg Response Time: ${avgDuration.toFixed(2)}ms\n`);
   });
   
   // Performance rating
-  console.log('=== Performance Rating ===\n');
+  console.warn('=== Performance Rating ===\n');
   if (p95 < 200 && successRate > 99.5) {
-    console.log('🟢 EXCELLENT - Ready for 5000+ users');
+    console.warn('🟢 EXCELLENT - Ready for 5000+ users');
   } else if (p95 < 500 && successRate > 99) {
-    console.log('🟡 GOOD - Can handle current load, some optimization needed');
+    console.warn('🟡 GOOD - Can handle current load, some optimization needed');
   } else if (p95 < 1000 && successRate > 95) {
-    console.log('🟠 FAIR - Needs optimization before scaling');
+    console.warn('🟠 FAIR - Needs optimization before scaling');
   } else {
-    console.log('🔴 POOR - Critical optimization required');
+    console.warn('🔴 POOR - Critical optimization required');
   }
 }
 
 // Main execution
 async function main() {
-  console.log('🚀 Starting Load Test');
-  console.log(`Duration: ${TEST_DURATION}s`);
-  console.log(`Concurrent Users: ${CONCURRENT_USERS}`);
-  console.log(`Target: ${SUPABASE_URL}\n`);
+  console.warn('🚀 Starting Load Test');
+  console.warn(`Duration: ${TEST_DURATION}s`);
+  console.warn(`Concurrent Users: ${CONCURRENT_USERS}`);
+  console.warn(`Target: ${SUPABASE_URL}\n`);
   
   const startTime = Date.now();
   const endTime = startTime + (TEST_DURATION * 1000);
