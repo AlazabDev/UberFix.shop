@@ -12,6 +12,8 @@ import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
 import { Loader2 } from "lucide-react";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { useMaintenanceLock } from "@/hooks/useMaintenanceLock";
+import { MaintenanceOverlay } from "@/components/MaintenanceOverlay";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,7 +45,16 @@ const App = () => {
 };
 
 const MaintenanceLockWrapper = () => {
-  // تعطيل فحص وضع الصيانة مؤقتاً لحل مشكلة التحميل
+  const { data: lockStatus, isLoading } = useMaintenanceLock();
+
+  if (isLoading) {
+    return <LoadingFallback />;
+  }
+
+  if (lockStatus?.isLocked) {
+    return <MaintenanceOverlay message={lockStatus.message} />;
+  }
+
   return (
     <ThemeProvider
       attribute="class"

@@ -335,22 +335,22 @@ export function useMaintenanceRequests() {
   useEffect(() => {
     fetchRequests();
 
-    // Realtime subscription DISABLED
-    // const channel = supabase
-    //   .channel('maintenance-requests-changes')
-    //   .on('postgres_changes', 
-    //     { event: '*', schema: 'public', table: 'maintenance_requests' },
-    //     () => {
-    //       fetchRequests();
-    //     }
-    //   )
-    //   .subscribe();
+    // إضافة realtime subscription
+    const channel = supabase
+      .channel('maintenance-requests-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'maintenance_requests' },
+        () => {
+          fetchRequests();
+        }
+      )
+      .subscribe();
 
-    // return () => {
-    //   channel.unsubscribe().then(() => {
-    //     supabase.removeChannel(channel);
-    //   });
-    // };
+    return () => {
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
+    };
   }, []);
 
   return {

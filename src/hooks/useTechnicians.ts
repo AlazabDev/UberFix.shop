@@ -107,20 +107,20 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
 
     if (!supabaseReady) return;
 
-    // Realtime subscription DISABLED
-    // const channel = supabase
-    //   .channel('technicians-changes')
-    //   .on('postgres_changes',
-    //     { event: '*', schema: 'public', table: 'technicians' },
-    //     () => {
-    //       fetchTechnicians();
-    //     }
-    //   )
-    //   .subscribe();
+    // إضافة realtime subscription
+    const channel = supabase
+      .channel('technicians-changes')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'technicians' },
+        () => {
+          fetchTechnicians();
+        }
+      )
+      .subscribe();
 
-    // return () => {
-    //   supabase.removeChannel(channel);
-    // };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [filterStatus, filterSpecialization]);
 
   return {

@@ -95,13 +95,13 @@ export const useTechnicianLocation = ({
     setIsTracking(true);
     getCurrentPosition(); // Get initial position
 
-    // Continuous tracking DISABLED
-    // const intervalId = setInterval(() => {
-    //   getCurrentPosition();
-    // }, updateInterval);
+    // Set up interval for continuous tracking
+    const intervalId = setInterval(() => {
+      getCurrentPosition();
+    }, updateInterval);
 
     return () => {
-      // clearInterval(intervalId); // DISABLED
+      clearInterval(intervalId);
       setIsTracking(false);
     };
   }, [enabled, getCurrentPosition, updateInterval]);
