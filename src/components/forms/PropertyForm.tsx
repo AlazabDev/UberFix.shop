@@ -186,6 +186,11 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
     }
   };
 
+  // Generate unique property code
+  const generateUniqueCode = (): string => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
   const onSubmit = async (data: PropertyFormData) => {
     try {
       setLoading(true);
@@ -216,10 +221,17 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
         }
       }
 
+      // Generate unique code if not provided
+      let propertyCode = data.code?.trim() || null;
+      if (!propertyCode && !propertyId) {
+        // For new properties, generate unique code
+        propertyCode = generateUniqueCode();
+      }
+
       const qrCodeData = `${window.location.origin}/quick-request/${propertyId || "new"}`;
 
       const propertyData = {
-        code: data.code || null,
+        code: propertyCode,
         name: data.name,
         type: data.type,
         status: data.status || "active",
