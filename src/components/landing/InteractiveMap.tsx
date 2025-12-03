@@ -16,7 +16,10 @@ export const InteractiveMap: React.FC = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
   const [branches, setBranches] = useState<BranchLocation[]>([]);
-  const [mapError, setMapError] = useState<string | null>(null);
+  const [runtimeError, setRuntimeError] = useState<string | null>(null);
+  const mapError = !mapboxToken
+    ? "مطلوب مفتاح Mapbox صالح لعرض الخريطة."
+    : runtimeError;
 
   // تحميل بيانات الفروع من ملف JSON داخل public/data/branch_locations.json
   useEffect(() => {
@@ -30,19 +33,12 @@ export const InteractiveMap: React.FC = () => {
       .then((data) => setBranches(data))
       .catch((error) => {
         console.error("Error loading branch locations:", error);
-        setMapError("تعذر تحميل مواقع الفروع حاليًا.");
+        setRuntimeError("تعذر تحميل مواقع الفروع حاليًا.");
       });
   }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || branches.length === 0) return;
-
-    if (!mapboxToken) {
-      setMapError("مطلوب مفتاح Mapbox صالح لعرض الخريطة.");
-      return;
-    }
-
-    setMapError(null);
+    if (!mapContainer.current || branches.length === 0 || !mapboxToken) return;
 
     mapboxgl.accessToken = mapboxToken;
 
@@ -56,7 +52,7 @@ export const InteractiveMap: React.FC = () => {
     });
 
     map.current.on("error", () => {
-      setMapError("حدث خطأ أثناء تحميل الخريطة. يرجى المحاولة لاحقًا.");
+      setRuntimeError("حدث خطأ أثناء تحميل الخريطة. يرجى المحاولة لاحقًا.");
     });
 
     map.current.addControl(
@@ -82,7 +78,7 @@ export const InteractiveMap: React.FC = () => {
     const maxSpinZoom = 5;
     const slowSpinZoom = 3;
     let userInteracting = false;
-    let spinEnabled = true;
+    const spinEnabled = true;
 
     function spinGlobe() {
       if (!map.current) return;

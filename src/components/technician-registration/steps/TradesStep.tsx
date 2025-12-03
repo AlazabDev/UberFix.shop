@@ -36,6 +36,18 @@ export function TradesStep({ data, onNext, onBack, onSaveAndExit }: TradesStepPr
     new Set(data.trades?.map(t => t.category_id) || [])
   );
 
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('service_categories')
+      .select('id, name, description')
+      .eq('is_active', true)
+      .order('sort_order');
+
+    if (!error && data) {
+      setCategories(data);
+    }
+  };
+
   const form = useForm<TradesFormData>({
     resolver: zodResolver(tradesSchema),
     defaultValues: {
@@ -51,18 +63,6 @@ export function TradesStep({ data, onNext, onBack, onSaveAndExit }: TradesStepPr
   useEffect(() => {
     fetchCategories();
   }, []);
-
-  const fetchCategories = async () => {
-    const { data, error } = await supabase
-      .from('service_categories')
-      .select('id, name, description')
-      .eq('is_active', true)
-      .order('sort_order');
-    
-    if (!error && data) {
-      setCategories(data);
-    }
-  };
 
   const toggleCategory = (category: any) => {
     const isSelected = selectedCategoryIds.has(category.id);

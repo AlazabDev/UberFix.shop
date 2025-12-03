@@ -36,23 +36,6 @@ export default function PWASettings() {
   const [cacheSize, setCacheSize] = useState<number>(0);
   const [storageEstimate, setStorageEstimate] = useState<{ usage: number; quota: number } | null>(null);
 
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  useEffect(() => {
-    calculateStorageSize();
-  }, []);
-
   const calculateStorageSize = async () => {
     try {
       // Calculate localStorage size
@@ -77,6 +60,23 @@ export default function PWASettings() {
       console.error('Error calculating storage:', error);
     }
   };
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    calculateStorageSize();
+  }, []);
 
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';

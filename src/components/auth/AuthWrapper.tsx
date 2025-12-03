@@ -9,15 +9,12 @@ interface AuthWrapperProps {
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(supabaseReady);
   const [emailConfirmed, setEmailConfirmed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!supabaseReady) {
-      setLoading(false);
-      return;
-    }
+    if (!supabaseReady) return;
 
     let isMounted = true;
 

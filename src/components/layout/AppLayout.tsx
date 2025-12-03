@@ -35,10 +35,6 @@ export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
   const fetchUserData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -64,6 +60,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       console.error("Error fetching user data:", error);
     }
   };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
     try {

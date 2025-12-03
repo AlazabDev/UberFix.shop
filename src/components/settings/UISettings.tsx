@@ -17,11 +17,15 @@ export function UISettings() {
 
   useEffect(() => {
     if (settings) {
-      setFormData({
-        theme_mode: settings.theme_mode,
-        map_style: settings.map_style,
-        show_footer: settings.show_footer,
+      const frame = requestAnimationFrame(() => {
+        setFormData({
+          theme_mode: settings.theme_mode,
+          map_style: settings.map_style,
+          show_footer: settings.show_footer,
+        });
       });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [settings]);
 

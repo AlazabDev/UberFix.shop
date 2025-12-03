@@ -32,10 +32,6 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
   const fetchUserData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -61,6 +57,10 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
       console.error("Error fetching user data:", error);
     }
   };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
     try {

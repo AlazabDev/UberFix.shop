@@ -20,13 +20,17 @@ export function SecuritySettings() {
 
   useEffect(() => {
     if (settings) {
-      setFormData({
-        enable_2fa: settings.enable_2fa,
-        auto_backup_enabled: settings.auto_backup_enabled,
-        backup_frequency: settings.backup_frequency,
-        lock_sensitive_settings: settings.lock_sensitive_settings,
-        session_timeout: settings.session_timeout,
+      const frame = requestAnimationFrame(() => {
+        setFormData({
+          enable_2fa: settings.enable_2fa,
+          auto_backup_enabled: settings.auto_backup_enabled,
+          backup_frequency: settings.backup_frequency,
+          lock_sensitive_settings: settings.lock_sensitive_settings,
+          session_timeout: settings.session_timeout,
+        });
       });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [settings]);
 

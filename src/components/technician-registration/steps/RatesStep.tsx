@@ -41,6 +41,39 @@ export function RatesStep({ data, onNext, onBack, onSaveAndExit }: RatesStepProp
     new Set(data.services?.map(s => s.service_id) || [])
   );
 
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('service_categories')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order');
+
+    if (!error && data) {
+      setCategories(data);
+    }
+  };
+
+  const fetchServices = async () => {
+    const { data, error } = await supabase
+      .from('service_items')
+      .select(`
+        id,
+        name,
+        base_price,
+        subcategory_id,
+        service_subcategories!inner(
+          id,
+          name,
+          category_id
+        )
+      `)
+      .eq('is_active', true);
+
+    if (!error && data) {
+      setServices(data);
+    }
+  };
+
   const form = useForm<RatesFormData>({
     resolver: zodResolver(ratesSchema),
     defaultValues: {
@@ -58,39 +91,6 @@ export function RatesStep({ data, onNext, onBack, onSaveAndExit }: RatesStepProp
     fetchCategories();
     fetchServices();
   }, []);
-
-  const fetchCategories = async () => {
-    const { data, error } = await supabase
-      .from('service_categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order');
-    
-    if (!error && data) {
-      setCategories(data);
-    }
-  };
-
-  const fetchServices = async () => {
-    const { data, error } = await supabase
-      .from('service_items')
-      .select(`
-        id, 
-        name, 
-        base_price,
-        subcategory_id,
-        service_subcategories!inner(
-          id,
-          name,
-          category_id
-        )
-      `)
-      .eq('is_active', true);
-    
-    if (!error && data) {
-      setServices(data);
-    }
-  };
 
   const toggleService = (service: any) => {
     const isSelected = selectedServiceIds.has(service.id);

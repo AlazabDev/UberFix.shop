@@ -16,11 +16,15 @@ export function TechniciansSettings() {
 
   useEffect(() => {
     if (settings) {
-      setFormData({
-        show_technicians_on_map: settings.show_technicians_on_map,
-        enable_technician_rating: settings.enable_technician_rating,
-        allow_technician_quotes: settings.allow_technician_quotes,
+      const frame = requestAnimationFrame(() => {
+        setFormData({
+          show_technicians_on_map: settings.show_technicians_on_map,
+          enable_technician_rating: settings.enable_technician_rating,
+          allow_technician_quotes: settings.allow_technician_quotes,
+        });
       });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [settings]);
 
