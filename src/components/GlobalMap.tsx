@@ -80,7 +80,7 @@ const GlobalMap = () => {
     const maxSpinZoom = 5;
     const slowSpinZoom = 3;
     let userInteracting = false;
-    let spinEnabled = true;
+    const spinEnabled = true;
 
     function spinGlobe() {
       if (!map.current) return;

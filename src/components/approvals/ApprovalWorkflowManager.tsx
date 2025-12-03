@@ -139,7 +139,6 @@ export function ApprovalWorkflowManager() {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: workflow, error: workflowError } = await (supabase as any)
         .from("approval_workflows")
         .upsert({
@@ -163,7 +162,6 @@ export function ApprovalWorkflowManager() {
       }
 
       // Insert new steps
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: stepsError } = await (supabase as any).from("approval_steps").insert(
         editingWorkflow.steps.map((s) => ({
           workflow_id: workflowId,

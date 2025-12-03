@@ -39,41 +39,45 @@ class GoogleMapsLoader {
       return this.loadPromise;
     }
 
-    this.loadPromise = new Promise(async (resolve, reject) => {
-      if (window.google?.maps) {
-        this.isLoaded = true;
-        resolve();
-        return;
-      }
-
-      try {
-        const apiKey = await this.fetchApiKey();
-        if (!apiKey) {
-          reject(new Error('Google Maps API key not configured'));
+    this.loadPromise = new Promise((resolve, reject) => {
+      const initiateLoad = async () => {
+        if (window.google?.maps) {
+          this.isLoaded = true;
+          resolve();
           return;
         }
 
-        const libs = MAPS_CONFIG.libraries.join(',');
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libs}&language=ar&region=EG&v=weekly`;
-        script.async = true;
-        script.defer = true;
-        
-        script.onload = () => {
-          this.isLoaded = true;
-          resolve();
-        };
-        
-        script.onerror = () => {
-          this.loadPromise = null;
-          reject(new Error('فشل في تحميل Google Maps'));
-        };
+        try {
+          const apiKey = await this.fetchApiKey();
+          if (!apiKey) {
+            reject(new Error('Google Maps API key not configured'));
+            return;
+          }
 
-        document.head.appendChild(script);
-      } catch (err) {
-        this.loadPromise = null;
-        reject(err);
-      }
+          const libs = MAPS_CONFIG.libraries.join(',');
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libs}&language=ar&region=EG&v=weekly`;
+          script.async = true;
+          script.defer = true;
+
+          script.onload = () => {
+            this.isLoaded = true;
+            resolve();
+          };
+
+          script.onerror = () => {
+            this.loadPromise = null;
+            reject(new Error('فشل في تحميل Google Maps'));
+          };
+
+          document.head.appendChild(script);
+        } catch (err) {
+          this.loadPromise = null;
+          reject(err);
+        }
+      };
+
+      void initiateLoad();
     });
 
     return this.loadPromise;

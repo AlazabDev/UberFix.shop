@@ -52,7 +52,6 @@ export function TechnicianReviews({
 
   useEffect(() => {
     fetchReviews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [technicianId]);
 
   return (
