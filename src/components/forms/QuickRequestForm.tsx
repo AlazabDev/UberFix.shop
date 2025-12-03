@@ -236,7 +236,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
     setTrackingLoading(true);
     try {
       const { data, error } = await supabase
-        .from<TrackingRequest>('maintenance_requests')
+        .from('maintenance_requests')
         .select('id, title, status, created_at, description, priority')
         .eq('property_id', property.id)
         .eq('client_phone', trackingPhone)
@@ -244,7 +244,16 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
 
       if (error) throw error;
 
-      setTrackingResults(data || []);
+      const typedData: TrackingRequest[] = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        status: item.status,
+        created_at: item.created_at,
+        description: item.description,
+        priority: item.priority
+      }));
+
+      setTrackingResults(typedData);
       
       if (!data || data.length === 0) {
         toast.info(isArabic ? "لا توجد طلبات مسجلة بهذا الرقم" : "No requests found with this number");

@@ -73,9 +73,6 @@ verify_jwt = true
 [functions.meta-deauthorize]
 verify_jwt = false
 
-[functions.get-maps-key]
-verify_jwt = true
-
 [functions.meta-delete-data]
 verify_jwt = false
 
@@ -131,4 +128,13 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.version-history]
+verify_jwt = true
+
+[functions.send-invoice]
+verify_jwt = true
+
+[functions.safe-update]
+verify_jwt = true
+
+[functions.sla-manager]
 verify_jwt = true
