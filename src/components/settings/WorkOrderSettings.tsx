@@ -17,11 +17,15 @@ export function WorkOrderSettings() {
 
   useEffect(() => {
     if (settings) {
-      setFormData({
-        max_execution_time: settings.max_execution_time,
-        allow_edit_after_start: settings.allow_edit_after_start,
-        require_manager_approval: settings.require_manager_approval,
+      const frame = requestAnimationFrame(() => {
+        setFormData({
+          max_execution_time: settings.max_execution_time,
+          allow_edit_after_start: settings.allow_edit_after_start,
+          require_manager_approval: settings.require_manager_approval,
+        });
       });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [settings]);
 

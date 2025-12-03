@@ -25,7 +25,11 @@ export function IconPicker({ value, onValueChange, trigger }: IconPickerProps) {
   const [selectedIcon, setSelectedIcon] = useState(value || "");
 
   useEffect(() => {
-    setSelectedIcon(value || "");
+    const frame = requestAnimationFrame(() => {
+      setSelectedIcon(value || "");
+    });
+
+    return () => cancelAnimationFrame(frame);
   }, [value]);
 
   const filteredIcons = PIN_ICONS.filter(icon =>

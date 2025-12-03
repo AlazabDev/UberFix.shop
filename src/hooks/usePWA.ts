@@ -22,12 +22,14 @@ export function usePWA() {
     // Check if app is installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isIOSStandalone = (window.navigator as any).standalone === true;
-    
-    setStatus(prev => ({
-      ...prev,
-      isInstalled: isStandalone || isIOSStandalone,
-      notificationPermission: Notification.permission
-    }));
+
+    const frame = requestAnimationFrame(() => {
+      setStatus(prev => ({
+        ...prev,
+        isInstalled: isStandalone || isIOSStandalone,
+        notificationPermission: Notification.permission
+      }));
+    });
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -46,6 +48,7 @@ export function usePWA() {
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };

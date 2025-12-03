@@ -75,16 +75,6 @@ export default function ServiceMap() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedBranch && branches && branches.length > 0) {
-      setSelectedBranch(branches[0]);
-    }
-  }, [branches, selectedBranch]);
-
   const fetchUserData = async () => {
     try {
       const {
@@ -118,6 +108,27 @@ export default function ServiceMap() {
       console.error("Error fetching user data:", error);
     }
   };
+
+  const handleRequestService = (technician: any) => {
+    navigate("/quick-request-from-map", {
+      state: {
+        technicianId: technician.id,
+        technicianName: technician.name,
+        technicianPhone: technician.phone,
+        specialization: technician.specialization,
+      },
+    });
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedBranch && branches && branches.length > 0) {
+      setSelectedBranch(branches[0]);
+    }
+  }, [branches, selectedBranch]);
 
   const handleLogout = async () => {
     try {
@@ -286,17 +297,6 @@ export default function ServiceMap() {
       markersRef.current = [];
     };
   }, [technicians, branches]);
-
-  const handleRequestService = (technician: any) => {
-    navigate("/quick-request-from-map", {
-      state: {
-        technicianId: technician.id,
-        technicianName: technician.name,
-        technicianPhone: technician.phone,
-        specialization: technician.specialization,
-      },
-    });
-  };
 
   const handleQuickRequest = () => {
     navigate("/quick-request-from-map");

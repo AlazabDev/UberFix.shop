@@ -17,12 +17,16 @@ export function NotificationsSettings() {
 
   useEffect(() => {
     if (settings) {
-      setFormData({
-        enable_email_notifications: settings.enable_email_notifications,
-        enable_sms_notifications: settings.enable_sms_notifications,
-        enable_in_app_notifications: settings.enable_in_app_notifications,
-        enable_reminders: settings.enable_reminders,
+      const frame = requestAnimationFrame(() => {
+        setFormData({
+          enable_email_notifications: settings.enable_email_notifications,
+          enable_sms_notifications: settings.enable_sms_notifications,
+          enable_in_app_notifications: settings.enable_in_app_notifications,
+          enable_reminders: settings.enable_reminders,
+        });
       });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [settings]);
 

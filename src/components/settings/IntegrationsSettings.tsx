@@ -21,15 +21,19 @@ export function IntegrationsSettings() {
 
   useEffect(() => {
     if (settings) {
-      setFormData({
-        google_maps_enabled: settings.google_maps_enabled,
-        erpnext_enabled: settings.erpnext_enabled,
-        erpnext_url: settings.erpnext_url || "",
-        smtp_host: settings.smtp_host || "",
-        smtp_port: settings.smtp_port || 587,
-        smtp_username: settings.smtp_username || "",
-        smtp_from_email: settings.smtp_from_email || "",
+      const frame = requestAnimationFrame(() => {
+        setFormData({
+          google_maps_enabled: settings.google_maps_enabled,
+          erpnext_enabled: settings.erpnext_enabled,
+          erpnext_url: settings.erpnext_url || "",
+          smtp_host: settings.smtp_host || "",
+          smtp_port: settings.smtp_port || 587,
+          smtp_username: settings.smtp_username || "",
+          smtp_from_email: settings.smtp_from_email || "",
+        });
       });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [settings]);
 

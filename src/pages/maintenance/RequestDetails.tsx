@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,16 +19,11 @@ export default function RequestDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { requests, loading, updateRequest } = useMaintenanceRequests();
-  const [request, setRequest] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    if (id && requests.length > 0) {
-      const found = requests.find(r => r.id === id);
-      if (found) {
-        setRequest(found);
-      }
-    }
+  const request = useMemo(() => {
+    if (!id || requests.length === 0) return null;
+    return requests.find(r => r.id === id) || null;
   }, [id, requests]);
 
   const handleArchive = async () => {

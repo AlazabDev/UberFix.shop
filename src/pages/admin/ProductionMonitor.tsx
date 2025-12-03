@@ -126,15 +126,16 @@ export default function ProductionMonitor() {
 
   // تحديث دوري للحالة والمقاييس
   useEffect(() => {
-    const interval = setInterval(() => {
-      checkSystemStatus();
+    const runChecks = async () => {
+      await checkSystemStatus();
       collectPerformanceMetrics();
       setErrorQueue({ queueLength: errorTracker.getQueueSize(), isOnline: navigator.onLine });
-    }, 30000); // كل 30 ثانية
+    };
+
+    const interval = setInterval(runChecks, 30000); // كل 30 ثانية
 
     // فحص فوري عند التحميل
-    checkSystemStatus();
-    collectPerformanceMetrics();
+    void runChecks();
 
     return () => clearInterval(interval);
   }, []);

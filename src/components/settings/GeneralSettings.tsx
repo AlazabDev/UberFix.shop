@@ -23,16 +23,20 @@ export function GeneralSettings() {
 
   useEffect(() => {
     if (settings) {
-      setFormData({
-        app_name: settings.app_name,
-        company_email: settings.company_email || "",
-        company_phone: settings.company_phone || "",
-        company_address: settings.company_address || "",
-        default_currency: settings.default_currency,
-        timezone: settings.timezone,
-        default_language: settings.default_language,
-        allow_self_registration: settings.allow_self_registration,
+      const frame = requestAnimationFrame(() => {
+        setFormData({
+          app_name: settings.app_name,
+          company_email: settings.company_email || "",
+          company_phone: settings.company_phone || "",
+          company_address: settings.company_address || "",
+          default_currency: settings.default_currency,
+          timezone: settings.timezone,
+          default_language: settings.default_language,
+          allow_self_registration: settings.allow_self_registration,
+        });
       });
+
+      return () => cancelAnimationFrame(frame);
     }
   }, [settings]);
 

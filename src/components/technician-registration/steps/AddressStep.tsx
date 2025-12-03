@@ -40,6 +40,29 @@ export function AddressStep({ data, onNext, onBack, onSaveAndExit }: AddressStep
   const [districts, setDistricts] = useState<any[]>([]);
   const [selectedCityId, setSelectedCityId] = useState<number | undefined>(data.city_id);
 
+  const fetchCities = async () => {
+    const { data, error } = await supabase
+      .from('cities')
+      .select('id, name_ar')
+      .order('name_ar');
+
+    if (!error && data) {
+      setCities(data);
+    }
+  };
+
+  const fetchDistricts = async (cityId: number) => {
+    const { data, error } = await supabase
+      .from('districts')
+      .select('id, name_ar')
+      .eq('city_id', cityId)
+      .order('name_ar');
+
+    if (!error && data) {
+      setDistricts(data);
+    }
+  };
+
   const form = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -68,29 +91,6 @@ export function AddressStep({ data, onNext, onBack, onSaveAndExit }: AddressStep
       fetchDistricts(selectedCityId);
     }
   }, [selectedCityId]);
-
-  const fetchCities = async () => {
-    const { data, error } = await supabase
-      .from('cities')
-      .select('id, name_ar')
-      .order('name_ar');
-    
-    if (!error && data) {
-      setCities(data);
-    }
-  };
-
-  const fetchDistricts = async (cityId: number) => {
-    const { data, error } = await supabase
-      .from('districts')
-      .select('id, name_ar')
-      .eq('city_id', cityId)
-      .order('name_ar');
-    
-    if (!error && data) {
-      setDistricts(data);
-    }
-  };
 
   const onSubmit = (formData: AddressFormData) => {
     onNext(formData);
