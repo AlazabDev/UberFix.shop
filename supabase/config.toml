@@ -138,3 +138,6 @@ verify_jwt = true
 
 [functions.sla-manager]
 verify_jwt = true
+
+[functions.get-mapbox-token]
+verify_jwt = false
