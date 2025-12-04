@@ -81,19 +81,6 @@ export default function Login() {
     }
   };
 
-  const handleDemoLogin = async () => {
-    setEmail("admin@alazab.online");
-    setPassword("123456");
-    
-    // Auto submit after setting demo credentials
-    setTimeout(() => {
-      const form = document.querySelector('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-    }, 100);
-  };
-
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
@@ -222,15 +209,6 @@ export default function Login() {
                 تسجيل الدخول باستخدام Google
               </Button>
               
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full" 
-                onClick={handleDemoLogin}
-                disabled={isLoading}
-              >
-                دخول تجريبي سريع
-              </Button>
             </form>
             
             <div className="mt-6 text-center space-y-2">
