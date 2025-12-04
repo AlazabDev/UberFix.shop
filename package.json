@@ -144,9 +144,9 @@
     "workbox-build": "7.1.0"
   },
   "optionalDependencies": {
-    "@swc/core": "latest",
-    "core-js": "latest",
-    "esbuild": "latest"
+    "@swc/core": "^1.15.3",
+    "core-js": "^3.47.0",
+    "esbuild": "^0.27.1"
   },
   "description": "![UberFix Logo](https://al-azab.co/img/uber.gif)",
   "main": "build-dev.js",
