@@ -79,6 +79,11 @@ const Testing = () => {
     { name: "التصميم المتجاوب - تابلت", status: 'pending' },
     { name: "التوافق مع المتصفحات", status: 'pending' },
     
+    // اختبارات نظام الفنيين
+    { name: "نظام تسجيل الفنيين", status: 'pending' },
+    { name: "جداول الفنيين وعلاقاتها", status: 'pending' },
+    { name: "محفظة الفني والمعاملات", status: 'pending' },
+    
     // اختبارات إضافية
     { name: "النسخ الاحتياطي والاستعادة", status: 'pending' },
     { name: "معالجة الأخطاء", status: 'pending' },
@@ -1239,6 +1244,194 @@ const Testing = () => {
     }
   };
 
+  // اختبارات نظام الفنيين
+  const testTechnicianRegistration = async (index: number) => {
+    updateTestResult(index, { status: 'running' });
+    const start = Date.now();
+    
+    try {
+      // التحقق من وجود جدول technician_profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('technician_profiles')
+        .select('id, company_name, full_name, email, phone, status')
+        .limit(5);
+      
+      if (profilesError) throw profilesError;
+      
+      // التحقق من الجداول المرتبطة
+      const { data: services, error: servicesError } = await supabase
+        .from('technician_service_prices')
+        .select('id, technician_profile_id, service_id, standard_price')
+        .limit(5);
+      
+      const { data: coverage, error: coverageError } = await supabase
+        .from('technician_coverage_areas')
+        .select('id, technician_profile_id, city_id, district_id')
+        .limit(5);
+      
+      const { data: documents, error: documentsError } = await supabase
+        .from('technician_documents')
+        .select('id, technician_profile_id, document_type, file_url')
+        .limit(5);
+      
+      const duration = Date.now() - start;
+      
+      const details = {
+        profiles: profiles?.length || 0,
+        services: services?.length || 0,
+        coverage: coverage?.length || 0,
+        documents: documents?.length || 0,
+        errors: [servicesError, coverageError, documentsError].filter(Boolean)
+      };
+      
+      if (details.errors.length > 0) {
+        updateTestResult(index, { 
+          status: 'warning', 
+          message: `بعض الجداول بها مشاكل - ${details.errors.length} خطأ`,
+          duration,
+          details
+        });
+      } else {
+        updateTestResult(index, { 
+          status: 'success', 
+          message: `نظام التسجيل يعمل - ${details.profiles} فني مسجل - ${duration}ms`,
+          duration,
+          details
+        });
+      }
+      
+      testLogger.log({
+        test_name: 'نظام تسجيل الفنيين',
+        status: details.errors.length > 0 ? 'warning' : 'success',
+        message: `Profiles: ${details.profiles}, Services: ${details.services}, Coverage: ${details.coverage}, Documents: ${details.documents}`,
+        duration,
+        metadata: details
+      });
+    } catch (error) {
+      updateTestResult(index, { 
+        status: 'error', 
+        message: `خطأ في نظام التسجيل: ${error instanceof Error ? error.message : 'خطأ غير معروف'}` 
+      });
+      testLogger.log({
+        test_name: 'نظام تسجيل الفنيين',
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        error_details: error
+      });
+    }
+  };
+
+  const testTechnicianTables = async (index: number) => {
+    updateTestResult(index, { status: 'running' });
+    const start = Date.now();
+    
+    try {
+      // التحقق من جداول الفنيين الأساسية
+      const checks = await Promise.allSettled([
+        supabase.from('technicians').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_service_prices').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_trades').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_coverage_areas').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_documents').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_wallet').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_performance').select('id', { count: 'exact', head: true }),
+        supabase.from('technician_tasks').select('id', { count: 'exact', head: true }),
+      ]);
+      
+      const tableNames = [
+        'technicians', 'technician_profiles', 'technician_service_prices',
+        'technician_trades', 'technician_coverage_areas', 'technician_documents',
+        'technician_wallet', 'technician_performance', 'technician_tasks'
+      ];
+      
+      const results: Record<string, number | string> = {};
+      const errors: string[] = [];
+      
+      checks.forEach((result, i) => {
+        if (result.status === 'fulfilled' && !result.value.error) {
+          results[tableNames[i]] = result.value.count || 0;
+        } else {
+          const errorMsg = result.status === 'rejected' 
+            ? 'فشل الاتصال' 
+            : (result.value.error?.message || 'خطأ غير معروف');
+          errors.push(`${tableNames[i]}: ${errorMsg}`);
+        }
+      });
+      
+      const duration = Date.now() - start;
+      const successCount = tableNames.length - errors.length;
+      
+      if (errors.length > 0) {
+        updateTestResult(index, { 
+          status: errors.length > 3 ? 'error' : 'warning', 
+          message: `${successCount}/${tableNames.length} جدول متاح`,
+          duration,
+          details: { results, errors }
+        });
+      } else {
+        updateTestResult(index, { 
+          status: 'success', 
+          message: `جميع الجداول (${tableNames.length}) متاحة - ${duration}ms`,
+          duration,
+          details: results
+        });
+      }
+    } catch (error) {
+      updateTestResult(index, { 
+        status: 'error', 
+        message: `خطأ في الجداول: ${error instanceof Error ? error.message : 'خطأ غير معروف'}` 
+      });
+    }
+  };
+
+  const testTechnicianWallet = async (index: number) => {
+    updateTestResult(index, { status: 'running' });
+    const start = Date.now();
+    
+    try {
+      // التحقق من جدول المحفظة
+      const { data: wallets, error: walletError } = await supabase
+        .from('technician_wallet')
+        .select('id, technician_id, balance_current, balance_pending, total_earnings')
+        .limit(5);
+      
+      if (walletError) throw walletError;
+      
+      // التحقق من جدول المعاملات
+      const { data: transactions, error: transError } = await supabase
+        .from('technician_transactions')
+        .select('id, wallet_id, amount, type, status')
+        .limit(10);
+      
+      // التحقق من جدول السحب
+      const { data: withdrawals, error: withdrawError } = await supabase
+        .from('technician_withdrawals')
+        .select('id, wallet_id, amount, status, method')
+        .limit(5);
+      
+      const duration = Date.now() - start;
+      
+      const details = {
+        wallets: wallets?.length || 0,
+        transactions: transactions?.length || 0,
+        withdrawals: withdrawals?.length || 0
+      };
+      
+      updateTestResult(index, { 
+        status: 'success', 
+        message: `المحفظة: ${details.wallets} | معاملات: ${details.transactions} | سحوبات: ${details.withdrawals} - ${duration}ms`,
+        duration,
+        details
+      });
+    } catch (error) {
+      updateTestResult(index, { 
+        status: 'error', 
+        message: `خطأ في المحفظة: ${error instanceof Error ? error.message : 'خطأ غير معروف'}` 
+      });
+    }
+  };
+
   // اختبارات إضافية
   const testErrorHandling = async (index: number) => {
     updateTestResult(index, { status: 'running' });
@@ -1295,46 +1488,49 @@ const Testing = () => {
     });
 
     const tests = [
-      testDatabaseConnection,      // 0
-      testRLSPolicies,              // 1
-      testDataIntegrity,            // 2
-      testAuthentication,           // 3
-      testUserPermissions,          // 4
-      testSessionSecurity,          // 5
-      testMaintenanceRequests,      // 6
-      testWorkflow,                 // 7
-      testProperties,               // 8
-      testPropertyQRCode,           // 9
-      testVendors,                  // 10
-      testAppointments,             // 11
-      testInvoices,                 // 12
-      testProjects,                 // 13
-      testLandingPage,              // 14
-      testDashboard,                // 15
-      testLoginPage,                // 16
-      testSettingsPage,             // 17
-      testMapsService,              // 18
-      testImageUpload,              // 19
-      testTablesFilters,            // 20
-      testForms,                    // 21
-      testNotifications,            // 22
-      testChatbot,                  // 23
-      testRealtimeUpdates,          // 24
-      testEmailService,             // 25
-      testEdgeFunctionNotifications,// 26
-      testEdgeFunctionInvoice,      // 27
-      testStorage,                  // 28
-      testStoragePolicies,          // 29
-      testFileOperations,           // 30
-      testPageLoadSpeed,            // 31
-      testDatabaseResponse,         // 32
-      testBundleSize,               // 33
-      testMobileResponsive,         // 34
-      testTabletResponsive,         // 35
-      testBrowserCompatibility,     // 36
-      testBackupRestore,            // 37
-      testErrorHandling,            // 38
-      testReportsAnalytics,         // 39
+      testDatabaseConnection,         // 0
+      testRLSPolicies,                 // 1
+      testDataIntegrity,               // 2
+      testAuthentication,              // 3
+      testUserPermissions,             // 4
+      testSessionSecurity,             // 5
+      testMaintenanceRequests,         // 6
+      testWorkflow,                    // 7
+      testProperties,                  // 8
+      testPropertyQRCode,              // 9
+      testVendors,                     // 10
+      testAppointments,                // 11
+      testInvoices,                    // 12
+      testProjects,                    // 13
+      testLandingPage,                 // 14
+      testDashboard,                   // 15
+      testLoginPage,                   // 16
+      testSettingsPage,                // 17
+      testMapsService,                 // 18
+      testImageUpload,                 // 19
+      testTablesFilters,               // 20
+      testForms,                       // 21
+      testNotifications,               // 22
+      testChatbot,                     // 23
+      testRealtimeUpdates,             // 24
+      testEmailService,                // 25
+      testEdgeFunctionNotifications,   // 26
+      testEdgeFunctionInvoice,         // 27
+      testStorage,                     // 28
+      testStoragePolicies,             // 29
+      testFileOperations,              // 30
+      testPageLoadSpeed,               // 31
+      testDatabaseResponse,            // 32
+      testBundleSize,                  // 33
+      testMobileResponsive,            // 34
+      testTabletResponsive,            // 35
+      testBrowserCompatibility,        // 36
+      testTechnicianRegistration,      // 37 - نظام تسجيل الفنيين
+      testTechnicianTables,            // 38 - جداول الفنيين
+      testTechnicianWallet,            // 39 - محفظة الفني
+      testBackupRestore,               // 40
+      testErrorHandling,               // 41
+      testReportsAnalytics,            // 42
     ];
 
     const startTime = Date.now();
