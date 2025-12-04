@@ -3,10 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 // استخدم الـ URL الأساسي للمشروع مع تحسينات الإنتاج
 const ORIGIN = import.meta.env.VITE_APP_URL || window.location.origin;
 
-// إعدادات محسنة للإنتاج
+// إعدادات محسنة للإنتاج - جميع عمليات المصادقة تذهب إلى /auth/callback
 const AUTH_CONFIG = {
-  emailRedirectTo: `${ORIGIN}/`,
-  redirectTo: `${ORIGIN}/`,
+  emailRedirectTo: `${ORIGIN}/auth/callback`,
+  redirectTo: `${ORIGIN}/auth/callback`,
+  updatePasswordRedirectTo: `${ORIGIN}/auth/callback?type=recovery`,
+  emailChangeRedirectTo: `${ORIGIN}/auth/callback?type=email_change`,
+  magicLinkRedirectTo: `${ORIGIN}/auth/callback?type=magiclink`,
   cookieOptions: {
     name: 'azab-auth',
     lifetime: 60 * 60 * 24 * 7, // أسبوع واحد
