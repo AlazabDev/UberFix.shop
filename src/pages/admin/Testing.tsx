@@ -705,10 +705,12 @@ const Testing = () => {
     const start = Date.now();
     
     try {
-      const { data: properties } = await supabase
+      const { data: properties, error } = await supabase
         .from('properties')
-        .select('id, qr_code')
+        .select('id, qr_code_data')
         .limit(1);
+      
+      if (error) throw error;
       
       const duration = Date.now() - start;
       
@@ -975,8 +977,14 @@ const Testing = () => {
     const start = Date.now();
     
     try {
-      const { data, error } = await supabase.functions.invoke('send-notification', {
-        body: { test: true }
+      const { data, error } = await supabase.functions.invoke('send-unified-notification', {
+        body: { 
+          type: 'request_created',
+          request_id: 'test-id',
+          recipient_id: 'test-recipient',
+          channels: ['in_app'],
+          data: { request_title: 'اختبار' }
+        }
       });
 
       const duration = Date.now() - start;
