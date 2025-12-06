@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { loadGoogleMaps } from "@/lib/googleMapsLoader";
+import { MAPS_CONFIG } from "@/config/maps";
 import { useTechnicians } from "@/hooks/useTechnicians";
 import { useBranchLocations, BranchLocation } from "@/hooks/useBranchLocations";
 import { useNavigate } from "react-router-dom";
@@ -201,9 +202,10 @@ export default function ServiceMap() {
 
         if (mapRef.current && !mapInstanceRef.current && mounted) {
           mapInstanceRef.current = new google.maps.Map(mapRef.current, {
-            center: { lat: 30.0444, lng: 31.2357 },
+            center: MAPS_CONFIG.defaultCenter,
             zoom: 13,
             styles: MAP_STYLE,
+            mapId: MAPS_CONFIG.defaultOptions.mapId,
             mapTypeControl: false,
             fullscreenControl: false,
             streetViewControl: false,
