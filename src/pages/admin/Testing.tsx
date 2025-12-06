@@ -1258,20 +1258,20 @@ const Testing = () => {
       
       if (profilesError) throw profilesError;
       
-      // التحقق من الجداول المرتبطة
+      // التحقق من الجداول المرتبطة - استخدام technician_id بدلاً من technician_profile_id
       const { data: services, error: servicesError } = await supabase
         .from('technician_service_prices')
-        .select('id, technician_profile_id, service_id, standard_price')
+        .select('id, technician_id, service_id, standard_price')
         .limit(5);
       
       const { data: coverage, error: coverageError } = await supabase
         .from('technician_coverage_areas')
-        .select('id, technician_profile_id, city_id, district_id')
+        .select('id, technician_id, city_id, district_id')
         .limit(5);
       
       const { data: documents, error: documentsError } = await supabase
         .from('technician_documents')
-        .select('id, technician_profile_id, document_type, file_url')
+        .select('id, technician_id, document_type, file_url')
         .limit(5);
       
       const duration = Date.now() - start;
