@@ -64,6 +64,7 @@ export const publicRoutes = [
   { path: "/pwa-settings", element: <PWASettings /> },
   { path: "/quick-request/:propertyId", element: <QuickRequest /> },
   { path: "/quick-request", element: <QuickRequestFromMap /> },
+  { path: "/quick-request-from-map", element: <QuickRequestFromMap /> },
   { path: "/track-orders", element: <TrackOrders /> },
   { path: "/completed-services", element: <CompletedServices /> },
   { path: "/technicians/register", element: <TechnicianRegistration /> },

@@ -1,16 +1,15 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API_KEY');
+const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*', // السماح لجميع النطاقات مؤقتاً للتطوير
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// قاعدة المعرفة للنظام - يمكنك إضافة المزيد من المعلومات هنا
+// قاعدة المعرفة للنظام
 const KNOWLEDGE_BASE = `
-أنت مساعد ذكي متخصص في نظام إدارة الصيانة. إليك المعلومات الأساسية التي يجب أن تعرفها:
+أنت مساعد ذكي متخصص في نظام إدارة الصيانة UberFix. إليك المعلومات الأساسية:
 
 ## حول النظام:
 - نظام إدارة الصيانة الذكي يساعد في تنظيم طلبات الصيانة
@@ -36,19 +35,6 @@ const KNOWLEDGE_BASE = `
 - كن مفيداً ومساعداً
 - قدم إجابات واضحة ومفصلة
 - إذا لم تعرف الإجابة، اطلب المزيد من التفاصيل
-- لا تقدم معلومات حساسة أو شخصية
-- تجنب الإجابة على أسئلة خارج نطاق النظام
-
-/** 
- * ملاحظة للمطور: 
- * يمكنك إضافة المزيد من المعلومات هنا مثل:
- * - أسئلة شائعة (FAQ)
- * - خطوات استخدام محددة
- * - معلومات عن الأسعار والخدمات
- * - سياسات الشركة
- * - معلومات الاتصال
- * - أي معلومات خاصة بعملك
- */
 `;
 
 serve(async (req) => {
@@ -94,16 +80,27 @@ serve(async (req) => {
     // Sanitize message
     const sanitizedMessage = message.slice(0, 2000).trim();
 
-    console.log('User message received and sanitized');
+    console.log('User message received:', sanitizedMessage.substring(0, 50));
 
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ error: 'خدمة الذكاء الاصطناعي غير مهيأة حالياً' }),
+        { 
+          status: 503, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
@@ -116,17 +113,38 @@ serve(async (req) => {
         ],
         max_tokens: 1000,
         temperature: 0.7,
-        stream: false
       }),
     });
 
     if (!response.ok) {
-      console.error('DeepSeek API error:', response.status, response.statusText);
-      throw new Error(`DeepSeek API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Lovable AI API error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'تم تجاوز حد الطلبات. يرجى المحاولة لاحقاً' }),
+          { 
+            status: 429, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'خدمة الذكاء الاصطناعي غير متاحة حالياً' }),
+          { 
+            status: 402, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      
+      throw new Error(`AI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('DeepSeek response received');
+    console.log('AI response received successfully');
 
     const botResponse = data.choices?.[0]?.message?.content || 'عذراً، لم أتمكن من فهم طلبك. يرجى المحاولة مرة أخرى.';
 
