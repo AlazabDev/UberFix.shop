@@ -7,58 +7,82 @@ export interface SpecializationStyle {
   label: string;
 }
 
+// الأيقونات المرفقة من المستخدم - بدون أي تعديل
+export const getTechnicianIcon = (specialization: string): string => {
+  const spec = specialization?.toLowerCase() || "";
+  
+  if (spec.includes("كهرب") || spec.includes("elect")) {
+    return '/icons/technicians/tec-03.png'; // كهربائي
+  } else if (spec.includes("سباك") || spec.includes("plumb")) {
+    return '/icons/technicians/tec-05.png'; // سباك
+  } else if (spec.includes("تكييف") || spec.includes("ac") || spec.includes("hvac")) {
+    return '/icons/technicians/tec-06.png'; // تكييف
+  } else if (spec.includes("نجار") || spec.includes("carp")) {
+    return '/icons/technicians/tec-04.png'; // نجار
+  } else if (spec.includes("دهان") || spec.includes("paint")) {
+    return '/icons/technicians/tec-07.png'; // دهان
+  } else if (spec.includes("سلم") || spec.includes("ladder") || spec.includes("أعمال")) {
+    return '/icons/technicians/tec-12.png'; // أعمال عامة
+  } else if (spec.includes("صيانة") || spec.includes("maint")) {
+    return '/icons/technicians/tec-09.png'; // صيانة
+  }
+  return '/icons/technicians/tec-01.png'; // افتراضي
+};
+
+// أيقونة الفروع الموحدة
+export const getBranchIcon = (): string => {
+  return '/icons/branches/branch-icon.png';
+};
+
 export const getSpecializationStyle = (specialization: string): SpecializationStyle => {
   const styleMap: Record<string, SpecializationStyle> = {
     plumber: {
-      icon: '/icons/pin-pro/pin-pro-2.svg',
-      color: '#FF8C00', // برتقالي
+      icon: '/icons/technicians/tec-05.png',
+      color: '#FF8C00',
       label: 'سباك'
     },
     electrician: {
-      icon: '/icons/pin-pro/pin-pro-3.svg',
-      color: '#FFD700', // أصفر ذهبي
+      icon: '/icons/technicians/tec-03.png',
+      color: '#FFD700',
       label: 'كهربائي'
     },
     carpenter: {
-      icon: '/icons/pin-pro/pin-pro-4.svg',
-      color: '#D2691E', // بني
+      icon: '/icons/technicians/tec-04.png',
+      color: '#D2691E',
       label: 'نجار'
     },
     painter: {
-      icon: '/icons/pin-pro/pin-pro-5.svg',
-      color: '#20B2AA', // فيروزي
+      icon: '/icons/technicians/tec-07.png',
+      color: '#20B2AA',
       label: 'دهان'
     },
     ac_technician: {
-      icon: '/icons/pin-pro/pin-pro-6.svg',
-      color: '#1E90FF', // أزرق فاتح
+      icon: '/icons/technicians/tec-06.png',
+      color: '#1E90FF',
       label: 'فني تكييف'
     },
     general_maintenance: {
-      icon: '/icons/pin-pro/pin-pro-7.svg',
-      color: '#9370DB', // بنفسجي
+      icon: '/icons/technicians/tec-09.png',
+      color: '#9370DB',
       label: 'صيانة عامة'
     }
   };
 
   return styleMap[specialization] || {
-    icon: '/icons/default-pin.png',
+    icon: '/icons/technicians/tec-01.png',
     color: '#808080',
     label: specialization
   };
 };
 
-// تعيين الأيقونات حسب التخصص
 export const getSpecializationIcon = (specialization: string): string => {
   return getSpecializationStyle(specialization).icon;
 };
 
-// تعيين اللون حسب التخصص
 export const getSpecializationColor = (specialization: string): string => {
   return getSpecializationStyle(specialization).color;
 };
 
-// تعيين التسمية العربية حسب التخصص
 export const getSpecializationLabel = (specialization: string): string => {
   return getSpecializationStyle(specialization).label;
 };
