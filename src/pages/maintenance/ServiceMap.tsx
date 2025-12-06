@@ -22,8 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotificationsList } from "@/components/notifications/NotificationsList";
-import { TechnicianPopup } from "@/components/maps/TechnicianPopup";
-import { BranchPopup } from "@/components/maps/BranchPopup";
+import { TechnicianMapPopup } from "@/components/maps/TechnicianMapPopup";
+import { BranchMapPopup } from "@/components/maps/BranchMapPopup";
 import { createRoot } from "react-dom/client";
 
 declare global {
@@ -102,6 +102,33 @@ const MAP_STYLE: google.maps.MapTypeStyle[] = [
     stylers: [{ color: "#3b82f6" }],
   },
 ];
+
+// دالة لإنشاء أيقونة SVG للفني حسب التخصص
+const getTechnicianIconSvg = (specialization: string) => {
+  const spec = specialization.toLowerCase();
+  let iconPath = "";
+  
+  if (spec.includes("كهرب") || spec.includes("elect")) {
+    iconPath = `<path d="M18 8l-4 8h3l-4 8 8-10h-4l4-6h-3z" fill="#0b1e36"/>`;
+  } else if (spec.includes("سباك") || spec.includes("plumb")) {
+    iconPath = `<path d="M22 9a5 5 0 0 0-5-5c-2.1 0-3.8 1.3-4.5 3H8v2h4v2H8v2h4.5c.7 1.7 2.4 3 4.5 3a5 5 0 0 0 5-5z" fill="#0b1e36"/>`;
+  } else if (spec.includes("تكييف") || spec.includes("ac")) {
+    iconPath = `<circle cx="12" cy="12" r="8" stroke="#0b1e36" stroke-width="2" fill="none"/><path d="M12 4v16M4 12h16" stroke="#0b1e36" stroke-width="2"/>`;
+  } else if (spec.includes("نجار") || spec.includes("carp")) {
+    iconPath = `<rect x="6" y="4" width="12" height="16" rx="1" stroke="#0b1e36" stroke-width="2" fill="none"/><line x1="10" y1="8" x2="14" y2="8" stroke="#0b1e36" stroke-width="2"/>`;
+  } else if (spec.includes("دهان") || spec.includes("paint")) {
+    iconPath = `<path d="M19 3H5v4h14V3zM12 7v10M8 17h8" stroke="#0b1e36" stroke-width="2" fill="none"/>`;
+  } else {
+    iconPath = `<path d="M14.7 6.3l1.6 1.6 3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="#0b1e36" stroke-width="2" fill="none"/>`;
+  }
+  
+  return `
+    <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 0C8.954 0 0 8.954 0 20c0 14.667 20 28 20 28s20-13.333 20-28C40 8.954 31.046 0 20 0z" fill="#f5bf23"/>
+      <g transform="translate(8, 6)">${iconPath}</g>
+    </svg>
+  `;
+};
 
 export default function ServiceMap() {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -229,41 +256,36 @@ export default function ServiceMap() {
 
           if (isNaN(lat) || isNaN(lng)) return;
 
-          const markerWrapper = document.createElement("div");
-          markerWrapper.className = "relative flex items-center justify-center";
-
-          const markerContent = document.createElement("div");
-          markerContent.className =
-            "w-14 h-14 rounded-full bg-white border-2 border-primary/60 shadow-xl flex items-center justify-center";
-
-          const iconImg = document.createElement("img");
-          iconImg.src = branch.icon || "/icons/properties/icon-5060.png";
-          iconImg.alt = branch.branch;
-          iconImg.style.cssText = "width: 38px; height: 46px";
-          markerContent.appendChild(iconImg);
-
-          const statusDot = document.createElement("span");
-          statusDot.className =
-            "absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-sm";
-
-          markerWrapper.appendChild(markerContent);
-          markerWrapper.appendChild(statusDot);
+          // أيقونة الفرع - SVG بسيط كما في الصورة المرفقة
+          const markerSvg = document.createElement("div");
+          markerSvg.innerHTML = `
+            <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 0C8.954 0 0 8.954 0 20c0 14.667 20 28 20 28s20-13.333 20-28C40 8.954 31.046 0 20 0z" fill="#3b82f6"/>
+              <rect x="10" y="8" width="20" height="16" rx="2" fill="#fff"/>
+              <rect x="14" y="12" width="5" height="5" fill="#3b82f6"/>
+              <rect x="21" y="12" width="5" height="5" fill="#3b82f6"/>
+              <rect x="14" y="18" width="5" height="5" fill="#3b82f6"/>
+              <rect x="21" y="18" width="5" height="5" fill="#3b82f6"/>
+              <text x="20" y="32" font-size="6" fill="#fff" text-anchor="middle" font-weight="bold">AbuAli</text>
+            </svg>
+          `;
+          markerSvg.style.cssText = "cursor: pointer;";
 
           const marker = new google.maps.marker.AdvancedMarkerElement({
             map: mapInstanceRef.current!,
             position: { lat, lng },
-            content: markerWrapper,
+            content: markerSvg,
             title: branch.branch,
             zIndex: 100,
           });
 
-          const infoWindow = new google.maps.InfoWindow();
+          const infoWindow = new google.maps.InfoWindow({ maxWidth: 280 });
           marker.addListener("click", () => {
             setSelectedBranch(branch);
             const div = document.createElement("div");
             const root = createRoot(div);
             root.render(
-              <BranchPopup id={branch.id} name={branch.branch} address={branch.address || "لا يوجد عنوان"} status="Active" />
+              <BranchMapPopup id={branch.id} name={branch.branch} address={branch.address || "لا يوجد عنوان"} status="Active" />
             );
             infoWindow.setContent(div);
             infoWindow.open(mapInstanceRef.current!, marker);
@@ -282,56 +304,31 @@ export default function ServiceMap() {
 
           const techStatus = tech.status === "busy" ? "busy" : tech.status === "online" ? "available" : "soon";
 
-          const markerContent = document.createElement("div");
-          markerContent.className = "relative flex items-center justify-center";
-
-          const pin = document.createElement("div");
-          pin.className =
-            techStatus === "available"
-              ? "w-12 h-12 rounded-full border-2 border-emerald-500 bg-white flex items-center justify-center shadow-lg"
-              : techStatus === "busy"
-              ? "w-12 h-12 rounded-full border-2 border-red-500 bg-white flex items-center justify-center shadow-lg"
-              : "w-12 h-12 rounded-full border-2 border-amber-400 bg-white flex items-center justify-center shadow-lg";
-
-          const icon = document.createElement("div");
-          icon.className = "text-xl";
-
-          if (tech.specialization?.toLowerCase().includes("كهرب") || tech.specialization?.toLowerCase().includes("elect")) {
-            icon.textContent = "⚡";
-          } else if (tech.specialization?.toLowerCase().includes("سباك") || tech.specialization?.toLowerCase().includes("plumb")) {
-            icon.textContent = "🚿";
-          } else if (tech.specialization?.toLowerCase().includes("تكييف") || tech.specialization?.toLowerCase().includes("ac")) {
-            icon.textContent = "❄️";
-          } else if (tech.specialization?.toLowerCase().includes("نجار") || tech.specialization?.toLowerCase().includes("carp")) {
-            icon.textContent = "🪵";
-          } else if (tech.specialization?.toLowerCase().includes("دهان") || tech.specialization?.toLowerCase().includes("paint")) {
-            icon.textContent = "🎨";
-          } else {
-            icon.textContent = "🛠️";
-          }
-
-          pin.appendChild(icon);
-          markerContent.appendChild(pin);
+          // SVG أيقونة الفني البسيطة - صفراء كما في الصورة
+          const techIconSvg = getTechnicianIconSvg(tech.specialization || "");
+          
+          const markerSvg = document.createElement("div");
+          markerSvg.innerHTML = techIconSvg;
+          markerSvg.style.cssText = "cursor: pointer;";
 
           const marker = new google.maps.marker.AdvancedMarkerElement({
             map: mapInstanceRef.current!,
             position: { lat, lng },
-            content: markerContent,
+            content: markerSvg,
             title: tech.name || "فني",
             zIndex: 200,
           });
 
-          const infoWindow = new google.maps.InfoWindow();
+          const infoWindow = new google.maps.InfoWindow({ maxWidth: 280 });
 
           marker.addListener("click", () => {
             const div = document.createElement("div");
             const root = createRoot(div);
             root.render(
-              <TechnicianPopup
+              <TechnicianMapPopup
                 name={tech.name || "فني غير معروف"}
                 specialization={tech.specialization || "خدمة صيانة"}
                 rating={tech.rating || 4.5}
-                totalReviews={12}
                 status={techStatus}
                 availableIn={techStatus === "soon" ? 40 : undefined}
                 onRequestService={() => handleRequestService(tech)}
