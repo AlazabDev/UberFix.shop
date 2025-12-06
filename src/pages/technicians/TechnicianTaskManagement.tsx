@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { TechnicianTask } from "@/types/technician";
@@ -253,7 +253,7 @@ interface TaskCardProps {
   task: TechnicianTask;
   onCheckIn?: () => void;
   onCheckOut?: () => void;
-  getStatusBadge: (status: string) => JSX.Element;
+  getStatusBadge: (status: string) => React.ReactNode;
 }
 
 function TaskCard({ task, onCheckIn, onCheckOut, getStatusBadge }: TaskCardProps) {

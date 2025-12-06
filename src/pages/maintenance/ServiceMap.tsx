@@ -103,32 +103,8 @@ const MAP_STYLE: google.maps.MapTypeStyle[] = [
   },
 ];
 
-// دالة لإنشاء أيقونة SVG للفني حسب التخصص
-const getTechnicianIconSvg = (specialization: string) => {
-  const spec = specialization.toLowerCase();
-  let iconPath = "";
-  
-  if (spec.includes("كهرب") || spec.includes("elect")) {
-    iconPath = `<path d="M18 8l-4 8h3l-4 8 8-10h-4l4-6h-3z" fill="#0b1e36"/>`;
-  } else if (spec.includes("سباك") || spec.includes("plumb")) {
-    iconPath = `<path d="M22 9a5 5 0 0 0-5-5c-2.1 0-3.8 1.3-4.5 3H8v2h4v2H8v2h4.5c.7 1.7 2.4 3 4.5 3a5 5 0 0 0 5-5z" fill="#0b1e36"/>`;
-  } else if (spec.includes("تكييف") || spec.includes("ac")) {
-    iconPath = `<circle cx="12" cy="12" r="8" stroke="#0b1e36" stroke-width="2" fill="none"/><path d="M12 4v16M4 12h16" stroke="#0b1e36" stroke-width="2"/>`;
-  } else if (spec.includes("نجار") || spec.includes("carp")) {
-    iconPath = `<rect x="6" y="4" width="12" height="16" rx="1" stroke="#0b1e36" stroke-width="2" fill="none"/><line x1="10" y1="8" x2="14" y2="8" stroke="#0b1e36" stroke-width="2"/>`;
-  } else if (spec.includes("دهان") || spec.includes("paint")) {
-    iconPath = `<path d="M19 3H5v4h14V3zM12 7v10M8 17h8" stroke="#0b1e36" stroke-width="2" fill="none"/>`;
-  } else {
-    iconPath = `<path d="M14.7 6.3l1.6 1.6 3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="#0b1e36" stroke-width="2" fill="none"/>`;
-  }
-  
-  return `
-    <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M20 0C8.954 0 0 8.954 0 20c0 14.667 20 28 20 28s20-13.333 20-28C40 8.954 31.046 0 20 0z" fill="#f5bf23"/>
-      <g transform="translate(8, 6)">${iconPath}</g>
-    </svg>
-  `;
-};
+// استيراد دوال الأيقونات
+import { getTechnicianIcon, getBranchIcon } from "@/lib/technicianIcons";
 
 export default function ServiceMap() {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -256,25 +232,16 @@ export default function ServiceMap() {
 
           if (isNaN(lat) || isNaN(lng)) return;
 
-          // أيقونة الفرع - SVG بسيط كما في الصورة المرفقة
-          const markerSvg = document.createElement("div");
-          markerSvg.innerHTML = `
-            <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 0C8.954 0 0 8.954 0 20c0 14.667 20 28 20 28s20-13.333 20-28C40 8.954 31.046 0 20 0z" fill="#3b82f6"/>
-              <rect x="10" y="8" width="20" height="16" rx="2" fill="#fff"/>
-              <rect x="14" y="12" width="5" height="5" fill="#3b82f6"/>
-              <rect x="21" y="12" width="5" height="5" fill="#3b82f6"/>
-              <rect x="14" y="18" width="5" height="5" fill="#3b82f6"/>
-              <rect x="21" y="18" width="5" height="5" fill="#3b82f6"/>
-              <text x="20" y="32" font-size="6" fill="#fff" text-anchor="middle" font-weight="bold">AbuAli</text>
-            </svg>
-          `;
-          markerSvg.style.cssText = "cursor: pointer;";
+          // استخدام أيقونة الفرع المرفقة بدون أي تعديل
+          const branchIconUrl = getBranchIcon();
+          const markerImg = document.createElement("img");
+          markerImg.src = branchIconUrl;
+          markerImg.style.cssText = "cursor: pointer; width: 40px; height: 48px;";
 
           const marker = new google.maps.marker.AdvancedMarkerElement({
             map: mapInstanceRef.current!,
             position: { lat, lng },
-            content: markerSvg,
+            content: markerImg,
             title: branch.branch,
             zIndex: 100,
           });
@@ -304,17 +271,16 @@ export default function ServiceMap() {
 
           const techStatus = tech.status === "busy" ? "busy" : tech.status === "online" ? "available" : "soon";
 
-          // SVG أيقونة الفني البسيطة - صفراء كما في الصورة
-          const techIconSvg = getTechnicianIconSvg(tech.specialization || "");
-          
-          const markerSvg = document.createElement("div");
-          markerSvg.innerHTML = techIconSvg;
-          markerSvg.style.cssText = "cursor: pointer;";
+          // استخدام أيقونة الفني المرفقة بدون أي تعديل
+          const techIconUrl = getTechnicianIcon(tech.specialization || "");
+          const markerImg = document.createElement("img");
+          markerImg.src = techIconUrl;
+          markerImg.style.cssText = "cursor: pointer; width: 40px; height: 48px;";
 
           const marker = new google.maps.marker.AdvancedMarkerElement({
             map: mapInstanceRef.current!,
             position: { lat, lng },
-            content: markerSvg,
+            content: markerImg,
             title: tech.name || "فني",
             zIndex: 200,
           });
@@ -539,135 +505,37 @@ export default function ServiceMap() {
             )}
           </div>
 
-          <div className="relative z-10 pointer-events-none h-[760px] w-full p-5">
-            <div className="absolute top-5 left-5 w-full max-w-[340px] pointer-events-auto space-y-3">
-              <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-lg p-4 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-primary">{featuredBranch?.id || "Az-Shop-0000"}</p>
-                    <h3 className="text-lg font-bold text-slate-900">{featuredBranch?.branch || "فرع غير محدد"}</h3>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {featuredBranch?.address || "لم يتم اختيار فرع"}
-                    </p>
-                  </div>
-                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-primary" />
-                    متاح مباشرة
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-3 h-3" /> 0100 123 4567
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button className="flex-1" onClick={handleQuickRequest}>
-                    طلب الخدمة
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => setSelectedBranch(branches[1] || null)}>
-                    تبديل الفرع
-                  </Button>
-                </div>
-              </div>
-
-              <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-md p-3">
-                <p className="text-sm font-semibold text-slate-800 mb-2">الخدمات القريبة</p>
-                <div className="flex flex-wrap gap-2">
-                  {SPECIALTIES.slice(1).map((specialty) => (
-                    <Badge
-                      key={specialty.id}
-                      variant={selectedSpecialty === specialty.id ? "default" : "outline"}
-                      className="cursor-pointer"
-                      onClick={() => setSelectedSpecialty(selectedSpecialty === specialty.id ? null : specialty.id)}
-                    >
-                      <span className="ml-1">{specialty.icon}</span>
-                      {specialty.label}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute top-5 right-5 w-full max-w-[340px] pointer-events-auto space-y-3">
-              <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-2xl shadow-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold">طلب صيانة سريع</p>
-                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full">خريطة الخدمات</span>
-                </div>
-                <p className="text-sm text-primary-foreground/90 mb-3">
-                  اختر الفني الأقرب واضغط على طلب الخدمة ليصل إليك خلال دقائق.
-                </p>
-                <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                  <div className="bg-white/15 rounded-lg py-2">
-                    <p className="font-semibold">{filteredTechnicians.length}</p>
-                    <p>فني متاح</p>
-                  </div>
-                  <div className="bg-white/15 rounded-lg py-2">
-                    <p className="font-semibold">{branches.length}</p>
-                    <p>فرع نشط</p>
-                  </div>
-                </div>
-              </div>
-
-              {featuredTechnicians.map((tech) => {
-                const techStatus = tech.status === "busy" ? "busy" : tech.status === "online" ? "available" : "soon";
-                return (
-                  <div
-                    key={tech.id}
-                    className="bg-white/95 backdrop-blur border border-slate-200 rounded-2xl shadow-lg p-4 space-y-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <div>
-                            <p className="text-sm font-bold text-slate-900">{tech.name || "فني"}</p>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {tech.specialization || "خدمة صيانة"}
-                            </p>
-                          </div>
-                          <Badge className={statusClasses(techStatus)}>{statusLabel(techStatus)}</Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                          <Phone className="w-3 h-3" />
-                          <span>{tech.phone || "0109 000 0000"}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                        <span>{tech.rating || 4.5}</span>
-                        <span>(+12 تقييم)</span>
-                      </div>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {techStatus === "soon" ? "متاح خلال 40 دقيقة" : "متاح في دائرتك"}
-                      </span>
-                    </div>
-                    <Button className="w-full" onClick={() => handleRequestService(tech)}>
-                      طلب الخدمة
-                    </Button>
-                  </div>
-                );
-              })}
-
-              {featuredTechnicians.length === 0 && (
-                <div className="bg-white/95 backdrop-blur border border-dashed border-slate-300 rounded-2xl p-4 text-sm text-muted-foreground text-center">
-                  لا يوجد فنيون متاحون حالياً. جرّب تعديل الفلاتر أو أعد المحاولة بعد قليل.
-                </div>
-              )}
-            </div>
-
+          {/* عرض الخريطة بملء الشاشة - البطاقات تظهر منبثقة عند الضغط على الأيقونات */}
+          <div className="relative z-10 pointer-events-none h-[760px] w-full">
+            {/* زر طلب الخدمة */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto">
               <Button size="lg" className="shadow-xl px-8" onClick={handleQuickRequest}>
                 طلب الخدمة الآن
               </Button>
+            </div>
+            
+            {/* شريط الفلاتر المبسط */}
+            <div className="absolute top-4 left-4 pointer-events-auto">
+              <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-xl shadow-md p-2 flex flex-wrap gap-1">
+                {SPECIALTIES.slice(1).map((specialty) => (
+                  <Badge
+                    key={specialty.id}
+                    variant={selectedSpecialty === specialty.id ? "default" : "outline"}
+                    className="cursor-pointer text-xs"
+                    onClick={() => setSelectedSpecialty(selectedSpecialty === specialty.id ? null : specialty.id)}
+                  >
+                    <span className="ml-1">{specialty.icon}</span>
+                    {specialty.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            
+            {/* معلومات سريعة */}
+            <div className="absolute top-4 right-4 pointer-events-auto">
+              <Badge variant="secondary" className="shadow-md text-xs">
+                {filteredTechnicians.length} فني متاح • {branches.length} فرع
+              </Badge>
             </div>
           </div>
         </section>
