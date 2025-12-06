@@ -119,8 +119,15 @@
 }
 
 @layer base {
+  /* Text size adjust for all browsers */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   body {
@@ -129,9 +136,12 @@
     overflow-x: hidden;
   }
 
-  /* Ensure proper RTL layout */
-  * {
-    box-sizing: border-box;
+  /* Backdrop filter with webkit prefix for Safari */
+  .backdrop-blur,
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg {
+    -webkit-backdrop-filter: blur(8px);
   }
 
   /* Scrollbar styles for better appearance */

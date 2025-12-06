@@ -44,3 +44,10 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), microphone=(), camera=()
+  Content-Type: text/html; charset=utf-8
+
+# Root HTML
+/
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+  Content-Type: text/html; charset=utf-8
