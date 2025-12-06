@@ -45,21 +45,23 @@ const App = () => {
 };
 
 const MaintenanceLockWrapper = () => {
-  const { data: lockStatus, isLoading } = useMaintenanceLock();
+  const { data: lockStatus, isLoading, isError } = useMaintenanceLock();
 
-  // Timeout after 5 seconds to prevent indefinite loading
+  // Timeout after 2 seconds to prevent indefinite loading
   const [timeoutReached, setTimeoutReached] = React.useState(false);
   
   React.useEffect(() => {
-    const timer = setTimeout(() => setTimeoutReached(true), 5000);
+    const timer = setTimeout(() => setTimeoutReached(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
+  // Show loading only briefly
   if (isLoading && !timeoutReached) {
     return <LoadingFallback />;
   }
 
-  if (lockStatus?.isLocked) {
+  // Only show maintenance overlay if explicitly locked
+  if (lockStatus?.isLocked && !isError) {
     return <MaintenanceOverlay message={lockStatus.message} />;
   }
 
