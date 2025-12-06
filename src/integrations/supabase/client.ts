@@ -2,26 +2,19 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Use direct values instead of environment variables for Lovable compatibility
+const SUPABASE_URL = "https://zrrffsjbfkphridqyais.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpycmZmc2piZmtwaHJpZHF5YWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MzE1NzMsImV4cCI6MjA3MjAwNzU3M30.AwzY48mSUGeopBv5P6gzAPlipTbQasmXK8DR-L_Tm9A";
 
-// Allow the app to render even if Supabase is not configured by falling back
-// to a placeholder client. Features that rely on Supabase will gracefully
-// degrade instead of breaking the whole UI.
-export const supabaseReady = !!(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
-
-if (!supabaseReady) {
-  console.warn(
-    'Supabase environment variables are missing. The app will run in offline mode with limited features.'
-  );
-}
+// Supabase is always ready with direct configuration
+export const supabaseReady = true;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL || 'https://placeholder.supabase.co',
-  SUPABASE_PUBLISHABLE_KEY || 'public-anon-key',
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
   {
     auth: {
       storage: localStorage,
