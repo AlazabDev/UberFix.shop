@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => ({
             return 'supabase';
           }
           // Charts
-          if (id.includes('recharts')) {
+          if (id.includes('@tremor/react')) {
             return 'charts';
           }
           // Form libraries

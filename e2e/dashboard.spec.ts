@@ -32,7 +32,7 @@ test.describe('Dashboard', () => {
 
   test('should display maintenance chart', async ({ page }) => {
     // Check for chart container
-    const chartContainer = page.locator('.recharts-wrapper, [data-testid="maintenance-chart"]');
+    const chartContainer = page.locator('[data-testid="maintenance-chart"]');
     await expect(chartContainer.first()).toBeVisible({ timeout: 5000 });
   });
 
