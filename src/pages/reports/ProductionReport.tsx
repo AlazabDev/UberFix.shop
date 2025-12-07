@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { DonutChart, LineChart } from "@tremor/react";
 import { 
   Activity, 
   Users, 
@@ -310,27 +310,14 @@ export default function ProductionReport() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={statusData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, value }) => `${name}: ${value}`}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {statusData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <DonutChart
+                      className="h-[300px]"
+                      data={statusData}
+                      index="name"
+                      category="value"
+                      colors={["emerald", "indigo", "amber"]}
+                      valueFormatter={(value) => value.toString()}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -344,19 +331,15 @@ export default function ProductionReport() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[400px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={performanceData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="time" />
-                          <YAxis />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="requests" stroke="#3b82f6" name="الطلبات" />
-                          <Line type="monotone" dataKey="responseTime" stroke="#10b981" name="زمن الاستجابة (ms)" />
-                          <Line type="monotone" dataKey="errors" stroke="#ef4444" name="الأخطاء" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <LineChart
+                      className="h-[400px]"
+                      data={performanceData}
+                      index="time"
+                      categories={["requests", "responseTime", "errors"]}
+                      colors={["indigo", "emerald", "rose"]}
+                      valueFormatter={(value) => value.toString()}
+                      yAxisWidth={50}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>

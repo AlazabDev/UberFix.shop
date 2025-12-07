@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { DonutChart, LineChart } from "@tremor/react";
 
 const monthlyData = [
   { month: "مارس", requests: 0 },
@@ -18,7 +18,7 @@ const statusData = [
 
 export const MaintenanceChart = () => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-testid="maintenance-chart">
       {/* Line Chart */}
       <Card className="card-elegant">
         <CardHeader>
@@ -26,34 +26,15 @@ export const MaintenanceChart = () => {
         </CardHeader>
         <CardContent>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="month" 
-                  className="text-muted-foreground text-xs"
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis 
-                  className="text-muted-foreground text-xs"
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="requests" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <LineChart
+              className="h-full"
+              data={monthlyData}
+              index="month"
+              categories={["requests"]}
+              colors={["indigo"]}
+              valueFormatter={(value) => value.toLocaleString('ar-EG')}
+              yAxisWidth={50}
+            />
           </div>
         </CardContent>
       </Card>
@@ -65,32 +46,16 @@ export const MaintenanceChart = () => {
         </CardHeader>
         <CardContent>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <DonutChart
+              className="h-full"
+              data={statusData}
+              index="name"
+              category="value"
+              colors={["amber", "indigo", "emerald"]}
+              valueFormatter={(value) => value.toString()}
+            />
           </div>
-          
+
           {/* Legend */}
           <div className="flex flex-wrap gap-4 mt-4">
             {statusData.map((item, index) => (
