@@ -167,19 +167,34 @@ const sendEmailNotification = async (
 
 const sendSMSNotification = async (
   phone: string,
-  message: string
-) => {
+  message: string,
+  requestId?: string
+): Promise<{ success: boolean; messageLogId?: string; error?: any }> => {
   try {
     // استخدام Twilio لإرسال SMS
-    const result = await supabase.functions.invoke('send-twilio-message', {
-      body: {
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-twilio-message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`
+      },
+      body: JSON.stringify({
         to: phone,
-        message: message
-      }
+        message: message,
+        type: 'sms',
+        requestId: requestId
+      })
     });
 
-    console.log('SMS sent successfully:', result);
-    return { success: true, result };
+    const result = await response.json();
+    
+    if (!response.ok || !result.success) {
+      console.error('SMS failed:', result);
+      return { success: false, error: result.error || 'SMS sending failed' };
+    }
+
+    console.log('SMS sent successfully:', result.messageSid);
+    return { success: true, messageLogId: result.messageSid };
   } catch (error) {
     console.error('Error sending SMS:', error);
     return { success: false, error };
@@ -188,18 +203,34 @@ const sendSMSNotification = async (
 
 const sendWhatsAppNotification = async (
   phone: string,
-  message: string
-) => {
+  message: string,
+  requestId?: string
+): Promise<{ success: boolean; messageLogId?: string; error?: any }> => {
   try {
-    const result = await supabase.functions.invoke('send-whatsapp', {
-      body: {
+    // استخدام send-twilio-message مع type: 'whatsapp'
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-twilio-message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseServiceKey}`
+      },
+      body: JSON.stringify({
         to: phone,
-        message: message
-      }
+        message: message,
+        type: 'whatsapp',
+        requestId: requestId
+      })
     });
 
-    console.log('WhatsApp sent successfully:', result);
-    return { success: true, result };
+    const result = await response.json();
+    
+    if (!response.ok || !result.success) {
+      console.error('WhatsApp failed:', result);
+      return { success: false, error: result.error || 'WhatsApp sending failed' };
+    }
+
+    console.log('WhatsApp sent successfully:', result.messageSid);
+    return { success: true, messageLogId: result.messageSid };
   } catch (error) {
     console.error('Error sending WhatsApp:', error);
     return { success: false, error };
@@ -256,21 +287,43 @@ const handler = async (req: Request): Promise<Response> => {
     if (channels.includes('sms') && requestData.recipient_phone) {
       results.sms = await sendSMSNotification(
         requestData.recipient_phone,
-        message
+        message,
+        requestData.request_id
       );
+      
+      // تحديث حالة الإرسال في جدول notifications
+      if (results.in_app?.success) {
+        await supabase.from('notifications')
+          .update({ sms_sent: results.sms.success })
+          .eq('entity_id', requestData.request_id)
+          .eq('recipient_id', requestData.recipient_id);
+      }
     }
 
     // 4. إرسال WhatsApp
     if (channels.includes('whatsapp') && requestData.recipient_phone) {
       results.whatsapp = await sendWhatsAppNotification(
         requestData.recipient_phone,
-        message
+        message,
+        requestData.request_id
       );
+      
+      // تحديث حالة الإرسال في جدول notifications
+      if (results.in_app?.success) {
+        await supabase.from('notifications')
+          .update({ whatsapp_sent: results.whatsapp.success })
+          .eq('entity_id', requestData.request_id)
+          .eq('recipient_id', requestData.recipient_id);
+      }
     }
+
+    // ملخص النتائج
+    const allSuccess = Object.values(results).every(r => r === null || r?.success);
+    const anyFailed = Object.values(results).some(r => r && !r.success);
 
     return new Response(
       JSON.stringify({
-        success: true,
+        success: !anyFailed,
         message: 'Notifications processed',
         results
       }),

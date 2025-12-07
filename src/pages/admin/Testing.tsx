@@ -419,28 +419,103 @@ const Testing = () => {
   const testNotifications = async (index: number) => {
     updateTestResult(index, { status: 'running' });
     const start = Date.now();
+    const errors: string[] = [];
+    const warnings: string[] = [];
     
     try {
-      const { data, error } = await supabase
+      // 1. اختبار قراءة الإشعارات من قاعدة البيانات
+      const { data: notifications, error: fetchError } = await supabase
         .from('notifications')
-        .select('*')
-        .limit(1);
+        .select('id, title, sms_sent, whatsapp_sent, message_log_id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
       
-      const duration = Date.now() - start;
-      
-      if (error) throw error;
+      if (fetchError) {
+        errors.push(`فشل جلب الإشعارات: ${fetchError.message}`);
+      }
 
-      updateTestResult(index, {
-        status: 'success',
-        message: `تم جلب ${data?.length || 0} إشعار - ${duration}ms`,
-        duration
+      // 2. تحليل حالة الإشعارات
+      if (notifications && notifications.length > 0) {
+        const smsSentCount = notifications.filter(n => n.sms_sent === true).length;
+        const whatsappSentCount = notifications.filter(n => n.whatsapp_sent === true).length;
+        const withMessageLog = notifications.filter(n => n.message_log_id !== null).length;
+        
+        // تحذيرات للمشاكل المحتملة
+        if (smsSentCount === 0 && notifications.length > 5) {
+          warnings.push(`لا توجد رسائل SMS مرسلة من ${notifications.length} إشعار`);
+        }
+        if (whatsappSentCount === 0 && notifications.length > 5) {
+          warnings.push(`لا توجد رسائل WhatsApp مرسلة من ${notifications.length} إشعار`);
+        }
+        if (withMessageLog === 0 && notifications.length > 5) {
+          warnings.push(`لا توجد سجلات رسائل (message_log_id) مرتبطة`);
+        }
+      }
+
+      // 3. اختبار Edge Function للإشعارات (بدون إرسال فعلي)
+      const { data: edgeResult, error: edgeError } = await supabase.functions.invoke('send-unified-notification', {
+        body: { 
+          type: 'request_created',
+          request_id: 'test-' + Date.now(),
+          recipient_id: 'test-recipient-' + Date.now(),
+          channels: ['in_app'], // فقط in_app للاختبار
+          data: { request_title: 'اختبار نظام الإشعارات' }
+        }
       });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
 
+      if (edgeError) {
+        errors.push(`فشل Edge Function: ${edgeError.message}`);
+      } else if (edgeResult && !edgeResult.success) {
+        errors.push(`Edge Function أرجع خطأ: ${edgeResult.error || 'غير معروف'}`);
+      }
+
+      // 4. التحقق من جدول message_logs
+      const { data: messageLogs, error: logsError } = await supabase
+        .from('message_logs')
+        .select('id, status, message_type, error_message')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (logsError) {
+        warnings.push(`لا يمكن قراءة سجلات الرسائل: ${logsError.message}`);
+      } else if (messageLogs) {
+        const failedMessages = messageLogs.filter(m => m.status === 'failed');
+        if (failedMessages.length > 0) {
+          errors.push(`${failedMessages.length} رسائل فاشلة في السجلات`);
+        }
+      }
+
+      const duration = Date.now() - start;
+
+      // تحديد الحالة النهائية
+      if (errors.length > 0) {
+        updateTestResult(index, {
+          status: 'error',
+          message: `${errors.length} أخطاء: ${errors[0]}`,
+          duration,
+          errors,
+          warnings
+        });
+      } else if (warnings.length > 0) {
+        updateTestResult(index, {
+          status: 'warning',
+          message: `${warnings.length} تحذيرات: ${warnings[0]}`,
+          duration,
+          warnings
+        });
+      } else {
+        updateTestResult(index, {
+          status: 'success',
+          message: `نظام الإشعارات يعمل بشكل صحيح - ${notifications?.length || 0} إشعار - ${duration}ms`,
+          duration
+        });
+      }
+    } catch (error) {
+      const duration = Date.now() - start;
       updateTestResult(index, {
-        status: 'warning',
-        message: `خدمة الإشعارات غير متاحة في بيئة الاختبار الحالية: ${errorMessage}`
+        status: 'error',
+        message: `خطأ في نظام الإشعارات: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
+        duration
       });
     }
   };
@@ -1030,33 +1105,78 @@ const Testing = () => {
   const testEdgeFunctionNotifications = async (index: number) => {
     updateTestResult(index, { status: 'running' });
     const start = Date.now();
+    const errors: string[] = [];
+    const warnings: string[] = [];
     
     try {
+      // 1. اختبار استدعاء Edge Function
+      const testId = 'test-' + Date.now();
       const { data, error } = await supabase.functions.invoke('send-unified-notification', {
         body: { 
           type: 'request_created',
-          request_id: 'test-id',
-          recipient_id: 'test-recipient',
+          request_id: testId,
+          recipient_id: 'test-recipient-' + Date.now(),
           channels: ['in_app'],
-          data: { request_title: 'اختبار' }
+          data: { request_title: 'اختبار Edge Function' }
         }
       });
 
       const duration = Date.now() - start;
 
-      if (error) throw error;
+      if (error) {
+        errors.push(`خطأ في الاستدعاء: ${error.message}`);
+      } else if (data) {
+        // فحص نتيجة الاستدعاء
+        if (!data.success) {
+          errors.push(`Edge Function أرجع فشل: ${data.error || 'غير معروف'}`);
+        }
+        
+        // فحص نتائج القنوات
+        if (data.results) {
+          if (data.results.in_app && !data.results.in_app.success) {
+            errors.push('فشل إرسال إشعار in_app');
+          }
+          if (data.results.email && !data.results.email.success) {
+            warnings.push(`فشل البريد الإلكتروني: ${data.results.email.error || 'غير معروف'}`);
+          }
+          if (data.results.sms && !data.results.sms.success) {
+            warnings.push(`فشل SMS: ${data.results.sms.error || 'غير معروف'}`);
+          }
+          if (data.results.whatsapp && !data.results.whatsapp.success) {
+            warnings.push(`فشل WhatsApp: ${data.results.whatsapp.error || 'غير معروف'}`);
+          }
+        }
+      }
 
-      updateTestResult(index, {
-        status: 'success',
-        message: `Edge Function جاهز - ${duration}ms`,
-        duration
-      });
+      // تحديد الحالة النهائية
+      if (errors.length > 0) {
+        updateTestResult(index, {
+          status: 'error',
+          message: `${errors.length} أخطاء: ${errors[0]}`,
+          duration,
+          errors,
+          warnings
+        });
+      } else if (warnings.length > 0) {
+        updateTestResult(index, {
+          status: 'warning',
+          message: `Edge Function يعمل مع ${warnings.length} تحذيرات - ${duration}ms`,
+          duration,
+          warnings
+        });
+      } else {
+        updateTestResult(index, {
+          status: 'success',
+          message: `Edge Function يعمل بشكل صحيح - ${duration}ms`,
+          duration
+        });
+      }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
-
+      const duration = Date.now() - start;
       updateTestResult(index, {
-        status: 'warning',
-        message: `Edge Function غير متاح في بيئة الاختبار الحالية: ${errorMessage}`
+        status: 'error',
+        message: `خطأ في Edge Function: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
+        duration
       });
     }
   };
