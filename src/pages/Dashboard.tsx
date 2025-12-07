@@ -1,7 +1,7 @@
+import { Suspense, lazy } from "react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentRequests } from "@/components/dashboard/RecentRequests";
 import { QuickActions } from "@/components/dashboard/QuickActions";
-import { MaintenanceChart } from "@/components/dashboard/MaintenanceChart";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useProjects } from "@/hooks/useProjects";
 import { useMediaQuery } from "@/hooks/use-mobile";
@@ -14,6 +14,8 @@ import {
   TrendingUp,
   Loader2
 } from "lucide-react";
+
+const MaintenanceChart = lazy(() => import("@/components/dashboard/MaintenanceChart"));
 
 const Dashboard = () => {
   const { stats, loading } = useDashboardStats();
@@ -114,7 +116,15 @@ const Dashboard = () => {
         />
       </div>
 
-      <MaintenanceChart />
+      <Suspense
+        fallback={(
+          <div className="flex min-h-[320px] items-center justify-center rounded-lg border">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        )}
+      >
+        <MaintenanceChart />
+      </Suspense>
 
       <div className={`grid gap-4 sm:gap-6 ${isMobile ? 'grid-cols-1 space-y-2' : 'grid-cols-1 lg:grid-cols-2'}`}>
         <RecentRequests />
