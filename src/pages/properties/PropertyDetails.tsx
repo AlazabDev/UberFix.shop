@@ -1,12 +1,14 @@
+import { lazy, Suspense } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Building2, Edit, Loader2 } from "lucide-react";
-import { InteractiveMap } from "@/components/maps/InteractiveMap";
 import { Badge } from "@/components/ui/badge";
 import { AppFooter } from "@/components/shared/AppFooter";
+
+const InteractiveMap = lazy(() => import("@/components/maps/InteractiveMap"));
 
 export default function PropertyDetails() {
   const { id } = useParams();
@@ -123,11 +125,19 @@ export default function PropertyDetails() {
 
       {/* Map */}
       {property.latitude && property.longitude && (
-        <InteractiveMap
-          latitude={property.latitude}
-          longitude={property.longitude}
-          height="400px"
-        />
+        <Suspense
+          fallback={(
+            <div className="flex h-[400px] items-center justify-center rounded-lg border">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          )}
+        >
+          <InteractiveMap
+            latitude={property.latitude}
+            longitude={property.longitude}
+            height="400px"
+          />
+        </Suspense>
       )}
 
       <AppFooter />
