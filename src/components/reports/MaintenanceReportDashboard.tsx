@@ -4,20 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  LineChart, 
-  Line 
-} from "recharts";
-import { ChartTooltip } from "@/components/ui/chart";
+import { BarChart, DonutChart, LineChart } from "@tremor/react";
 import { Download, RefreshCw, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -208,24 +195,14 @@ export function MaintenanceReportDashboard() {
             <CardTitle>توزيع الخدمات</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={serviceTypeData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  dataKey="value"
-                  label={(entry) => `${entry.name}: ${entry.value}`}
-                >
-                  {serviceTypeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={`hsl(${index * 60}, 70%, 50%)`} />
-                  ))}
-                </Pie>
-                <ChartTooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <DonutChart
+              className="h-[300px]"
+              data={serviceTypeData}
+              index="name"
+              category="value"
+              colors={["indigo", "emerald", "amber", "rose", "cyan"]}
+              valueFormatter={(value) => value.toString()}
+            />
           </CardContent>
         </Card>
 
@@ -234,19 +211,15 @@ export function MaintenanceReportDashboard() {
             <CardTitle>التكلفة حسب نوع الخدمة</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={serviceTypeData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <ChartTooltip />
-                <Bar 
-                  dataKey="totalCost" 
-                  fill="hsl(var(--primary))"
-                  name="التكلفة الإجمالية"
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            <BarChart
+              className="h-[300px]"
+              data={serviceTypeData}
+              index="name"
+              categories={["totalCost"]}
+              colors={["indigo"]}
+              valueFormatter={(value) => value.toLocaleString('ar-EG')}
+              yAxisWidth={50}
+            />
           </CardContent>
         </Card>
       </div>
@@ -257,31 +230,15 @@ export function MaintenanceReportDashboard() {
           <CardTitle>الصيانات المنتهية عبر الزمن</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <ChartTooltip />
-              <Line 
-                yAxisId="left"
-                type="monotone" 
-                dataKey="count" 
-                stroke="hsl(var(--success))" 
-                strokeWidth={3}
-                name="عدد الصيانات"
-              />
-              <Line 
-                yAxisId="right"
-                type="monotone" 
-                dataKey="cost" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={3}
-                name="التكلفة (جنيه)"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <LineChart
+            className="h-[300px]"
+            data={monthlyData}
+            index="month"
+            categories={["count", "cost"]}
+            colors={["emerald", "indigo"]}
+            valueFormatter={(value) => value.toLocaleString('ar-EG')}
+            yAxisWidth={60}
+          />
         </CardContent>
       </Card>
 

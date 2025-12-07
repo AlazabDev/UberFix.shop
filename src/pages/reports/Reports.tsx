@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { BarChart, DonutChart, LineChart } from "@tremor/react";
 import { TrendingUp, TrendingDown, Calendar, Download, FileText, BarChart3 } from "lucide-react";
 
 const monthlyData = [
@@ -22,12 +21,6 @@ const serviceData = [
   { name: "تكييف", value: 20, color: "hsl(var(--success))" },
   { name: "نجارة", value: 17, color: "hsl(var(--destructive))" },
 ];
-
-const chartConfig = {
-  requests: { label: "الطلبات", color: "hsl(var(--primary))" },
-  completed: { label: "المكتملة", color: "hsl(var(--success))" },
-  revenue: { label: "الإيرادات", color: "hsl(var(--warning))" },
-};
 
 export default function Reports() {
   return (
@@ -140,21 +133,15 @@ export default function Reports() {
                   <CardTitle>الأداء الشهري</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={monthlyData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis 
-                          dataKey="month" 
-                          className="text-xs text-muted-foreground"
-                        />
-                        <YAxis className="text-xs text-muted-foreground" />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="requests" fill="hsl(var(--primary))" name="الطلبات" />
-                        <Bar dataKey="completed" fill="hsl(var(--success))" name="المكتملة" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+                  <BarChart
+                    className="h-[300px]"
+                    data={monthlyData}
+                    index="month"
+                    categories={["requests", "completed"]}
+                    colors={["indigo", "emerald"]}
+                    valueFormatter={(value) => value.toLocaleString("ar-EG")}
+                    yAxisWidth={40}
+                  />
                 </CardContent>
               </Card>
 
@@ -164,27 +151,14 @@ export default function Reports() {
                   <CardTitle>توزيع الخدمات</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={serviceData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="hsl(var(--primary))"
-                          dataKey="value"
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {serviceData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
+                  <DonutChart
+                    className="h-[300px]"
+                    data={serviceData}
+                    index="name"
+                    category="value"
+                    colors={["indigo", "amber", "emerald", "rose"]}
+                    valueFormatter={(value) => value.toLocaleString("ar-EG")}
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -195,26 +169,15 @@ export default function Reports() {
                 <CardTitle>اتجاه الإيرادات</CardTitle>
               </CardHeader>
               <CardContent>
-                <ChartContainer config={chartConfig}>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis 
-                        dataKey="month" 
-                        className="text-xs text-muted-foreground"
-                      />
-                      <YAxis className="text-xs text-muted-foreground" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="revenue" 
-                        stroke="hsl(var(--warning))" 
-                        strokeWidth={3}
-                        name="الإيرادات (ج.م)"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                <LineChart
+                  className="h-[300px]"
+                  data={monthlyData}
+                  index="month"
+                  categories={["revenue"]}
+                  colors={["amber"]}
+                  valueFormatter={(value) => `${value.toLocaleString("ar-EG")} ج.م`}
+                  yAxisWidth={60}
+                />
               </CardContent>
             </Card>
 

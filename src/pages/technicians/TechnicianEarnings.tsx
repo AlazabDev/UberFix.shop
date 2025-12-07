@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendingUp, DollarSign, Calendar, Award } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart } from '@tremor/react';
 
 interface DailyStats {
   date: string;
@@ -144,37 +144,33 @@ export default function TechnicianEarnings() {
       {/* Earnings Chart */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">تطور الأرباح (آخر 30 يوم)</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={dailyStats}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tickFormatter={(value) => new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
-            />
-            <YAxis />
-            <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-                      <p className="font-medium">
-                        {new Date(payload[0].payload.date).toLocaleDateString('ar-EG')}
-                      </p>
-                      <p className="text-green-600">
-                        الأرباح: {parseFloat(payload[0].value as string).toFixed(2)} جنيه
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        الزيارات: {payload[0].payload.visits_completed}
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Area type="monotone" dataKey="total_earnings" stroke="#10b981" fill="#10b98120" />
-          </AreaChart>
-        </ResponsiveContainer>
+        <AreaChart
+          className="h-[300px]"
+          data={dailyStats}
+          index="date"
+          categories={["total_earnings"]}
+          colors={["emerald"]}
+          valueFormatter={(value) => `${Number(value).toFixed(2)} جنيه`}
+          yAxisWidth={40}
+          customTooltip={({ active, payload }) => {
+            if (!active || !payload?.length) return null;
+            const [item] = payload;
+            const date = new Date(item.payload.date).toLocaleDateString('ar-EG');
+
+            return (
+              <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
+                <p className="font-medium">{date}</p>
+                <p className="text-green-600">
+                  الأرباح: {Number(item.value).toFixed(2)} جنيه
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  الزيارات: {item.payload.visits_completed}
+                </p>
+              </div>
+            );
+          }}
+          dateFormatter={(value) => new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
+        />
       </Card>
 
       {/* Monthly Bonuses */}

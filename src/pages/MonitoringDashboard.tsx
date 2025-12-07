@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  AlertCircle, 
+import {
+  AlertCircle,
   Activity, 
   TrendingUp, 
   Users,
@@ -14,20 +14,7 @@ import {
   AlertTriangle,
   Info
 } from "lucide-react";
-import { 
-  LineChart, 
-  Line, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from "recharts";
-import { ChartTooltip } from "@/components/ui/chart";
+import { BarChart, DonutChart, LineChart } from "@tremor/react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
@@ -210,24 +197,14 @@ export default function MonitoringDashboard() {
             <CardTitle>توزيع الأخطاء حسب الخطورة</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={severityData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  dataKey="value"
-                  label={(entry) => `${entry.name}: ${entry.value}`}
-                >
-                  {severityData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <ChartTooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <DonutChart
+              className="h-[300px]"
+              data={severityData}
+              index="name"
+              category="value"
+              valueFormatter={(value) => value.toString()}
+              colors={["cyan", "amber", "rose", "indigo"]}
+            />
           </CardContent>
         </Card>
 
@@ -236,28 +213,15 @@ export default function MonitoringDashboard() {
             <CardTitle>الأداء عبر الوقت</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={performanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="hour" />
-                <YAxis />
-                <ChartTooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="LCP" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={2}
-                  name="LCP (ms)"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="FCP" 
-                  stroke="hsl(var(--success))" 
-                  strokeWidth={2}
-                  name="FCP (ms)"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <LineChart
+              className="h-[300px]"
+              data={performanceData}
+              index="hour"
+              categories={["LCP", "FCP"]}
+              colors={["indigo", "emerald"]}
+              valueFormatter={(value) => `${value} ms`}
+              yAxisWidth={40}
+            />
           </CardContent>
         </Card>
 
@@ -266,15 +230,15 @@ export default function MonitoringDashboard() {
             <CardTitle>أهم الأحداث</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topEvents}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <ChartTooltip />
-                <Bar dataKey="count" fill="hsl(var(--primary))" name="العدد" />
-              </BarChart>
-            </ResponsiveContainer>
+            <BarChart
+              className="h-[300px]"
+              data={topEvents}
+              index="name"
+              categories={["count"]}
+              colors={["indigo"]}
+              valueFormatter={(value) => value.toString()}
+              yAxisWidth={40}
+            />
           </CardContent>
         </Card>
       </div>
