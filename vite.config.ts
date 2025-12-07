@@ -36,22 +36,6 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         format: "es",
-
-        manualChunks: {
-          maps: [
-            "mapbox-gl",
-            "@googlemaps/js-api-loader",
-            "@googlemaps/markerclusterer",
-            "@mapbox/mapbox-sdk"
-          ],
-          charts: ["recharts", "framer-motion"],
-          vendor: [
-            "zustand",
-            "react-router-dom"
-          ],
-          "react-query": ["@tanstack/react-query"],
-          "vendor-react": ["react", "react-dom"]
-
         manualChunks: (id) => {
           // React core
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
@@ -98,7 +82,6 @@ export default defineConfig(({ mode }) => ({
             const pageName = id.split('/pages/')[1]?.split('.')[0];
             return `page-${pageName}`;
           }
-
         },
         // Optimize chunk loading
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -115,7 +98,7 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 600,
     cssCodeSplit: true,
     assetsInlineLimit: 4096,
   },

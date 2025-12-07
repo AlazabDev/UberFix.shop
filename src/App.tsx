@@ -27,23 +27,6 @@ const queryClient = new QueryClient({
   },
 });
 
-const preloadRoutes = () => {
-  const runWhenIdle = (loader: () => Promise<unknown>) => {
-    const execute = () => loader().catch(() => {});
-    if (typeof window === "undefined") return;
-    if ("requestIdleCallback" in window) {
-      (window as Window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback?.(execute);
-    } else {
-      setTimeout(execute, 500);
-    }
-  };
-
-  runWhenIdle(() => import("@/pages/Dashboard"));
-  runWhenIdle(() => import("@/pages/Vendors"));
-  runWhenIdle(() => import("@/pages/properties/Properties"));
-  runWhenIdle(() => import("@/pages/MonitoringDashboard"));
-};
-
 // مكون Loading مركزي لـ Suspense
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -71,12 +54,6 @@ const MaintenanceLockWrapper = () => {
     const timer = setTimeout(() => setTimeoutReached(true), 2000);
     return () => clearTimeout(timer);
   }, []);
-
-  React.useEffect(() => {
-    if (!lockStatus?.isLocked) {
-      preloadRoutes();
-    }
-  }, [lockStatus?.isLocked]);
 
   // Show loading only briefly
   if (isLoading && !timeoutReached) {

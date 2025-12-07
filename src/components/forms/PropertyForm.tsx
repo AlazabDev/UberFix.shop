@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,12 +10,11 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, X, Upload, AlertCircle } from "lucide-react";
+import { InteractiveMap } from "@/components/maps/InteractiveMap";
 import type { Property } from "@/hooks/useProperties";
 import { PropertyFormTabs } from "./PropertyFormTabs";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-const InteractiveMap = lazy(() => import("@/components/maps/InteractiveMap"));
 
 const propertyFormSchema = z.object({
   code: z.string().optional(),
@@ -453,26 +452,18 @@ export function PropertyForm({ initialData, propertyId, skipNavigation, onSucces
       </div>
 
       {/* Interactive Map */}
-      <Suspense
-        fallback={(
-          <div className="flex h-[320px] items-center justify-center rounded-lg border">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        )}
-      >
-        <InteractiveMap
-          latitude={watch("latitude") ?? 30.0444}
-          longitude={watch("longitude") ?? 31.2357}
-          onLocationChange={(lat, lng, address) => {
-            setValue("latitude", lat, { shouldDirty: true });
-            setValue("longitude", lng, { shouldDirty: true });
-            if (address) {
-              setValue("address", address, { shouldDirty: true });
-            }
-          }}
-          height="320px"
-        />
-      </Suspense>
+      <InteractiveMap
+        latitude={watch("latitude") ?? 30.0444}
+        longitude={watch("longitude") ?? 31.2357}
+        onLocationChange={(lat, lng, address) => {
+          setValue("latitude", lat, { shouldDirty: true });
+          setValue("longitude", lng, { shouldDirty: true });
+          if (address) {
+            setValue("address", address, { shouldDirty: true });
+          }
+        }}
+        height="320px"
+      />
 
       {/* Property Managers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
