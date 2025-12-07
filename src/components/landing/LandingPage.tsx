@@ -1,5 +1,7 @@
 // src/components/landing/LandingPage.tsx
+// Error-safe landing page with lazy-loaded components
 
+import { lazy, Suspense } from "react";
 import { LandingHeader } from "./LandingHeader";
 import { HeroSection } from "./HeroSection";
 import { ServicesSection } from "./ServicesSection";
@@ -11,7 +13,20 @@ import { FeaturesSection } from "./FeaturesSection";
 import { TechnicianSection } from "./TechnicianSection";
 import { TestimonialsSection } from "./TestimonialsSection";
 import { Footer } from "./Footer";
-import { InteractiveMap } from "./InteractiveMap";
+import { Loader2 } from "lucide-react";
+
+// Lazy load the map component to prevent blocking initial render
+const InteractiveMap = lazy(() => import("./InteractiveMap"));
+
+// Loading fallback for map
+const MapLoadingFallback = () => (
+  <div className="w-full h-[500px] rounded-2xl bg-slate-900/50 flex items-center justify-center">
+    <div className="text-center">
+      <Loader2 className="w-10 h-10 animate-spin mx-auto mb-3 text-primary" />
+      <p className="text-sm text-muted-foreground">جاري تحميل الخريطة...</p>
+    </div>
+  </div>
+);
 
 export const LandingPage = () => {
   return (
@@ -42,7 +57,9 @@ export const LandingPage = () => {
           </div>
 
           <div className="max-w-6xl mx-auto">
-            <InteractiveMap />
+            <Suspense fallback={<MapLoadingFallback />}>
+              <InteractiveMap />
+            </Suspense>
           </div>
 
           <div className="max-w-3xl mx-auto text-center text-xs md:text-sm text-muted-foreground">
