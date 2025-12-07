@@ -36,22 +36,6 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         format: "es",
-
-        manualChunks: {
-          maps: [
-            "mapbox-gl",
-            "@googlemaps/js-api-loader",
-            "@googlemaps/markerclusterer",
-            "@mapbox/mapbox-sdk"
-          ],
-          charts: ["recharts", "framer-motion"],
-          vendor: [
-            "zustand",
-            "react-router-dom"
-          ],
-          "react-query": ["@tanstack/react-query"],
-          "vendor-react": ["react", "react-dom"]
-
         manualChunks: (id) => {
           // React core
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
@@ -70,7 +54,7 @@ export default defineConfig(({ mode }) => ({
             return 'supabase';
           }
           // Charts
-          if (id.includes('@tremor/react')) {
+          if (id.includes('@tremor/react') || id.includes('framer-motion') || id.includes('recharts')) {
             return 'charts';
           }
           // Form libraries
@@ -80,6 +64,10 @@ export default defineConfig(({ mode }) => ({
           // Icons
           if (id.includes('lucide-react') || id.includes('react-icons')) {
             return 'icons';
+          }
+          // State management
+          if (id.includes('zustand')) {
+            return 'state';
           }
           // Date utilities
           if (id.includes('date-fns')) {
@@ -93,12 +81,17 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('mapbox') || id.includes('@googlemaps')) {
             return 'maps';
           }
+          // Data fetching
+          if (id.includes('@tanstack/react-query')) {
+            return 'react-query';
+          }
           // Large page components
           if (id.includes('src/pages') && !id.includes('src/pages/Index')) {
             const pageName = id.split('/pages/')[1]?.split('.')[0];
             return `page-${pageName}`;
           }
 
+          return undefined;
         },
         // Optimize chunk loading
         chunkFileNames: 'assets/[name]-[hash].js',
