@@ -20,7 +20,7 @@
     "check": "npm run lint && npm run typecheck",
     "clean": "bash ./scripts/clean.sh",
     "fix": "bash ./scripts/fix.sh",
-    "test:e2e": "echo \"No E2E tests configured\""
+    "test:e2e": "echo \"No E2E tests configured\"",
     "test:unit": "vitest --runInBand --coverage"
   },
   "dependencies": {
