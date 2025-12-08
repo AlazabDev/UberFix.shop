@@ -9,11 +9,7 @@ echo "== CLEAN MODE =="
 rm -rf node_modules
 rm -f pnpm-lock.yaml
 
-if command -v pnpm >/dev/null 2>&1; then
-  PNPM_STORE="$(pnpm store path)"
-  rm -rf "$PNPM_STORE"
-else
-  echo "pnpm not installed; skipping pnpm store cleanup"
-fi
+PNPM_STORE="$(npm run store path)"
+rm -rf "$PNPM_STORE"
 
 echo "✔ CLEAN COMPLETED"
