@@ -1,10 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DonutChart, LineChart } from "@tremor/react";
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Legend 
+} from "recharts";
 import { 
   Activity, 
   Users, 
@@ -21,8 +33,6 @@ import {
 } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { useProjects } from "@/hooks/useProjects";
-import { useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface SystemMetrics {
   uptime: number;
@@ -39,6 +49,8 @@ interface DatabaseMetrics {
   storage: number;
   backups: number;
 }
+
+const COLORS = ['#10b981', '#3b82f6', '#f59e0b'];
 
 export default function ProductionReport() {
   const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +78,6 @@ export default function ProductionReport() {
     completedProjects: projects.filter(p => p.status === 'completed').length,
   }), [requests, projects]);
   
-  // System metrics simulation (replace with real metrics from your monitoring)
   const [systemMetrics] = useState<SystemMetrics>({
     uptime: 99.8,
     responseTime: 245,
@@ -83,7 +94,6 @@ export default function ProductionReport() {
     backups: 5
   });
 
-  // Performance data for charts
   const performanceData = [
     { time: '00:00', requests: 45, errors: 0, responseTime: 200 },
     { time: '04:00', requests: 23, errors: 1, responseTime: 180 },
@@ -94,14 +104,13 @@ export default function ProductionReport() {
   ];
 
   const statusData = [
-    { name: 'نشط', value: stats.pendingRequests, color: '#10b981' },
-    { name: 'مكتمل', value: stats.completedRequests, color: '#3b82f6' },
-    { name: 'في الانتظار', value: stats.todayRequests, color: '#f59e0b' },
+    { name: 'نشط', value: stats.pendingRequests },
+    { name: 'مكتمل', value: stats.completedRequests },
+    { name: 'في الانتظار', value: stats.todayRequests },
   ];
 
   const handleRefresh = async () => {
     setIsLoading(true);
-    // Simulate refresh
     await new Promise(resolve => setTimeout(resolve, 1000));
     setLastUpdated(new Date());
     setIsLoading(false);
@@ -138,21 +147,21 @@ export default function ProductionReport() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={handleRefresh}
-                  disabled={isLoading}
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                  تحديث
-                </Button>
-                <Button 
-                  onClick={downloadReport}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  تحميل التقرير
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            تحديث
+          </Button>
+          <Button 
+            onClick={downloadReport}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            تحميل التقرير
           </Button>
         </div>
       </div>
@@ -166,7 +175,6 @@ export default function ProductionReport() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8">
-          {/* System Status Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -185,301 +193,287 @@ export default function ProductionReport() {
               </CardContent>
             </Card>
 
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">زمن الاستجابة</CardTitle>
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{systemMetrics.responseTime}ms</div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        متوسط آخر 24 ساعة
-                      </p>
-                      <Badge variant={systemMetrics.responseTime < 300 ? "secondary" : "destructive"} className="mt-2">
-                        {systemMetrics.responseTime < 300 ? "جيد" : "بطيء"}
-                      </Badge>
-                    </CardContent>
-                  </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">زمن الاستجابة</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{systemMetrics.responseTime}ms</div>
+                <p className="text-xs text-muted-foreground mt-2">متوسط آخر 24 ساعة</p>
+                <Badge variant={systemMetrics.responseTime < 300 ? "secondary" : "destructive"} className="mt-2">
+                  {systemMetrics.responseTime < 300 ? "جيد" : "بطيء"}
+                </Badge>
+              </CardContent>
+            </Card>
 
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">المستخدمون النشطون</CardTitle>
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-primary">{systemMetrics.activeUsers}</div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        متصل الآن
-                      </p>
-                      <Badge variant="secondary" className="mt-2">
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        +8% من الأمس
-                      </Badge>
-                    </CardContent>
-                  </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">المستخدمون النشطون</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">{systemMetrics.activeUsers}</div>
+                <p className="text-xs text-muted-foreground mt-2">متصل الآن</p>
+                <Badge variant="secondary" className="mt-2">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  +8% من الأمس
+                </Badge>
+              </CardContent>
+            </Card>
 
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">معدل الأخطاء</CardTitle>
-                      <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{systemMetrics.errorRate}%</div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        آخر 24 ساعة
-                      </p>
-                      <Badge variant={systemMetrics.errorRate < 1 ? "secondary" : "destructive"} className="mt-2">
-                        {systemMetrics.errorRate < 1 ? "منخفض" : "مرتفع"}
-                      </Badge>
-                    </CardContent>
-                  </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">معدل الأخطاء</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{systemMetrics.errorRate}%</div>
+                <p className="text-xs text-muted-foreground mt-2">آخر 24 ساعة</p>
+                <Badge variant={systemMetrics.errorRate < 1 ? "secondary" : "destructive"} className="mt-2">
+                  {systemMetrics.errorRate < 1 ? "منخفض" : "مرتفع"}
+                </Badge>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">طلبات الصيانة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalRequests}</div>
+                <div className="text-xs text-muted-foreground">إجمالي الطلبات</div>
+                <div className="mt-2 space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span>معلقة: {stats.pendingRequests}</span>
+                    <span>مكتملة: {stats.completedRequests}</span>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Application Statistics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">طلبات الصيانة</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats.totalRequests}</div>
-                      <div className="text-xs text-muted-foreground">إجمالي الطلبات</div>
-                      <div className="mt-2 space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span>معلقة: {stats.pendingRequests}</span>
-                          <span>مكتملة: {stats.completedRequests}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">المشاريع النشطة</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats.activeProjects}</div>
-                      <div className="text-xs text-muted-foreground">مشروع نشط</div>
-                      <div className="mt-2">
-                        <Badge variant="outline">
-                          {stats.completedProjects} مكتمل
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">الميزانية</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {stats.totalBudget.toLocaleString('ar-EG')} ج.م
-                      </div>
-                      <div className="text-xs text-muted-foreground">إجمالي الميزانية</div>
-                      <div className="mt-2">
-                        <div className="text-xs">
-                          مُنفق: {stats.actualCost.toLocaleString('ar-EG')} ج.م
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">هذا الشهر</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats.thisMonthRequests}</div>
-                      <div className="text-xs text-muted-foreground">طلب جديد</div>
-                      <div className="mt-2">
-                        <Badge variant="secondary">
-                          اليوم: {stats.todayRequests}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">المشاريع النشطة</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.activeProjects}</div>
+                <div className="text-xs text-muted-foreground">مشروع نشط</div>
+                <div className="mt-2">
+                  <Badge variant="outline">{stats.completedProjects} مكتمل</Badge>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Status Distribution Chart */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>توزيع حالة الطلبات</CardTitle>
-                    <CardDescription>
-                      توزيع طلبات الصيانة حسب الحالة
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <DonutChart
-                      className="h-[300px]"
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">الميزانية</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalBudget.toLocaleString('ar-EG')} ج.م</div>
+                <div className="text-xs text-muted-foreground">إجمالي الميزانية</div>
+                <div className="mt-2">
+                  <div className="text-xs">مُنفق: {stats.actualCost.toLocaleString('ar-EG')} ج.م</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">هذا الشهر</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.thisMonthRequests}</div>
+                <div className="text-xs text-muted-foreground">طلب جديد</div>
+                <div className="mt-2">
+                  <Badge variant="secondary">اليوم: {stats.todayRequests}</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>توزيع حالة الطلبات</CardTitle>
+              <CardDescription>توزيع طلبات الصيانة حسب الحالة</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
                       data={statusData}
-                      index="name"
-                      category="value"
-                      colors={["emerald", "indigo", "amber"]}
-                      valueFormatter={(value) => value.toString()}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {statusData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              <TabsContent value="performance" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>أداء النظام خلال 24 ساعة</CardTitle>
-                    <CardDescription>
-                      مراقبة الطلبات والأخطاء وزمن الاستجابة
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <LineChart
-                      className="h-[400px]"
-                      data={performanceData}
-                      index="time"
-                      categories={["requests", "responseTime", "errors"]}
-                      colors={["indigo", "emerald", "rose"]}
-                      valueFormatter={(value) => value.toString()}
-                      yAxisWidth={50}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
+        <TabsContent value="performance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>أداء النظام خلال 24 ساعة</CardTitle>
+              <CardDescription>مراقبة الطلبات والأخطاء وزمن الاستجابة</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis width={50} />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="requests" stroke="#6366f1" name="الطلبات" strokeWidth={2} />
+                    <Line type="monotone" dataKey="responseTime" stroke="#10b981" name="زمن الاستجابة" strokeWidth={2} />
+                    <Line type="monotone" dataKey="errors" stroke="#ef4444" name="الأخطاء" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              <TabsContent value="database" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">الاتصالات النشطة</CardTitle>
-                      <Database className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{dbMetrics.connections}</div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        من أصل 100 اتصال
-                      </p>
-                      <Progress value={(dbMetrics.connections / 100) * 100} className="mt-2 h-2" />
-                    </CardContent>
-                  </Card>
+        <TabsContent value="database" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">الاتصالات النشطة</CardTitle>
+                <Database className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dbMetrics.connections}</div>
+                <p className="text-xs text-muted-foreground mt-2">من أصل 100 اتصال</p>
+                <Progress value={(dbMetrics.connections / 100) * 100} className="mt-2 h-2" />
+              </CardContent>
+            </Card>
 
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">الاستعلامات</CardTitle>
-                      <Activity className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{dbMetrics.queries}</div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        آخر ساعة
-                      </p>
-                      <Badge variant="secondary" className="mt-2">
-                        متوسط: 39 استعلام/دقيقة
-                      </Badge>
-                    </CardContent>
-                  </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">الاستعلامات</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dbMetrics.queries}</div>
+                <p className="text-xs text-muted-foreground mt-2">آخر ساعة</p>
+                <Badge variant="secondary" className="mt-2">متوسط: 39 استعلام/دقيقة</Badge>
+              </CardContent>
+            </Card>
 
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">التخزين المستخدم</CardTitle>
-                      <Server className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{dbMetrics.storage}%</div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        من المساحة الإجمالية
-                      </p>
-                      <Progress value={dbMetrics.storage} className="mt-2 h-2" />
-                    </CardContent>
-                  </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">التخزين المستخدم</CardTitle>
+                <Server className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dbMetrics.storage}%</div>
+                <p className="text-xs text-muted-foreground mt-2">من المساحة الإجمالية</p>
+                <Progress value={dbMetrics.storage} className="mt-2 h-2" />
+              </CardContent>
+            </Card>
 
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">النسخ الاحتياطية</CardTitle>
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{dbMetrics.backups}</div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        آخر 7 أيام
-                      </p>
-                      <Badge variant="secondary" className="mt-2">
-                        آخر نسخة: اليوم
-                      </Badge>
-                    </CardContent>
-                  </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">النسخ الاحتياطية</CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dbMetrics.backups}</div>
+                <p className="text-xs text-muted-foreground mt-2">آخر 7 أيام</p>
+                <Badge variant="secondary" className="mt-2">آخر نسخة: اليوم</Badge>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  حالة الأمان
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">شهادة SSL</span>
+                  <Badge variant="secondary">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    نشطة
+                  </Badge>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="security" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Shield className="h-5 w-5" />
-                        حالة الأمان
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">شهادة SSL</span>
-                        <Badge variant="secondary">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          نشطة
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">جدار الحماية</span>
-                        <Badge variant="secondary">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          نشط
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">التشفير</span>
-                        <Badge variant="secondary">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          AES-256
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">المصادقة الثنائية</span>
-                        <Badge variant="secondary">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          متاحة
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Wifi className="h-5 w-5" />
-                        حالة الشبكة
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">زمن الاستجابة</span>
-                        <Badge variant="secondary">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          جيد
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">سرعة التحميل</span>
-                        <Badge variant="secondary">98%</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">الاتصال CDN</span>
-                        <Badge variant="secondary">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          متصل
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">جدار الحماية</span>
+                  <Badge variant="secondary">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    نشط
+                  </Badge>
                 </div>
-              </TabsContent>
-            </Tabs>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">التشفير</span>
+                  <Badge variant="secondary">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    AES-256
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">المصادقة الثنائية</span>
+                  <Badge variant="secondary">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    متاحة
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wifi className="h-5 w-5" />
+                  حالة الشبكة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">زمن الاستجابة</span>
+                  <Badge variant="secondary">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    جيد
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">سرعة التحميل</span>
+                  <Badge variant="secondary">98%</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">الاتصال CDN</span>
+                  <Badge variant="secondary">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    متصل
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

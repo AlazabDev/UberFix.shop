@@ -92,6 +92,7 @@ export default defineConfig(({ mode }) => ({
           }
 
           return undefined;
+
         },
         // Optimize chunk loading
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -108,7 +109,7 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 600,
     cssCodeSplit: true,
     assetsInlineLimit: 4096,
   },

@@ -253,7 +253,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const channels = requestData.channels || ['in_app'];
-    const results: any = {
+    const results: Record<string, { success: boolean; error?: any; messageLogId?: string } | null> = {
       in_app: null,
       email: null,
       sms: null,

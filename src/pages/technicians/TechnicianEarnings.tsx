@@ -3,7 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendingUp, DollarSign, Calendar, Award } from 'lucide-react';
-import { AreaChart } from '@tremor/react';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 
 interface DailyStats {
   date: string;
@@ -79,11 +87,11 @@ export default function TechnicianEarnings() {
         .select('*')
         .eq('technician_id', techData.id)
         .order('month', { ascending: false })
-        .limit(6);
+        .limit(12);
 
       setMonthlyBonuses(bonusesData || []);
     } catch (error) {
-      console.error('Error fetching earnings data:', error);
+      console.error('Error fetching earnings:', error);
     } finally {
       setLoading(false);
     }
@@ -91,7 +99,7 @@ export default function TechnicianEarnings() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -99,34 +107,37 @@ export default function TechnicianEarnings() {
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">الأرباح والإحصائيات</h1>
-        <p className="text-muted-foreground">تتبع أرباحك ومكافآتك</p>
-      </div>
+      <h1 className="text-3xl font-bold">الأرباح والمكافآت</h1>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">أرباح هذا الشهر</span>
+            <span className="text-sm text-muted-foreground">أرباح اليوم</span>
             <DollarSign className="h-5 w-5 text-green-500" />
           </div>
           <p className="text-3xl font-bold text-green-600">
+            {dailyStats[dailyStats.length - 1]?.total_earnings?.toFixed(2) || '0.00'} جنيه
+          </p>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-muted-foreground">أرباح الشهر</span>
+            <TrendingUp className="h-5 w-5 text-blue-500" />
+          </div>
+          <p className="text-3xl font-bold text-blue-600">
             {totalEarningsThisMonth.toFixed(2)} جنيه
           </p>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">متوسط الأرباح اليومية</span>
-            <TrendingUp className="h-5 w-5 text-blue-500" />
+            <span className="text-sm text-muted-foreground">المكافآت</span>
+            <Award className="h-5 w-5 text-yellow-500" />
           </div>
-          <p className="text-3xl font-bold text-blue-600">
-            {dailyStats.length > 0
-              ? (totalEarningsThisMonth / dailyStats.length).toFixed(2)
-              : '0.00'}{' '}
-            جنيه
+          <p className="text-3xl font-bold text-yellow-600">
+            {monthlyBonuses[0]?.total_bonus?.toFixed(2) || '0.00'} جنيه
           </p>
         </Card>
 
@@ -144,33 +155,44 @@ export default function TechnicianEarnings() {
       {/* Earnings Chart */}
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">تطور الأرباح (آخر 30 يوم)</h2>
-        <AreaChart
-          className="h-[300px]"
-          data={dailyStats}
-          index="date"
-          categories={["total_earnings"]}
-          colors={["emerald"]}
-          valueFormatter={(value) => `${Number(value).toFixed(2)} جنيه`}
-          yAxisWidth={40}
-          customTooltip={({ active, payload }) => {
-            if (!active || !payload?.length) return null;
-            const [item] = payload;
-            const date = new Date(item.payload.date).toLocaleDateString('ar-EG');
-
-            return (
-              <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
-                <p className="font-medium">{date}</p>
-                <p className="text-green-600">
-                  الأرباح: {Number(item.value).toFixed(2)} جنيه
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  الزيارات: {item.payload.visits_completed}
-                </p>
-              </div>
-            );
-          }}
-          dateFormatter={(value) => new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
-        />
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={dailyStats}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                dataKey="date" 
+                tickFormatter={(value) => new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
+                className="text-xs"
+              />
+              <YAxis width={60} className="text-xs" />
+              <Tooltip 
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const item = payload[0];
+                  const date = new Date(item.payload.date).toLocaleDateString('ar-EG');
+                  return (
+                    <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
+                      <p className="font-medium">{date}</p>
+                      <p className="text-green-600">
+                        الأرباح: {Number(item.value).toFixed(2)} جنيه
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        الزيارات: {item.payload.visits_completed}
+                      </p>
+                    </div>
+                  );
+                }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="total_earnings" 
+                stroke="#10b981" 
+                fill="#10b981" 
+                fillOpacity={0.3}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </Card>
 
       {/* Monthly Bonuses */}
@@ -188,92 +210,66 @@ export default function TechnicianEarnings() {
 
           <TabsContent value="current">
             {monthlyBonuses.length > 0 && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">مكافأة الالتزام</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {monthlyBonuses[0].commitment_bonus.toFixed(2)} جنيه
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {monthlyBonuses[0].visits_completed} / 25 زيارة
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">مكافأة الجودة</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {monthlyBonuses[0].quality_bonus.toFixed(2)} جنيه
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      تقييم: {monthlyBonuses[0].average_rating.toFixed(1)} ⭐
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">مكافأة الوقت</p>
-                    <p className="text-2xl font-bold text-purple-600">
-                      {monthlyBonuses[0].time_bonus.toFixed(2)} جنيه
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Top Rated</p>
-                    <p className="text-2xl font-bold text-yellow-600">
-                      {monthlyBonuses[0].top_rated_bonus.toFixed(2)} جنيه
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Super Pro</p>
-                    <p className="text-2xl font-bold text-orange-600">
-                      {monthlyBonuses[0].super_pro_bonus.toFixed(2)} جنيه
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-primary/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">الإجمالي</p>
-                    <p className="text-2xl font-bold text-primary">
-                      {monthlyBonuses[0].total_bonus.toFixed(2)} جنيه
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm">
-                    <span className="font-medium">الحالة:</span>{' '}
-                    {monthlyBonuses[0].status === 'paid' ? (
-                      <span className="text-green-600">مدفوعة ✓</span>
-                    ) : monthlyBonuses[0].status === 'approved' ? (
-                      <span className="text-blue-600">معتمدة</span>
-                    ) : (
-                      <span className="text-orange-600">قيد الحساب</span>
-                    )}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <Card className="p-4 bg-green-50 dark:bg-green-900/20">
+                  <p className="text-sm text-muted-foreground">مكافأة الالتزام</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {monthlyBonuses[0]?.commitment_bonus || 0} جنيه
                   </p>
-                </div>
+                </Card>
+                <Card className="p-4 bg-blue-50 dark:bg-blue-900/20">
+                  <p className="text-sm text-muted-foreground">مكافأة الجودة</p>
+                  <p className="text-xl font-bold text-blue-600">
+                    {monthlyBonuses[0]?.quality_bonus || 0} جنيه
+                  </p>
+                </Card>
+                <Card className="p-4 bg-purple-50 dark:bg-purple-900/20">
+                  <p className="text-sm text-muted-foreground">مكافأة الوقت</p>
+                  <p className="text-xl font-bold text-purple-600">
+                    {monthlyBonuses[0]?.time_bonus || 0} جنيه
+                  </p>
+                </Card>
+                <Card className="p-4 bg-yellow-50 dark:bg-yellow-900/20">
+                  <p className="text-sm text-muted-foreground">مكافأة Top Rated</p>
+                  <p className="text-xl font-bold text-yellow-600">
+                    {monthlyBonuses[0]?.top_rated_bonus || 0} جنيه
+                  </p>
+                </Card>
+                <Card className="p-4 bg-red-50 dark:bg-red-900/20">
+                  <p className="text-sm text-muted-foreground">مكافأة Super Pro</p>
+                  <p className="text-xl font-bold text-red-600">
+                    {monthlyBonuses[0]?.super_pro_bonus || 0} جنيه
+                  </p>
+                </Card>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="history">
             <div className="space-y-3">
-              {monthlyBonuses.slice(1).map((bonus) => (
-                <div key={bonus.month} className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                  <div>
-                    <p className="font-medium">
-                      {new Date(bonus.month).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' })}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {bonus.visits_completed} زيارة • تقييم {bonus.average_rating.toFixed(1)}
-                    </p>
+              {monthlyBonuses.map((bonus, index) => (
+                <Card key={index} className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-semibold">{bonus.month}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {bonus.visits_completed} زيارة • تقييم {bonus.average_rating?.toFixed(1)}
+                      </p>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xl font-bold text-green-600">
+                        {bonus.total_bonus?.toFixed(2)} جنيه
+                      </p>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        bonus.status === 'paid' 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {bonus.status === 'paid' ? 'مدفوع' : 'قيد المعالجة'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <p className="text-xl font-bold text-primary">{bonus.total_bonus.toFixed(2)} جنيه</p>
-                    <p className="text-xs text-muted-foreground">
-                      {bonus.status === 'paid' ? 'مدفوعة' : 'معتمدة'}
-                    </p>
-                  </div>
-                </div>
+                </Card>
               ))}
             </div>
           </TabsContent>
