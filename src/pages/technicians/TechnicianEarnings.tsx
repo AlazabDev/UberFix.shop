@@ -169,7 +169,7 @@ export default function TechnicianEarnings() {
               </div>
             );
           }}
-          dateFormatter={(value) => new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}
+          
         />
       </Card>
 

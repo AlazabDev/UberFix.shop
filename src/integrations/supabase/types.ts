@@ -1053,7 +1053,137 @@ export type Database = {
             referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "maintenance_requests_audit_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      maintenance_requests_public_audit: {
+        Row: {
+          actual_cost: number | null
+          archived_at: string | null
+          asset_id: string | null
+          assigned_vendor_id: string | null
+          branch_id: string | null
+          category_id: string | null
+          channel: string | null
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_notes: string | null
+          description: string | null
+          estimated_cost: number | null
+          id: string | null
+          last_modified_by: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          opened_by_role: string | null
+          priority: string | null
+          property_id: string | null
+          rating: number | null
+          service_type: string | null
+          sla_accept_due: string | null
+          sla_arrive_due: string | null
+          sla_complete_due: string | null
+          sla_deadline: string | null
+          sla_due_date: string | null
+          status: Database["public"]["Enums"]["mr_status"] | null
+          subcategory_id: string | null
+          title: string | null
+          updated_at: string | null
+          vendor_notes: string | null
+          version: number | null
+          workflow_stage: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          archived_at?: string | null
+          asset_id?: string | null
+          assigned_vendor_id?: string | null
+          branch_id?: string | null
+          category_id?: string | null
+          channel?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_notes?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string | null
+          last_modified_by?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          opened_by_role?: string | null
+          priority?: string | null
+          property_id?: string | null
+          rating?: number | null
+          service_type?: string | null
+          sla_accept_due?: string | null
+          sla_arrive_due?: string | null
+          sla_complete_due?: string | null
+          sla_deadline?: string | null
+          sla_due_date?: string | null
+          status?: Database["public"]["Enums"]["mr_status"] | null
+          subcategory_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_notes?: string | null
+          version?: number | null
+          workflow_stage?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          archived_at?: string | null
+          asset_id?: string | null
+          assigned_vendor_id?: string | null
+          branch_id?: string | null
+          category_id?: string | null
+          channel?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_notes?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string | null
+          last_modified_by?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          opened_by_role?: string | null
+          priority?: string | null
+          property_id?: string | null
+          rating?: number | null
+          service_type?: string | null
+          sla_accept_due?: string | null
+          sla_arrive_due?: string | null
+          sla_complete_due?: string | null
+          sla_deadline?: string | null
+          sla_due_date?: string | null
+          status?: Database["public"]["Enums"]["mr_status"] | null
+          subcategory_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_notes?: string | null
+          version?: number | null
+          workflow_stage?: string | null
+        }
+        Relationships: []
       }
       message_logs: {
         Row: {
@@ -1110,6 +1240,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_logs_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1817,6 +1954,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_review_request"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_review_technician"
             columns: ["technician_id"]
             isOneToOne: false
@@ -2487,6 +2631,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_complaints_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
             referencedColumns: ["id"]
           },
           {
@@ -3414,6 +3565,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_task_request"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_task_technician"
             columns: ["technician_id"]
             isOneToOne: false
@@ -3425,6 +3583,13 @@ export type Database = {
             columns: ["maintenance_request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_tasks_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
             referencedColumns: ["id"]
           },
           {
@@ -3590,6 +3755,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_transactions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
             referencedColumns: ["id"]
           },
           {
@@ -4112,7 +4284,92 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vw_maintenance_requests_public: {
+        Row: {
+          assigned_vendor_id: string | null
+          branch_id: string | null
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          property_id: string | null
+          status: Database["public"]["Enums"]["mr_status"] | null
+          title: string | null
+        }
+        Insert: {
+          assigned_vendor_id?: string | null
+          branch_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          property_id?: string | null
+          status?: Database["public"]["Enums"]["mr_status"] | null
+          title?: string | null
+        }
+        Update: {
+          assigned_vendor_id?: string | null
+          branch_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          property_id?: string | null
+          status?: Database["public"]["Enums"]["mr_status"] | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_maintenance_requests_assigned_vendor"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_branch"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       approve_technician_profile: {
