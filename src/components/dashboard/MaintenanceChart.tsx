@@ -1,5 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DonutChart, LineChart } from "@tremor/react";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from "recharts";
 
 const monthlyData = [
   { month: "مارس", requests: 0 },
@@ -26,15 +38,24 @@ export const MaintenanceChart = () => {
         </CardHeader>
         <CardContent>
           <div className="h-64">
-            <LineChart
-              className="h-full"
-              data={monthlyData}
-              index="month"
-              categories={["requests"]}
-              colors={["indigo"]}
-              valueFormatter={(value) => value.toLocaleString('ar-EG')}
-              yAxisWidth={50}
-            />
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="month" className="text-xs" />
+                <YAxis width={50} className="text-xs" />
+                <Tooltip 
+                  formatter={(value: number) => [value.toLocaleString('ar-EG'), 'الطلبات']}
+                  contentStyle={{ direction: 'rtl' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="requests" 
+                  stroke="#6366f1" 
+                  strokeWidth={2}
+                  dot={{ fill: '#6366f1' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
@@ -46,14 +67,28 @@ export const MaintenanceChart = () => {
         </CardHeader>
         <CardContent>
           <div className="h-64">
-            <DonutChart
-              className="h-full"
-              data={statusData}
-              index="name"
-              category="value"
-              colors={["amber", "indigo", "emerald"]}
-              valueFormatter={(value) => value.toString()}
-            />
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value: number) => [value.toString(), '']}
+                  contentStyle={{ direction: 'rtl' }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
 
           {/* Legend */}
