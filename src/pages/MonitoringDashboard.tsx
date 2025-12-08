@@ -14,7 +14,21 @@ import {
   AlertTriangle,
   Info
 } from "lucide-react";
-import { BarChart, DonutChart, LineChart } from "@tremor/react";
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  LineChart, 
+  Line, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Legend 
+} from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
@@ -41,6 +55,8 @@ interface AnalyticsEvent {
   created_at: string;
 }
 
+const COLORS = ['#06b6d4', '#f59e0b', '#ef4444', '#6366f1'];
+
 export default function MonitoringDashboard() {
   const [errors, setErrors] = useState<ErrorLog[]>([]);
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
@@ -50,15 +66,12 @@ export default function MonitoringDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch error logs
       const { data: errorData } = await supabase
         .from('error_logs')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
-      // Note: performance_metrics and analytics_events tables don't exist yet
-      // Using mock data for now
       setErrors((errorData || []) as ErrorLog[]);
       setMetrics([]);
       setEvents([]);
@@ -73,21 +86,18 @@ export default function MonitoringDashboard() {
     fetchData();
   }, []);
 
-  // Calculate statistics
   const totalErrors = errors.length;
   const criticalErrors = errors.filter(e => e.level === 'critical').length;
   const resolvedErrors = errors.filter(e => e.resolved_at !== null).length;
   const unresolvedErrors = totalErrors - resolvedErrors;
 
-  // Error severity distribution
   const severityData = [
-    { name: 'معلوماتية', value: errors.filter(e => e.level === 'info').length, color: 'hsl(var(--info))' },
-    { name: 'تحذير', value: errors.filter(e => e.level === 'warning').length, color: 'hsl(var(--warning))' },
-    { name: 'خطأ', value: errors.filter(e => e.level === 'error').length, color: 'hsl(var(--destructive))' },
-    { name: 'حرج', value: errors.filter(e => e.level === 'critical').length, color: 'hsl(220, 90%, 30%)' }
+    { name: 'معلوماتية', value: errors.filter(e => e.level === 'info').length },
+    { name: 'تحذير', value: errors.filter(e => e.level === 'warning').length },
+    { name: 'خطأ', value: errors.filter(e => e.level === 'error').length },
+    { name: 'حرج', value: errors.filter(e => e.level === 'critical').length }
   ];
 
-  // Performance metrics over time (mock data for now)
   const performanceData = [
     { hour: '08:00', LCP: 2500, FCP: 1200 },
     { hour: '10:00', LCP: 2300, FCP: 1100 },
@@ -96,9 +106,8 @@ export default function MonitoringDashboard() {
     { hour: '16:00', LCP: 2600, FCP: 1250 },
   ];
 
-  // Top events (mock data for now)
   const topEvents = [
-    { name: 'عرض الصفحة الرئيسية', count: 1250 },
+    { name: 'عرض الصفحة', count: 1250 },
     { name: 'تسجيل دخول', count: 890 },
     { name: 'إنشاء طلب', count: 650 },
     { name: 'تحديث حالة', count: 430 },
@@ -116,7 +125,7 @@ export default function MonitoringDashboard() {
   };
 
   const getSeverityBadge = (severity: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
       critical: 'destructive',
       error: 'destructive',
       warning: 'default',
@@ -127,7 +136,6 @@ export default function MonitoringDashboard() {
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">لوحة مراقبة النظام</h1>
@@ -139,7 +147,6 @@ export default function MonitoringDashboard() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
@@ -190,21 +197,33 @@ export default function MonitoringDashboard() {
         </Card>
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>توزيع الأخطاء حسب الخطورة</CardTitle>
           </CardHeader>
           <CardContent>
-            <DonutChart
-              className="h-[300px]"
-              data={severityData}
-              index="name"
-              category="value"
-              valueFormatter={(value) => value.toString()}
-              colors={["cyan", "amber", "rose", "indigo"]}
-            />
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={severityData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {severityData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
@@ -213,15 +232,19 @@ export default function MonitoringDashboard() {
             <CardTitle>الأداء عبر الوقت</CardTitle>
           </CardHeader>
           <CardContent>
-            <LineChart
-              className="h-[300px]"
-              data={performanceData}
-              index="hour"
-              categories={["LCP", "FCP"]}
-              colors={["indigo", "emerald"]}
-              valueFormatter={(value) => `${value} ms`}
-              yAxisWidth={40}
-            />
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={performanceData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="hour" />
+                  <YAxis width={50} />
+                  <Tooltip formatter={(value) => `${value} ms`} />
+                  <Legend />
+                  <Line type="monotone" dataKey="LCP" stroke="#6366f1" strokeWidth={2} />
+                  <Line type="monotone" dataKey="FCP" stroke="#10b981" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
@@ -230,20 +253,21 @@ export default function MonitoringDashboard() {
             <CardTitle>أهم الأحداث</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarChart
-              className="h-[300px]"
-              data={topEvents}
-              index="name"
-              categories={["count"]}
-              colors={["indigo"]}
-              valueFormatter={(value) => value.toString()}
-              yAxisWidth={40}
-            />
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topEvents} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Detailed Tables */}
       <Tabs defaultValue="errors" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="errors">
@@ -313,9 +337,7 @@ export default function MonitoringDashboard() {
                     {metrics.length > 0 ? metrics.slice(0, 20).map((metric, idx) => (
                       <tr key={idx} className="border-b hover:bg-muted/50">
                         <td className="py-3 px-4 font-medium">{metric.metric_name}</td>
-                        <td className="py-3 px-4">
-                          {metric.value.toFixed(2)} ms
-                        </td>
+                        <td className="py-3 px-4">{metric.value.toFixed(2)} ms</td>
                         <td className="py-3 px-4 text-sm text-muted-foreground">
                           {format(new Date(metric.created_at), 'yyyy-MM-dd HH:mm')}
                         </td>
