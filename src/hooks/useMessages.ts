@@ -43,6 +43,13 @@ export const useMessages = (folder: 'inbox' | 'sent' | 'starred' | 'archived' = 
       
       if (!user) return;
 
+      // جلب المستخدمين مرة واحدة فقط
+      const { data: usersData, error: usersError } = await supabase.functions.invoke('get-users');
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+      }
+      const allUsers = usersData?.users || [];
+
       let query = supabase
         .from('messages')
         .select('*')
@@ -68,22 +75,17 @@ export const useMessages = (folder: 'inbox' | 'sent' | 'starred' | 'archived' = 
 
       if (error) throw error;
       
-      // Fetch user details for each message
-      const messagesWithUsers = await Promise.all(
-        (messagesData || []).map(async (msg) => {
-          const { data: usersData } = await supabase.functions.invoke('get-users');
-          const allUsers = usersData?.users || [];
-          
-          const sender = allUsers.find((u: any) => u.id === msg.sender_id);
-          const recipient = allUsers.find((u: any) => u.id === msg.recipient_id);
-          
-          return {
-            ...msg,
-            sender: sender || { email: 'Unknown', raw_user_meta_data: {} },
-            recipient: recipient || { email: 'Unknown', raw_user_meta_data: {} },
-          };
-        })
-      );
+      // ربط المستخدمين بالرسائل
+      const messagesWithUsers = (messagesData || []).map((msg) => {
+        const sender = allUsers.find((u: any) => u.id === msg.sender_id);
+        const recipient = allUsers.find((u: any) => u.id === msg.recipient_id);
+        
+        return {
+          ...msg,
+          sender: sender || { email: 'غير معروف', raw_user_meta_data: {} },
+          recipient: recipient || { email: 'غير معروف', raw_user_meta_data: {} },
+        };
+      });
       
       setMessages(messagesWithUsers as Message[]);
 
