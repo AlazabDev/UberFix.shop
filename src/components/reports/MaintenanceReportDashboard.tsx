@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, DonutChart, LineChart } from "@tremor/react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
 import { Download, RefreshCw, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+
+const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-3))", "hsl(var(--warning))", "hsl(var(--destructive))", "hsl(var(--chart-5))"];
 
 export function MaintenanceReportDashboard() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'));
@@ -41,7 +43,6 @@ export function MaintenanceReportDashboard() {
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch completed requests from maintenance_requests
       const { data: completed, error: completedError } = await supabase
         .from('maintenance_requests')
         .select('*')
@@ -52,7 +53,6 @@ export function MaintenanceReportDashboard() {
 
       if (completedError) throw completedError;
 
-      // For now, only use completed requests (archived table doesn't exist yet)
       const archived: Array<{ id: string; service_type?: string; actual_cost?: number; created_at?: string; title?: string; description?: string; location?: string; priority?: string; completion_date?: string; store_id?: string; }> = [];
 
       setCompletedRequests(completed || []);
@@ -73,7 +73,6 @@ export function MaintenanceReportDashboard() {
   const totalCost = allCompleted.reduce((sum, r) => sum + (Number(r.actual_cost) || 0), 0);
   const averageCost = totalCompleted > 0 ? totalCost / totalCompleted : 0;
 
-  // Group by service type
   const serviceTypeData = allCompleted.reduce((acc: Array<{ name: string; value: number; totalCost: number }>, req) => {
     const serviceType = (req.service_type as string) || 'غير محدد';
     const existing = acc.find(item => item.name === serviceType);
@@ -90,7 +89,6 @@ export function MaintenanceReportDashboard() {
     return acc;
   }, [] as Array<{ name: string; value: number; totalCost: number }>);
 
-  // Group by month for timeline
   const monthlyData = allCompleted.reduce((acc: Array<{ month: string; count: number; cost: number }>, req) => {
     const month = req.created_at ? format(new Date(req.created_at as string), 'yyyy-MM') : 'غير محدد';
     const existing = acc.find(item => item.month === month);
@@ -195,14 +193,25 @@ export function MaintenanceReportDashboard() {
             <CardTitle>توزيع الخدمات</CardTitle>
           </CardHeader>
           <CardContent>
-            <DonutChart
-              className="h-[300px]"
-              data={serviceTypeData}
-              index="name"
-              category="value"
-              colors={["indigo", "emerald", "amber", "rose", "cyan"]}
-              valueFormatter={(value) => value.toString()}
-            />
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={serviceTypeData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {serviceTypeData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
@@ -211,15 +220,22 @@ export function MaintenanceReportDashboard() {
             <CardTitle>التكلفة حسب نوع الخدمة</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarChart
-              className="h-[300px]"
-              data={serviceTypeData}
-              index="name"
-              categories={["totalCost"]}
-              colors={["indigo"]}
-              valueFormatter={(value) => value.toLocaleString('ar-EG')}
-              yAxisWidth={50}
-            />
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={serviceTypeData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="name" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                  formatter={(value) => [`${Number(value).toLocaleString('ar-EG')} جنيه`, 'التكلفة']}
+                />
+                <Bar dataKey="totalCost" name="التكلفة" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
@@ -230,15 +246,23 @@ export function MaintenanceReportDashboard() {
           <CardTitle>الصيانات المنتهية عبر الزمن</CardTitle>
         </CardHeader>
         <CardContent>
-          <LineChart
-            className="h-[300px]"
-            data={monthlyData}
-            index="month"
-            categories={["count", "cost"]}
-            colors={["emerald", "indigo"]}
-            valueFormatter={(value) => value.toLocaleString('ar-EG')}
-            yAxisWidth={60}
-          />
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="month" className="text-xs" />
+              <YAxis className="text-xs" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))', 
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend />
+              <Line type="monotone" dataKey="count" name="العدد" stroke="hsl(var(--chart-3))" strokeWidth={2} />
+              <Line type="monotone" dataKey="cost" name="التكلفة" stroke="hsl(var(--primary))" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
@@ -282,7 +306,7 @@ export function MaintenanceReportDashboard() {
                           {request.actual_cost ? `${Number(request.actual_cost).toLocaleString('ar-EG')} جنيه` : '-'}
                         </td>
                         <td className="py-3 px-4 text-sm">
-                          {format(new Date(request.created_at), 'yyyy-MM-dd')}
+                          {request.created_at ? format(new Date(request.created_at), 'yyyy-MM-dd') : '-'}
                         </td>
                         <td className="py-3 px-4">
                           <Badge variant={request.store_id ? 'secondary' : 'default'}>
@@ -327,7 +351,7 @@ export function MaintenanceReportDashboard() {
                           {request.actual_cost ? `${Number(request.actual_cost).toLocaleString('ar-EG')} جنيه` : '-'}
                         </td>
                         <td className="py-3 px-4 text-sm">
-                          {format(new Date(request.created_at), 'yyyy-MM-dd')}
+                          {request.created_at ? format(new Date(request.created_at), 'yyyy-MM-dd') : '-'}
                         </td>
                       </tr>
                     ))}
