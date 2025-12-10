@@ -5,6 +5,34 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Allowed domains for referrer validation
+const ALLOWED_DOMAINS = [
+  'uberfix.shop',
+  'uberfiix.lovable.app',
+  'lovable.app',
+  'localhost',
+  '127.0.0.1',
+];
+
+function isAllowedOrigin(req: Request): boolean {
+  const referer = req.headers.get('referer') || '';
+  const origin = req.headers.get('origin') || '';
+  const source = referer || origin;
+  
+  // Allow if no referrer (direct API calls from server-side)
+  if (!source) {
+    // Check if it's from our Supabase functions
+    const userAgent = req.headers.get('user-agent') || '';
+    if (userAgent.includes('Deno') || userAgent.includes('supabase')) {
+      return true;
+    }
+    // Block unknown direct requests
+    return false;
+  }
+  
+  return ALLOWED_DOMAINS.some(domain => source.includes(domain));
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -12,6 +40,21 @@ serve(async (req) => {
   }
 
   try {
+    // Validate referrer/origin
+    if (!isAllowedOrigin(req)) {
+      console.error('❌ Unauthorized origin attempted to access Mapbox token');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Unauthorized origin',
+          message: 'الوصول غير مصرح به'
+        }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const mapboxToken = Deno.env.get('MAPBOX_PUBLIC_TOKEN');
 
     if (!mapboxToken) {
