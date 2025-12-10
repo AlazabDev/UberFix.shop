@@ -1,20 +1,12 @@
 import { CheckCircle, Circle, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface WorkflowStage {
-  id: string;
-  label: string;
-  description: string;
-}
-
-const WORKFLOW_STAGES: WorkflowStage[] = [
-  { id: "submitted", label: "تم التقديم", description: "تم إرسال الطلب" },
-  { id: "acknowledged", label: "تم الاستلام", description: "تم استلام الطلب ومراجعته" },
-  { id: "assigned", label: "تم التخصيص", description: "تم تعيين فني للطلب" },
-  { id: "in_progress", label: "قيد التنفيذ", description: "جاري العمل على الطلب" },
-  { id: "completed", label: "مكتمل", description: "تم إكمال العمل" },
-  { id: "closed", label: "مغلق", description: "تم إغلاق الطلب" }
-];
+import { 
+  WORKFLOW_STAGES, 
+  HAPPY_PATH_STAGES, 
+  getStageIndex, 
+  getProgressPercentage,
+  type WorkflowStage 
+} from "@/constants/workflowStages";
 
 interface WorkflowTimelineProps {
   currentStage: string;
@@ -22,12 +14,12 @@ interface WorkflowTimelineProps {
 }
 
 export function WorkflowTimeline({ currentStage, className }: WorkflowTimelineProps) {
-  const getCurrentStageIndex = () => {
-    const index = WORKFLOW_STAGES.findIndex(stage => stage.id === currentStage);
-    return index === -1 ? 0 : index;
-  };
+  const stage = (currentStage || 'draft') as WorkflowStage;
+  const currentIndex = getStageIndex(stage);
+  const progress = getProgressPercentage(stage);
 
-  const currentIndex = getCurrentStageIndex();
+  // استخدام المسار الطبيعي للعرض
+  const displayStages = HAPPY_PATH_STAGES.map(key => WORKFLOW_STAGES[key]);
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -37,15 +29,16 @@ export function WorkflowTimeline({ currentStage, className }: WorkflowTimelinePr
       </h3>
       
       <div className="relative">
-        {WORKFLOW_STAGES.map((stage, index) => {
+        {displayStages.map((stageConfig, index) => {
           const isCompleted = index < currentIndex;
           const isCurrent = index === currentIndex;
           const isPending = index > currentIndex;
+          const Icon = stageConfig.icon;
 
           return (
-            <div key={stage.id} className="flex gap-4 relative">
+            <div key={stageConfig.key} className="flex gap-4 relative">
               {/* Connector Line */}
-              {index < WORKFLOW_STAGES.length - 1 && (
+              {index < displayStages.length - 1 && (
                 <div 
                   className={cn(
                     "absolute right-[15px] top-[32px] w-[2px] h-[calc(100%+16px)]",
@@ -61,8 +54,8 @@ export function WorkflowTimeline({ currentStage, className }: WorkflowTimelinePr
                     <CheckCircle className="h-5 w-5 text-white" />
                   </div>
                 ) : isCurrent ? (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center animate-pulse">
-                    <Circle className="h-5 w-5 text-primary-foreground fill-current" />
+                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center animate-pulse", stageConfig.bgColor)}>
+                    <Icon className="h-5 w-5 text-white" />
                   </div>
                 ) : (
                   <div className="w-8 h-8 rounded-full border-2 border-border bg-background flex items-center justify-center">
@@ -79,10 +72,10 @@ export function WorkflowTimeline({ currentStage, className }: WorkflowTimelinePr
                 <div className={cn(
                   "text-sm",
                   isCompleted && "text-green-600",
-                  isCurrent && "text-primary",
+                  isCurrent && stageConfig.textColor,
                   isPending && "text-muted-foreground"
                 )}>
-                  {stage.label}
+                  {stageConfig.label}
                   {isCurrent && (
                     <span className="mr-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                       الحالية
@@ -90,7 +83,7 @@ export function WorkflowTimeline({ currentStage, className }: WorkflowTimelinePr
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {stage.description}
+                  {stageConfig.description}
                 </p>
                 {isCompleted && (
                   <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
@@ -108,14 +101,12 @@ export function WorkflowTimeline({ currentStage, className }: WorkflowTimelinePr
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">التقدم</span>
-          <span className="font-semibold">
-            {Math.round((currentIndex / (WORKFLOW_STAGES.length - 1)) * 100)}%
-          </span>
+          <span className="font-semibold">{progress}%</span>
         </div>
         <div className="w-full bg-border rounded-full h-2 overflow-hidden">
           <div 
             className="bg-primary h-full transition-all duration-500 rounded-full"
-            style={{ width: `${(currentIndex / (WORKFLOW_STAGES.length - 1)) * 100}%` }}
+            style={{ width: `${progress}%` }}
           />
         </div>
       </div>

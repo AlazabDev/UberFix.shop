@@ -1,22 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { type WorkflowStage, WORKFLOW_STAGES } from "@/constants/workflowStages";
 
-export type WorkflowStage = 
-  | 'draft'
-  | 'submitted'
-  | 'acknowledged'
-  | 'assigned'
-  | 'scheduled'
-  | 'in_progress'
-  | 'inspection'
-  | 'waiting_parts'
-  | 'completed'
-  | 'billed'
-  | 'paid'
-  | 'closed'
-  | 'cancelled'
-  | 'on_hold';
+// إعادة تصدير النوع للتوافق مع الكود الحالي
+export type { WorkflowStage } from "@/constants/workflowStages";
 
 // Based on actual database schema
 export interface MaintenanceRequest {
@@ -120,14 +108,15 @@ export function useMaintenanceRequests() {
         throw new Error("حدث خطأ في جلب بيانات الفرع. يرجى تسجيل الخروج والدخول مرة أخرى.");
       }
       
-      // إنشاء الطلب
+      // إنشاء الطلب مع المرحلة الافتراضية
+      const initialStage: WorkflowStage = 'submitted';
       const { data, error } = await supabase
         .from('maintenance_requests')
         .insert({
           ...requestData,
           created_by: user.id,
-          status: 'Open',
-          workflow_stage: 'submitted',
+          status: WORKFLOW_STAGES[initialStage].status,
+          workflow_stage: initialStage,
           company_id: profile.company_id,
           branch_id: branch.id
         })
@@ -196,6 +185,14 @@ export function useMaintenanceRequests() {
         .eq('id', id)
         .maybeSingle();
 
+      // تحديث status إذا تم تغيير workflow_stage
+      if (updates.workflow_stage) {
+        const stage = updates.workflow_stage as WorkflowStage;
+        if (WORKFLOW_STAGES[stage]) {
+          updates.status = WORKFLOW_STAGES[stage].status as any;
+        }
+      }
+
       const { data, error } = await supabase
         .from('maintenance_requests')
         .update(updates as any)
@@ -231,8 +228,11 @@ export function useMaintenanceRequests() {
 
             // إرسال رسالة WhatsApp للعميل عند تغيير المرحلة
             if (data.client_phone) {
+              const stage = updates.workflow_stage as WorkflowStage;
+              const stageConfig = WORKFLOW_STAGES[stage];
               let message = '';
-              switch (updates.workflow_stage) {
+              
+              switch (stage) {
                 case 'assigned':
                   message = `تم تعيين فني لطلب الصيانة رقم ${id}. سيتم التواصل معك قريباً.`;
                   break;
@@ -250,6 +250,12 @@ export function useMaintenanceRequests() {
                   break;
                 case 'completed':
                   message = `تم إكمال طلب الصيانة رقم ${id} بنجاح. شكراً لثقتك بنا!`;
+                  break;
+                case 'billed':
+                  message = `تم إصدار فاتورة لطلب الصيانة رقم ${id}. يرجى مراجعتها.`;
+                  break;
+                case 'paid':
+                  message = `تم استلام الدفع لطلب الصيانة رقم ${id}. شكراً لك!`;
                   break;
               }
               
