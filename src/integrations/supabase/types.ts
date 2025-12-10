@@ -4526,8 +4526,8 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_email_confirmed: { Args: never; Returns: boolean }
       is_staff:
-        | { Args: { uid: string }; Returns: boolean }
         | { Args: never; Returns: boolean }
+        | { Args: { uid: string }; Returns: boolean }
       recalc_request_totals: {
         Args: { p_request_id: string }
         Returns: undefined

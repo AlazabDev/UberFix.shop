@@ -11,27 +11,41 @@ export const useMaintenanceLock = () => {
     queryKey: ["maintenance-lock"],
     queryFn: async (): Promise<MaintenanceLockStatus> => {
       if (!supabaseReady) {
-        console.warn("Supabase is not configured; skipping maintenance lock check.");
         return { isLocked: false, message: null };
       }
 
-      const { data, error } = await supabase
-        .from("app_control")
-        .select("is_locked, message")
-        .eq("id", "global")
-        .maybeSingle();
+      try {
+        // Use Promise.race with timeout to prevent hanging
+        const queryPromise = supabase
+          .from("app_control")
+          .select("is_locked, message")
+          .eq("id", "global")
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching maintenance lock status:", error);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error("Timeout")), 3000);
+        });
+
+        const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
+        if (error) {
+          console.error("Maintenance lock check failed:", error.message);
+          return { isLocked: false, message: null };
+        }
+
+        return {
+          isLocked: data?.is_locked || false,
+          message: data?.message || null,
+        };
+      } catch {
+        // Timeout or network error - allow app to continue
+        console.warn("Maintenance lock check timed out");
         return { isLocked: false, message: null };
       }
-
-      return {
-        isLocked: data?.is_locked || false,
-        message: data?.message || null,
-      };
     },
-    refetchInterval: 30000, // تحديث كل 30 ثانية
+    refetchInterval: 30000,
     staleTime: 20000,
+    retry: false,
+    gcTime: 60000,
   });
 };

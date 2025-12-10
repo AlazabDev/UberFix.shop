@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { PageErrorBoundary } from "@/components/error-boundaries/PageErrorBoundary";
-import React from "react";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
@@ -20,87 +19,73 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000,
       gcTime: 10 * 60 * 1000,
-      retry: 3,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      networkMode: 'offlineFirst',
+      retry: 1,
+      retryDelay: 1000,
+      networkMode: 'online',
     },
   },
 });
 
-// مكون Loading مركزي لـ Suspense
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
+  <div className="flex items-center justify-center min-h-screen bg-background">
     <Loader2 className="h-8 w-8 animate-spin text-primary" />
   </div>
 );
+
+const AppContent = () => {
+  const { data: lockStatus } = useMaintenanceLock();
+  
+  // Show maintenance overlay only if explicitly locked
+  if (lockStatus?.isLocked) {
+    return <MaintenanceOverlay message={lockStatus.message} />;
+  }
+
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Public Routes */}
+          {publicRoutes.map(({ path, element }) => (
+            <Route key={path} path={path} element={element} />
+          ))}
+
+          {/* Protected Routes */}
+          {protectedRoutes.map(({ path, element, withLayout }) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <ProtectedRoute withLayout={withLayout}>
+                  {element}
+                </ProtectedRoute>
+              }
+            />
+          ))}
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+};
 
 const App = () => {
   return (
     <PageErrorBoundary pageName="Application">
       <QueryClientProvider client={queryClient}>
-        <MaintenanceLockWrapper />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <PWAInstallPrompt />
+            <Toaster />
+            <Sonner />
+            <AppContent />
+          </TooltipProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </PageErrorBoundary>
-  );
-};
-
-const MaintenanceLockWrapper = () => {
-  const { data: lockStatus, isLoading, isError } = useMaintenanceLock();
-
-  // Timeout after 2 seconds to prevent indefinite loading
-  const [timeoutReached, setTimeoutReached] = React.useState(false);
-  
-  React.useEffect(() => {
-    const timer = setTimeout(() => setTimeoutReached(true), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Show loading only briefly
-  if (isLoading && !timeoutReached) {
-    return <LoadingFallback />;
-  }
-
-  // Only show maintenance overlay if explicitly locked
-  if (lockStatus?.isLocked && !isError) {
-    return <MaintenanceOverlay message={lockStatus.message} />;
-  }
-
-  return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <TooltipProvider>
-        <PWAInstallPrompt />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              {/* المسارات العامة (Public Routes) */}
-              {publicRoutes.map(({ path, element }) => (
-                <Route key={path} path={path} element={element} />
-              ))}
-
-              {/* المسارات المحمية (Protected Routes) */}
-              {protectedRoutes.map(({ path, element, withLayout }) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={
-                    <ProtectedRoute withLayout={withLayout}>
-                      {element}
-                    </ProtectedRoute>
-                  }
-                />
-              ))}
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
   );
 };
 
