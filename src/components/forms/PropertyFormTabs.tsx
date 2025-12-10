@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { PROPERTY_TYPES_LIST } from "@/constants/propertyConstants";
 
 interface PropertyFormTabsProps {
   selectedType: string;
@@ -6,17 +7,9 @@ interface PropertyFormTabsProps {
 }
 
 export function PropertyFormTabs({ selectedType, onTypeChange }: PropertyFormTabsProps) {
-  const types = [
-    { value: "residential", label: "المشروع" },
-    { value: "commercial", label: "الفرع" },
-    { value: "office", label: "الوحدة" },
-    { value: "industrial", label: "المستودع" },
-    { value: "mixed_use", label: "أخرى" },
-  ];
-
   return (
     <div className="flex flex-wrap gap-2 mb-6">
-      {types.map((type) => (
+      {PROPERTY_TYPES_LIST.map((type) => (
         <Button
           key={type.value}
           type="button"
@@ -24,7 +17,7 @@ export function PropertyFormTabs({ selectedType, onTypeChange }: PropertyFormTab
           onClick={() => onTypeChange(type.value)}
           className="min-w-[100px]"
         >
-          {type.label}
+          {type.icon} {type.label}
         </Button>
       ))}
     </div>
