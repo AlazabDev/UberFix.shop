@@ -1,22 +1,23 @@
 import { supabase } from '@/integrations/supabase/client';
 
-// استخدم الـ URL الأساسي للمشروع مع تحسينات الإنتاج
-const ORIGIN = import.meta.env.VITE_APP_URL || window.location.origin;
+// استخدم الـ URL الأساسي للمشروع
+const getOrigin = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return 'https://uberfiix.lovable.app';
+};
 
 // إعدادات محسنة للإنتاج - جميع عمليات المصادقة تذهب إلى /auth/callback
-const AUTH_CONFIG = {
-  emailRedirectTo: `${ORIGIN}/auth/callback`,
-  redirectTo: `${ORIGIN}/auth/callback`,
-  updatePasswordRedirectTo: `${ORIGIN}/auth/callback?type=recovery`,
-  emailChangeRedirectTo: `${ORIGIN}/auth/callback?type=email_change`,
-  magicLinkRedirectTo: `${ORIGIN}/auth/callback?type=magiclink`,
-  cookieOptions: {
-    name: 'azab-auth',
-    lifetime: 60 * 60 * 24 * 7, // أسبوع واحد
-    domain: undefined,
-    path: '/',
-    sameSite: 'lax'
-  }
+const getAuthConfig = () => {
+  const origin = getOrigin();
+  return {
+    emailRedirectTo: `${origin}/auth/callback`,
+    redirectTo: `${origin}/auth/callback`,
+    updatePasswordRedirectTo: `${origin}/auth/callback?type=recovery`,
+    emailChangeRedirectTo: `${origin}/auth/callback?type=email_change`,
+    magicLinkRedirectTo: `${origin}/auth/callback?type=magiclink`,
+  };
 };
 
 export interface SmartAuthResult {
@@ -32,6 +33,8 @@ export async function smartSignup(
   full_name?: string
 ): Promise<SmartAuthResult> {
   try {
+    const authConfig = getAuthConfig();
+    
     // التأكد من وجود كلمة مرور
     if (!password) {
       return { ok: false, mode: 'error', error: { message: 'كلمة المرور مطلوبة' } };
@@ -43,7 +46,7 @@ export async function smartSignup(
       password,
       options: { 
         data: { full_name },
-        emailRedirectTo: AUTH_CONFIG.emailRedirectTo
+        emailRedirectTo: authConfig.emailRedirectTo
       }
     });
 
@@ -79,7 +82,7 @@ export async function smartSignup(
             type: 'signup', 
             email,
             options: {
-              emailRedirectTo: AUTH_CONFIG.emailRedirectTo
+              emailRedirectTo: authConfig.emailRedirectTo
             }
           });
           return { ok: false, mode: 'confirm_resent' };
@@ -88,7 +91,7 @@ export async function smartSignup(
         // 2.c كلمة المرور غير صحيحة → أرسل رابط إعادة التعيين
         if (em.includes('invalid login credentials')) {
           await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${ORIGIN}/auth/update-password`,
+            redirectTo: authConfig.updatePasswordRedirectTo,
             captchaToken: undefined
           });
           return { ok: false, mode: 'reset_sent' };
@@ -99,7 +102,7 @@ export async function smartSignup(
       await supabase.auth.signInWithOtp({
         email,
         options: { 
-          emailRedirectTo: AUTH_CONFIG.emailRedirectTo,
+          emailRedirectTo: authConfig.emailRedirectTo,
           shouldCreateUser: false // لا ننشئ مستخدم جديد عبر OTP
         }
       });
@@ -116,6 +119,8 @@ export async function smartSignup(
 
 export async function smartLogin(email: string, password: string): Promise<SmartAuthResult> {
   try {
+    const authConfig = getAuthConfig();
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -132,7 +137,7 @@ export async function smartLogin(email: string, password: string): Promise<Smart
         type: 'signup', 
         email,
         options: {
-          emailRedirectTo: AUTH_CONFIG.emailRedirectTo
+          emailRedirectTo: authConfig.emailRedirectTo
         }
       });
       return { ok: false, mode: 'confirm_resent' };
