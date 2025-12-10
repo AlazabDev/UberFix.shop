@@ -37,7 +37,8 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/dashboard`;
+      // يجب استخدام /auth/callback للتعامل مع token_hash و type parameters
+      const redirectUrl = `${window.location.origin}/auth/callback`;
       
       const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
