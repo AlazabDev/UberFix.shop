@@ -1119,14 +1119,17 @@ const Testing = () => {
     
     try {
       // 1. اختبار استدعاء Edge Function
-      const testId = 'test-' + Date.now();
+      // استخدام UUID صحيح (nil UUID) بدلاً من string عشوائي
+      const testRequestId = '00000000-0000-0000-0000-000000000000';
+      const testRecipientId = '00000000-0000-0000-0000-000000000000';
+      
       const { data, error } = await supabase.functions.invoke('send-unified-notification', {
         body: { 
           type: 'request_created',
-          request_id: testId,
-          recipient_id: 'test-recipient-' + Date.now(),
+          request_id: testRequestId,
+          recipient_id: testRecipientId,
           channels: ['in_app'],
-          data: { request_title: 'اختبار Edge Function' }
+          data: { request_title: 'اختبار نظام الإشعارات' }
         }
       });
 
