@@ -40,13 +40,11 @@ interface UserData {
   role: "مسؤول" | "مدير" | "موظف" | "فني" | "عميل";
 }
 
+import { SPECIALIZATIONS_LIST, mapStatusToMapLabel } from "@/constants/technicianConstants";
+
 const SPECIALTIES = [
-  { id: "all", label: "كل التخصصات", icon: "🛠️", keywords: [] },
-  { id: "electrician", label: "كهرباء", icon: "⚡", keywords: ["كهرب", "elect"] },
-  { id: "plumber", label: "سباكة", icon: "🚿", keywords: ["سباك", "plumb"] },
-  { id: "ac_technician", label: "تكييف", icon: "❄️", keywords: ["تكييف", "ac"] },
-  { id: "carpenter", label: "نجارة", icon: "🪵", keywords: ["نجار", "carp"] },
-  { id: "painter", label: "دهانات", icon: "🎨", keywords: ["دهان", "paint"] },
+  { id: "all", label: "كل التخصصات", icon: "🛠️", keywords: [] as string[] },
+  ...SPECIALIZATIONS_LIST.map(s => ({ id: s.id, label: s.label, icon: s.icon, keywords: s.keywords }))
 ];
 
 const MAP_STYLE: google.maps.MapTypeStyle[] = [
@@ -269,7 +267,7 @@ export default function ServiceMap() {
 
           if (isNaN(lat) || isNaN(lng)) return;
 
-          const techStatus = tech.status === "busy" ? "busy" : tech.status === "online" ? "available" : "soon";
+          const techStatus = mapStatusToMapLabel(tech.status || 'offline');
 
           // استخدام أيقونة الفني المرفقة بدون أي تعديل
           const techIconUrl = getTechnicianIcon(tech.specialization || "");

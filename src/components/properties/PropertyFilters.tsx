@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { PROPERTY_TYPES_LIST, PROPERTY_STATUS_LIST } from "@/constants/propertyConstants";
 
 interface PropertyFiltersProps {
   searchTerm: string;
@@ -27,9 +28,11 @@ export function PropertyFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">كل الحالات</SelectItem>
-          <SelectItem value="active">نشطة</SelectItem>
-          <SelectItem value="inactive">متوقفة</SelectItem>
-          <SelectItem value="maintenance">تحت الصيانة</SelectItem>
+          {PROPERTY_STATUS_LIST.map((status) => (
+            <SelectItem key={status.value} value={status.value}>
+              {status.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
@@ -39,10 +42,11 @@ export function PropertyFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">كل الأنواع</SelectItem>
-          <SelectItem value="residential">مشروع</SelectItem>
-          <SelectItem value="commercial">فرع</SelectItem>
-          <SelectItem value="industrial">مستودع</SelectItem>
-          <SelectItem value="office">وحدة</SelectItem>
+          {PROPERTY_TYPES_LIST.map((type) => (
+            <SelectItem key={type.value} value={type.value}>
+              {type.icon} {type.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 

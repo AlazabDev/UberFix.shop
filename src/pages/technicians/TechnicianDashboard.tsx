@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TechnicianPerformance, TechnicianLevelData, TechnicianBadge, TechnicianTask } from "@/types/technician";
 import { Trophy, Star, Award, CheckCircle, Clock, TrendingUp } from "lucide-react";
+import { getTechnicianLevelInfo } from "@/constants/technicianConstants";
 
 export default function TechnicianDashboard() {
   const [performance, setPerformance] = useState<TechnicianPerformance | null>(null);
@@ -66,18 +67,7 @@ export default function TechnicianDashboard() {
     }
   };
 
-  const getLevelInfo = (level?: string) => {
-    switch (level) {
-      case "elite":
-        return { label: "Elite Technician", color: "from-purple-600 to-pink-600", icon: "👑" };
-      case "pro":
-        return { label: "Pro Technician", color: "from-blue-600 to-cyan-600", icon: "⭐" };
-      default:
-        return { label: "Technician", color: "from-gray-600 to-gray-700", icon: "🔧" };
-    }
-  };
-
-  const levelInfo = getLevelInfo(level?.current_level);
+  const levelInfo = getTechnicianLevelInfo(level?.current_level || 'technician');
 
   if (loading) {
     return (
