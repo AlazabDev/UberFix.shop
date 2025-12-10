@@ -1,6 +1,13 @@
 import { CheckCircle, Circle, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { 
+  WORKFLOW_STAGES, 
+  HAPPY_PATH_STAGES, 
+  getStageIndex,
+  type WorkflowStage 
+} from "@/constants/workflowStages";
+import { cn } from "@/lib/utils";
 
 interface StatusTimelineProps {
   currentStatus: string;
@@ -15,21 +22,12 @@ export function RequestStatusTimeline({
   createdAt, 
   updatedAt 
 }: StatusTimelineProps) {
-  const stages = [
-    { key: 'submitted', label: 'تم التقديم', stage: 'submitted' },
-    { key: 'acknowledged', label: 'تم الاستلام', stage: 'acknowledged' },
-    { key: 'assigned', label: 'تم التخصيص', stage: 'assigned' },
-    { key: 'in_progress', label: 'قيد التنفيذ', stage: 'in_progress' },
-    { key: 'completed', label: 'مكتمل', stage: 'completed' },
-    { key: 'closed', label: 'مغلق', stage: 'closed' }
-  ];
+  // استخدام workflow_stage أولاً، ثم status
+  const stage = (workflowStage || 'draft') as WorkflowStage;
+  const currentIndex = getStageIndex(stage);
 
-  const getCurrentStageIndex = () => {
-    const index = stages.findIndex(s => s.stage === (workflowStage || currentStatus));
-    return index !== -1 ? index : 0;
-  };
-
-  const currentIndex = getCurrentStageIndex();
+  // استخدام المسار الطبيعي للعرض
+  const displayStages = HAPPY_PATH_STAGES.map(key => WORKFLOW_STAGES[key]);
 
   return (
     <Card>
@@ -43,42 +41,48 @@ export function RequestStatusTimeline({
         <div className="relative">
           <div className="absolute top-5 left-5 bottom-5 w-0.5 bg-border" />
           <div className="space-y-6">
-            {stages.map((stage, index) => {
+            {displayStages.map((stageConfig, index) => {
               const isCompleted = index < currentIndex;
               const isCurrent = index === currentIndex;
+              const Icon = stageConfig.icon;
 
               return (
-                <div key={stage.key} className="relative flex items-start gap-4">
-                  <div className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
+                <div key={stageConfig.key} className="relative flex items-start gap-4">
+                  <div className={cn(
+                    "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors",
                     isCompleted 
-                      ? 'bg-success border-success' 
+                      ? 'bg-green-500 border-green-500' 
                       : isCurrent 
-                        ? 'bg-primary border-primary animate-pulse' 
+                        ? cn(stageConfig.bgColor, 'border-transparent animate-pulse')
                         : 'bg-background border-muted'
-                  }`}>
+                  )}>
                     {isCompleted ? (
-                      <CheckCircle className="h-5 w-5 text-success-foreground" />
+                      <CheckCircle className="h-5 w-5 text-white" />
                     ) : isCurrent ? (
-                      <Circle className="h-5 w-5 text-primary-foreground fill-current" />
+                      <Icon className="h-5 w-5 text-white" />
                     ) : (
                       <Circle className="h-5 w-5 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex-1 pt-1">
                     <div className="flex items-center gap-2">
-                      <h4 className={`font-medium ${
+                      <h4 className={cn(
+                        "font-medium",
                         isCompleted 
-                          ? 'text-success' 
+                          ? 'text-green-600' 
                           : isCurrent 
-                            ? 'text-primary' 
+                            ? stageConfig.textColor
                             : 'text-muted-foreground'
-                      }`}>
-                        {stage.label}
+                      )}>
+                        {stageConfig.label}
                       </h4>
                       {isCurrent && (
                         <Badge variant="outline" className="text-xs">الحالية</Badge>
                       )}
                     </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {stageConfig.description}
+                    </p>
                     {isCurrent && updatedAt && (
                       <p className="text-xs text-muted-foreground mt-1">
                         آخر تحديث: {new Date(updatedAt).toLocaleString('ar-SA')}

@@ -17,63 +17,44 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  CheckCircle2,
-  Clock,
-  UserCheck,
-  Wrench,
-  FileCheck,
-  DollarSign,
-  XCircle,
-  Pause,
-} from "lucide-react";
-import { MaintenanceRequest, WorkflowStage } from "@/hooks/useMaintenanceRequests";
+import { Clock, Wrench } from "lucide-react";
+import { MaintenanceRequest } from "@/hooks/useMaintenanceRequests";
+import { 
+  WORKFLOW_STAGES, 
+  getAllStagesArray, 
+  getNextStages,
+  type WorkflowStage 
+} from "@/constants/workflowStages";
+import { cn } from "@/lib/utils";
 
 interface RequestWorkflowControlsProps {
   request: MaintenanceRequest;
   onUpdate?: () => void;
 }
 
-const workflowStages: { value: WorkflowStage; label: string; icon: React.ElementType; color: string }[] = [
-  { value: 'submitted', label: 'تم الإرسال', icon: Clock, color: 'bg-blue-500' },
-  { value: 'acknowledged', label: 'تم الاستلام', icon: CheckCircle2, color: 'bg-cyan-500' },
-  { value: 'assigned', label: 'تم التعيين', icon: UserCheck, color: 'bg-purple-500' },
-  { value: 'scheduled', label: 'تم الجدولة', icon: Clock, color: 'bg-indigo-500' },
-  { value: 'in_progress', label: 'قيد التنفيذ', icon: Wrench, color: 'bg-yellow-500' },
-  { value: 'inspection', label: 'قيد الفحص', icon: FileCheck, color: 'bg-orange-500' },
-  { value: 'completed', label: 'مكتمل', icon: CheckCircle2, color: 'bg-green-500' },
-  { value: 'billed', label: 'تم الفوترة', icon: DollarSign, color: 'bg-emerald-500' },
-  { value: 'closed', label: 'مغلق', icon: CheckCircle2, color: 'bg-gray-500' },
-  { value: 'cancelled', label: 'ملغي', icon: XCircle, color: 'bg-red-500' },
-  { value: 'on_hold', label: 'معلق', icon: Pause, color: 'bg-amber-500' },
-];
-
 export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowControlsProps) {
   const [loading, setLoading] = useState(false);
   const [selectedStage, setSelectedStage] = useState<WorkflowStage>(
-    (request.workflow_stage as WorkflowStage) || 'submitted'
+    (request.workflow_stage as WorkflowStage) || 'draft'
   );
   const { toast } = useToast();
 
-  const currentStage = workflowStages.find(s => s.value === selectedStage);
+  const currentStageConfig = WORKFLOW_STAGES[selectedStage];
+  const allStages = getAllStagesArray();
+  const nextStages = getNextStages(selectedStage);
 
   const updateWorkflowStage = async (newStage: WorkflowStage) => {
     setLoading(true);
     try {
+      const stageConfig = WORKFLOW_STAGES[newStage];
       const updates: Record<string, string | number> = {
         workflow_stage: newStage,
+        status: stageConfig.status as any,
       };
 
-      // تحديث الحالة التقليدية أيضاً
+      // إضافة تاريخ الإكمال عند الوصول لمرحلة الإكمال
       if (newStage === 'completed' || newStage === 'closed') {
-        updates.status = 'completed';
-        updates.actual_completion = new Date().toISOString();
-      } else if (newStage === 'in_progress') {
-        updates.status = 'in_progress';
-      } else if (newStage === 'cancelled') {
-        updates.status = 'cancelled';
-      } else if (newStage === 'on_hold') {
-        updates.status = 'on_hold';
+        updates.archived_at = new Date().toISOString();
       }
 
       const { error } = await supabase
@@ -85,11 +66,11 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
 
       toast({
         title: "✓ تم التحديث",
-        description: `تم تحديث مرحلة الطلب إلى: ${workflowStages.find(s => s.value === newStage)?.label}`,
+        description: `تم تحديث مرحلة الطلب إلى: ${stageConfig.label}`,
       });
 
       if (onUpdate) {
-      onUpdate();
+        onUpdate();
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "فشل في تحديث المرحلة";
@@ -110,32 +91,7 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
     updateWorkflowStage(newStage);
   };
 
-  const quickActions = [
-    {
-      label: 'بدء العمل',
-      stage: 'in_progress' as WorkflowStage,
-      variant: 'default' as const,
-      show: selectedStage === 'scheduled' || selectedStage === 'assigned',
-    },
-    {
-      label: 'إكمال',
-      stage: 'completed' as WorkflowStage,
-      variant: 'default' as const,
-      show: selectedStage === 'in_progress' || selectedStage === 'inspection',
-    },
-    {
-      label: 'إغلاق',
-      stage: 'closed' as WorkflowStage,
-      variant: 'secondary' as const,
-      show: selectedStage === 'completed' || selectedStage === 'billed',
-    },
-    {
-      label: 'تعليق',
-      stage: 'on_hold' as WorkflowStage,
-      variant: 'outline' as const,
-      show: selectedStage === 'in_progress' || selectedStage === 'scheduled',
-    },
-  ];
+  const Icon = currentStageConfig?.icon || Clock;
 
   return (
     <Card>
@@ -151,14 +107,14 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
       <CardContent className="space-y-4">
         {/* المرحلة الحالية */}
         <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-          {currentStage && (
+          {currentStageConfig && (
             <>
-              <div className={`p-2 rounded-full ${currentStage.color}`}>
-                <currentStage.icon className="h-5 w-5 text-white" />
+              <div className={cn("p-2 rounded-full", currentStageConfig.bgColor)}>
+                <Icon className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">المرحلة الحالية</p>
-                <p className="font-semibold">{currentStage.label}</p>
+                <p className="font-semibold">{currentStageConfig.label}</p>
               </div>
               <Badge variant="outline">{selectedStage}</Badge>
             </>
@@ -177,40 +133,44 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
               <SelectValue placeholder="اختر المرحلة" />
             </SelectTrigger>
             <SelectContent>
-              {workflowStages.map((stage) => (
-                <SelectItem key={stage.value} value={stage.value}>
-                  <div className="flex items-center gap-2">
-                    <stage.icon className="h-4 w-4" />
-                    {stage.label}
-                  </div>
-                </SelectItem>
-              ))}
+              {allStages.map((stage) => {
+                const StageIcon = stage.icon;
+                return (
+                  <SelectItem key={stage.key} value={stage.key}>
+                    <div className="flex items-center gap-2">
+                      <StageIcon className="h-4 w-4" />
+                      {stage.label}
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
 
-        {/* إجراءات سريعة */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">إجراءات سريعة</label>
-          <div className="flex flex-wrap gap-2">
-            {quickActions
-              .filter(action => action.show)
-              .map((action) => (
+        {/* إجراءات سريعة - المراحل التالية المحتملة */}
+        {nextStages.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium">الانتقال السريع</label>
+            <div className="flex flex-wrap gap-2">
+              {nextStages.map((stage) => (
                 <Button
-                  key={action.stage}
-                  variant={action.variant}
+                  key={stage.key}
+                  variant="outline"
                   size="sm"
                   onClick={() => {
-                    setSelectedStage(action.stage);
-                    updateWorkflowStage(action.stage);
+                    setSelectedStage(stage.key);
+                    updateWorkflowStage(stage.key);
                   }}
                   disabled={loading}
+                  className={cn("border", stage.textColor)}
                 >
-                  {action.label}
+                  {stage.label}
                 </Button>
               ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* مؤشر SLA */}
         {request.sla_due_date && (
