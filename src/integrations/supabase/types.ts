@@ -50,6 +50,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "annual_grand_winners_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       app_control: {
@@ -719,6 +726,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "hall_of_excellence_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       invoice_items: {
@@ -1341,6 +1355,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monthly_excellence_awards_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1968,10 +1989,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_review_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reviews_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2561,10 +2596,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_badge_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_badges_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_badges_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2654,6 +2703,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "technician_complaints_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       technician_coverage: {
@@ -2701,6 +2757,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_coverage_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2827,6 +2890,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "technician_daily_stats_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       technician_documents: {
@@ -2910,6 +2980,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "technician_level_history_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       technician_levels: {
@@ -2949,10 +3026,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_level_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_levels_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_levels_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2982,6 +3073,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_location_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3061,6 +3159,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "technician_monthly_bonuses_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       technician_performance: {
@@ -3124,10 +3229,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_perf_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_performance_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_performance_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3178,6 +3297,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_portfolio_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3436,6 +3562,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "technician_services_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       technician_skill_tests: {
@@ -3481,10 +3614,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_skill_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_skill_tests_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_skill_tests_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3579,6 +3726,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_task_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_tasks_maintenance_request_id_fkey"
             columns: ["maintenance_request_id"]
             isOneToOne: false
@@ -3597,6 +3751,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_tasks_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3704,6 +3865,13 @@ export type Database = {
             referencedRelation: "technicians"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "technician_training_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       technician_transactions: {
@@ -3769,6 +3937,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_transactions_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3869,10 +4044,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_wallet_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_wallet_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_wallet_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3932,6 +4121,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_withdrawal_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_withdrawals_processed_by_fkey"
             columns: ["processed_by"]
             isOneToOne: false
@@ -3943,6 +4139,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_withdrawals_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3992,6 +4195,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_work_zones_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4284,39 +4494,171 @@ export type Database = {
       }
     }
     Views: {
-      vw_maintenance_requests_public: {
+      technicians_public: {
         Row: {
-          assigned_vendor_id: string | null
-          branch_id: string | null
-          company_id: string | null
-          created_at: string | null
-          description: string | null
+          current_latitude: number | null
+          current_longitude: number | null
+          icon_url: string | null
           id: string | null
-          property_id: string | null
-          status: Database["public"]["Enums"]["mr_status"] | null
-          title: string | null
+          is_active: boolean | null
+          level: string | null
+          name: string | null
+          profile_image: string | null
+          rating: number | null
+          specialization: string | null
+          status: string | null
+          total_reviews: number | null
         }
         Insert: {
-          assigned_vendor_id?: string | null
-          branch_id?: string | null
-          company_id?: string | null
-          created_at?: string | null
-          description?: string | null
+          current_latitude?: number | null
+          current_longitude?: number | null
+          icon_url?: string | null
           id?: string | null
-          property_id?: string | null
-          status?: Database["public"]["Enums"]["mr_status"] | null
-          title?: string | null
+          is_active?: boolean | null
+          level?: string | null
+          name?: string | null
+          profile_image?: string | null
+          rating?: number | null
+          specialization?: string | null
+          status?: string | null
+          total_reviews?: number | null
         }
         Update: {
+          current_latitude?: number | null
+          current_longitude?: number | null
+          icon_url?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          level?: string | null
+          name?: string | null
+          profile_image?: string | null
+          rating?: number | null
+          specialization?: string | null
+          status?: string | null
+          total_reviews?: number | null
+        }
+        Relationships: []
+      }
+      vw_maintenance_requests_public: {
+        Row: {
+          actual_cost: number | null
+          archived_at: string | null
+          asset_id: string | null
+          assigned_vendor_id: string | null
+          branch_id: string | null
+          category_id: string | null
+          channel: string | null
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_notes: string | null
+          description: string | null
+          estimated_cost: number | null
+          id: string | null
+          last_modified_by: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          opened_by_role: string | null
+          priority: string | null
+          property_id: string | null
+          rating: number | null
+          service_type: string | null
+          sla_accept_due: string | null
+          sla_arrive_due: string | null
+          sla_complete_due: string | null
+          sla_deadline: string | null
+          sla_due_date: string | null
+          status: Database["public"]["Enums"]["mr_status"] | null
+          subcategory_id: string | null
+          title: string | null
+          updated_at: string | null
+          vendor_notes: string | null
+          version: number | null
+          workflow_stage: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          archived_at?: string | null
+          asset_id?: string | null
           assigned_vendor_id?: string | null
           branch_id?: string | null
+          category_id?: string | null
+          channel?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
           company_id?: string | null
           created_at?: string | null
+          created_by?: string | null
+          customer_notes?: string | null
           description?: string | null
+          estimated_cost?: number | null
           id?: string | null
+          last_modified_by?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          opened_by_role?: string | null
+          priority?: string | null
           property_id?: string | null
+          rating?: number | null
+          service_type?: string | null
+          sla_accept_due?: string | null
+          sla_arrive_due?: string | null
+          sla_complete_due?: string | null
+          sla_deadline?: string | null
+          sla_due_date?: string | null
           status?: Database["public"]["Enums"]["mr_status"] | null
+          subcategory_id?: string | null
           title?: string | null
+          updated_at?: string | null
+          vendor_notes?: string | null
+          version?: number | null
+          workflow_stage?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          archived_at?: string | null
+          asset_id?: string | null
+          assigned_vendor_id?: string | null
+          branch_id?: string | null
+          category_id?: string | null
+          channel?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_phone?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_notes?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string | null
+          last_modified_by?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          opened_by_role?: string | null
+          priority?: string | null
+          property_id?: string | null
+          rating?: number | null
+          service_type?: string | null
+          sla_accept_due?: string | null
+          sla_arrive_due?: string | null
+          sla_complete_due?: string | null
+          sla_deadline?: string | null
+          sla_due_date?: string | null
+          status?: Database["public"]["Enums"]["mr_status"] | null
+          subcategory_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_notes?: string | null
+          version?: number | null
+          workflow_stage?: string | null
         }
         Relationships: [
           {
@@ -4331,6 +4673,13 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_category"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
