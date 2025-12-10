@@ -10,6 +10,7 @@ const ALLOWED_DOMAINS = [
   'uberfix.shop',
   'uberfiix.lovable.app',
   'lovable.app',
+  'lovableproject.com',
   'localhost',
   '127.0.0.1',
 ];
