@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const VERIFY_TOKEN = Deno.env.get('WEBHOOK_SECRET') || 'uberfix_webhook_verify_token';
 const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
+const FACEBOOK_SECRET = Deno.env.get('FACEBOOK_SECRET');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -13,6 +14,65 @@ const corsHeaders = {
 
 // إنشاء Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+// ==========================================
+// التحقق من توقيع Meta (X-Hub-Signature-256)
+// ==========================================
+async function verifyWebhookSignature(req: Request, rawBody: string): Promise<boolean> {
+  if (!FACEBOOK_SECRET) {
+    console.warn('FACEBOOK_SECRET not configured - signature verification disabled');
+    return true; // السماح بالمرور إذا لم يتم تكوين السر (للاختبار)
+  }
+
+  const signature = req.headers.get('x-hub-signature-256');
+  if (!signature) {
+    console.error('Missing x-hub-signature-256 header');
+    return false;
+  }
+
+  try {
+    // إنشاء HMAC-SHA256 من الـ body باستخدام السر
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(FACEBOOK_SECRET),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    
+    const signatureBuffer = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(rawBody)
+    );
+    
+    // تحويل إلى hex string
+    const hashArray = Array.from(new Uint8Array(signatureBuffer));
+    const expectedSignature = 'sha256=' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    // مقارنة آمنة ضد timing attacks
+    if (signature.length !== expectedSignature.length) {
+      console.error('Signature length mismatch');
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < signature.length; i++) {
+      result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+    }
+    
+    const isValid = result === 0;
+    if (!isValid) {
+      console.error('Invalid signature - request may be forged');
+    }
+    
+    return isValid;
+  } catch (error) {
+    console.error('Signature verification error:', error);
+    return false;
+  }
+}
 
 serve(async (req) => {
   const url = new URL(req.url);
@@ -49,7 +109,23 @@ serve(async (req) => {
   // ==========================================
   if (req.method === 'POST') {
     try {
-      const body = await req.json();
+      // قراءة الـ body كنص للتحقق من التوقيع
+      const rawBody = await req.text();
+      
+      // التحقق من توقيع Meta
+      const isValidSignature = await verifyWebhookSignature(req, rawBody);
+      if (!isValidSignature) {
+        console.error('Invalid webhook signature - rejecting request');
+        return new Response('Invalid signature', { 
+          status: 401,
+          headers: corsHeaders 
+        });
+      }
+      
+      console.log('✅ Webhook signature verified successfully');
+      
+      // تحويل الـ body إلى JSON
+      const body = JSON.parse(rawBody);
       console.log('Incoming webhook:', JSON.stringify(body, null, 2));
 
       // التحقق من أن هذا إشعار من WhatsApp
