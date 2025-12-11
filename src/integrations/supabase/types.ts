@@ -847,6 +847,7 @@ export type Database = {
           actual_cost: number | null
           archived_at: string | null
           asset_id: string | null
+          assigned_technician_id: string | null
           assigned_vendor_id: string | null
           branch_id: string
           category_id: string | null
@@ -887,6 +888,7 @@ export type Database = {
           actual_cost?: number | null
           archived_at?: string | null
           asset_id?: string | null
+          assigned_technician_id?: string | null
           assigned_vendor_id?: string | null
           branch_id: string
           category_id?: string | null
@@ -927,6 +929,7 @@ export type Database = {
           actual_cost?: number | null
           archived_at?: string | null
           asset_id?: string | null
+          assigned_technician_id?: string | null
           assigned_vendor_id?: string | null
           branch_id?: string
           category_id?: string | null
@@ -997,6 +1000,20 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
           {
@@ -1077,6 +1094,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_logs_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
             referencedColumns: ["id"]
           },
           {
@@ -1707,6 +1731,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_review_request"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
             referencedColumns: ["id"]
           },
           {
@@ -3029,6 +3060,13 @@ export type Database = {
             foreignKeyName: "fk_task_request"
             columns: ["maintenance_request_id"]
             isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_task_request"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
             referencedRelation: "vw_maintenance_requests_public"
             referencedColumns: ["id"]
           },
@@ -3051,6 +3089,13 @@ export type Database = {
             columns: ["maintenance_request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_tasks_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
             referencedColumns: ["id"]
           },
           {
@@ -3237,6 +3282,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_transactions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
             referencedColumns: ["id"]
           },
           {
@@ -3752,6 +3804,42 @@ export type Database = {
       }
     }
     Views: {
+      technician_assigned_requests: {
+        Row: {
+          assigned_technician_id: string | null
+          client_name: string | null
+          client_phone: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          priority: string | null
+          sla_complete_due: string | null
+          status: Database["public"]["Enums"]["mr_status"] | null
+          technician_name: string | null
+          technician_phone: string | null
+          title: string | null
+          workflow_stage: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technicians_public: {
         Row: {
           current_latitude: number | null
@@ -4100,6 +4188,10 @@ export type Database = {
           row_count: number
           table_name: string
         }[]
+      }
+      get_technician_id_for_user: {
+        Args: { p_user_id: string }
+        Returns: string
       }
       get_user_tenant: { Args: never; Returns: string }
       get_vendor_appointments: {

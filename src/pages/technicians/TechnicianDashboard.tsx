@@ -5,30 +5,88 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TechnicianPerformance, TechnicianLevelData, TechnicianBadge, TechnicianTask } from "@/types/technician";
-import { Trophy, Star, Award, CheckCircle, Clock, TrendingUp } from "lucide-react";
+import { Trophy, Star, Award, CheckCircle, Clock, TrendingUp, AlertCircle } from "lucide-react";
 import { getTechnicianLevelInfo } from "@/constants/technicianConstants";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function TechnicianDashboard() {
+  const [technicianId, setTechnicianId] = useState<string | null>(null);
+  const [technicianStatus, setTechnicianStatus] = useState<string | null>(null);
   const [performance, setPerformance] = useState<TechnicianPerformance | null>(null);
   const [level, setLevel] = useState<TechnicianLevelData | null>(null);
   const [badges, setBadges] = useState<TechnicianBadge[]>([]);
   const [tasks, setTasks] = useState<TechnicianTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchTechnicianId();
   }, []);
 
-  const fetchDashboardData = async () => {
+  // جلب technician_id الصحيح من خلال technician_profiles
+  const fetchTechnicianId = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // أولاً: البحث عن technician_profile للمستخدم
+      const { data: profile, error: profileError } = await supabase
+        .from('technician_profiles')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      if (!profile) {
+        // لا يوجد ملف تسجيل - توجيه للتسجيل
+        setTechnicianStatus('not_registered');
+        setLoading(false);
+        return;
+      }
+
+      if (profile.status !== 'approved') {
+        // الطلب لم تتم الموافقة عليه بعد
+        setTechnicianStatus(profile.status);
+        setLoading(false);
+        return;
+      }
+
+      // ثانياً: جلب technician_id من جدول technicians
+      const { data: technician, error: techError } = await supabase
+        .from('technicians')
+        .select('id')
+        .eq('technician_profile_id', profile.id)
+        .maybeSingle();
+
+      if (techError) throw techError;
+
+      if (!technician) {
+        setTechnicianStatus('pending_activation');
+        setLoading(false);
+        return;
+      }
+
+      setTechnicianId(technician.id);
+      setTechnicianStatus('active');
+      
+      // الآن جلب بيانات Dashboard
+      await fetchDashboardData(technician.id);
+    } catch (error) {
+      console.error("Error fetching technician ID:", error);
+      setLoading(false);
+    }
+  };
+
+  const fetchDashboardData = async (techId: string) => {
+    try {
       // Fetch performance
       const { data: perfData } = await supabase
         .from("technician_performance")
         .select("*")
-        .eq("technician_id", user.id)
+        .eq("technician_id", techId)
         .maybeSingle();
 
       setPerformance(perfData);
@@ -37,7 +95,7 @@ export default function TechnicianDashboard() {
       const { data: levelData } = await supabase
         .from("technician_levels")
         .select("*")
-        .eq("technician_id", user.id)
+        .eq("technician_id", techId)
         .maybeSingle();
 
       setLevel(levelData as any);
@@ -46,7 +104,7 @@ export default function TechnicianDashboard() {
       const { data: badgesData } = await supabase
         .from("technician_badges")
         .select("*")
-        .eq("technician_id", user.id)
+        .eq("technician_id", techId)
         .order("awarded_at", { ascending: false });
 
       setBadges(badgesData as any || []);
@@ -55,7 +113,7 @@ export default function TechnicianDashboard() {
       const { data: tasksData } = await supabase
         .from("technician_tasks")
         .select("*")
-        .eq("technician_id", user.id)
+        .eq("technician_id", techId)
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -73,6 +131,90 @@ export default function TechnicianDashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // عرض رسائل حسب حالة الفني
+  if (technicianStatus === 'not_registered') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-8 pb-6 text-center">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-yellow-500" />
+            <h2 className="text-2xl font-bold mb-2">لم يتم التسجيل بعد</h2>
+            <p className="text-muted-foreground mb-6">
+              يجب التسجيل كفني أولاً للوصول إلى لوحة التحكم
+            </p>
+            <Button onClick={() => navigate("/technicians/registration/wizard")} size="lg" className="w-full">
+              التسجيل الآن
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (technicianStatus === 'draft') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-8 pb-6 text-center">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-blue-500" />
+            <h2 className="text-2xl font-bold mb-2">استكمل التسجيل</h2>
+            <p className="text-muted-foreground mb-6">
+              طلب التسجيل محفوظ كمسودة. يرجى استكمال التسجيل وإرساله للمراجعة.
+            </p>
+            <Button onClick={() => navigate("/technicians/registration/wizard")} size="lg" className="w-full">
+              استكمال التسجيل
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (technicianStatus === 'pending_review') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-yellow-500">
+          <CardContent className="pt-8 pb-6 text-center">
+            <Clock className="w-16 h-16 mx-auto mb-4 text-yellow-500 animate-pulse" />
+            <h2 className="text-2xl font-bold mb-2">قيد المراجعة</h2>
+            <p className="text-muted-foreground mb-4">
+              طلب التسجيل قيد المراجعة من قبل فريقنا. سيتم إشعارك عند الموافقة.
+            </p>
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>الخطوة التالية</AlertTitle>
+              <AlertDescription>
+                يمكنك التحقق من هويتك الآن لتسريع عملية الموافقة
+              </AlertDescription>
+            </Alert>
+            <Button onClick={() => navigate("/technicians/verification")} variant="outline" size="lg" className="w-full mt-4">
+              التحقق من الهوية
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (technicianStatus === 'rejected') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-red-500">
+          <CardContent className="pt-8 pb-6 text-center">
+            <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+            <h2 className="text-2xl font-bold mb-2">تم رفض الطلب</h2>
+            <p className="text-muted-foreground mb-6">
+              للأسف، تم رفض طلب التسجيل. يمكنك التواصل مع الدعم لمعرفة السبب.
+            </p>
+            <Button onClick={() => navigate("/support")} variant="outline" size="lg" className="w-full">
+              التواصل مع الدعم
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
