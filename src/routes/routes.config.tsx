@@ -83,6 +83,9 @@ const ProductionMonitor = lazy(
   () => import("@/pages/admin/ProductionMonitor")
 );
 const Testing = lazy(() => import("@/pages/admin/Testing"));
+const TechnicianApprovalQueue = lazy(
+  () => import("@/pages/admin/TechnicianApprovalQueue")
+);
 
 // Messages
 const Inbox = lazy(() => import("@/pages/messages/Inbox"));
@@ -155,6 +158,7 @@ export const protectedRoutes = [
   { path: "/production-monitor", element: <ProductionMonitor />, withLayout: true },
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
+  { path: "/admin/technician-approval", element: <TechnicianApprovalQueue />, withLayout: true },
   { path: "/users", element: <UsersPage />, withLayout: true },
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
 

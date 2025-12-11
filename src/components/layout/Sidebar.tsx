@@ -14,7 +14,8 @@ import {
   DollarSign,
   PlayCircle,
   Activity,
-  Clock
+  Clock,
+  UserCheck
 } from "lucide-react";
 
 interface SidebarProps {
@@ -37,6 +38,11 @@ const menuItems = [
     icon: Users,
     label: "الموردين والفنيين",
     href: "/vendors"
+  },
+  {
+    icon: UserCheck,
+    label: "موافقة الفنيين",
+    href: "/admin/technician-approval"
   },
   {
     icon: BarChart3,
