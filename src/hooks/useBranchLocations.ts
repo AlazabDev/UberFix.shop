@@ -5,12 +5,17 @@ import { fallbackBranches } from '@/data/fallbackBranches';
 export interface BranchLocation {
   id: string;
   branch: string;
+  branch_name: string | null;
   address: string | null;
   branch_type: string | null;
+  city: string | null;
+  district: string | null;
+  phone: string | null;
   link: string | null;
   icon: string | null;
   latitude: string | null;
   longitude: string | null;
+  status: string | null;
 }
 
 export const useBranchLocations = () => {

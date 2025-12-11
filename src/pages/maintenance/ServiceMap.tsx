@@ -244,13 +244,26 @@ export default function ServiceMap() {
             zIndex: 100,
           });
 
-          const infoWindow = new google.maps.InfoWindow({ maxWidth: 280 });
+          const infoWindow = new google.maps.InfoWindow({ maxWidth: 300 });
           marker.addListener("click", () => {
             setSelectedBranch(branch);
             const div = document.createElement("div");
             const root = createRoot(div);
             root.render(
-              <BranchMapPopup id={branch.id} name={branch.branch} address={branch.address || "لا يوجد عنوان"} status="Active" />
+              <BranchMapPopup 
+                id={branch.id} 
+                name={branch.branch} 
+                address={branch.address || "لا يوجد عنوان"} 
+                area={branch.district || undefined}
+                status="Active"
+                phone={branch.phone || undefined}
+                workingHours="9:00 ص - 9:00 م"
+                onGetDirections={() => {
+                  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                  window.open(url, '_blank');
+                }}
+                onCall={branch.phone ? () => window.open(`tel:${branch.phone}`) : undefined}
+              />
             );
             infoWindow.setContent(div);
             infoWindow.open(mapInstanceRef.current!, marker);
