@@ -184,7 +184,7 @@ serve(async (req) => {
     const { error: assignError } = await supabase
       .from('maintenance_requests')
       .update({
-        assigned_vendor_id: bestMatch.id,
+        assigned_technician_id: bestMatch.id,
         status: 'Assigned',
         workflow_stage: 'ASSIGNED',
       })
@@ -194,16 +194,73 @@ serve(async (req) => {
       throw assignError;
     }
 
-    // Send notifications to all top 3
+    // Get technician user_id for notification
+    const { data: techProfile } = await supabase
+      .from('technicians')
+      .select('technician_profile_id')
+      .eq('id', bestMatch.id)
+      .single();
+
+    let recipientUserId = bestMatch.id;
+    if (techProfile?.technician_profile_id) {
+      const { data: profile } = await supabase
+        .from('technician_profiles')
+        .select('user_id')
+        .eq('id', techProfile.technician_profile_id)
+        .single();
+      if (profile?.user_id) {
+        recipientUserId = profile.user_id;
+      }
+    }
+
+    // Send notifications to all top 3 using unified notification system
     for (const tech of scoredTechnicians) {
-      await supabase.from('notifications').insert({
-        recipient_id: tech.id,
-        title: 'طلب صيانة جديد',
-        message: `طلب صيانة جديد على بعد ${tech.distance.toFixed(1)} كم منك`,
-        type: 'info',
-        entity_type: 'maintenance_request',
-        entity_id: requestId,
-      });
+      // Get user_id for this technician
+      let techUserId = tech.id;
+      const { data: tp } = await supabase
+        .from('technicians')
+        .select('technician_profile_id')
+        .eq('id', tech.id)
+        .single();
+      
+      if (tp?.technician_profile_id) {
+        const { data: prof } = await supabase
+          .from('technician_profiles')
+          .select('user_id, phone, email')
+          .eq('id', tp.technician_profile_id)
+          .single();
+        
+        if (prof) {
+          techUserId = prof.user_id;
+          
+          // Send via unified notification system
+          await supabase.functions.invoke('send-unified-notification', {
+            body: {
+              type: 'technician_job_assigned',
+              request_id: requestId,
+              recipient_id: techUserId,
+              recipient_email: prof.email,
+              recipient_phone: prof.phone,
+              channels: ['in_app', 'email', 'sms'],
+              data: {
+                request_title: request.service_type || 'طلب صيانة',
+                distance: tech.distance.toFixed(1),
+                job_type: request.service_type,
+              }
+            }
+          });
+        }
+      } else {
+        // Fallback: insert directly to notifications
+        await supabase.from('notifications').insert({
+          recipient_id: techUserId,
+          title: '🔧 طلب صيانة جديد',
+          message: `طلب صيانة جديد على بعد ${tech.distance.toFixed(1)} كم منك`,
+          type: 'info',
+          entity_type: 'maintenance_request',
+          entity_id: requestId,
+        });
+      }
     }
 
     return new Response(

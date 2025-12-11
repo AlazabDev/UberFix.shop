@@ -16,8 +16,8 @@ export interface Notification {
 }
 
 interface SendNotificationOptions {
-  type: 'request_created' | 'status_updated' | 'vendor_assigned' | 'sla_warning' | 'request_completed';
-  request_id: string;
+  type: 'request_created' | 'status_updated' | 'vendor_assigned' | 'sla_warning' | 'request_completed' | 'technician_approved' | 'technician_rejected' | 'technician_job_assigned';
+  request_id?: string;
   recipient_id: string;
   recipient_email?: string;
   recipient_phone?: string;
@@ -31,6 +31,12 @@ interface SendNotificationOptions {
     property_name?: string;
     sla_deadline?: string;
     notes?: string;
+    technician_name?: string;
+    technician_id?: string;
+    rejection_reason?: string;
+    login_url?: string;
+    distance?: string;
+    job_type?: string;
   };
 }
 

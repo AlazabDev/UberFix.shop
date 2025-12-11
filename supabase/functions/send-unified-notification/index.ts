@@ -8,8 +8,8 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: 'request_created' | 'status_updated' | 'vendor_assigned' | 'sla_warning' | 'request_completed';
-  request_id: string;
+  type: 'request_created' | 'status_updated' | 'vendor_assigned' | 'sla_warning' | 'request_completed' | 'technician_approved' | 'technician_rejected' | 'technician_job_assigned';
+  request_id?: string;
   recipient_id: string;
   recipient_email?: string;
   recipient_phone?: string;
@@ -23,6 +23,12 @@ interface NotificationRequest {
     property_name?: string;
     sla_deadline?: string;
     notes?: string;
+    technician_name?: string;
+    technician_id?: string;
+    rejection_reason?: string;
+    login_url?: string;
+    distance?: string;
+    job_type?: string;
   };
 }
 
@@ -113,6 +119,72 @@ const messageTemplates = {
           ${data.notes ? `<p><strong>ملاحظات الفني:</strong> ${data.notes}</p>` : ''}
         </div>
         <p>نرجو أن تكون راضياً عن الخدمة. يمكنك تقييم الخدمة من لوحة التحكم.</p>
+      </div>
+    `
+  },
+  technician_approved: {
+    title: "🎉 تم قبول طلب التسجيل",
+    message: (data: any) => `تهانينا ${data.technician_name}! تم قبول طلب التسجيل في منصة UberFix. يمكنك الآن البدء في استقبال الطلبات.`,
+    email_subject: "مبروك! تم قبولك كفني في UberFix",
+    email_html: (data: any) => `
+      <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+        <h2 style="color: #059669;">🎉 مبروك! تم قبول طلبك</h2>
+        <p>عزيزي ${data.technician_name}،</p>
+        <p>يسعدنا إبلاغك بأنه تم قبول طلب تسجيلك كفني في منصة <strong>UberFix</strong>.</p>
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-right: 4px solid #059669;">
+          <h3 style="margin-top: 0;">الخطوات التالية:</h3>
+          <ul style="padding-right: 20px;">
+            <li>قم بتسجيل الدخول إلى لوحة التحكم الخاصة بك</li>
+            <li>أكمل إعداد ملفك الشخصي</li>
+            <li>حدد حالتك إلى "متاح" لبدء استقبال الطلبات</li>
+          </ul>
+        </div>
+        <a href="${data.login_url || 'https://uberfix.shop/technician/dashboard'}" 
+           style="display: inline-block; background: #059669; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+          الدخول إلى لوحة التحكم
+        </a>
+        <p style="margin-top: 20px; color: #6b7280;">مرحباً بك في فريق UberFix!</p>
+      </div>
+    `
+  },
+  technician_rejected: {
+    title: "❌ لم يتم قبول طلب التسجيل",
+    message: (data: any) => `عذراً ${data.technician_name}، لم يتم قبول طلب التسجيل. السبب: ${data.rejection_reason || 'لم يتم تحديد سبب'}`,
+    email_subject: "بخصوص طلب التسجيل في UberFix",
+    email_html: (data: any) => `
+      <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+        <h2 style="color: #dc2626;">بخصوص طلب التسجيل</h2>
+        <p>عزيزي ${data.technician_name}،</p>
+        <p>نأسف لإبلاغك بأنه لم يتم قبول طلب تسجيلك في منصة UberFix في الوقت الحالي.</p>
+        <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 15px 0; border-right: 4px solid #dc2626;">
+          <p><strong>السبب:</strong></p>
+          <p>${data.rejection_reason || 'لم يتم تحديد سبب محدد'}</p>
+        </div>
+        <p>يمكنك إعادة تقديم طلب التسجيل بعد استيفاء المتطلبات اللازمة.</p>
+        <p style="margin-top: 20px; color: #6b7280;">نشكرك على اهتمامك بالانضمام إلى UberFix.</p>
+      </div>
+    `
+  },
+  technician_job_assigned: {
+    title: "🔧 طلب صيانة جديد",
+    message: (data: any) => `لديك طلب صيانة جديد "${data.request_title}" على بعد ${data.distance || '?'} كم - ${data.job_type || 'عام'}`,
+    email_subject: "طلب صيانة جديد متاح - UberFix",
+    email_html: (data: any) => `
+      <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+        <h2 style="color: #2563eb;">🔧 طلب صيانة جديد</h2>
+        <p>مرحباً،</p>
+        <p>لديك طلب صيانة جديد متاح:</p>
+        <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 15px 0; border-right: 4px solid #2563eb;">
+          <p><strong>نوع الخدمة:</strong> ${data.job_type || 'صيانة عامة'}</p>
+          <p><strong>العنوان:</strong> ${data.request_title || 'طلب صيانة'}</p>
+          <p><strong>المسافة:</strong> ${data.distance || '?'} كم</p>
+          ${data.property_name ? `<p><strong>الموقع:</strong> ${data.property_name}</p>` : ''}
+        </div>
+        <a href="https://uberfix.shop/technician/requests" 
+           style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+          عرض التفاصيل والقبول
+        </a>
+        <p style="margin-top: 15px; color: #6b7280; font-size: 14px;">⏱️ يرجى الرد في أقرب وقت ممكن</p>
       </div>
     `
   }

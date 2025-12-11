@@ -93,11 +93,9 @@ const handler = async (req: Request): Promise<Response> => {
       await supabaseClient.functions.invoke('send-unified-notification', {
         body: {
           type: 'technician_rejected',
-          recipient: {
-            user_id: techProfile.user_id,
-            phone: techProfile.phone,
-            email: techProfile.email,
-          },
+          recipient_id: techProfile.user_id,
+          recipient_phone: techProfile.phone,
+          recipient_email: techProfile.email,
           channels: ['email', 'sms', 'in_app'],
           data: {
             technician_name: techProfile.full_name,
@@ -144,16 +142,14 @@ const handler = async (req: Request): Promise<Response> => {
     await supabaseClient.functions.invoke('send-unified-notification', {
       body: {
         type: 'technician_approved',
-        recipient: {
-          user_id: techProfile.user_id,
-          phone: techProfile.phone,
-          email: techProfile.email,
-        },
+        recipient_id: techProfile.user_id,
+        recipient_phone: techProfile.phone,
+        recipient_email: techProfile.email,
         channels: ['email', 'sms', 'whatsapp', 'in_app'],
         data: {
           technician_name: techProfile.full_name,
           technician_id: newTechnicianId,
-          login_url: `${Deno.env.get('SUPABASE_URL')}/technician/dashboard`,
+          login_url: 'https://uberfix.shop/technician/dashboard',
         },
       },
     });
