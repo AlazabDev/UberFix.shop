@@ -388,6 +388,17 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('recipient_id', requestData.recipient_id);
       }
     }
+    
+    if (!requestData?.request_id) {
+     console.warn("Missing request_id, skipping update");
+    } else {
+    await supabase.from("notifications")
+      .update({
+      request_id: requestData.request_id,
+      status: "sent",
+    })
+    .eq("id", notificationId);
+   }
 
     // ملخص النتائج
     const allSuccess = Object.values(results).every(r => r === null || r?.success);
