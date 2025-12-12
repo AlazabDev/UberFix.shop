@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Star, ArrowRight } from "lucide-react";
 import { TechnicianLocation } from "@/modules/map/types";
+import { getSpecializationLabel } from "@/constants/technicianConstants";
 
 export default function QuickRequestFromMap() {
   const navigate = useNavigate();
@@ -126,15 +127,7 @@ export default function QuickRequestFromMap() {
     );
   }
 
-  const getSpecializationLabel = (spec: string) => {
-    const labels: Record<string, string> = {
-      plumber: 'سباك',
-      carpenter: 'نجار',
-      electrician: 'كهربائي',
-      painter: 'دهان',
-    };
-    return labels[spec] || spec;
-  };
+  // getSpecializationLabel is now imported from constants
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background py-8">
