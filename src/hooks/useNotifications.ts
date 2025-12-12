@@ -115,16 +115,12 @@ export const useNotifications = () => {
 
   const sendNotification = async (options: SendNotificationOptions) => {
     try {
-      console.log('Sending unified notification:', options);
-
       // استدعاء Edge Function الموحد
       const { data, error } = await supabase.functions.invoke('send-unified-notification', {
         body: options
       });
 
       if (error) throw error;
-
-      console.log('Notification sent successfully:', data);
       
       // تحديث القائمة
       await fetchNotifications();

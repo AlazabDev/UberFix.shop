@@ -116,7 +116,6 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('Submit started', values);
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -179,7 +178,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
         estimated_cost: totalServicePrice + inspectionPrice + taxAmount
       };
 
-      console.log('Submitting request with data:', requestData);
+      
 
       const { data: request, error: requestError } = await supabase
         .from('maintenance_requests')
@@ -192,7 +191,7 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
         throw new Error(`فشل في إنشاء الطلب: ${requestError.message}`);
       }
 
-      console.log('Request created successfully:', request);
+      
 
       toast({
         title: "✅ تم إنشاء الطلب بنجاح",
@@ -434,9 +433,8 @@ export const RequestDetailsStep = ({ selectedServices, onBack }: RequestDetailsS
               <FormLabel>الصور المرفقة</FormLabel>
               <ImageUpload
                 images={[]}
-                onImagesChange={(files) => {
+                onImagesChange={() => {
                   // سيتم تحميل الصور لاحقاً
-                  console.log('Files selected:', files);
                 }}
                 maxImages={5}
               />

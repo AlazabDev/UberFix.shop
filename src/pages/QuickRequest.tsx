@@ -23,8 +23,6 @@ export default function QuickRequest() {
       try {
         const functionUrl = `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/get-property-for-qr?propertyId=${propertyId}`;
         
-        console.log('Fetching property from:', functionUrl);
-        
         const response = await fetch(functionUrl, {
           method: 'GET',
           headers: {
@@ -32,16 +30,11 @@ export default function QuickRequest() {
           },
         });
 
-        console.log('Response status:', response.status);
-
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Response error:', errorText);
           throw new Error(`Failed to fetch property: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('Property data:', data);
         
         if (data.error) {
           throw new Error(data.error);
