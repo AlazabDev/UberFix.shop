@@ -4,7 +4,7 @@
 // This file is kept for backward compatibility
 // All icons and colors are now defined in src/constants/technicianConstants.ts
 
-export {
+import {
   getSpecializationIcon,
   getSpecializationColor,
   getSpecializationLabel,
@@ -14,9 +14,18 @@ export {
   SPECIALIZATIONS,
 } from '@/constants/technicianConstants';
 
+export {
+  getSpecializationIcon,
+  getSpecializationColor,
+  getSpecializationLabel,
+  getSpecializationEmoji,
+  getTechnicianIconByText,
+  getBranchIcon,
+  SPECIALIZATIONS,
+};
+
 // Legacy alias for backward compatibility
 export const getTechnicianIcon = (specialization: string): string => {
-  const { getTechnicianIconByText } = require('@/constants/technicianConstants');
   return getTechnicianIconByText(specialization);
 };
 
@@ -28,10 +37,11 @@ export interface SpecializationStyle {
 }
 
 // Legacy function - now uses unified constants
-export const getSpecializationStyle = (specialization: string): SpecializationStyle => {
-  const { SPECIALIZATIONS } = require('@/constants/technicianConstants');
+export const getSpecializationStyle = (
+  specialization: string
+): SpecializationStyle => {
   const spec = SPECIALIZATIONS[specialization as keyof typeof SPECIALIZATIONS];
-  
+
   if (spec) {
     return {
       icon: spec.icon,
@@ -39,7 +49,7 @@ export const getSpecializationStyle = (specialization: string): SpecializationSt
       label: spec.label,
     };
   }
-  
+
   return {
     icon: '/icons/technicians/tec-01.png',
     color: '#808080',
