@@ -237,16 +237,28 @@ serve(async (req) => {
 
             console.log(`Message ${messageId} status: ${statusType}`);
 
+            // جلب السجل الحالي للحصول على metadata
+            const { data: existingRecord } = await supabase
+              .from('message_logs')
+              .select('metadata')
+              .eq('external_id', messageId)
+              .single();
+            
+            // دمج metadata الجديدة مع القديمة
+            const currentMetadata = (existingRecord?.metadata as Record<string, unknown>) || {};
+            const newMetadata = { 
+              ...currentMetadata, 
+              [`${statusType}_at`]: timestamp,
+              last_status: statusType 
+            };
+
             // تحديث حالة الرسالة في قاعدة البيانات
             const { error: updateError } = await supabase
               .from('message_logs')
               .update({
                 status: statusType,
                 delivered_at: statusType === 'delivered' ? new Date().toISOString() : undefined,
-                metadata: supabase.sql`metadata || ${JSON.stringify({ 
-                  [`${statusType}_at`]: timestamp,
-                  last_status: statusType 
-                })}`
+                metadata: newMetadata
               })
               .eq('external_id', messageId);
 

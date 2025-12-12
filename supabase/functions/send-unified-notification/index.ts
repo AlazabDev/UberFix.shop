@@ -342,7 +342,7 @@ const handler = async (req: Request): Promise<Response> => {
         title,
         message,
         requestData.type,
-        requestData.request_id
+        requestData.request_id || ''
       );
     }
 
@@ -360,11 +360,11 @@ const handler = async (req: Request): Promise<Response> => {
       results.sms = await sendSMSNotification(
         requestData.recipient_phone,
         message,
-        requestData.request_id
+        requestData.request_id || ''
       );
       
       // تحديث حالة الإرسال في جدول notifications
-      if (results.in_app?.success) {
+      if (results.in_app?.success && requestData.request_id) {
         await supabase.from('notifications')
           .update({ sms_sent: results.sms.success })
           .eq('entity_id', requestData.request_id)
@@ -377,28 +377,17 @@ const handler = async (req: Request): Promise<Response> => {
       results.whatsapp = await sendWhatsAppNotification(
         requestData.recipient_phone,
         message,
-        requestData.request_id
+        requestData.request_id || ''
       );
       
       // تحديث حالة الإرسال في جدول notifications
-      if (results.in_app?.success) {
+      if (results.in_app?.success && requestData.request_id) {
         await supabase.from('notifications')
           .update({ whatsapp_sent: results.whatsapp.success })
           .eq('entity_id', requestData.request_id)
           .eq('recipient_id', requestData.recipient_id);
       }
     }
-    
-    if (!requestData?.request_id) {
-     console.warn("Missing request_id, skipping update");
-    } else {
-    await supabase.from("notifications")
-      .update({
-      request_id: requestData.request_id,
-      status: "sent",
-    })
-    .eq("id", notificationId);
-   }
 
     // ملخص النتائج
     const allSuccess = Object.values(results).every(r => r === null || r?.success);
