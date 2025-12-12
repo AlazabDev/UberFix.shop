@@ -40,11 +40,17 @@ interface UserData {
   role: "مسؤول" | "مدير" | "موظف" | "فني" | "عميل";
 }
 
-import { SPECIALIZATIONS_LIST, mapStatusToMapLabel } from "@/constants/technicianConstants";
+import { 
+  SPECIALIZATIONS_LIST, 
+  mapStatusToMapLabel, 
+  getTechnicianIconByText, 
+  getBranchIcon,
+  getSpecializationEmoji 
+} from "@/constants/technicianConstants";
 
 const SPECIALTIES = [
-  { id: "all", label: "كل التخصصات", icon: "🛠️", keywords: [] as string[] },
-  ...SPECIALIZATIONS_LIST.map(s => ({ id: s.id, label: s.label, icon: s.icon, keywords: s.keywords }))
+  { id: "all", label: "كل التخصصات", emoji: "🛠️", keywords: [] as string[] },
+  ...SPECIALIZATIONS_LIST.map(s => ({ id: s.id, label: s.label, emoji: s.emoji, keywords: s.keywords }))
 ];
 
 const MAP_STYLE: google.maps.MapTypeStyle[] = [
@@ -101,8 +107,7 @@ const MAP_STYLE: google.maps.MapTypeStyle[] = [
   },
 ];
 
-// استيراد دوال الأيقونات
-import { getTechnicianIcon, getBranchIcon } from "@/lib/technicianIcons";
+// Icons now imported from unified constants above
 
 export default function ServiceMap() {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -283,7 +288,7 @@ export default function ServiceMap() {
           const techStatus = mapStatusToMapLabel(tech.status || 'offline');
 
           // استخدام أيقونة الفني المرفقة بدون أي تعديل
-          const techIconUrl = getTechnicianIcon(tech.specialization || "");
+          const techIconUrl = getTechnicianIconByText(tech.specialization || "");
           const markerImg = document.createElement("img");
           markerImg.src = techIconUrl;
           markerImg.style.cssText = "cursor: pointer; width: 40px; height: 48px;";
@@ -484,7 +489,7 @@ export default function ServiceMap() {
                 onClick={() => setSelectedSpecialty(selectedSpecialty === specialty.id ? null : specialty.id)}
                 className="whitespace-nowrap"
               >
-                <span className="ml-1">{specialty.icon}</span>
+                <span className="ml-1">{specialty.emoji}</span>
                 {specialty.label}
               </Button>
             ))}
@@ -535,7 +540,7 @@ export default function ServiceMap() {
                     className="cursor-pointer text-xs"
                     onClick={() => setSelectedSpecialty(selectedSpecialty === specialty.id ? null : specialty.id)}
                   >
-                    <span className="ml-1">{specialty.icon}</span>
+                    <span className="ml-1">{specialty.emoji}</span>
                     {specialty.label}
                   </Badge>
                 ))}

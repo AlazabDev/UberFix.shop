@@ -11,13 +11,62 @@ export const TECHNICIAN_STATUS = {
 } as const;
 
 // Specializations - synced with specialization_icons table
+// Unified with icons from /icons/technicians/ and colors
 export const SPECIALIZATIONS = {
-  electrician: { id: 'electrician', label: 'كهرباء', icon: '⚡', keywords: ['كهرب', 'elect'] },
-  plumber: { id: 'plumber', label: 'سباكة', icon: '🚿', keywords: ['سباك', 'plumb'] },
-  ac_technician: { id: 'ac_technician', label: 'تكييف', icon: '❄️', keywords: ['تكييف', 'ac'] },
-  carpenter: { id: 'carpenter', label: 'نجارة', icon: '🪵', keywords: ['نجار', 'carp'] },
-  painter: { id: 'painter', label: 'دهانات', icon: '🎨', keywords: ['دهان', 'paint'] },
-  general: { id: 'general', label: 'صيانة عامة', icon: '🛠️', keywords: ['عام', 'general'] },
+  electrician: { 
+    id: 'electrician', 
+    label: 'كهربائي', 
+    labelAr: 'كهرباء',
+    emoji: '⚡', 
+    icon: '/icons/technicians/tec-03.png',
+    color: '#FFD700',
+    keywords: ['كهرب', 'elect'] 
+  },
+  plumber: { 
+    id: 'plumber', 
+    label: 'سباك', 
+    labelAr: 'سباكة',
+    emoji: '🚿', 
+    icon: '/icons/technicians/tec-05.png',
+    color: '#FF8C00',
+    keywords: ['سباك', 'plumb'] 
+  },
+  ac_technician: { 
+    id: 'ac_technician', 
+    label: 'فني تكييف', 
+    labelAr: 'تكييف',
+    emoji: '❄️', 
+    icon: '/icons/technicians/tec-06.png',
+    color: '#1E90FF',
+    keywords: ['تكييف', 'ac', 'hvac'] 
+  },
+  carpenter: { 
+    id: 'carpenter', 
+    label: 'نجار', 
+    labelAr: 'نجارة',
+    emoji: '🪵', 
+    icon: '/icons/technicians/tec-04.png',
+    color: '#D2691E',
+    keywords: ['نجار', 'carp'] 
+  },
+  painter: { 
+    id: 'painter', 
+    label: 'دهان', 
+    labelAr: 'دهانات',
+    emoji: '🎨', 
+    icon: '/icons/technicians/tec-07.png',
+    color: '#20B2AA',
+    keywords: ['دهان', 'paint'] 
+  },
+  general: { 
+    id: 'general', 
+    label: 'صيانة عامة', 
+    labelAr: 'صيانة عامة',
+    emoji: '🛠️', 
+    icon: '/icons/technicians/tec-09.png',
+    color: '#9370DB',
+    keywords: ['عام', 'general', 'صيانة', 'maint'] 
+  },
 } as const;
 
 // Technician Levels
@@ -73,9 +122,32 @@ export const getSpecializationLabel = (spec: string): string => {
   return SPECIALIZATIONS[spec as Specialization]?.label || spec;
 };
 
-export const getSpecializationIcon = (spec: string): string => {
-  return SPECIALIZATIONS[spec as Specialization]?.icon || '🛠️';
+export const getSpecializationEmoji = (spec: string): string => {
+  return SPECIALIZATIONS[spec as Specialization]?.emoji || '🛠️';
 };
+
+export const getSpecializationIcon = (spec: string): string => {
+  return SPECIALIZATIONS[spec as Specialization]?.icon || '/icons/technicians/tec-01.png';
+};
+
+export const getSpecializationColor = (spec: string): string => {
+  return SPECIALIZATIONS[spec as Specialization]?.color || '#808080';
+};
+
+// Helper to get icon based on specialization text (for dynamic matching)
+export const getTechnicianIconByText = (specialization: string): string => {
+  const spec = specialization?.toLowerCase() || "";
+  
+  for (const [key, value] of Object.entries(SPECIALIZATIONS)) {
+    if (value.keywords.some(kw => spec.includes(kw))) {
+      return value.icon;
+    }
+  }
+  return '/icons/technicians/tec-01.png';
+};
+
+// Branch icon
+export const getBranchIcon = (): string => '/icons/branches/branch-icon.png';
 
 export const getTechnicianLevelInfo = (level: string) => {
   return TECHNICIAN_LEVELS[level as TechnicianLevel] || TECHNICIAN_LEVELS.technician;
