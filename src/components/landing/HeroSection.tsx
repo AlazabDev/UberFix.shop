@@ -62,8 +62,7 @@ export const HeroSection = () => {
                     "نهج مستدام للمنشآت التجارية",         
                   ]}
                   interval={3500}
-                  />
-                </span>
+                />
               </h1>
 
               <p className="text-lg text-muted-foreground leading-relaxed">
