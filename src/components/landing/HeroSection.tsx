@@ -37,7 +37,7 @@ export const HeroSection = () => {
           <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary animate-pulse-soft" />
             <span className="text-sm font-medium">
-              نخدم أكثر من 8 مدن في جميع أنحاء مصر
+              UberFix for Facility Management
             </span>
             <MapPin className="h-5 w-5 text-primary animate-pulse-soft" />
           </div>
@@ -49,28 +49,19 @@ export const HeroSection = () => {
             <div className="space-y-4">
               <Badge variant="secondary" className="w-fit">
                 <Wrench className="h-3 w-3 mr-1" />
-                خبراء الصيانة وتجهيز المحلات
+                By Alazab Construction
               </Badge>
 
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight min-h-[180px] lg:min-h-[240px]">
                 <RotatingText
                   texts={[
-                    "حلول شاملة للصيانة",
-                    "خدمات صيانة متكاملة",
-                    "خبراء الصيانة المتخصصة",
-                    "صيانة احترافية متطورة",
+                    "إدارة المنشآت بمعايير الجودة",
+                    "نقدم حلول ذكية لإدارة الصيانة",
+                    "صيانة احترافية بمعايير واضحة",
+                    "تجهيز المحلات بخبرة هندسية",
+                    "نهج مستدام للمنشآت التجارية",         
                   ]}
                   interval={3500}
-                />
-                <span className="bg-gradient-to-l from-primary to-primary/60 bg-clip-text text-transparent block mt-2">
-                  <RotatingText
-                    texts={[
-                      "وتجهيز المحلات التجارية",
-                      "وتجهيز المتاجر بالكامل",
-                      "للمحلات والمنشآت التجارية",
-                      "وتأسيس المحلات الحديثة",
-                    ]}
-                    interval={3500}
                   />
                 </span>
               </h1>
@@ -78,10 +69,11 @@ export const HeroSection = () => {
               <p className="text-lg text-muted-foreground leading-relaxed">
                 <RotatingText
                   texts={[
-                    "نوفر خدمات الصيانة الكاملة من كهرباء وسباكة وتكييف، بالإضافة إلى تجهيز المحلات التجارية بأعلى معايير الجودة والاحترافية",
-                    "نقدم حلول متكاملة لصيانة وتجهيز المحلات التجارية بأحدث التقنيات ومعايير الجودة العالمية مع فريق متخصص محترف",
-                    "خبراء في تأسيس وصيانة المحلات التجارية بجميع أنواعها، من الكهرباء والسباكة إلى التكييف والديكور الداخلي",
-                    "شريكك الموثوق في تجهيز المحلات التجارية والمنشآت، نوفر خدمات صيانة شاملة متاحة على مدار الساعة",
+                    "نُدير المنشآت وفق أطر جودة واضحة تضمن كفاءة التشغيل، وتقليل الأعطال، والحفاظ على مستوى ثابت من الأداء اليومي.",
+                    "نوفر حلول صيانة تعتمد على التخطيط والتحليل، بما يضمن سرعة الاستجابة واستمرارية العمل التشغليه دون تعطيل النشاط.",
+                    "تنفيذ أعمال الصيانة والتجديدات بأسلوب منظم ومعايير محددة تضمن الجودة، والدقة، والالتزام في كل مرحلة من الخدمه.",
+                    "خبرة عملية في تجهيز المحلات التجارية والفروع من التأسيس حتى التشغيل، مع مراعاة المتطلبات الفنية والتشغيلية .",
+                    "نعتمد نهجًا طويل المدى يوازن بين الأداء والتكلفة، ويعزز استدامة المنشآت التجاريه وسلسلة الامدادات على المدى البعيد.",
                   ]}
                   interval={3500}
                 />
