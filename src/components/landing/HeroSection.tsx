@@ -5,7 +5,7 @@ import { ArrowLeft, Calendar, ChevronDown, Wrench } from "lucide-react";
 import { RotatingText } from "./RotatingText";
 import { useEffect, useRef } from "react";
 
-// Animated particles component
+// Animated particles component with brand colors
 const AnimatedParticles = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -33,24 +33,23 @@ const AnimatedParticles = () => {
       opacity: number;
     }> = [];
 
+    // Brand colors from design system
     const colors = [
-      "hsl(160, 84%, 39%)", // Green
-      "hsl(45, 93%, 47%)", // Yellow/Gold
-      "hsl(199, 89%, 48%)", // Blue
-      "hsl(280, 65%, 60%)", // Purple
-      "hsl(340, 75%, 55%)", // Pink
+      "hsl(220, 84%, 35%)", // Primary blue
+      "hsl(38, 92%, 50%)", // Secondary orange
+      "hsl(120, 60%, 50%)", // Success green
+      "hsl(220, 84%, 45%)", // Primary light
     ];
 
-    // Create particles
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 60; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 3 + 1,
+        radius: Math.random() * 2 + 0.5,
         color: colors[Math.floor(Math.random() * colors.length)],
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.8 + 0.2,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.5 + 0.2,
       });
     }
 
@@ -61,13 +60,11 @@ const AnimatedParticles = () => {
         particle.x += particle.vx;
         particle.y += particle.vy;
 
-        // Wrap around edges
         if (particle.x < 0) particle.x = canvas.width;
         if (particle.x > canvas.width) particle.x = 0;
         if (particle.y < 0) particle.y = canvas.height;
         if (particle.y > canvas.height) particle.y = 0;
 
-        // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
         ctx.fillStyle = particle.color;
@@ -97,22 +94,22 @@ const AnimatedParticles = () => {
 
 export const HeroSection = () => {
   const scrollToContent = () => {
-    window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
+    window.scrollBy({ top: window.innerHeight * 0.7, behavior: "smooth" });
   };
 
   return (
-    <section className="relative min-h-screen bg-[hsl(200,50%,8%)] overflow-hidden flex flex-col items-center justify-center">
+    <section className="relative min-h-[85vh] bg-primary-dark overflow-hidden flex flex-col items-center justify-center">
       {/* Animated Particles Background */}
       <AnimatedParticles />
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(200,50%,8%)]/30 to-[hsl(200,50%,8%)]/80 z-[2]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-primary-dark/50 to-primary-dark z-[2]" />
 
-      <div className="container mx-auto px-4 py-20 relative z-10 text-center" dir="rtl">
+      <div className="container mx-auto px-4 py-12 relative z-10 text-center" dir="rtl">
         {/* Top Badge */}
-        <div className="flex justify-center mb-10">
-          <div className="bg-[hsl(180,40%,20%)]/80 backdrop-blur-sm px-6 py-3 rounded-full border border-[hsl(160,84%,39%)]/30 flex items-center gap-3">
-            <Wrench className="h-5 w-5 text-[hsl(160,84%,39%)]" />
+        <div className="flex justify-center mb-6">
+          <div className="bg-primary/20 backdrop-blur-sm px-5 py-2 rounded-full border border-secondary/30 flex items-center gap-2">
+            <Wrench className="h-4 w-4 text-secondary" />
             <span className="text-sm font-medium text-white/90">
               حلول صيانة مبتكرة
             </span>
@@ -120,8 +117,8 @@ export const HeroSection = () => {
         </div>
 
         {/* Main Heading with Rotating Text */}
-        <div className="max-w-4xl mx-auto space-y-6 mb-10">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white min-h-[120px] md:min-h-[150px]">
+        <div className="max-w-4xl mx-auto space-y-4 mb-8">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white min-h-[80px] md:min-h-[100px]">
             <RotatingText
               texts={[
                 "إدارة المنشآت بمعايير الجودة",
@@ -135,7 +132,7 @@ export const HeroSection = () => {
           </h1>
 
           {/* Subtitle with Rotating Text */}
-          <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-3xl mx-auto min-h-[80px]">
+          <p className="text-sm md:text-base text-white/70 leading-relaxed max-w-2xl mx-auto min-h-[60px]">
             <RotatingText
               texts={[
                 "نُدير المنشآت وفق أطر جودة واضحة تضمن كفاءة التشغيل، وتقليل الأعطال، والحفاظ على مستوى ثابت من الأداء اليومي.",
@@ -150,56 +147,50 @@ export const HeroSection = () => {
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <Button
             size="lg"
-            className="bg-[hsl(180,40%,25%)] hover:bg-[hsl(180,40%,30%)] text-white border border-[hsl(160,84%,39%)]/30 px-8 py-6 text-base group"
+            className="bg-secondary hover:bg-secondary-light text-secondary-foreground px-6 py-5 text-sm font-semibold group"
             onClick={() => (window.location.href = "/role-selection")}
           >
             ابدأ رحلتك معنا
-            <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
           </Button>
 
           <Button
             variant="outline"
             size="lg"
-            className="border-white/20 text-white hover:bg-white/10 px-8 py-6 text-base"
+            className="border-white/30 text-white hover:bg-white/10 px-6 py-5 text-sm"
             onClick={() => (window.location.href = "/contact")}
           >
-            <Calendar className="h-5 w-5 ml-2" />
+            <Calendar className="h-4 w-4 ml-2" />
             احجز استشارة
           </Button>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="flex flex-col items-center mb-12">
-          <button
-            onClick={scrollToContent}
-            className="flex flex-col items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer"
-          >
-            <div className="w-8 h-12 rounded-full border-2 border-white/30 flex items-start justify-center p-2">
-              <div className="w-1.5 h-3 bg-white/60 rounded-full animate-bounce" />
-            </div>
-            <span className="text-xs">انتقل لأسفل</span>
-            <ChevronDown className="h-4 w-4 animate-bounce" />
-          </button>
+        {/* Stats Section */}
+        <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-6">
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-secondary">99%</div>
+            <div className="text-xs text-white/60 mt-1">رضا العملاء</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-success">+1500</div>
+            <div className="text-xs text-white/60 mt-1">مشروع مكتمل</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-secondary">+50</div>
+            <div className="text-xs text-white/60 mt-1">خبير متخصص</div>
+          </div>
         </div>
 
-        {/* Stats Section */}
-        <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold text-[hsl(180,60%,50%)]">99</div>
-            <div className="text-sm text-white/60 mt-1">رضا العملاء</div>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold text-[hsl(45,93%,47%)]">1500</div>
-            <div className="text-sm text-white/60 mt-1">مشروع مكتمل</div>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-bold text-[hsl(180,60%,50%)]">50</div>
-            <div className="text-sm text-white/60 mt-1">خبير متخصص</div>
-          </div>
-        </div>
+        {/* Scroll Indicator */}
+        <button
+          onClick={scrollToContent}
+          className="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors cursor-pointer mx-auto"
+        >
+          <ChevronDown className="h-5 w-5 animate-bounce" />
+        </button>
       </div>
     </section>
   );

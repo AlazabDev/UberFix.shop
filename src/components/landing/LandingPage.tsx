@@ -4,6 +4,7 @@
 import { lazy, Suspense } from "react";
 import { LandingHeader } from "./LandingHeader";
 import { HeroSection } from "./HeroSection";
+import { HeroServicesBar } from "./HeroServicesBar";
 import { ServicesSection } from "./ServicesSection";
 import { StatsSection } from "./StatsSection";
 import { ExperienceSection } from "./ExperienceSection";
@@ -20,9 +21,9 @@ const InteractiveMap = lazy(() => import("./InteractiveMap"));
 
 // Loading fallback for map
 const MapLoadingFallback = () => (
-  <div className="w-full h-[500px] rounded-2xl bg-slate-900/50 flex items-center justify-center">
+  <div className="w-full h-[400px] rounded-2xl bg-muted/50 flex items-center justify-center">
     <div className="text-center">
-      <Loader2 className="w-10 h-10 animate-spin mx-auto mb-3 text-primary" />
+      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
       <p className="text-sm text-muted-foreground">جاري تحميل الخريطة...</p>
     </div>
   </div>
@@ -36,36 +37,28 @@ export const LandingPage = () => {
       {/* قسم الهيرو */}
       <HeroSection />
 
-      {/* قسم مستقل للخريطة أسفل الهيرو */}
-      <section className="py-16 md:py-20 bg-muted/40 border-y border-border/60">
-        <div className="container mx-auto px-4 space-y-8" dir="rtl">
-          <div className="max-w-3xl mx-auto text-center space-y-3">
-            <p className="inline-flex items-center gap-2 text-xs md:text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+      {/* شريط الخدمات السريع أسفل الهيرو مباشرة */}
+      <HeroServicesBar />
+
+      {/* قسم مستقل للخريطة */}
+      <section className="py-12 md:py-16 bg-muted/30">
+        <div className="container mx-auto px-4 space-y-6" dir="rtl">
+          <div className="max-w-2xl mx-auto text-center space-y-2">
+            <p className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
               شبكة أوبر فيكس على الخريطة
             </p>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">
               تغطية تشغيلية{" "}
               <span className="bg-gradient-to-l from-primary to-secondary bg-clip-text text-transparent">
-                للفروع والعملاء في مصر
+                للفروع والعملاء
               </span>
             </h2>
-            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-              يعرض هذا القسم مواقع الفروع والشركاء التي نخدمها حاليًا، مع
-              إمكانية ربطه مستقبلاً ببيانات حقيقية من Supabase وERPNext لعرض
-              الحالة التشغيلية لحظيًا.
-            </p>
           </div>
 
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <Suspense fallback={<MapLoadingFallback />}>
               <InteractiveMap />
             </Suspense>
-          </div>
-
-          <div className="max-w-3xl mx-auto text-center text-xs md:text-sm text-muted-foreground">
-            يمكن إضافة طبقات أخرى على الخريطة مثل حالة الطلبات، الفنيين
-            المتصلين، أوقات الذروة، ومؤشرات الأداء لكل فرع، لتصبح الخريطة
-            لوحة تحكم تشغيلية بصرية متكاملة.
           </div>
         </div>
       </section>
