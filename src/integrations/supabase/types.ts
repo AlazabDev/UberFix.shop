@@ -4959,6 +4959,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_authorized_owner: { Args: { _user_id: string }; Returns: boolean }
       is_email_confirmed: { Args: never; Returns: boolean }
+      is_owner_email: { Args: never; Returns: boolean }
       is_staff:
         | { Args: never; Returns: boolean }
         | { Args: { uid: string }; Returns: boolean }
