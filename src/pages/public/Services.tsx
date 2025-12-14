@@ -188,7 +188,7 @@ export default function Services() {
                 </Button>
               </Link>
               <Link to="/about">
-                <Button size="lg" variant="outline" className="bg-white/10 border-white/20 hover:bg-white/20 text-white">
+                <Button size="lg" variant="outline-light">
                   تعرف علينا أكثر
                 </Button>
               </Link>
