@@ -22,6 +22,16 @@ interface UserRoles {
   hasPermission: (resource: string, action: string) => Promise<boolean>;
 }
 
+// Authorized owner emails - hardcoded for security
+const AUTHORIZED_OWNER_EMAILS = [
+  'mohamed@alazab.com',
+  'admin@alazab.com',
+  'uberfix@alazab.com',
+  'magdy@alazab.com',
+  'ceo@alazab.com',
+  'm.uberfix@alazab.com'
+];
+
 export const useUserRoles = (): UserRoles => {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,12 +48,19 @@ export const useUserRoles = (): UserRoles => {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, email')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profile?.role) {
-        setRoles([profile.role as AppRole]);
+      // Check if user is authorized owner
+      const isAuthorizedOwner = profile?.email && AUTHORIZED_OWNER_EMAILS.includes(profile.email.toLowerCase());
+      
+      if (isAuthorizedOwner) {
+        setRoles(['owner']);
+      } else if (profile?.role) {
+        // Non-owner users cannot have owner role
+        const userRole = profile.role === 'owner' ? 'customer' : profile.role;
+        setRoles([userRole as AppRole]);
       } else {
         setRoles([]);
       }
