@@ -31,6 +31,7 @@ const QuickRequestFromMap = lazy(() => import("@/pages/QuickRequestFromMap"));
 const TrackOrders = lazy(() => import("@/pages/TrackOrders"));
 const CompletedServices = lazy(() => import("@/pages/CompletedServices"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const WhatsAppStatusPage = lazy(() => import("@/pages/messages/WhatsAppStatusPage"));
 
 // Technician pages
 const TechnicianRegistration = lazy(() => import("@/pages/technicians/TechnicianRegistration"));
@@ -67,6 +68,7 @@ export const publicRoutes = [
   { path: "/quick-request-from-map", element: <QuickRequestFromMap /> },
   { path: "/track-orders", element: <TrackOrders /> },
   { path: "/completed-services", element: <CompletedServices /> },
+  { path: "/whatsapp-status", element: <WhatsAppStatusPage /> },
   { path: "/technicians/register", element: <TechnicianRegistration /> },
   { path: "/technicians/registration/wizard", element: <TechnicianRegistrationWizard /> },
   { path: "/technicians/registration/thank-you", element: <RegistrationThankYou /> },
