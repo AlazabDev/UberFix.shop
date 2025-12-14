@@ -3922,6 +3922,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "technician_withdrawals_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_withdrawals_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
@@ -4239,6 +4246,44 @@ export type Database = {
       }
     }
     Views: {
+      profiles_public_safe: {
+        Row: {
+          avatar_url: string | null
+          company_id: string | null
+          full_name: string | null
+          id: string | null
+          name: string | null
+          position: string | null
+          role: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_id?: string | null
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
+          position?: string | null
+          role?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string | null
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
+          position?: string | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       technician_assigned_requests: {
         Row: {
           assigned_technician_id: string | null
