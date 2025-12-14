@@ -4768,6 +4768,7 @@ export type Database = {
       is_staff:
         | { Args: never; Returns: boolean }
         | { Args: { uid: string }; Returns: boolean }
+      is_valid_egyptian_phone: { Args: { phone: string }; Returns: boolean }
       recalc_request_totals: {
         Args: { p_request_id: string }
         Returns: undefined
