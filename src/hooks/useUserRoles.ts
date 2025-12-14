@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-type AppRole = 'admin' | 'manager' | 'staff' | 'technician' | 'vendor' | 'customer' | 'dispatcher' | 'finance';
+type AppRole = 'admin' | 'manager' | 'staff' | 'technician' | 'vendor' | 'customer' | 'dispatcher' | 'finance' | 'owner';
 
 export type { AppRole };
 
@@ -16,6 +16,7 @@ interface UserRoles {
   isCustomer: boolean;
   isDispatcher: boolean;
   isFinance: boolean;
+  isOwner: boolean;
   hasRole: (role: AppRole) => boolean;
   hasAnyRole: (roles: AppRole[]) => boolean;
   hasPermission: (resource: string, action: string) => Promise<boolean>;
@@ -121,6 +122,7 @@ export const useUserRoles = (): UserRoles => {
     isCustomer: hasRole('customer'),
     isDispatcher: hasRole('dispatcher'),
     isFinance: hasRole('finance'),
+    isOwner: hasRole('owner'),
     hasRole,
     hasAnyRole,
     hasPermission

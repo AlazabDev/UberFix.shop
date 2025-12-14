@@ -1210,6 +1210,36 @@ export type Database = {
           },
         ]
       }
+      module_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          module_key: string
+          module_name: string
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          module_key: string
+          module_name: string
+          role: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          module_key?: string
+          module_name?: string
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       monthly_excellence_awards: {
         Row: {
           announcement_url: string | null

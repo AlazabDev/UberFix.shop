@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "./AppSidebar";
+import { RoleBasedSidebar } from "./RoleBasedSidebar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NotificationsList } from "@/components/notifications/NotificationsList";
@@ -51,10 +51,12 @@ export function AppLayout({ children }: AppLayoutProps) {
         firstName: profile?.first_name || "مستخدم",
         lastName: profile?.last_name || "",
         avatarUrl: profile?.avatar_url || null,
-        role: profile?.role === "admin" ? "مسؤول" : 
+        role: profile?.role === "owner" ? "المالك" :
+              profile?.role === "admin" ? "مسؤول" : 
               profile?.role === "manager" ? "مدير" :
               profile?.role === "staff" ? "موظف" :
-              profile?.role === "vendor" ? "فني" : "عميل"
+              profile?.role === "technician" ? "فني" :
+              profile?.role === "vendor" ? "مورد" : "عميل"
       });
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -97,7 +99,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background" dir="rtl">
-        <AppSidebar />
+        <RoleBasedSidebar />
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header with trigger and user menu */}
