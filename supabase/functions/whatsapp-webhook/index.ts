@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const VERIFY_TOKEN = Deno.env.get('WEBHOOK_SECRET') || 'uberfix_webhook_verify_token';
+const VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN');
 const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
 const FACEBOOK_SECRET = Deno.env.get('FACEBOOK_SECRET');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
