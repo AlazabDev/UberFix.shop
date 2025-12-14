@@ -283,9 +283,9 @@ export const HeroSection = () => {
           </AnimatedBorderButton>
 
           <Button
-            variant="outline"
+            variant="outline-light"
             size="lg"
-            className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 px-8 py-6 text-base backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
+            className="px-8 py-6 text-base backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
             onClick={() => (window.location.href = "/contact")}
           >
             <Calendar className="h-5 w-5 ml-2" />
