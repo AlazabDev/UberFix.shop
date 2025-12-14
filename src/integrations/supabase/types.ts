@@ -364,6 +364,27 @@ export type Database = {
         }
         Relationships: []
       }
+      authorized_owners: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
       branch_locations: {
         Row: {
           address: string | null
@@ -4742,6 +4763,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_authorized_owner: { Args: { _user_id: string }; Returns: boolean }
       is_email_confirmed: { Args: never; Returns: boolean }
       is_staff:
         | { Args: never; Returns: boolean }
