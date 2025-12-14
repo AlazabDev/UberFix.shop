@@ -1,13 +1,11 @@
-// src/components/landing/HeroSection.tsx
-
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, ChevronDown, Wrench } from "lucide-react";
-import { RotatingText } from "./RotatingText";
-import { useEffect, useRef } from "react";
+import { ArrowLeft, Calendar, Wrench } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
-// Animated particles component with brand colors
-const AnimatedParticles = () => {
+// Animated particles with mouse interaction
+const ParticleCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -23,6 +21,11 @@ const AnimatedParticles = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+
     const particles: Array<{
       x: number;
       y: number;
@@ -31,39 +34,59 @@ const AnimatedParticles = () => {
       vx: number;
       vy: number;
       opacity: number;
+      baseX: number;
+      baseY: number;
     }> = [];
 
-    // Brand colors from design system
     const colors = [
-      "hsl(220, 84%, 35%)", // Primary blue
-      "hsl(38, 92%, 50%)", // Secondary orange
-      "hsl(120, 60%, 50%)", // Success green
-      "hsl(220, 84%, 45%)", // Primary light
+      "#3b82f6", // Blue
+      "#0d9488", // Teal
+      "#f59e0b", // Orange
+      "#10b981", // Green
+      "#6366f1", // Indigo
     ];
 
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 80; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
       particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 2 + 0.5,
+        x,
+        y,
+        baseX: x,
+        baseY: y,
+        radius: Math.random() * 3 + 1,
         color: colors[Math.floor(Math.random() * colors.length)],
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.5 + 0.2,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        opacity: Math.random() * 0.7 + 0.3,
       });
     }
 
+    let animationId: number;
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((particle) => {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+        // Mouse interaction
+        const dx = mouseRef.current.x - particle.x;
+        const dy = mouseRef.current.y - particle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const maxDistance = 150;
 
-        if (particle.x < 0) particle.x = canvas.width;
-        if (particle.x > canvas.width) particle.x = 0;
-        if (particle.y < 0) particle.y = canvas.height;
-        if (particle.y > canvas.height) particle.y = 0;
+        if (distance < maxDistance) {
+          const force = (maxDistance - distance) / maxDistance;
+          particle.x -= (dx / distance) * force * 2;
+          particle.y -= (dy / distance) * force * 2;
+        } else {
+          particle.x += (particle.baseX - particle.x) * 0.02;
+          particle.y += (particle.baseY - particle.y) * 0.02;
+        }
+
+        particle.baseX += particle.vx;
+        particle.baseY += particle.vy;
+
+        if (particle.baseX < 0 || particle.baseX > canvas.width) particle.vx *= -1;
+        if (particle.baseY < 0 || particle.baseY > canvas.height) particle.vy *= -1;
 
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
@@ -73,124 +96,227 @@ const AnimatedParticles = () => {
         ctx.globalAlpha = 1;
       });
 
-      requestAnimationFrame(animate);
+      animationId = requestAnimationFrame(animate);
     };
 
     animate();
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animationId);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
-      style={{ zIndex: 1 }}
+      className="absolute inset-0 pointer-events-none z-[1]"
     />
   );
 };
 
-export const HeroSection = () => {
-  const scrollToContent = () => {
-    window.scrollBy({ top: window.innerHeight * 0.7, behavior: "smooth" });
-  };
+// Animated Orbs
+const AnimatedOrbs = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
+    <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full bg-primary/20 blur-[100px] animate-[float_20s_ease-in-out_infinite]" />
+    <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-success/15 blur-[120px] animate-[float_20s_ease-in-out_infinite_7s]" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-[#0d9488]/10 blur-[80px] animate-[float_20s_ease-in-out_infinite_14s]" />
+  </div>
+);
+
+// Hero Badge with shimmer
+const HeroBadge = () => (
+  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 animate-[fadeInDown_0.6s_ease-out_0.2s_both] relative overflow-hidden group">
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+    <Wrench className="h-4 w-4 text-secondary animate-pulse" />
+    <span className="text-sm font-medium text-white/90">حلول صيانة مبتكرة</span>
+  </div>
+);
+
+// Typing effect hook
+const useTypingEffect = (text: string, speed: number = 100, delay: number = 0) => {
+  const [displayText, setDisplayText] = useState("");
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    let index = 0;
+
+    const startTyping = () => {
+      if (index < text.length) {
+        setDisplayText(text.slice(0, index + 1));
+        index++;
+        timeout = setTimeout(startTyping, speed);
+      } else {
+        setIsComplete(true);
+      }
+    };
+
+    const delayTimeout = setTimeout(startTyping, delay);
+
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(delayTimeout);
+    };
+  }, [text, speed, delay]);
+
+  return { displayText, isComplete };
+};
+
+// Animated Counter
+const AnimatedCounter = ({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) => {
+  const [count, setCount] = useState(0);
+  const countRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          const startTime = performance.now();
+          
+          const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.floor(easeOut * end));
+            
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+          
+          requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (countRef.current) {
+      observer.observe(countRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [end, duration]);
 
   return (
-    <section className="relative min-h-[85vh] bg-primary-dark overflow-hidden flex flex-col items-center justify-center">
-      {/* Animated Particles Background */}
-      <AnimatedParticles />
+    <div ref={countRef} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-secondary via-success to-primary bg-clip-text text-transparent">
+      {suffix}{count.toLocaleString()}
+    </div>
+  );
+};
+
+// Scroll Indicator
+const ScrollIndicator = ({ onClick }: { onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className="flex flex-col items-center gap-2 text-white/50 hover:text-white transition-colors cursor-pointer animate-[fadeInUp_0.6s_ease-out_1.5s_both]"
+  >
+    <div className="w-6 h-10 rounded-full border-2 border-current flex justify-center pt-2">
+      <div className="w-1 h-2 bg-current rounded-full animate-[scrollWheel_2s_ease-in-out_infinite]" />
+    </div>
+    <span className="text-xs">انتقل لأسفل</span>
+  </button>
+);
+
+// Animated Border Button
+const AnimatedBorderButton = ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className="relative group px-8 py-4 rounded-lg overflow-hidden bg-primary hover:bg-primary/90 transition-all duration-300 hover:-translate-y-1"
+  >
+    <div className="absolute inset-0 rounded-lg p-[2px] bg-gradient-to-r from-primary via-secondary to-success animate-[borderRotate_3s_linear_infinite] opacity-0 group-hover:opacity-100 transition-opacity" />
+    <div className="absolute inset-[2px] rounded-lg bg-primary group-hover:bg-primary/95" />
+    <span className="relative z-10 flex items-center gap-2 text-white font-semibold">
+      {children}
+    </span>
+  </button>
+);
+
+export const HeroSection = () => {
+  const { displayText, isComplete } = useTypingEffect("بمعايير الجودة العالمية", 80, 800);
+
+  const scrollToContent = useCallback(() => {
+    window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
+  }, []);
+
+  return (
+    <section className="relative min-h-screen bg-[#0a1929] overflow-hidden flex flex-col items-center justify-center">
+      {/* Background Layers */}
+      <ParticleCanvas />
+      <AnimatedOrbs />
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-primary-dark/50 to-primary-dark z-[2]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a1929]/50 to-[#0a1929] z-[3]" />
 
-      <div className="container mx-auto px-4 py-12 relative z-10 text-center" dir="rtl">
-        {/* Top Badge */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-primary/20 backdrop-blur-sm px-5 py-2 rounded-full border border-secondary/30 flex items-center gap-2">
-            <Wrench className="h-4 w-4 text-secondary" />
-            <span className="text-sm font-medium text-white/90">
-              حلول صيانة مبتكرة
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-16 relative z-10 text-center" dir="rtl">
+        {/* Badge */}
+        <div className="flex justify-center mb-8">
+          <HeroBadge />
+        </div>
+
+        {/* Main Title */}
+        <div className="max-w-5xl mx-auto mb-8">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[fadeInUp_0.6s_ease-out_both]">
+            <span className="text-white block mb-2">إدارة الصيانة والمنشآت</span>
+            <span className="bg-gradient-to-r from-[#0d9488] via-[#3b82f6] to-[#0d9488] bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradientShift_3s_linear_infinite]">
+              {displayText}
+              {!isComplete && <span className="animate-pulse">|</span>}
             </span>
-          </div>
-        </div>
-
-        {/* Main Heading with Rotating Text */}
-        <div className="max-w-4xl mx-auto space-y-4 mb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white min-h-[80px] md:min-h-[100px]">
-            <RotatingText
-              texts={[
-                "إدارة المنشآت بمعايير الجودة",
-                "نقدم حلول ذكية لإدارة الصيانة",
-                "صيانة احترافية بمعايير واضحة",
-                "تجهيز المحلات بخبرة هندسية",
-                "نهج مستدام للمنشآت التجارية",
-              ]}
-              interval={4000}
-            />
           </h1>
-
-          {/* Subtitle with Rotating Text */}
-          <p className="text-sm md:text-base text-white/70 leading-relaxed max-w-2xl mx-auto min-h-[60px]">
-            <RotatingText
-              texts={[
-                "نُدير المنشآت وفق أطر جودة واضحة تضمن كفاءة التشغيل، وتقليل الأعطال، والحفاظ على مستوى ثابت من الأداء اليومي.",
-                "نوفر حلول صيانة تعتمد على التخطيط والتحليل، بما يضمن سرعة الاستجابة واستمرارية العمل التشغيلية دون تعطيل النشاط.",
-                "تنفيذ أعمال الصيانة والتجديدات بأسلوب منظم ومعايير محددة تضمن الجودة، والدقة، والالتزام في كل مرحلة من الخدمة.",
-                "خبرة عملية في تجهيز المحلات التجارية والفروع من التأسيس حتى التشغيل، مع مراعاة المتطلبات الفنية والتشغيلية.",
-                "نعتمد نهجًا طويل المدى يوازن بين الأداء والتكلفة، ويعزز استدامة المنشآت التجارية وسلسلة الإمدادات على المدى البعيد.",
-              ]}
-              interval={4000}
-            />
-          </p>
         </div>
+
+        {/* Subtitle */}
+        <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-3xl mx-auto mb-10 animate-[fadeInUp_0.6s_ease-out_0.6s_both]">
+          نوفر حلولاً ذكية لإدارة الصيانة والمنشآت مع معايير جودة واضحة تضمن كفاءة التشغيل،
+          وتقليل الأعطال، والحفاظ على مستوى ثابت من الأداء.
+        </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-          <Button
-            size="lg"
-            className="bg-secondary hover:bg-secondary-light text-secondary-foreground px-6 py-5 text-sm font-semibold group"
-            onClick={() => (window.location.href = "/role-selection")}
-          >
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-[fadeInUp_0.6s_ease-out_0.9s_both]">
+          <AnimatedBorderButton onClick={() => (window.location.href = "/role-selection")}>
             ابدأ رحلتك معنا
-            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-          </Button>
+            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+          </AnimatedBorderButton>
 
           <Button
             variant="outline"
             size="lg"
-            className="border-white/30 text-white hover:bg-white/10 px-6 py-5 text-sm"
+            className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 px-8 py-6 text-base backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
             onClick={() => (window.location.href = "/contact")}
           >
-            <Calendar className="h-4 w-4 ml-2" />
+            <Calendar className="h-5 w-5 ml-2" />
             احجز استشارة
           </Button>
         </div>
 
-        {/* Stats Section */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-6">
+        {/* Stats */}
+        <div className="flex flex-wrap justify-center gap-8 md:gap-16 mb-12 animate-[fadeInUp_0.6s_ease-out_1.2s_both]">
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-secondary">99%</div>
-            <div className="text-xs text-white/60 mt-1">رضا العملاء</div>
+            <AnimatedCounter end={99} suffix="" />
+            <div className="text-sm text-white/60 mt-2">رضا العملاء %</div>
           </div>
+          
+          <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-success">+1500</div>
-            <div className="text-xs text-white/60 mt-1">مشروع مكتمل</div>
+            <AnimatedCounter end={1500} suffix="+" />
+            <div className="text-sm text-white/60 mt-2">مشروع مكتمل</div>
           </div>
+          
+          <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-secondary">+50</div>
-            <div className="text-xs text-white/60 mt-1">خبير متخصص</div>
+            <AnimatedCounter end={50} suffix="+" />
+            <div className="text-sm text-white/60 mt-2">خبير متخصص</div>
           </div>
         </div>
 
         {/* Scroll Indicator */}
-        <button
-          onClick={scrollToContent}
-          className="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors cursor-pointer mx-auto"
-        >
-          <ChevronDown className="h-5 w-5 animate-bounce" />
-        </button>
+        <ScrollIndicator onClick={scrollToContent} />
       </div>
     </section>
   );
