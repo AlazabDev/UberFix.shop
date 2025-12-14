@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PropertyForm } from "@/components/forms/PropertyForm";
+import { SmartPropertyForm } from "@/components/forms/property";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -62,14 +62,10 @@ export default function EditProperty() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <PropertyForm
-            initialData={propertyData}
-            propertyId={id}
-          />
-        </CardContent>
-      </Card>
+      <SmartPropertyForm
+        initialData={propertyData}
+        propertyId={id}
+      />
 
       {/* Footer */}
       <div className="mt-8 text-center text-xs text-muted-foreground space-x-4 space-x-reverse">

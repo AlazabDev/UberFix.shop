@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { PropertyForm } from "@/components/forms/PropertyForm";
-import { Card, CardContent } from "@/components/ui/card";
+import { SmartPropertyForm } from "@/components/forms/property";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { AppFooter } from "@/components/shared/AppFooter";
@@ -26,11 +25,7 @@ export default function AddProperty() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <PropertyForm />
-        </CardContent>
-      </Card>
+      <SmartPropertyForm />
 
       <AppFooter />
     </div>
