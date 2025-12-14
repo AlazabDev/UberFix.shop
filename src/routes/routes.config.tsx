@@ -111,6 +111,9 @@ const Appointments = lazy(() => import("@/pages/Appointments"));
 const Invoices = lazy(() => import("@/pages/Invoices"));
 const UsersPage = lazy(() => import("@/pages/UsersPage"));
 
+// Module Settings (Owner only)
+const ModuleSettings = lazy(() => import("@/pages/admin/ModuleSettings"));
+
 // Maintenance Module Pages
 const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
 const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
@@ -159,6 +162,7 @@ export const protectedRoutes = [
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
   { path: "/admin/technician-approval", element: <TechnicianApprovalQueue />, withLayout: true },
+  { path: "/admin/module-settings", element: <ModuleSettings />, withLayout: true },
   { path: "/users", element: <UsersPage />, withLayout: true },
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
 
