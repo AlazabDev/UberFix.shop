@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export interface ModulePermission {
   id: string;
@@ -13,10 +14,25 @@ export const useModulePermissions = () => {
   const [permissions, setPermissions] = useState<ModulePermission[]>([]);
   const [allPermissions, setAllPermissions] = useState<ModulePermission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string>('customer');
+  
+  // Use the centralized useUserRoles hook which properly checks owner email whitelist
+  const { roles, loading: rolesLoading, isOwner, isManager, isTechnician, isCustomer } = useUserRoles();
+
+  // Determine actual role from useUserRoles
+  const getUserRole = (): string => {
+    if (isOwner) return 'owner';
+    if (isManager) return 'manager';
+    if (isTechnician) return 'technician';
+    return 'customer';
+  };
+
+  const userRole = getUserRole();
 
   useEffect(() => {
     const fetchPermissions = async () => {
+      // Wait for roles to load first
+      if (rolesLoading) return;
+
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
@@ -24,31 +40,9 @@ export const useModulePermissions = () => {
           return;
         }
 
-        // Get user's profile to check if owner
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        const currentRole = profile?.role || 'customer';
-        setUserRole(currentRole);
-
-        // Fetch permissions for user's role
-        const { data, error } = await supabase
-          .from('module_permissions')
-          .select('*')
-          .eq('role', currentRole)
-          .eq('is_enabled', true);
-
-        if (error) {
-          console.error('Error fetching permissions:', error);
-        } else {
-          setPermissions(data || []);
-        }
-
-        // If owner, fetch all permissions for management
-        if (currentRole === 'owner') {
+        // Owner sees everything - no need to fetch permissions
+        if (isOwner) {
+          // Fetch all permissions for management
           const { data: allData } = await supabase
             .from('module_permissions')
             .select('*')
@@ -56,6 +50,21 @@ export const useModulePermissions = () => {
             .order('module_key', { ascending: true });
           
           setAllPermissions(allData || []);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch permissions for user's actual role
+        const { data, error } = await supabase
+          .from('module_permissions')
+          .select('*')
+          .eq('role', userRole)
+          .eq('is_enabled', true);
+
+        if (error) {
+          console.error('Error fetching permissions:', error);
+        } else {
+          setPermissions(data || []);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -65,11 +74,11 @@ export const useModulePermissions = () => {
     };
 
     fetchPermissions();
-  }, []);
+  }, [rolesLoading, isOwner, userRole]);
 
   const isModuleEnabled = (moduleKey: string): boolean => {
-    // Owner sees everything
-    if (userRole === 'owner') return true;
+    // Owner sees everything always
+    if (isOwner) return true;
     
     const permission = permissions.find(p => p.module_key === moduleKey);
     return permission?.is_enabled ?? false;
@@ -102,7 +111,7 @@ export const useModulePermissions = () => {
   return {
     permissions,
     allPermissions,
-    loading,
+    loading: loading || rolesLoading,
     isModuleEnabled,
     updatePermission,
     userRole
