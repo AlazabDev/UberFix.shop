@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN');
 const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
-const FACEBOOK_SECRET = Deno.env.get('FACEBOOK_SECRET');
+const FACEBOOK_SECRET = Deno.env.get('FACEBOOK_APP_SECRET');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
