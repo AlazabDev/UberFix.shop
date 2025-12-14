@@ -1392,16 +1392,24 @@ function displayBranchesList(filteredBranches = branches) {
         return;
     }
 
+    // HTML escape function to prevent XSS
+    const escapeHtml = (text) => {
+        if (text == null) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    };
+
     filteredBranches.forEach(branch => {
         const branchItem = document.createElement('div');
         branchItem.className = 'branch-item';
         branchItem.innerHTML = `
             <div class="branch-name">
                 <i class="fas ${branch.branch_type === 'Branch' ? 'fa-store' : 'fa-kiosk'}"></i>
-                ${branch.branch}
+                ${escapeHtml(branch.branch)}
             </div>
-            <div class="branch-address">${branch.address}</div>
-            <span class="branch-type ${branch.branch_type}">
+            <div class="branch-address">${escapeHtml(branch.address)}</div>
+            <span class="branch-type ${escapeHtml(branch.branch_type)}">
                 ${branch.branch_type === 'Branch' ? 'فرع رئيسي' : 'كشك'}
             </span>
         `;
@@ -1437,12 +1445,32 @@ function showBranchInfo(branch) {
     const branchInfo = document.getElementById('branchInfo');
     const branchInfoContent = document.getElementById('branchInfoContent');
     
+    // HTML escape function to prevent XSS
+    const escapeHtml = (text) => {
+        if (text == null) return '';
+        const div = document.createElement('div');
+        div.textContent = String(text);
+        return div.innerHTML;
+    };
+    
+    // Validate and sanitize URL
+    const sanitizeUrl = (url) => {
+        if (!url) return '#';
+        try {
+            const parsed = new URL(url);
+            if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+                return parsed.href;
+            }
+        } catch (e) {}
+        return '#';
+    };
+    
     branchInfoContent.innerHTML = `
-        <h3>${branch.branch}</h3>
-        <p><strong>العنوان:</strong> ${branch.address}</p>
+        <h3>${escapeHtml(branch.branch)}</h3>
+        <p><strong>العنوان:</strong> ${escapeHtml(branch.address)}</p>
         <p><strong>نوع الفرع:</strong> ${branch.branch_type === 'Branch' ? 'فرع رئيسي' : 'كشك'}</p>
-        <p><strong>رقم المعرف:</strong> ${branch.id}</p>
-        <a href="${branch.link}" target="_blank" style="background: #27ae60;">
+        <p><strong>رقم المعرف:</strong> ${escapeHtml(branch.id)}</p>
+        <a href="${sanitizeUrl(branch.link)}" target="_blank" rel="noopener noreferrer" style="background: #27ae60;">
             <i class="fas fa-external-link-alt"></i>
             عرض على الخريطة
         </a>
