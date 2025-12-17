@@ -336,6 +336,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "appointments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       audit_logs: {
@@ -1034,6 +1041,13 @@ export type Database = {
             columns: ["assigned_vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_maintenance_requests_assigned_vendor"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -4020,6 +4034,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "technician_withdrawals_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technician_withdrawals_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
@@ -4344,7 +4365,126 @@ export type Database = {
       }
     }
     Views: {
+      app_settings_safe: {
+        Row: {
+          allow_self_registration: boolean | null
+          app_logo_url: string | null
+          app_name: string | null
+          background_color: string | null
+          company_address: string | null
+          company_email: string | null
+          company_phone: string | null
+          default_currency: string | null
+          default_language: string | null
+          enable_email_notifications: boolean | null
+          enable_in_app_notifications: boolean | null
+          enable_sms_notifications: boolean | null
+          enable_technician_rating: boolean | null
+          google_maps_enabled: boolean | null
+          id: string | null
+          map_style: string | null
+          primary_color: string | null
+          require_manager_approval: boolean | null
+          secondary_color: string | null
+          show_footer: boolean | null
+          show_technicians_on_map: boolean | null
+          theme_mode: string | null
+          timezone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          allow_self_registration?: boolean | null
+          app_logo_url?: string | null
+          app_name?: string | null
+          background_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_phone?: string | null
+          default_currency?: string | null
+          default_language?: string | null
+          enable_email_notifications?: boolean | null
+          enable_in_app_notifications?: boolean | null
+          enable_sms_notifications?: boolean | null
+          enable_technician_rating?: boolean | null
+          google_maps_enabled?: boolean | null
+          id?: string | null
+          map_style?: string | null
+          primary_color?: string | null
+          require_manager_approval?: boolean | null
+          secondary_color?: string | null
+          show_footer?: boolean | null
+          show_technicians_on_map?: boolean | null
+          theme_mode?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          allow_self_registration?: boolean | null
+          app_logo_url?: string | null
+          app_name?: string | null
+          background_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_phone?: string | null
+          default_currency?: string | null
+          default_language?: string | null
+          enable_email_notifications?: boolean | null
+          enable_in_app_notifications?: boolean | null
+          enable_sms_notifications?: boolean | null
+          enable_technician_rating?: boolean | null
+          google_maps_enabled?: boolean | null
+          id?: string | null
+          map_style?: string | null
+          primary_color?: string | null
+          require_manager_approval?: boolean | null
+          secondary_color?: string | null
+          show_footer?: boolean | null
+          show_technicians_on_map?: boolean | null
+          theme_mode?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles_public_safe: {
+        Row: {
+          avatar_url: string | null
+          company_id: string | null
+          full_name: string | null
+          id: string | null
+          name: string | null
+          position: string | null
+          role: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_id?: string | null
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
+          position?: string | null
+          role?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string | null
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
+          position?: string | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles_safe: {
         Row: {
           avatar_url: string | null
           company_id: string | null
@@ -4384,36 +4524,48 @@ export type Database = {
       }
       properties_qr_public: {
         Row: {
-          address: string | null
+          city_id: number | null
           code: string | null
-          icon_url: string | null
+          district_id: number | null
           id: string | null
-          latitude: number | null
-          longitude: number | null
           name: string | null
+          status: string | null
           type: string | null
         }
         Insert: {
-          address?: string | null
+          city_id?: number | null
           code?: string | null
-          icon_url?: string | null
+          district_id?: number | null
           id?: string | null
-          latitude?: number | null
-          longitude?: number | null
           name?: string | null
+          status?: string | null
           type?: string | null
         }
         Update: {
-          address?: string | null
+          city_id?: number | null
           code?: string | null
-          icon_url?: string | null
+          district_id?: number | null
           id?: string | null
-          latitude?: number | null
-          longitude?: number | null
           name?: string | null
+          status?: string | null
           type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "properties_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       technician_assigned_requests: {
         Row: {
@@ -4605,10 +4757,11 @@ export type Database = {
           icon_url: string | null
           id: string | null
           is_active: boolean | null
-          lat: number | null
+          lat_approx: number | null
           level: string | null
-          lng: number | null
+          lng_approx: number | null
           name: string | null
+          profile_image: string | null
           rating: number | null
           specialization: string | null
           status: string | null
@@ -4618,10 +4771,11 @@ export type Database = {
           icon_url?: string | null
           id?: string | null
           is_active?: boolean | null
-          lat?: number | null
+          lat_approx?: never
           level?: string | null
-          lng?: number | null
+          lng_approx?: never
           name?: string | null
+          profile_image?: string | null
           rating?: number | null
           specialization?: string | null
           status?: string | null
@@ -4631,14 +4785,45 @@ export type Database = {
           icon_url?: string | null
           id?: string | null
           is_active?: boolean | null
-          lat?: number | null
+          lat_approx?: never
           level?: string | null
-          lng?: number | null
+          lng_approx?: never
           name?: string | null
+          profile_image?: string | null
           rating?: number | null
           specialization?: string | null
           status?: string | null
           total_reviews?: number | null
+        }
+        Relationships: []
+      }
+      vendors_public_safe: {
+        Row: {
+          address: string | null
+          company_name: string | null
+          id: string | null
+          name: string | null
+          rating: number | null
+          specialization: string[] | null
+          status: string | null
+        }
+        Insert: {
+          address?: string | null
+          company_name?: string | null
+          id?: string | null
+          name?: string | null
+          rating?: number | null
+          specialization?: string[] | null
+          status?: string | null
+        }
+        Update: {
+          address?: string | null
+          company_name?: string | null
+          id?: string | null
+          name?: string | null
+          rating?: number | null
+          specialization?: string[] | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -4769,6 +4954,13 @@ export type Database = {
             columns: ["assigned_vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_maintenance_requests_assigned_vendor"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -4955,6 +5147,31 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+        }[]
+      }
+      get_mr_client_info: {
+        Args: { request_id: string }
+        Returns: {
+          client_email: string
+          client_name: string
+          client_phone: string
+        }[]
+      }
+      get_safe_app_settings: {
+        Args: never
+        Returns: {
+          app_logo_url: string
+          app_name: string
+          background_color: string
+          company_address: string
+          company_email: string
+          company_phone: string
+          default_currency: string
+          default_language: string
+          primary_color: string
+          secondary_color: string
+          theme_mode: string
+          timezone: string
         }[]
       }
       get_table_row_counts: {
