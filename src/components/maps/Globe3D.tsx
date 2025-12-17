@@ -20,6 +20,13 @@ interface Globe3DProps {
   className?: string;
 }
 
+// HTML escape function for XSS prevention
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 export const Globe3D: React.FC<Globe3DProps> = ({ 
   height = '600px', 
   showStats = true,
@@ -143,7 +150,7 @@ export const Globe3D: React.FC<Globe3DProps> = ({
               el.style.transform = 'scale(1)';
             });
 
-            // Create popup
+            // Create popup with escaped HTML to prevent XSS
             const popup = new mapboxgl.Popup({
               offset: 25,
               closeButton: false,
@@ -163,8 +170,8 @@ export const Globe3D: React.FC<Globe3DProps> = ({
                   font-size: 14px;
                   font-weight: 700;
                   color: #f5bf23;
-                ">${branch.name}</h3>
-                ${branch.branch_type ? `<p style="margin: 0; font-size: 11px; opacity: 0.8;">📍 ${branch.branch_type}</p>` : ''}
+                ">${escapeHtml(branch.name || '')}</h3>
+                ${branch.branch_type ? `<p style="margin: 0; font-size: 11px; opacity: 0.8;">📍 ${escapeHtml(branch.branch_type)}</p>` : ''}
                 ${branch.status === 'Active' ? `<span style="
                   display: inline-block;
                   margin-top: 6px;
