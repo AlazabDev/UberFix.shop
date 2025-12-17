@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,13 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowRight, Cog, Shield, Users, Wrench } from "lucide-react";
+import { Loader2, ArrowRight, Cog, Shield, Users, Wrench, Phone } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
+import { PhoneOTPLogin } from "@/components/auth/PhoneOTPLogin";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const [searchParams] = useSearchParams();
   const selectedRole = searchParams.get("role") || "customer";
   const navigate = useNavigate();
@@ -140,76 +142,94 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="example@email.com"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">كلمة المرور</Label>
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-xs text-primary hover:underline"
+            {loginMethod === "phone" ? (
+              <PhoneOTPLogin onBack={() => setLoginMethod("email")} />
+            ) : (
+              <>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">البريد الإلكتروني</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="example@email.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">كلمة المرور</Label>
+                      <Link 
+                        to="/forgot-password" 
+                        className="text-xs text-primary hover:underline"
+                      >
+                        نسيت كلمة المرور؟
+                      </Link>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading}
                   >
-                    نسيت كلمة المرور؟
-                  </Link>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        جاري تسجيل الدخول...
+                      </>
+                    ) : (
+                      <>
+                        تسجيل الدخول
+                        <ArrowRight className="mr-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+                
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">أو</span>
+                  </div>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    جاري تسجيل الدخول...
-                  </>
-                ) : (
-                  <>
-                    تسجيل الدخول
-                    <ArrowRight className="mr-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-              
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">أو</span>
-                </div>
-              </div>
 
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full" 
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-              >
-                <FcGoogle className="ml-2 h-5 w-5" />
-                تسجيل الدخول باستخدام Google
-              </Button>
-              
-            </form>
+                <div className="space-y-3">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                  >
+                    <FcGoogle className="ml-2 h-5 w-5" />
+                    تسجيل الدخول باستخدام Google
+                  </Button>
+
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={() => setLoginMethod("phone")}
+                    disabled={isLoading}
+                  >
+                    <Phone className="ml-2 h-5 w-5" />
+                    تسجيل الدخول برقم الهاتف
+                  </Button>
+                </div>
+              </>
+            )}
             
             <div className="mt-6 text-center space-y-2">
               <p className="text-sm text-muted-foreground">
