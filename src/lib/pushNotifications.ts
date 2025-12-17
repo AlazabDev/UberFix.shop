@@ -1,11 +1,24 @@
 /**
  * Push Notifications Manager
  * Handles push notification subscription and management
+ * Mobile-safe implementation with proper API availability checks
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+
+// Safe check for Notification API
+const isNotificationSupported = (): boolean => {
+  return typeof window !== 'undefined' && 'Notification' in window;
+};
+
+const getNotificationPermission = (): NotificationPermission => {
+  if (isNotificationSupported()) {
+    return Notification.permission;
+  }
+  return 'denied';
+};
 
 export class PushNotificationManager {
   private static instance: PushNotificationManager;
@@ -27,7 +40,7 @@ export class PushNotificationManager {
     this.registration = registration;
     
     // Request notification permission if not granted
-    if (Notification.permission === 'default') {
+    if (isNotificationSupported() && Notification.permission === 'default') {
       await this.requestPermission();
     }
   }
@@ -36,19 +49,24 @@ export class PushNotificationManager {
    * Request notification permission from user
    */
   async requestPermission(): Promise<NotificationPermission> {
-    if (!('Notification' in window)) {
+    if (!isNotificationSupported()) {
       console.warn('This browser does not support notifications');
       return 'denied';
     }
 
-    const permission = await Notification.requestPermission();
-    
-    if (permission === 'granted') {
-      console.warn('Notification permission granted');
-      await this.subscribeToPush();
+    try {
+      const permission = await Notification.requestPermission();
+      
+      if (permission === 'granted') {
+        console.warn('Notification permission granted');
+        await this.subscribeToPush();
+      }
+      
+      return permission;
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+      return 'denied';
     }
-    
-    return permission;
   }
 
   /**
@@ -127,8 +145,8 @@ export class PushNotificationManager {
       return;
     }
 
-    if (Notification.permission !== 'granted') {
-      console.warn('Notification permission not granted');
+    if (!isNotificationSupported() || Notification.permission !== 'granted') {
+      console.warn('Notification permission not granted or not supported');
       return;
     }
 
@@ -190,7 +208,8 @@ export class PushNotificationManager {
    * Check if push notifications are supported
    */
   static isSupported(): boolean {
-    return 'serviceWorker' in navigator && 
+    return typeof window !== 'undefined' &&
+           'serviceWorker' in navigator && 
            'PushManager' in window && 
            'Notification' in window;
   }
@@ -199,10 +218,7 @@ export class PushNotificationManager {
    * Get notification permission status
    */
   static getPermissionStatus(): NotificationPermission {
-    if (!('Notification' in window)) {
-      return 'denied';
-    }
-    return Notification.permission;
+    return getNotificationPermission();
   }
 }
 
