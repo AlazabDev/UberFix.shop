@@ -3,26 +3,38 @@ import App from './App.tsx'
 import './index.css'
 import { registerPWA } from './lib/pwaRegister'
 
+console.log('[Main] Application starting...');
+
 // Global error handler for mobile compatibility
 window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error);
+  console.error('[Main] Global error:', event.error?.message || event.message, event.error?.stack);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
+  console.error('[Main] Unhandled promise rejection:', event.reason);
 });
 
-// Register PWA
-registerPWA();
+// Register PWA safely
+try {
+  registerPWA();
+  console.log('[Main] PWA registration complete');
+} catch (e) {
+  console.error('[Main] PWA registration failed:', e);
+}
 
 // Safe render with error handling
 const rootElement = document.getElementById("root");
+console.log('[Main] Root element found:', !!rootElement);
 
 if (rootElement) {
   try {
-    createRoot(rootElement).render(<App />);
+    console.log('[Main] Creating React root...');
+    const root = createRoot(rootElement);
+    console.log('[Main] Rendering App...');
+    root.render(<App />);
+    console.log('[Main] App rendered successfully');
   } catch (error) {
-    console.error('Failed to render app:', error);
+    console.error('[Main] Failed to render app:', error);
     rootElement.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #0a1929; color: white; font-family: system-ui; direction: rtl; padding: 20px;">
         <div style="text-align: center; max-width: 400px;">
@@ -36,5 +48,5 @@ if (rootElement) {
     `;
   }
 } else {
-  console.error('Root element not found');
+  console.error('[Main] Root element not found');
 }
