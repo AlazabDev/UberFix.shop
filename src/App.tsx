@@ -1,4 +1,4 @@
-import { Suspense, useState, useEffect } from "react";
+import { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,9 +10,14 @@ import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { protectedRoutes } from "@/routes/routes.config";
 import { publicRoutes } from "@/routes/publicRoutes.config";
 import { Loader2 } from "lucide-react";
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useMaintenanceLock } from "@/hooks/useMaintenanceLock";
 import { MaintenanceOverlay } from "@/components/MaintenanceOverlay";
+
+// Lazy load PWA prompt to prevent blocking initial render
+import { lazy } from "react";
+const PWAInstallPrompt = lazy(() => 
+  import("@/components/PWAInstallPrompt").then(m => ({ default: m.PWAInstallPrompt }))
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,10 +38,11 @@ const LoadingFallback = () => (
 );
 
 const AppContent = () => {
-  const { data: lockStatus } = useMaintenanceLock();
+  const { data: lockStatus, isLoading } = useMaintenanceLock();
   
-  // Show maintenance overlay only if explicitly locked
-  if (lockStatus?.isLocked) {
+  // Don't block rendering while checking maintenance status
+  // Only show maintenance overlay if explicitly locked and data is loaded
+  if (!isLoading && lockStatus?.isLocked) {
     return <MaintenanceOverlay message={lockStatus.message} />;
   }
 
@@ -68,6 +74,8 @@ const AppContent = () => {
 };
 
 const App = () => {
+  console.log('[App] Rendering application...');
+  
   return (
     <PageErrorBoundary pageName="Application">
       <QueryClientProvider client={queryClient}>
@@ -78,10 +86,13 @@ const App = () => {
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <PWAInstallPrompt />
             <Toaster />
             <Sonner />
             <AppContent />
+            {/* PWA prompt loaded lazily after main content */}
+            <Suspense fallback={null}>
+              <PWAInstallPrompt />
+            </Suspense>
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>
