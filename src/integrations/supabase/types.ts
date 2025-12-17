@@ -323,6 +323,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
@@ -1058,6 +1065,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_mr_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
             columns: ["assigned_technician_id"]
             isOneToOne: false
@@ -1104,6 +1118,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4361,6 +4382,39 @@ export type Database = {
           },
         ]
       }
+      properties_qr_public: {
+        Row: {
+          address: string | null
+          code: string | null
+          icon_url: string | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          name: string | null
+          type: string | null
+        }
+        Insert: {
+          address?: string | null
+          code?: string | null
+          icon_url?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          type?: string | null
+        }
+        Update: {
+          address?: string | null
+          code?: string | null
+          icon_url?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
       technician_assigned_requests: {
         Row: {
           assigned_technician_id: string | null
@@ -4459,8 +4513,9 @@ export type Database = {
           current_longitude: number | null
           icon_url: string | null
           id: string | null
-          is_active: boolean | null
+          lat: number | null
           level: string | null
+          lng: number | null
           name: string | null
           profile_image: string | null
           rating: number | null
@@ -4473,8 +4528,9 @@ export type Database = {
           current_longitude?: number | null
           icon_url?: string | null
           id?: string | null
-          is_active?: boolean | null
+          lat?: number | null
           level?: string | null
+          lng?: number | null
           name?: string | null
           profile_image?: string | null
           rating?: number | null
@@ -4487,8 +4543,9 @@ export type Database = {
           current_longitude?: number | null
           icon_url?: string | null
           id?: string | null
-          is_active?: boolean | null
+          lat?: number | null
           level?: string | null
+          lng?: number | null
           name?: string | null
           profile_image?: string | null
           rating?: number | null
@@ -4743,6 +4800,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_mr_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "maintenance_requests_branch_id_fkey"
             columns: ["branch_id"]
             isOneToOne: false
@@ -4761,6 +4825,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
             referencedColumns: ["id"]
           },
         ]
