@@ -46,26 +46,33 @@ export const useUserRoles = (): UserRoles => {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, email')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      // Check if user is authorized owner
-      const isAuthorizedOwner = profile?.email && AUTHORIZED_OWNER_EMAILS.includes(profile.email.toLowerCase());
+      // Check if user is authorized owner using auth email directly (more reliable)
+      const userEmail = user.email?.toLowerCase();
+      const isAuthorizedOwner = userEmail && AUTHORIZED_OWNER_EMAILS.includes(userEmail);
       
       if (isAuthorizedOwner) {
         setRoles(['owner']);
-      } else if (profile?.role) {
+        setLoading(false);
+        return;
+      }
+
+      // For non-owners, check profile role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profile?.role) {
         // Non-owner users cannot have owner role
         const userRole = profile.role === 'owner' ? 'customer' : profile.role;
         setRoles([userRole as AppRole]);
       } else {
-        setRoles([]);
+        setRoles(['customer']);
       }
     } catch (error) {
-      setRoles([]);
+      console.error('Error fetching user roles:', error);
+      setRoles(['customer']);
     } finally {
       setLoading(false);
     }
