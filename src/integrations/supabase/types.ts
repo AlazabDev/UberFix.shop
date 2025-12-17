@@ -4413,58 +4413,28 @@ export type Database = {
       }
       technician_profiles_safe: {
         Row: {
-          accounting_email: string | null
-          accounting_name: string | null
-          accounting_phone: string | null
           city_id: number | null
           created_at: string | null
           district_id: number | null
-          email: string | null
           full_name: string | null
           id: string | null
-          insurance_company_name: string | null
-          phone: string | null
-          policy_number: string | null
-          pricing_notes: string | null
           status: string | null
-          updated_at: string | null
-          user_id: string | null
         }
         Insert: {
-          accounting_email?: never
-          accounting_name?: never
-          accounting_phone?: never
           city_id?: number | null
           created_at?: string | null
           district_id?: number | null
-          email?: string | null
           full_name?: string | null
           id?: string | null
-          insurance_company_name?: never
-          phone?: string | null
-          policy_number?: never
-          pricing_notes?: never
           status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
         }
         Update: {
-          accounting_email?: never
-          accounting_name?: never
-          accounting_phone?: never
           city_id?: number | null
           created_at?: string | null
           district_id?: number | null
-          email?: string | null
           full_name?: string | null
           id?: string | null
-          insurance_company_name?: never
-          phone?: string | null
-          policy_number?: never
-          pricing_notes?: never
           status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
         }
         Relationships: [
           {
