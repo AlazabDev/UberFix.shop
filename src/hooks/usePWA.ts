@@ -8,17 +8,28 @@ interface PWAStatus {
   notificationPermission: NotificationPermission;
 }
 
+// Safe check for Notification API availability
+const getNotificationPermission = (): NotificationPermission => {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    return Notification.permission;
+  }
+  return 'denied';
+};
+
 export function usePWA() {
   const [status, setStatus] = useState<PWAStatus>({
     isInstalled: false,
     isUpdateAvailable: false,
     canInstall: false,
-    notificationPermission: 'default'
+    notificationPermission: 'denied'
   });
   
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
+    // Check if running in browser environment
+    if (typeof window === 'undefined') return;
+
     // Check if app is installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isIOSStandalone = (window.navigator as any).standalone === true;
@@ -27,7 +38,7 @@ export function usePWA() {
       setStatus(prev => ({
         ...prev,
         isInstalled: isStandalone || isIOSStandalone,
-        notificationPermission: Notification.permission
+        notificationPermission: getNotificationPermission()
       }));
     });
 
