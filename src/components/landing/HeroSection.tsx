@@ -134,34 +134,19 @@ const HeroBadge = () => (
   </div>
 );
 
-// Typing effect hook
-const useTypingEffect = (text: string, speed: number = 100, delay: number = 0) => {
-  const [displayText, setDisplayText] = useState("");
-  const [isComplete, setIsComplete] = useState(false);
+// Smooth text reveal hook - no typing, just fade in
+const useSmoothReveal = (delay: number = 800) => {
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    let index = 0;
+    const timeout = setTimeout(() => {
+      setIsVisible(true);
+    }, delay);
 
-    const startTyping = () => {
-      if (index < text.length) {
-        setDisplayText(text.slice(0, index + 1));
-        index++;
-        timeout = setTimeout(startTyping, speed);
-      } else {
-        setIsComplete(true);
-      }
-    };
+    return () => clearTimeout(timeout);
+  }, [delay]);
 
-    const delayTimeout = setTimeout(startTyping, delay);
-
-    return () => {
-      clearTimeout(timeout);
-      clearTimeout(delayTimeout);
-    };
-  }, [text, speed, delay]);
-
-  return { displayText, isComplete };
+  return isVisible;
 };
 
 // Animated Counter
@@ -202,7 +187,7 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }: { end: number; d
   }, [end, duration]);
 
   return (
-    <div ref={countRef} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-secondary via-success to-primary bg-clip-text text-transparent">
+    <div ref={countRef} className="text-3xl md:text-4xl font-bold text-[#d4a017]">
       {suffix}{count.toLocaleString()}
     </div>
   );
@@ -236,7 +221,7 @@ const AnimatedBorderButton = ({ children, onClick }: { children: React.ReactNode
 );
 
 export const HeroSection = () => {
-  const { displayText, isComplete } = useTypingEffect("بمعايير الجودة العالمية", 80, 800);
+  const isTextVisible = useSmoothReveal(600);
 
   const scrollToContent = useCallback(() => {
     window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
@@ -262,9 +247,12 @@ export const HeroSection = () => {
         <div className="max-w-5xl mx-auto mb-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[fadeInUp_0.6s_ease-out_both]">
             <span className="text-white block mb-2">إدارة الصيانة والمنشآت</span>
-            <span className="bg-gradient-to-r from-[#0d9488] via-[#3b82f6] to-[#0d9488] bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradientShift_3s_linear_infinite]">
-              {displayText}
-              {!isComplete && <span className="animate-pulse">|</span>}
+            <span 
+              className={`text-[#d4a017] transition-all duration-700 ease-out ${
+                isTextVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+            >
+              بمعايير الجودة العالمية
             </span>
           </h1>
         </div>
