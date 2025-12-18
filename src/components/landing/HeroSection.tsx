@@ -41,7 +41,7 @@ const ParticleCanvas = () => {
     const colors = [
       "#3b82f6", // Blue
       "#0d9488", // Teal
-      "#f59e0b", // Orange
+      "#f5bf23", // Orange
       "#10b981", // Green
       "#6366f1", // Indigo
     ];
