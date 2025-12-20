@@ -4619,6 +4619,69 @@ export type Database = {
       }
     }
     Views: {
+      app_settings_public_safe: {
+        Row: {
+          app_logo_url: string | null
+          app_name: string | null
+          background_color: string | null
+          company_address: string | null
+          company_email: string | null
+          company_phone: string | null
+          default_currency: string | null
+          default_language: string | null
+          enable_technician_rating: boolean | null
+          google_maps_enabled: boolean | null
+          id: string | null
+          map_style: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          show_footer: boolean | null
+          show_technicians_on_map: boolean | null
+          theme_mode: string | null
+          timezone: string | null
+        }
+        Insert: {
+          app_logo_url?: string | null
+          app_name?: string | null
+          background_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_phone?: string | null
+          default_currency?: string | null
+          default_language?: string | null
+          enable_technician_rating?: boolean | null
+          google_maps_enabled?: boolean | null
+          id?: string | null
+          map_style?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          show_footer?: boolean | null
+          show_technicians_on_map?: boolean | null
+          theme_mode?: string | null
+          timezone?: string | null
+        }
+        Update: {
+          app_logo_url?: string | null
+          app_name?: string | null
+          background_color?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_phone?: string | null
+          default_currency?: string | null
+          default_language?: string | null
+          enable_technician_rating?: boolean | null
+          google_maps_enabled?: boolean | null
+          id?: string | null
+          map_style?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          show_footer?: boolean | null
+          show_technicians_on_map?: boolean | null
+          theme_mode?: string | null
+          timezone?: string | null
+        }
+        Relationships: []
+      }
       app_settings_safe: {
         Row: {
           allow_self_registration: boolean | null
