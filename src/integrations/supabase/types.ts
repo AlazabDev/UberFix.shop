@@ -592,6 +592,260 @@ export type Database = {
           },
         ]
       }
+      document_audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_name: string
+          created_at: string
+          document_id: string
+          id: string
+          metadata: Json | null
+          new_value: Json | null
+          old_value: Json | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_name: string
+          created_at?: string
+          document_id: string
+          id?: string
+          metadata?: Json | null
+          new_value?: Json | null
+          old_value?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_name?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          metadata?: Json | null
+          new_value?: Json | null
+          old_value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_audit_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_comments: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          page: number | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          text: string
+          updated_at: string
+          user_id: string | null
+          user_name: string
+          x_position: number | null
+          y_position: number | null
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          page?: number | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          text: string
+          updated_at?: string
+          user_id?: string | null
+          user_name: string
+          x_position?: number | null
+          y_position?: number | null
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          page?: number | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          text?: string
+          updated_at?: string
+          user_id?: string | null
+          user_name?: string
+          x_position?: number | null
+          y_position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_comments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_signatures: {
+        Row: {
+          document_id: string
+          id: string
+          ip_address: string | null
+          pdf_hash: string | null
+          signature_data: string
+          signed_at: string
+          signed_pdf_url: string | null
+          signer_id: string | null
+          signer_name: string
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          ip_address?: string | null
+          pdf_hash?: string | null
+          signature_data: string
+          signed_at?: string
+          signed_pdf_url?: string | null
+          signer_id?: string | null
+          signer_name: string
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          ip_address?: string | null
+          pdf_hash?: string | null
+          signature_data?: string
+          signed_at?: string
+          signed_pdf_url?: string | null
+          signer_id?: string | null
+          signer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          document_id: string
+          file_url: string
+          id: string
+          notes: string | null
+          source: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          document_id: string
+          file_url: string
+          id?: string
+          notes?: string | null
+          source: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          document_id?: string
+          file_url?: string
+          id?: string
+          notes?: string | null
+          source?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          assigned_approver_id: string | null
+          assigned_reviewer_id: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          daftra_id: string | null
+          date: string
+          html_url: string | null
+          id: string
+          number: string
+          payment_status: string
+          pdf_url: string | null
+          raw_json: Json | null
+          status: string
+          synced_at: string | null
+          total: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_approver_id?: string | null
+          assigned_reviewer_id?: string | null
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          daftra_id?: string | null
+          date?: string
+          html_url?: string | null
+          id?: string
+          number: string
+          payment_status?: string
+          pdf_url?: string | null
+          raw_json?: Json | null
+          status?: string
+          synced_at?: string | null
+          total?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_approver_id?: string | null
+          assigned_reviewer_id?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          daftra_id?: string | null
+          date?: string
+          html_url?: string | null
+          id?: string
+          number?: string
+          payment_status?: string
+          pdf_url?: string | null
+          raw_json?: Json | null
+          status?: string
+          synced_at?: string | null
+          total?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       error_logs: {
         Row: {
           count: number | null
@@ -5260,6 +5514,15 @@ export type Database = {
           timezone: string
         }[]
       }
+      get_search_statistics: {
+        Args: { project_id_param?: string; search_query: string }
+        Returns: {
+          avg_relevance: number
+          by_file_type: Json
+          by_project: Json
+          total_results: number
+        }[]
+      }
       get_smtp_settings: {
         Args: never
         Returns: {
@@ -5321,6 +5584,25 @@ export type Database = {
       recalc_request_totals: {
         Args: { p_request_id: string }
         Returns: undefined
+      }
+      search_files: {
+        Args: {
+          file_type_param?: string
+          limit_count?: number
+          offset_count?: number
+          project_id_param?: string
+          search_query: string
+        }
+        Returns: {
+          file_size: number
+          file_type: string
+          id: string
+          original_filename: string
+          project_name: string
+          relevance_score: number
+          storage_url: string
+          text_content_preview: string
+        }[]
       }
     }
     Enums: {

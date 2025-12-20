@@ -1,8 +1,5 @@
 project_id = "zrrffsjbfkphridqyais"
 
-[functions.auth-callback]
-verify_jwt = false
-
 [api]
 enabled = true
 port = 54321
@@ -49,17 +46,29 @@ port = 54321
 enabled = false
 port = 54327
 
+# ========================================
+# AUTH-REQUIRED FUNCTIONS (verify_jwt=true)
+# These require valid JWT from authenticated users
+# ========================================
+
+[functions.auth-callback]
+verify_jwt = false
+# OAuth callback - must be public for auth flow
+
 [functions.error-tracking]
 verify_jwt = true
 
 [functions.chatbot]
 verify_jwt = true
 
+# HIGH PRIORITY: Map keys require auth to prevent abuse
 [functions.get-maps-key]
-verify_jwt = false
+verify_jwt = true
+# Changed from false - returns Google Maps API key, requires authentication
 
-[functions.twilio-delivery-status]
-verify_jwt = false
+[functions.get-mapbox-token]
+verify_jwt = true
+# Changed from false - returns Mapbox token, requires authentication
 
 [functions.send-maintenance-notification]
 verify_jwt = true
@@ -70,26 +79,8 @@ verify_jwt = true
 [functions.calculate-route]
 verify_jwt = true
 
-[functions.meta-deauthorize]
-verify_jwt = false
-
-[functions.meta-delete-data]
-verify_jwt = false
-
-[functions.twilio-fallback]
-verify_jwt = false
-
-[functions.get-property-for-qr]
-verify_jwt = false
-
 [functions.calculate-monthly-bonuses]
 verify_jwt = true
-
-[functions.send-otp]
-verify_jwt = false
-
-[functions.verify-otp]
-verify_jwt = false
 
 [functions.process-national-id-ocr]
 verify_jwt = true
@@ -124,9 +115,6 @@ verify_jwt = true
 [functions.push-subscribe]
 verify_jwt = true
 
-[functions.receive-twilio-message]
-verify_jwt = false
-
 [functions.send-invoice]
 verify_jwt = true
 
@@ -136,8 +124,48 @@ verify_jwt = true
 [functions.sla-manager]
 verify_jwt = true
 
-[functions.get-mapbox-token]
+# ========================================
+# PUBLIC FUNCTIONS FOR QR/OTP (verify_jwt=false)
+# These need to be public but have internal validation
+# ========================================
+
+[functions.get-property-for-qr]
 verify_jwt = false
+# Public QR scanning - but function has rate limiting and only returns safe data
+
+[functions.send-otp]
+verify_jwt = false
+# Public OTP sending - has internal rate limiting
+
+[functions.verify-otp]
+verify_jwt = false
+# Public OTP verification - has internal rate limiting
+
+# ========================================
+# WEBHOOK ENDPOINTS (verify_jwt=false)
+# External services call these - signature verification inside function
+# ========================================
+
+[functions.twilio-delivery-status]
+verify_jwt = false
+# Twilio callback - validates request internally
+
+[functions.receive-twilio-message]
+verify_jwt = false
+# Twilio incoming message webhook - should validate Twilio signature internally
+
+[functions.twilio-fallback]
+verify_jwt = false
+# Twilio error fallback
 
 [functions.whatsapp-webhook]
 verify_jwt = false
+# Meta WhatsApp webhook - validates x-hub-signature-256 internally
+
+[functions.meta-deauthorize]
+verify_jwt = false
+# Meta deauthorization callback - validates x-hub-signature-256 internally
+
+[functions.meta-delete-data]
+verify_jwt = false
+# Meta data deletion callback - validates x-hub-signature-256 internally

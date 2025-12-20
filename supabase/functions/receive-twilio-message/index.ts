@@ -1,9 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders } from '../_shared/cors.ts';
+import { verifyTwilioSignature, logVerificationFailure } from '../_shared/webhookVerifier.ts';
+import { getTwilioCredentials } from '../_shared/secrets.ts';
 
 interface TwilioIncomingMessage {
   MessageSid: string;
@@ -22,10 +20,40 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Get Twilio credentials for signature verification
+    const twilioCredentials = getTwilioCredentials(false);
+    
+    if (twilioCredentials?.authToken) {
+      // Verify Twilio signature
+      const webhookUrl = `${supabaseUrl}/functions/v1/receive-twilio-message`;
+      const isValid = await verifyTwilioSignature(req.clone(), twilioCredentials.authToken, webhookUrl);
+      
+      if (!isValid) {
+        console.error('❌ Invalid Twilio signature - potential spoofed request');
+        
+        // Log the failed attempt
+        await logVerificationFailure(supabase, 'twilio', {
+          ip: req.headers.get('x-forwarded-for') || undefined,
+          userAgent: req.headers.get('user-agent') || undefined,
+          path: '/receive-twilio-message',
+          reason: 'Invalid X-Twilio-Signature'
+        });
+        
+        return new Response(
+          JSON.stringify({ error: 'Invalid signature' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      console.log('✅ Twilio signature verified successfully');
+    } else {
+      console.warn('⚠️ Twilio auth token not configured - skipping signature verification');
+    }
 
     // Parse form data from Twilio webhook
     const formData = await req.formData();
@@ -41,7 +69,7 @@ Deno.serve(async (req) => {
       WaId: formData.get('WaId') as string,
     };
 
-    console.log('Incoming message received:', {
+    console.log('📥 Incoming message received:', {
       sid: data.MessageSid,
       from: data.From,
       to: data.To,
@@ -58,7 +86,7 @@ Deno.serve(async (req) => {
       .from('message_logs')
       .insert({
         external_id: data.MessageSid,
-        recipient: cleanTo, // Our number (recipient of the incoming message)
+        recipient: cleanTo,
         message_content: data.Body || '[Media Message]',
         message_type: messageType,
         provider: 'twilio',
@@ -84,10 +112,9 @@ Deno.serve(async (req) => {
       throw logError;
     }
 
-    console.log('Incoming message stored successfully:', messageLog.id);
+    console.log('✅ Incoming message stored:', messageLog.id);
 
-    // Find or create notification for staff about new incoming message
-    // First, try to find related maintenance request by phone number
+    // Find related maintenance request
     const { data: relatedRequest } = await supabase
       .from('maintenance_requests')
       .select('id, title, created_by')
@@ -96,7 +123,7 @@ Deno.serve(async (req) => {
       .limit(1)
       .single();
 
-    // Get admin and manager users to notify
+    // Notify staff users
     const { data: staffUsers } = await supabase
       .from('user_roles')
       .select('user_id')
@@ -113,18 +140,10 @@ Deno.serve(async (req) => {
         message_log_id: messageLog.id,
       }));
 
-      const { error: notifError } = await supabase
-        .from('notifications')
-        .insert(notifications);
-
-      if (notifError) {
-        console.error('Error creating notifications:', notifError);
-      } else {
-        console.log('Staff notifications created:', notifications.length);
-      }
+      await supabase.from('notifications').insert(notifications);
     }
 
-    // Respond to Twilio with TwiML (empty response = no auto-reply)
+    // Respond with TwiML
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Message>شكراً لتواصلك معنا. سيتم الرد عليك في أقرب وقت.</Message>
