@@ -5525,6 +5525,18 @@ export type Database = {
         Args: { p_request_id: string }
         Returns: undefined
       }
+      register_technician_profile: {
+        Args: {
+          p_company_name: string
+          p_company_type: string
+          p_email: string
+          p_full_name: string
+          p_password: string
+          p_phone: string
+          p_profile_data?: Json
+        }
+        Returns: Json
+      }
       search_files: {
         Args: {
           file_type_param?: string

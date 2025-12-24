@@ -4,61 +4,149 @@ import * as z from "zod";
 import { TechnicianRegistrationData } from "@/types/technician-registration";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const submitSchema = z.object({
+  password: z.string()
+    .min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
+    .regex(/[A-Z]/, "يجب أن تحتوي على حرف كبير واحد على الأقل")
+    .regex(/[a-z]/, "يجب أن تحتوي على حرف صغير واحد على الأقل")
+    .regex(/[0-9]/, "يجب أن تحتوي على رقم واحد على الأقل"),
+  confirmPassword: z.string(),
   agree_terms: z.boolean().refine(val => val === true, {
     message: "يجب الموافقة على الشروط والأحكام",
   }),
   agree_payment_terms: z.boolean().refine(val => val === true, {
     message: "يجب الموافقة على شروط الدفع",
   }),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "كلمات المرور غير متطابقة",
+  path: ["confirmPassword"],
 });
 
 type SubmitFormData = z.infer<typeof submitSchema>;
 
 interface SubmitStepProps {
   data: Partial<TechnicianRegistrationData>;
-  onSubmit: (data: Partial<TechnicianRegistrationData>) => void;
+  onSubmit: (data: { password: string; agree_terms: boolean; agree_payment_terms: boolean }) => Promise<void>;
   onBack: () => void;
+  isLoading?: boolean;
 }
 
-export function SubmitStep({ data, onSubmit, onBack }: SubmitStepProps) {
+export function SubmitStep({ data, onSubmit, onBack, isLoading }: SubmitStepProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const form = useForm<SubmitFormData>({
     resolver: zodResolver(submitSchema),
     defaultValues: {
+      password: '',
+      confirmPassword: '',
       agree_terms: data.agree_terms || false,
       agree_payment_terms: data.agree_payment_terms || false,
     },
   });
 
-  const handleSubmit = (formData: SubmitFormData) => {
-    onSubmit(formData);
+  const handleSubmit = async (formData: SubmitFormData) => {
+    await onSubmit({
+      password: formData.password,
+      agree_terms: formData.agree_terms,
+      agree_payment_terms: formData.agree_payment_terms,
+    });
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">الخطوة 9: المراجعة والإرسال</h2>
-        <p className="text-muted-foreground">راجع البيانات ووافق على الشروط لإتمام التسجيل</p>
+        <h2 className="text-2xl font-bold text-foreground mb-2">الخطوة 9: إنشاء الحساب والإرسال</h2>
+        <p className="text-muted-foreground">أنشئ كلمة مرور للحساب ووافق على الشروط لإتمام التسجيل</p>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          {/* ملخص البيانات */}
           <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-green-800 dark:text-green-200">أنت على وشك الانتهاء!</p>
                 <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                  البريد الإلكتروني للحساب: <strong dir="ltr">{data.email}</strong>
+                </p>
+                <p className="text-sm text-green-700 dark:text-green-300">
                   بعد الموافقة على الشروط والإرسال، سيتم مراجعة طلبك من قبل فريقنا خلال 24-48 ساعة
                 </p>
               </div>
             </div>
           </div>
 
+          {/* كلمة المرور */}
+          <div className="border rounded-lg p-4 space-y-4">
+            <h3 className="font-semibold">إنشاء كلمة مرور للحساب</h3>
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>كلمة المرور *</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="أدخل كلمة مرور قوية"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    يجب أن تحتوي على 8 أحرف على الأقل، حرف كبير، حرف صغير، ورقم
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>تأكيد كلمة المرور *</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="أعد إدخال كلمة المرور"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* الشروط والأحكام */}
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -216,20 +304,28 @@ export function SubmitStep({ data, onSubmit, onBack }: SubmitStepProps) {
 
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              ⚠️ <strong>تنبيه:</strong> بالضغط على "إرسال الطلب"، أنت توافق على جميع الشروط والأحكام المذكورة أعلاه
+              ⚠️ <strong>تنبيه:</strong> بالضغط على "إرسال الطلب"، أنت توافق على جميع الشروط والأحكام المذكورة أعلاه وسيتم إنشاء حسابك
             </p>
           </div>
 
           <div className="flex gap-4 justify-between pt-6">
-            <Button type="button" variant="outline" onClick={onBack}>
+            <Button type="button" variant="outline" onClick={onBack} disabled={isLoading}>
               رجوع
             </Button>
             <Button 
               type="submit"
               size="lg"
               className="min-w-[200px]"
+              disabled={isLoading}
             >
-              إرسال الطلب 🚀
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                  جارٍ الإرسال...
+                </>
+              ) : (
+                'إرسال الطلب 🚀'
+              )}
             </Button>
           </div>
         </form>
