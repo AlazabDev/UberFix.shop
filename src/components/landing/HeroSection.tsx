@@ -187,7 +187,7 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }: { end: number; d
   }, [end, duration]);
 
   return (
-    <div ref={countRef} className="text-3xl md:text-4xl font-bold text-[#f5bf23]">
+    <div ref={countRef} className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#f5bf23]">
       {suffix}{count.toLocaleString()}
     </div>
   );
@@ -228,7 +228,7 @@ export const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen bg-[#0a1929] overflow-hidden flex flex-col items-center justify-center">
+    <section className="relative min-h-[100dvh] bg-[#0a1929] overflow-hidden flex flex-col items-center justify-center">
       {/* Background Layers */}
       <ParticleCanvas />
       <AnimatedOrbs />
@@ -237,15 +237,15 @@ export const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a1929]/50 to-[#0a1929] z-[3]" />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-16 relative z-10 text-center" dir="rtl">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-16 relative z-10 text-center" dir="rtl">
         {/* Badge */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-6 sm:mb-8">
           <HeroBadge />
         </div>
 
         {/* Main Title */}
-        <div className="max-w-5xl mx-auto mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[fadeInUp_0.6s_ease-out_both]">
+        <div className="max-w-5xl mx-auto mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[fadeInUp_0.6s_ease-out_both]">
             <span className="text-white block mb-2">إدارة الصيانة والمنشآت</span>
             <span 
               className={`text-[#d4a017] transition-all duration-700 ease-out ${
@@ -258,53 +258,55 @@ export const HeroSection = () => {
         </div>
 
         {/* Subtitle */}
-        <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-3xl mx-auto mb-10 animate-[fadeInUp_0.6s_ease-out_0.6s_both]">
+        <p className="text-sm sm:text-base md:text-lg text-white/70 leading-relaxed max-w-3xl mx-auto mb-8 sm:mb-10 animate-[fadeInUp_0.6s_ease-out_0.6s_both] px-2">
           نوفر حلولاً ذكية لإدارة الصيانة والمنشآت مع معايير جودة واضحة تضمن كفاءة التشغيل،
           وتقليل الأعطال، والحفاظ على مستوى ثابت من الأداء.
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-[fadeInUp_0.6s_ease-out_0.9s_both]">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 animate-[fadeInUp_0.6s_ease-out_0.9s_both] px-4 sm:px-0">
           <AnimatedBorderButton onClick={() => (window.location.href = "/role-selection")}>
             ابدأ رحلتك معنا
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 group-hover:-translate-x-1 transition-transform" />
           </AnimatedBorderButton>
 
           <Button
             variant="outline-light"
             size="lg"
-            className="px-8 py-6 text-base backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
+            className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
             onClick={() => (window.location.href = "/contact")}
           >
-            <Calendar className="h-5 w-5 ml-2" />
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
             احجز استشارة
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="flex flex-wrap justify-center gap-8 md:gap-16 mb-12 animate-[fadeInUp_0.6s_ease-out_1.2s_both]">
-          <div className="text-center">
+        <div className="flex flex-wrap justify-center gap-6 sm:gap-8 md:gap-16 mb-8 sm:mb-12 animate-[fadeInUp_0.6s_ease-out_1.2s_both]">
+          <div className="text-center min-w-[80px]">
             <AnimatedCounter end={99} suffix="" />
-            <div className="text-sm text-white/60 mt-2">رضا العملاء %</div>
+            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">رضا العملاء %</div>
           </div>
           
-          <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          <div className="hidden sm:block w-px h-12 sm:h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
           
-          <div className="text-center">
+          <div className="text-center min-w-[80px]">
             <AnimatedCounter end={1500} suffix="+" />
-            <div className="text-sm text-white/60 mt-2">مشروع مكتمل</div>
+            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">مشروع مكتمل</div>
           </div>
           
-          <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          <div className="hidden sm:block w-px h-12 sm:h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
           
-          <div className="text-center">
+          <div className="text-center min-w-[80px]">
             <AnimatedCounter end={50} suffix="+" />
-            <div className="text-sm text-white/60 mt-2">خبير متخصص</div>
+            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">خبير متخصص</div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <ScrollIndicator onClick={scrollToContent} />
+        {/* Scroll Indicator - Hidden on small screens */}
+        <div className="hidden sm:block">
+          <ScrollIndicator onClick={scrollToContent} />
+        </div>
       </div>
     </section>
   );

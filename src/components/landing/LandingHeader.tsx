@@ -1,62 +1,122 @@
 import { Button } from "@/components/ui/button";
-import { Cog } from "lucide-react";
+import { Cog, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+
+const navItems = [
+  { to: "/", label: "الرئيسية" },
+  { to: "/about", label: "من نحن" },
+  { to: "/services", label: "خدماتنا" },
+  { to: "/projects", label: "مشاريعنا" },
+  { to: "/gallery", label: "معرض الصور" },
+  { to: "/blog", label: "المدونة" },
+];
 
 export const LandingHeader = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <header className="bg-card/95 backdrop-blur-md border-b border-border/50 px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+    <header className="bg-card/95 backdrop-blur-md border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
       {/* Logo */}
-      <div className="flex items-center gap-3">
-        <Link to="/" className="flex items-center gap-3">
-          <div className="relative w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3">
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
             <div className="relative">
-              <span className="text-primary-foreground font-bold text-lg">Az</span>
+              <span className="text-primary-foreground font-bold text-base sm:text-lg">Az</span>
               <Cog
-                className="absolute -top-1 -right-1 h-3 w-3 text-primary-foreground/80 animate-spin"
+                className="absolute -top-1 -right-1 h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary-foreground/80 animate-spin"
                 style={{ animationDuration: "8s" }}
               />
             </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-primary tracking-tight">UberFix.shop</h1>
-            <p className="text-xs text-muted-foreground font-medium">نظام إدارة طلبات الصيانة المتطور</p>
+          <div className="hidden xs:block">
+            <h1 className="text-lg sm:text-xl font-bold text-primary tracking-tight">UberFix.shop</h1>
+            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium line-clamp-1">نظام إدارة طلبات الصيانة المتطور</p>
           </div>
         </Link>
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="hidden md:flex items-center gap-6">
-        <Link to="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-          الرئيسية
-        </Link>
-        <Link to="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-          من نحن
-        </Link>
-        <Link to="/services" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-          خدماتنا
-        </Link>
-        <Link to="/projects" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-          مشاريعنا
-        </Link>
-        <Link to="/gallery" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-          معرض الصور
-        </Link>
-        <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-          المدونة
-        </Link>
+      {/* Desktop Navigation Menu */}
+      <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
+        {navItems.map((item) => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className="text-sm font-medium text-foreground hover:text-primary transition-colors whitespace-nowrap"
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
 
-      {/* Auth Buttons */}
-      <div className="flex items-center gap-4">
+      {/* Desktop Auth Buttons */}
+      <div className="hidden sm:flex items-center gap-2 sm:gap-4">
         <Link to="/role-selection">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="text-xs sm:text-sm">
             تسجيل الدخول
           </Button>
         </Link>
         <Link to="/role-selection">
-          <Button size="sm">إنشاء حساب</Button>
+          <Button size="sm" className="text-xs sm:text-sm">إنشاء حساب</Button>
         </Link>
       </div>
+
+      {/* Mobile Menu Button */}
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="lg:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">فتح القائمة</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0">
+          <div className="flex flex-col h-full">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <Link to="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
+                <div className="relative w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-primary-foreground font-bold text-base">Az</span>
+                </div>
+                <span className="text-lg font-bold text-primary">UberFix.shop</span>
+              </Link>
+              <SheetClose asChild>
+                <Button variant="ghost" size="icon">
+                  <X className="h-5 w-5" />
+                </Button>
+              </SheetClose>
+            </div>
+
+            {/* Mobile Navigation */}
+            <nav className="flex-1 overflow-y-auto py-4">
+              <div className="flex flex-col gap-1 px-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors font-medium"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+
+            {/* Mobile Auth Buttons */}
+            <div className="p-4 border-t border-border space-y-3">
+              <Link to="/role-selection" className="block" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" className="w-full">
+                  تسجيل الدخول
+                </Button>
+              </Link>
+              <Link to="/role-selection" className="block" onClick={() => setIsOpen(false)}>
+                <Button className="w-full">إنشاء حساب</Button>
+              </Link>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </header>
   );
 };
