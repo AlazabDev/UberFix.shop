@@ -55,10 +55,10 @@ export const useTechnicians = (filter?: { status?: string; specialization?: stri
         return;
       }
 
+      // Use the public-safe view that doesn't require special RLS permissions
       let query = (supabase as any)
-        .from('technicians')
-        .select('*')
-        .eq('is_active', true);
+        .from('technicians_map_public')
+        .select('*');
 
       if (filterStatus) {
         query = query.eq('status', filterStatus);
