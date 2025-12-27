@@ -559,6 +559,61 @@ export type Database = {
         }
         Relationships: []
       }
+      daftra_sync_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          maintenance_request_id: string | null
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+          sync_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          maintenance_request_id?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status: string
+          sync_type: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          maintenance_request_id?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          sync_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daftra_sync_logs_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daftra_sync_logs_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daftra_sync_logs_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       districts: {
         Row: {
           city_id: number
@@ -1245,6 +1300,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_notes: string | null
+          daftra_invoice_id: string | null
+          daftra_sync_status: string | null
+          daftra_synced_at: string | null
           description: string | null
           estimated_cost: number | null
           id: string
@@ -1286,6 +1344,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_notes?: string | null
+          daftra_invoice_id?: string | null
+          daftra_sync_status?: string | null
+          daftra_synced_at?: string | null
           description?: string | null
           estimated_cost?: number | null
           id?: string
@@ -1327,6 +1388,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_notes?: string | null
+          daftra_invoice_id?: string | null
+          daftra_sync_status?: string | null
+          daftra_synced_at?: string | null
           description?: string | null
           estimated_cost?: number | null
           id?: string
