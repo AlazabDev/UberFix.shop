@@ -63,7 +63,7 @@ export function UploadsStep({ data, onNext, onBack, onSaveAndExit }: UploadsStep
       const filePath = `technician-documents/${fileName}`;
 
       const { error: uploadError, data: uploadData } = await supabase.storage
-        .from('property-images')
+        .from('technician-registration-docs')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
@@ -72,7 +72,7 @@ export function UploadsStep({ data, onNext, onBack, onSaveAndExit }: UploadsStep
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage
-        .from('property-images')
+        .from('technician-registration-docs')
         .getPublicUrl(filePath);
 
       update(index, {
