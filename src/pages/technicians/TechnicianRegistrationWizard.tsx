@@ -15,6 +15,8 @@ import { SubmitStep } from "@/components/technician-registration/steps/SubmitSte
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const STEPS = [
   { id: 'basic', label: 'الأساسيات' },
@@ -43,6 +45,35 @@ export default function TechnicianRegistrationWizard() {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Fetch city and district names for PDF
+  const { data: cityData } = useQuery({
+    queryKey: ['city', formData.city_id],
+    queryFn: async () => {
+      if (!formData.city_id) return null;
+      const { data } = await supabase
+        .from('cities')
+        .select('name_ar')
+        .eq('id', formData.city_id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!formData.city_id,
+  });
+
+  const { data: districtData } = useQuery({
+    queryKey: ['district', formData.district_id],
+    queryFn: async () => {
+      if (!formData.district_id) return null;
+      const { data } = await supabase
+        .from('districts')
+        .select('name_ar')
+        .eq('id', formData.district_id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!formData.district_id,
+  });
 
   const handleNext = (stepData: Partial<TechnicianRegistrationData>) => {
     goToNextStep(stepData);
@@ -211,6 +242,12 @@ export default function TechnicianRegistrationWizard() {
               onSubmit={handleSubmit} 
               onBack={handleBack}
               isLoading={isLoading}
+              services={formData.services}
+              trades={formData.trades}
+              coverageAreas={formData.coverage_areas}
+              documents={formData.documents}
+              cityName={cityData?.name_ar}
+              districtName={districtData?.name_ar}
             />
           )}
         </Card>

@@ -1,14 +1,16 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { TechnicianRegistrationData } from "@/types/technician-registration";
+import { TechnicianRegistrationData, ServicePrice, TechnicianTrade, CoverageArea, TechnicianDocument } from "@/types/technician-registration";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2, FileDown } from "lucide-react";
 import { useState } from "react";
+import { generateRegistrationPDF } from "@/utils/generateRegistrationPDF";
+import { toast } from "sonner";
 
 const submitSchema = z.object({
   password: z.string()
@@ -35,11 +37,18 @@ interface SubmitStepProps {
   onSubmit: (data: { password: string; agree_terms: boolean; agree_payment_terms: boolean }) => Promise<void>;
   onBack: () => void;
   isLoading?: boolean;
+  services?: ServicePrice[];
+  trades?: TechnicianTrade[];
+  coverageAreas?: CoverageArea[];
+  documents?: TechnicianDocument[];
+  cityName?: string;
+  districtName?: string;
 }
 
-export function SubmitStep({ data, onSubmit, onBack, isLoading }: SubmitStepProps) {
+export function SubmitStep({ data, onSubmit, onBack, isLoading, services, trades, coverageAreas, documents, cityName, districtName }: SubmitStepProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const form = useForm<SubmitFormData>({
     resolver: zodResolver(submitSchema),
@@ -57,6 +66,27 @@ export function SubmitStep({ data, onSubmit, onBack, isLoading }: SubmitStepProp
       agree_terms: formData.agree_terms,
       agree_payment_terms: formData.agree_payment_terms,
     });
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPDF(true);
+    try {
+      await generateRegistrationPDF({
+        formData: data,
+        services,
+        trades,
+        coverageAreas,
+        documents,
+        cityName,
+        districtName,
+      });
+      toast.success('تم تحميل ملف PDF بنجاح');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('فشل في إنشاء ملف PDF');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   return (
@@ -81,6 +111,37 @@ export function SubmitStep({ data, onSubmit, onBack, isLoading }: SubmitStepProp
                   بعد الموافقة على الشروط والإرسال، سيتم مراجعة طلبك من قبل فريقنا خلال 24-48 ساعة
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* زر تحميل PDF */}
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-blue-800 dark:text-blue-200">تحميل نسخة من بيانات التسجيل</p>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  يمكنك تحميل ملف PDF يحتوي على جميع البيانات التي أدخلتها للاحتفاظ بها
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPDF}
+                className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900"
+              >
+                {isGeneratingPDF ? (
+                  <>
+                    <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                    جارٍ الإنشاء...
+                  </>
+                ) : (
+                  <>
+                    <FileDown className="h-4 w-4 ml-2" />
+                    تحميل PDF
+                  </>
+                )}
+              </Button>
             </div>
           </div>
 
