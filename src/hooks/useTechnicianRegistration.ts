@@ -127,20 +127,58 @@ export function useTechnicianRegistration() {
         additional_notes: formData.additional_notes,
       };
 
-      // استدعاء دالة التسجيل
-      const { data, error } = await supabase.rpc('register_technician_profile', {
+      // الخطوة 1: حفظ البيانات في جدول التسجيلات المعلقة
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('register_technician_profile', {
         p_company_name: formData.company_name,
         p_company_type: formData.company_type || 'individual',
         p_full_name: formData.full_name,
         p_email: formData.email,
         p_phone: formData.phone,
-        p_password: password,
+        p_password: password, // سيتم استخدامه لاحقاً
         p_profile_data: profileData,
       });
 
-      if (error) throw error;
+      if (rpcError) throw rpcError;
       
-      const result = data as unknown as RegistrationResult;
+      const pendingResult = rpcResult as unknown as { success: boolean; pending_id?: string; requires_signup?: boolean; error?: string };
+      
+      if (!pendingResult.success) {
+        throw new Error(pendingResult.error || 'فشل حفظ البيانات');
+      }
+
+      // الخطوة 2: إنشاء حساب المستخدم عبر Supabase Auth
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: password,
+        options: {
+          data: {
+            full_name: formData.full_name,
+            phone: formData.phone,
+            role: 'technician',
+          },
+        },
+      });
+
+      if (signUpError) {
+        console.error('SignUp error:', signUpError);
+        throw new Error(signUpError.message || 'فشل إنشاء الحساب');
+      }
+
+      if (!signUpData.user) {
+        throw new Error('فشل إنشاء الحساب');
+      }
+
+      // الخطوة 3: إكمال التسجيل (إنشاء ملف الفني)
+      const { data: completeResult, error: completeError } = await supabase.rpc('complete_technician_registration', {
+        p_email: formData.email,
+      });
+
+      if (completeError) {
+        console.error('Complete registration error:', completeError);
+        throw new Error(completeError.message || 'فشل إكمال التسجيل');
+      }
+
+      const result = completeResult as unknown as RegistrationResult;
       
       if (!result.success) {
         throw new Error(result.error || 'فشل التسجيل');
@@ -150,7 +188,7 @@ export function useTechnicianRegistration() {
 
       // إدخال الخدمات والأسعار
       if (services && services.length > 0 && profileId) {
-        await supabase.from('technician_service_prices').insert(
+        const { error: servicesError } = await supabase.from('technician_service_prices').insert(
           services.map(s => ({ 
             technician_id: profileId,
             service_id: s.service_id,
@@ -161,11 +199,12 @@ export function useTechnicianRegistration() {
             material_markup_percent: s.material_markup_percent,
           }))
         );
+        if (servicesError) console.warn('Error inserting services:', servicesError);
       }
 
       // إدخال المهن
       if (trades && trades.length > 0 && profileId) {
-        await supabase.from('technician_trades').insert(
+        const { error: tradesError } = await supabase.from('technician_trades').insert(
           trades.map(t => ({ 
             technician_id: profileId,
             category_id: t.category_id,
@@ -174,11 +213,12 @@ export function useTechnicianRegistration() {
             can_handle_heavy_projects: t.can_handle_heavy_projects,
           }))
         );
+        if (tradesError) console.warn('Error inserting trades:', tradesError);
       }
 
       // إدخال مناطق التغطية
       if (coverageAreas && coverageAreas.length > 0 && profileId) {
-        await supabase.from('technician_coverage_areas').insert(
+        const { error: coverageError } = await supabase.from('technician_coverage_areas').insert(
           coverageAreas.map(c => ({ 
             technician_id: profileId,
             city_id: c.city_id,
@@ -186,11 +226,12 @@ export function useTechnicianRegistration() {
             radius_km: c.radius_km,
           }))
         );
+        if (coverageError) console.warn('Error inserting coverage areas:', coverageError);
       }
 
       // إدخال المستندات
       if (documents && documents.length > 0 && profileId) {
-        await supabase.from('technician_documents').insert(
+        const { error: docsError } = await supabase.from('technician_documents').insert(
           documents.map(d => ({ 
             technician_id: profileId,
             document_type: d.document_type,
@@ -199,16 +240,7 @@ export function useTechnicianRegistration() {
             file_size: d.file_size,
           }))
         );
-      }
-
-      // تسجيل الدخول تلقائياً
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: password,
-      });
-
-      if (signInError) {
-        console.warn('Auto sign-in failed:', signInError);
+        if (docsError) console.warn('Error inserting documents:', docsError);
       }
 
       // مسح البيانات المحفوظة محلياً
