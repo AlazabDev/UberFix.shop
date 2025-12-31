@@ -2,35 +2,26 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Users, Wrench, Cog } from "lucide-react";
-import { AppFooter } from "@/components/shared/AppFooter";
+import { LandingHeader } from "@/components/landing/LandingHeader";
+import { Footer } from "@/components/landing/Footer";
 
 export default function RoleSelection() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 via-background to-primary/10">
       {/* Header */}
-      <div className="text-center pt-12 pb-8">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="relative w-20 h-20 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-            <div className="relative">
-              <span className="text-primary-foreground font-bold text-3xl">A</span>
-              <Cog
-                className="absolute -top-1 -right-1 h-5 w-5 text-primary-foreground/80 animate-spin"
-                style={{ animationDuration: "8s" }}
-              />
-            </div>
-          </div>
-        </div>
-        <h1 className="text-4xl font-bold text-primary mb-2">UberFix.shop</h1>
-        <p className="text-xl text-muted-foreground mb-1">نظام إدارة طلبات الصيانة المتطور</p>
-        <p className="text-sm text-primary/70 mb-8">النظام الشامل لإدارة الصيانة والعقارات</p>
+      <LandingHeader />
 
-        <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
-          <Shield className="h-4 w-4 text-primary" />
-          <span className="text-sm">أختر مسارك الوصول الخاص إلي</span>
+      {/* Main Content */}
+      <div className="flex-1">
+        {/* Page Title */}
+        <div className="text-center pt-8 sm:pt-12 pb-6 sm:pb-8 px-4">
+          <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+            <Shield className="h-4 w-4 text-primary" />
+            <span className="text-sm">أختر مسارك الوصول الخاص إلي</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">اختيار نوع الحساب للدخول</h2>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">يرجى اختيار نوع الحساب المناسب للوصول إلى مميزات المنصة والتطبيقات</p>
         </div>
-        <h2 className="text-3xl font-bold text-foreground">اختيار نوع الحساب للدخول</h2>
-        <p className="text-muted-foreground mt-2">يرجى اختيار نوع الحساب المناسب للوصول إلى خيزات المنصة والتطبيقات</p>
-      </div>
 
       {/* Role Cards */}
       <div className="container max-w-6xl mx-auto px-4 pb-16">
@@ -143,9 +134,11 @@ export default function RoleSelection() {
           </div>
         </div>
 
-        {/* Footer */}
-        <AppFooter variant="simple" className="mt-12" />
+        </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

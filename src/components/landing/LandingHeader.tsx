@@ -50,23 +50,23 @@ export const LandingHeader = () => {
         ))}
       </nav>
 
-      {/* Desktop Auth Buttons */}
-      <div className="hidden sm:flex items-center gap-2 sm:gap-4">
-        <Link to="/role-selection">
-          <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+      {/* Auth Buttons - visible on all screens */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Link to="/role-selection" className="hidden xs:block">
+          <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9">
             تسجيل الدخول
           </Button>
         </Link>
         <Link to="/role-selection">
-          <Button size="sm" className="text-xs sm:text-sm">إنشاء حساب</Button>
+          <Button size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9">إنشاء حساب</Button>
         </Link>
       </div>
 
       {/* Mobile Menu Button */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden">
-            <Menu className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8 sm:h-9 sm:w-9">
+            <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="sr-only">فتح القائمة</span>
           </Button>
         </SheetTrigger>
