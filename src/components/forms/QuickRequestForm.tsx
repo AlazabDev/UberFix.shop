@@ -176,6 +176,10 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
         SERVICES.find(s => s.id === id)?.[isArabic ? 'name_ar' : 'name_en'] || id
       ).join(', ');
 
+      // Get current user if authenticated
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id;
+
       const requestData = {
         branch_id: branchId,
         company_id: companyId,
@@ -189,6 +193,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
         channel: 'qr_code',
         status: 'Open' as const,
         customer_notes: data.description,
+        ...(userId ? { created_by: userId } : {}),
       };
 
       const { data: createdRequest, error: requestError } = await supabase
