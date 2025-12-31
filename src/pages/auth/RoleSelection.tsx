@@ -13,14 +13,17 @@ export default function RoleSelection() {
           <div className="relative w-20 h-20 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
             <div className="relative">
               <span className="text-primary-foreground font-bold text-3xl">A</span>
-              <Cog className="absolute -top-1 -right-1 h-5 w-5 text-primary-foreground/80 animate-spin" style={{ animationDuration: '8s' }} />
+              <Cog
+                className="absolute -top-1 -right-1 h-5 w-5 text-primary-foreground/80 animate-spin"
+                style={{ animationDuration: "8s" }}
+              />
             </div>
           </div>
         </div>
         <h1 className="text-4xl font-bold text-primary mb-2">UberFix.shop</h1>
         <p className="text-xl text-muted-foreground mb-1">نظام إدارة طلبات الصيانة المتطور</p>
         <p className="text-sm text-primary/70 mb-8">النظام الشامل لإدارة الصيانة والعقارات</p>
-        
+
         <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
           <Shield className="h-4 w-4 text-primary" />
           <span className="text-sm">أختر مسارك الوصول الخاص إلي</span>
@@ -50,9 +53,7 @@ export default function RoleSelection() {
                 <li>• التقارير والإشراف المتقدمة</li>
               </ul>
               <Link to="/login?role=admin" className="block">
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                  تسجيل الدخول كـ الإدارة
-                </Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">تسجيل الدخول كـ الإدارة</Button>
               </Link>
             </CardContent>
           </Card>
@@ -65,7 +66,7 @@ export default function RoleSelection() {
               </div>
               <CardTitle className="text-2xl">الفنيون</CardTitle>
               <CardDescription className="text-base">
-                للفنيون والوصول إلى أدوات العمل الوصفية وإدارة المهام والمواعيد
+                للفنيون والوصول إلى أدوات العمل وإدارة المهام والمواعيد وتوثيق الصيانة
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -75,9 +76,7 @@ export default function RoleSelection() {
                 <li>• التقارير والإجابيات</li>
               </ul>
               <Link to="/login?role=vendor" className="block">
-                <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
-                  تسجيل الدخول كـ الفنيون
-                </Button>
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white">تسجيل الدخول كـ الفنيون</Button>
               </Link>
             </CardContent>
           </Card>
@@ -100,9 +99,7 @@ export default function RoleSelection() {
                 <li>• إدارة الملف الشخصي</li>
               </ul>
               <Link to="/login?role=customer" className="block">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                  تسجيل الدخول كـ العملاء
-                </Button>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">تسجيل الدخول كـ العملاء</Button>
               </Link>
             </CardContent>
           </Card>
@@ -119,7 +116,7 @@ export default function RoleSelection() {
               <h4 className="font-bold mb-2">الأمان والحماية</h4>
               <p className="text-sm text-muted-foreground">حماية متقدمة لبيانات المؤسسة المندمجة</p>
             </Card>
-            
+
             <Card className="text-center p-6">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
@@ -127,7 +124,7 @@ export default function RoleSelection() {
               <h4 className="font-bold mb-2">إدارة الموظفين</h4>
               <p className="text-sm text-muted-foreground">أدوات متقدمة لإدارة الموارد البشرية</p>
             </Card>
-            
+
             <Card className="text-center p-6">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <Wrench className="h-6 w-6 text-primary" />
@@ -135,7 +132,7 @@ export default function RoleSelection() {
               <h4 className="font-bold mb-2">إدارة العملاء</h4>
               <p className="text-sm text-muted-foreground">نظام شامل لإدارة العملاء والعلاقات</p>
             </Card>
-            
+
             <Card className="text-center p-6">
               <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                 <Cog className="h-6 w-6 text-primary" />
