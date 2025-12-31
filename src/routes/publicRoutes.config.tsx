@@ -27,6 +27,7 @@ const UserGuide = lazy(() => import("@/pages/public/UserGuide"));
 const Projects = lazy(() => import("@/pages/projects/Projects"));
 const PWASettings = lazy(() => import("@/pages/settings/PWASettings"));
 const QuickRequest = lazy(() => import("@/pages/QuickRequest"));
+const PublicQuickRequest = lazy(() => import("@/pages/PublicQuickRequest"));
 const QuickRequestFromMap = lazy(() => import("@/pages/QuickRequestFromMap"));
 const TrackOrders = lazy(() => import("@/pages/TrackOrders"));
 const CompletedServices = lazy(() => import("@/pages/CompletedServices"));
@@ -64,6 +65,7 @@ export const publicRoutes = [
   { path: "/blog/:slug", element: <BlogPost /> },
   { path: "/pwa-settings", element: <PWASettings /> },
   { path: "/quick-request/:propertyId", element: <QuickRequest /> },
+  { path: "/qr/:propertyId", element: <PublicQuickRequest /> },
   { path: "/quick-request", element: <QuickRequestFromMap /> },
   { path: "/quick-request-from-map", element: <QuickRequestFromMap /> },
   { path: "/track-orders", element: <TrackOrders /> },
