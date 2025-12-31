@@ -133,6 +133,10 @@ verify_jwt = true
 verify_jwt = false
 # Public QR scanning - but function has rate limiting and only returns safe data
 
+[functions.submit-public-request]
+verify_jwt = false
+# Public QR request submission - has rate limiting and input validation
+
 [functions.send-otp]
 verify_jwt = false
 # Public OTP sending - has internal rate limiting
