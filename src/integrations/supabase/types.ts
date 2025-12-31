@@ -1820,6 +1820,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_technician_registrations: {
+        Row: {
+          company_name: string
+          company_type: string
+          created_at: string | null
+          email: string
+          expires_at: string | null
+          full_name: string
+          id: string
+          phone: string
+          profile_data: Json | null
+        }
+        Insert: {
+          company_name: string
+          company_type: string
+          created_at?: string | null
+          email: string
+          expires_at?: string | null
+          full_name: string
+          id?: string
+          phone: string
+          profile_data?: Json | null
+        }
+        Update: {
+          company_name?: string
+          company_type?: string
+          created_at?: string | null
+          email?: string
+          expires_at?: string | null
+          full_name?: string
+          id?: string
+          phone?: string
+          profile_data?: Json | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -5387,6 +5423,10 @@ export type Database = {
       can_transition_stage: {
         Args: { current_stage: string; next_stage: string; user_role: string }
         Returns: boolean
+      }
+      complete_technician_registration: {
+        Args: { p_email: string }
+        Returns: Json
       }
       create_technician_draft: {
         Args: { fullname: string; phone: string }
