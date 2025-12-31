@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Users, Wrench, Cog } from "lucide-react";
+import { AppFooter } from "@/components/shared/AppFooter";
 
 export default function RoleSelection() {
   return (
@@ -144,6 +145,9 @@ export default function RoleSelection() {
             </Card>
           </div>
         </div>
+
+        {/* Footer */}
+        <AppFooter variant="simple" className="mt-12" />
       </div>
     </div>
   );
