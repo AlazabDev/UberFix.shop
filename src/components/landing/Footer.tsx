@@ -9,7 +9,8 @@ export const Footer = () => {
       { label: "إدارة العقارات", href: "#" },
       { label: "التقارير والتحليلات", href: "#" },
       { label: "إدارة الموردين", href: "#" },
-      { label: "نظام المواعيد", href: "#" }
+      { label: "نظام المواعيد", href: "#" },
+      { label: "طلب صيانة سريع", href: "/quick-request" }
     ],
     support: [
       { label: "مركز المساعدة", href: "#" },

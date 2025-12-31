@@ -11,6 +11,7 @@ const navItems = [
   { to: "/projects", label: "مشاريعنا" },
   { to: "/gallery", label: "معرض الصور" },
   { to: "/blog", label: "المدونة" },
+  { to: "/quick-request", label: "طلب صيانة" },
 ];
 
 export const LandingHeader = () => {
