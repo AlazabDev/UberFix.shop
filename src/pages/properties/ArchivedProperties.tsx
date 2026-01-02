@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { getPropertyTypeLabel } from "@/constants/propertyConstants";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -117,7 +117,7 @@ export default function ArchivedProperties() {
 
                 <h3 className="font-bold text-lg mb-1">{property.name}</h3>
                 <p className="text-sm text-muted-foreground mb-1">
-                  {property.type}
+                  {getPropertyTypeLabel(property.type)}
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">
                   {property.address}

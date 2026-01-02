@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, Phone, MoreVertical } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { NewRequestForm } from "@/components/forms/NewRequestForm";
+import { getPropertyTypeIcon, getPropertyTypeLabel, getPropertyStatusLabel, getPropertyStatusColor } from "@/constants/propertyConstants";
 
 interface PropertyCardProps {
   property: Property;
@@ -12,18 +13,6 @@ interface PropertyCardProps {
 
 export function PropertyCard({ property, onActionsClick }: PropertyCardProps) {
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
-
-  const getTypeIcon = (type: string) => {
-    const icons: Record<string, string> = {
-      residential: "🏢",
-      commercial: "🏪",
-      industrial: "🏭",
-      office: "🏢",
-      retail: "🛍️",
-      mixed_use: "🏗️"
-    };
-    return icons[type] || "🏢";
-  };
 
   return (
     <div className="bg-card rounded-lg border border-border overflow-hidden hover:shadow-lg transition-shadow">
@@ -46,11 +35,13 @@ export function PropertyCard({ property, onActionsClick }: PropertyCardProps) {
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-              <span>{getTypeIcon(property.type)}</span>
-              <span>المشروع</span>
+              <span>{getPropertyTypeIcon(property.type)}</span>
+              <span>{getPropertyTypeLabel(property.type)}</span>
             </div>
             <h3 className="font-bold text-lg text-foreground">{property.name}</h3>
-            <p className="text-sm text-muted-foreground">الفرع</p>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${getPropertyStatusColor(property.status)}`}>
+              {getPropertyStatusLabel(property.status)}
+            </span>
           </div>
           <Button
             variant="ghost"
