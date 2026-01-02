@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { MapPin, Phone, Loader2, Building2, Plus } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { MapPin, Loader2, Building2, Plus, User, Pencil, Check } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { useToast } from "@/hooks/use-toast";
 import { MapLocationPicker } from "@/components/maps/MapLocationPicker";
@@ -20,6 +20,7 @@ import { PropertyForm } from "./PropertyForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { maintenanceRequestFormSchema } from "@/lib/validationSchemas";
 import { getPropertyIcon } from "@/lib/propertyIcons";
+import { ImageUpload } from "@/components/forms/ImageUpload";
 
 interface NewRequestFormProps {
   onSuccess?: () => void;
@@ -34,7 +35,10 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
   const { properties, loading: propertiesLoading } = useProperties();
   const { toast } = useToast();
   const [showPropertyForm, setShowPropertyForm] = useState(false);
-  
+  const [userProfile, setUserProfile] = useState<{ name: string; phone: string; email: string } | null>(null);
+  const [editingContact, setEditingContact] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<MaintenanceRequestFormData>({
     resolver: zodResolver(maintenanceRequestFormSchema),
@@ -56,6 +60,38 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
     },
   });
 
+  // جلب بيانات المستخدم من حسابه
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('name, full_name, phone, email')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile) {
+            const userData = {
+              name: profile.full_name || profile.name || '',
+              phone: profile.phone || '',
+              email: profile.email || user.email || ''
+            };
+            setUserProfile(userData);
+            // ملء البيانات تلقائياً
+            form.setValue('client_name', userData.name);
+            form.setValue('client_phone', userData.phone);
+            form.setValue('client_email', userData.email);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+    fetchUserProfile();
+  }, [form]);
+
   // التحقق من وجود عقارات عند تحميل المكون
   useEffect(() => {
     if (!propertiesLoading && properties.length === 0) {
@@ -65,7 +101,9 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
 
   const handleSubmit = async (data: MaintenanceRequestFormData) => {
     try {
-      // إعداد البيانات للإرسال - createRequest سيتعامل مع company_id و branch_id تلقائياً
+      setUploading(true);
+      
+      // إعداد البيانات للإرسال
       const requestPayload = {
         title: data.title,
         description: data.description,
@@ -84,6 +122,39 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
       
       const result = await createRequest(requestPayload);
       if (result) {
+        // رفع الصور إذا وجدت
+        if (images.length > 0) {
+          const uploadPromises = images.map(async (file, index) => {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${result.id}/${Date.now()}_${index}.${fileExt}`;
+            
+            const { error: uploadError } = await supabase.storage
+              .from('maintenance-attachments')
+              .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+            
+            if (uploadError) {
+              console.error('Upload error:', uploadError);
+              return null;
+            }
+            
+            const { data: urlData } = supabase.storage
+              .from('maintenance-attachments')
+              .getPublicUrl(fileName);
+            
+            return urlData?.publicUrl;
+          });
+          
+          const uploadedUrls = await Promise.all(uploadPromises);
+          const validUrls = uploadedUrls.filter(Boolean);
+          
+          if (validUrls.length > 0) {
+            // حفظ روابط الصور في جدول منفصل أو في حقل JSON
+            console.log('Uploaded images:', validUrls);
+          }
+        }
         // إنشاء إشعار للمستخدم
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -148,6 +219,8 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
         const requestId = result.id;
         
         form.reset();
+        setImages([]);
+        setUploading(false);
         
         // إغلاق النموذج أولاً
         if (onSuccess) {
@@ -161,6 +234,7 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
       }
     } catch (error) {
       console.error("Submit error:", error);
+      setUploading(false);
       toast({
         title: "خطأ في إرسال الطلب",
         description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
@@ -270,67 +344,98 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
               )}
             />
 
-            {/* Basic Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>عنوان الطلب *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="مثال: إصلاح تسريب المياه" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* عنوان الطلب */}
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>عنوان الطلب *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="مثال: إصلاح تسريب المياه" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="client_phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رقم الهاتف *</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Phone className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="01xxxxxxxxx" className="pr-10" {...field} />
-                      </div>
-                    </FormControl>
-                    <FormDescription>رقم هاتف مصري (11 رقم)</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* بيانات العميل - تلقائية من الحساب */}
+            <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium text-sm">بيانات التواصل</span>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingContact(!editingContact)}
+                  className="h-8 gap-1"
+                >
+                  {editingContact ? (
+                    <>
+                      <Check className="h-3 w-3" />
+                      <span className="text-xs">تم</span>
+                    </>
+                  ) : (
+                    <>
+                      <Pencil className="h-3 w-3" />
+                      <span className="text-xs">تعديل</span>
+                    </>
+                  )}
+                </Button>
+              </div>
 
-              <FormField
-                control={form.control}
-                name="client_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>اسم العميل *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="اسم العميل" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="client_email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>البريد الإلكتروني</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="example@email.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {editingContact ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="client_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">الاسم</FormLabel>
+                        <FormControl>
+                          <Input placeholder="الاسم" {...field} className="h-9" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="client_phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">الهاتف</FormLabel>
+                        <FormControl>
+                          <Input placeholder="01xxxxxxxxx" {...field} className="h-9" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="client_email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">البريد</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="email@example.com" {...field} className="h-9" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <span className="text-foreground">{form.watch('client_name') || 'لم يحدد'}</span>
+                  <span className="text-muted-foreground">{form.watch('client_phone') || 'لم يحدد'}</span>
+                  <span className="text-muted-foreground">{form.watch('client_email') || 'لم يحدد'}</span>
+                </div>
+              )}
             </div>
 
             <FormField
@@ -493,6 +598,16 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
               )}
             />
 
+            {/* رفع الصور */}
+            <div className="space-y-2">
+              <FormLabel>صور المشكلة (اختياري)</FormLabel>
+              <ImageUpload 
+                images={images} 
+                onImagesChange={setImages}
+                maxImages={5}
+              />
+            </div>
+
             {/* Priority Badge Preview */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">معاينة الأولوية:</span>
@@ -509,11 +624,11 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
-              <Button type="submit" className="flex-1" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
+              <Button type="submit" className="flex-1" disabled={form.formState.isSubmitting || uploading}>
+                {(form.formState.isSubmitting || uploading) && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
                 إرسال الطلب
               </Button>
-              <Button type="button" variant="outline" onClick={onCancel} className="flex-1" disabled={form.formState.isSubmitting}>
+              <Button type="button" variant="outline" onClick={onCancel} className="flex-1" disabled={form.formState.isSubmitting || uploading}>
                 إلغاء
               </Button>
             </div>
