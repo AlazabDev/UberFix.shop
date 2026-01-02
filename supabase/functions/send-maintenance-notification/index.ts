@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "npm:resend@4.0.0";
+import React from "npm:react@18.3.1";
+import { renderAsync } from "npm:@react-email/components@0.0.22";
+import { MaintenanceStatusEmail } from "./_templates/maintenance-status.tsx";
 
 /**
  * Event-Driven Notification System
@@ -206,14 +209,38 @@ const formatPhoneNumber = (phone: string): string => {
 };
 
 // ==========================================
-// Send Email via Resend
+// All Stages for Timeline Display
+// ==========================================
+const ALL_STAGES = [
+  { key: 'received', label: 'تم استلام الطلب' },
+  { key: 'reviewed', label: 'تمت المراجعة' },
+  { key: 'scheduled', label: 'تم تحديد الموعد' },
+  { key: 'on_the_way', label: 'الفني في الطريق' },
+  { key: 'in_progress', label: 'جاري التنفيذ' },
+  { key: 'completed', label: 'تم الانتهاء' },
+  { key: 'closed', label: 'تم الإغلاق' },
+];
+
+const getStageIndex = (status: NotificationStatus): number => {
+  return ALL_STAGES.findIndex(s => s.key === status);
+};
+
+// ==========================================
+// Send Email via Resend with React Email
 // ==========================================
 const sendEmail = async (
   to: string,
   subject: string,
-  body: string,
+  customerName: string,
+  orderId: string,
+  currentStatus: NotificationStatus,
+  statusLabel: string,
+  statusMessage: string,
   buttonText: string,
-  trackUrl: string
+  trackUrl: string,
+  scheduledDate?: string,
+  scheduledTime?: string,
+  lifecycleData?: Array<{ status: string; created_at: string }>
 ): Promise<{ success: boolean; error?: string }> => {
   try {
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
@@ -224,46 +251,52 @@ const sendEmail = async (
 
     const resend = new Resend(resendApiKey);
     
-    const htmlBody = `
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; background-color: #f5f5f5; padding: 20px; margin: 0;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2563eb; padding-bottom: 20px;">
-      <h1 style="color: #2563eb; margin: 0; font-size: 28px;">UberFix</h1>
-      <p style="color: #666; font-size: 14px; margin-top: 5px;">نظام إدارة الصيانة</p>
-    </div>
-    
-    <div style="color: #333; line-height: 1.8; white-space: pre-line; font-size: 16px;">
-      ${body}
-    </div>
-    
-    <div style="text-align: center; margin-top: 30px;">
-      <a href="${trackUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-        ${buttonText}
-      </a>
-    </div>
-    
-    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-    
-    <p style="color: #999; font-size: 12px; text-align: center;">
-      هذه رسالة آلية من نظام UberFix. لا ترد على هذا البريد.
-      <br>
-      <a href="${trackUrl}" style="color: #2563eb;">تتبع طلبك</a>
-    </p>
-  </div>
-</body>
-</html>`;
+    // Build stages with completion status
+    const currentStageIndex = getStageIndex(currentStatus);
+    const stages = ALL_STAGES.map((stage, index) => {
+      // Find lifecycle entry for this stage
+      const lifecycleEntry = lifecycleData?.find(l => {
+        const mappedStatus = stageToNotificationStatus(l.status);
+        return mappedStatus === stage.key;
+      });
+      
+      return {
+        key: stage.key,
+        label: stage.label,
+        isCompleted: index < currentStageIndex,
+        isCurrent: index === currentStageIndex,
+        timestamp: lifecycleEntry 
+          ? new Date(lifecycleEntry.created_at).toLocaleString('ar-EG', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : undefined
+      };
+    });
+
+    // Render React Email template
+    const html = await renderAsync(
+      React.createElement(MaintenanceStatusEmail, {
+        customerName,
+        orderId,
+        trackUrl,
+        currentStatus,
+        statusLabel,
+        statusMessage,
+        buttonText,
+        scheduledDate,
+        scheduledTime,
+        stages,
+      })
+    );
 
     const result = await resend.emails.send({
       from: 'UberFix <noreply@uberfix.shop>',
       to: [to],
       subject: subject,
-      html: htmlBody,
+      html,
     });
 
     console.log('✅ Email sent successfully:', result);
@@ -452,6 +485,13 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Fetch request lifecycle for timeline
+    const { data: lifecycleData } = await supabase
+      .from('request_lifecycle')
+      .select('status, created_at')
+      .eq('request_id', request_id)
+      .order('created_at', { ascending: true });
+
     // Determine stage
     const stage = new_stage || request.workflow_stage || 'submitted';
     
@@ -493,12 +533,24 @@ const handler = async (req: Request): Promise<Response> => {
     // Build variables
     const trackUrl = buildTrackUrl(request_id);
     const shortOrderId = request_id.substring(0, 8).toUpperCase();
+    const customerName = request.client_name || 'عميلنا العزيز';
     const variables: Record<string, string> = {
-      customer_name: request.client_name || 'عميلنا العزيز',
+      customer_name: customerName,
       order_id: shortOrderId,
       track_url: trackUrl,
       date: scheduled_date || '',
       time: scheduled_time || '',
+    };
+
+    // Status labels for messages
+    const statusLabels: Record<NotificationStatus, string> = {
+      received: 'تم استلام طلب الصيانة',
+      reviewed: 'تمت مراجعة الطلب',
+      scheduled: 'تم تحديد الموعد',
+      on_the_way: 'الفني في الطريق',
+      in_progress: 'جاري التنفيذ',
+      completed: 'تم الانتهاء',
+      closed: 'تم الإغلاق',
     };
 
     const results: Array<{ channel: string; success: boolean; error?: string }> = [];
@@ -510,9 +562,16 @@ const handler = async (req: Request): Promise<Response> => {
         const emailResult = await sendEmail(
           request.client_email,
           template.email.subject,
+          customerName,
+          shortOrderId,
+          notificationStatus,
+          statusLabels[notificationStatus],
           emailBody,
           template.email.buttonText,
-          trackUrl
+          trackUrl,
+          scheduled_date,
+          scheduled_time,
+          lifecycleData || []
         );
         results.push({ channel: 'email', ...emailResult });
       }
@@ -542,16 +601,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Also send in-app notification
     if (request.created_by) {
-      const statusLabels: Record<NotificationStatus, string> = {
-        received: 'تم استلام طلب الصيانة',
-        reviewed: 'تمت مراجعة الطلب',
-        scheduled: 'تم تحديد الموعد',
-        on_the_way: 'الفني في الطريق',
-        in_progress: 'جاري التنفيذ',
-        completed: 'تم الانتهاء',
-        closed: 'تم الإغلاق',
-      };
-
       await supabase.from('notifications').insert({
         recipient_id: request.created_by,
         title: statusLabels[notificationStatus],
