@@ -181,12 +181,7 @@ export function SmartPropertyForm({ initialData, propertyId, skipNavigation, onS
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
         toast.error("يجب تسجيل الدخول أولاً");
-        navigate("/login");
-        return;
-      }
-
-      if (!user.email_confirmed_at) {
-        toast.error("يجب تأكيد بريدك الإلكتروني أولاً قبل إضافة عقارات");
+        if (!skipNavigation) navigate("/login");
         return;
       }
 

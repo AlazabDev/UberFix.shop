@@ -43,6 +43,7 @@ export function useProperties() {
       const { data, error } = await supabase
         .from("properties")
         .select("*")
+        .neq("status", "archived") // استثناء العقارات المؤرشفة
         .order("created_at", { ascending: false });
 
       if (error) throw error;

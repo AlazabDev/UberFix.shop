@@ -7,7 +7,7 @@ import { ArrowLeft, MapPin, Building2, Edit, Loader2 } from "lucide-react";
 import { InteractiveMap } from "@/components/maps/InteractiveMap";
 import { Badge } from "@/components/ui/badge";
 import { AppFooter } from "@/components/shared/AppFooter";
-
+import { getPropertyTypeLabel, getPropertyStatusLabel, getPropertyStatusColor } from "@/constants/propertyConstants";
 export default function PropertyDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -77,8 +77,8 @@ export default function PropertyDetails() {
         <CardContent className="pt-6">
           <div className="flex items-start justify-between mb-4">
             <h1 className="text-3xl font-bold text-foreground">{property.name}</h1>
-            <Badge variant={property.status === "active" ? "default" : "secondary"}>
-              {property.status === "active" ? "نشط" : property.status}
+            <Badge className={getPropertyStatusColor(property.status)}>
+              {getPropertyStatusLabel(property.status)}
             </Badge>
           </div>
 
@@ -87,7 +87,7 @@ export default function PropertyDetails() {
               <Building2 className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <p className="text-sm text-muted-foreground">نوع العقار</p>
-                <p className="font-medium text-foreground">{property.type}</p>
+                <p className="font-medium text-foreground">{getPropertyTypeLabel(property.type)}</p>
               </div>
             </div>
 
