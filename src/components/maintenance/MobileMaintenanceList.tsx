@@ -14,11 +14,13 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  BarChart3
+  BarChart3,
+  FolderOpen
 } from "lucide-react";
 import { MobileMaintenanceCard } from "./MobileMaintenanceCard";
-import { MaintenanceStats } from "../dashboard/MaintenanceStats";
+import { MaintenanceStats } from "./MaintenanceStats";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { FILTER_STATUS_OPTIONS, FILTER_PRIORITY_OPTIONS } from "@/constants/maintenanceStatusConstants";
 
 interface MobileMaintenanceListProps {
   onNewRequestClick?: () => void;
@@ -36,6 +38,7 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
                            request.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            request.client_name?.toLowerCase().includes(searchTerm.toLowerCase());
       
+      // استخدام قيم قاعدة البيانات الفعلية
       const matchesStatus = statusFilter === "all" || request.status === statusFilter;
       const matchesPriority = priorityFilter === "all" || request.priority === priorityFilter;
       
@@ -52,6 +55,15 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
     setStatusFilter("all");
     setPriorityFilter("all");
   };
+
+  // حساب الإحصائيات باستخدام قيم قاعدة البيانات
+  const stats = useMemo(() => ({
+    total: requests?.length || 0,
+    open: requests?.filter(r => r.status === 'Open').length || 0,
+    inProgress: requests?.filter(r => r.status === 'In Progress').length || 0,
+    completed: requests?.filter(r => r.status === 'Completed').length || 0,
+    overdue: 0
+  }), [requests]);
 
   if (loading) {
     return (
@@ -81,7 +93,7 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
     <div className="space-y-4">
       {/* إحصائيات سريعة */}
       <div className="lg:hidden">
-        <MaintenanceStats />
+        <MaintenanceStats stats={stats} />
       </div>
 
       {/* رأس القائمة */}
@@ -107,18 +119,18 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
             />
           </div>
 
-          {/* فلاتر سريعة */}
+          {/* فلاتر سريعة - استخدام قيم قاعدة البيانات */}
           <div className="flex gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="flex-1">
                 <SelectValue placeholder="الحالة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="pending">في الانتظار</SelectItem>
-                <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-                <SelectItem value="completed">مكتمل</SelectItem>
-                <SelectItem value="cancelled">ملغي</SelectItem>
+                {FILTER_STATUS_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -127,10 +139,11 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
                 <SelectValue placeholder="الأولوية" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الأولويات</SelectItem>
-                <SelectItem value="high">عالية</SelectItem>
-                <SelectItem value="medium">متوسطة</SelectItem>
-                <SelectItem value="low">منخفضة</SelectItem>
+                {FILTER_PRIORITY_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -143,7 +156,7 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
         </CardContent>
       </Card>
 
-      {/* علامات التبويب للحالات */}
+      {/* علامات التبويب للحالات - استخدام قيم قاعدة البيانات */}
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-5 h-auto p-1">
           <TabsTrigger value="all" className="text-xs py-2 px-1">
@@ -152,32 +165,32 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
               {filteredRequests.length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="pending" className="text-xs py-2 px-1">
-            <Clock className="h-3 w-3 mr-1" />
-            انتظار
+          <TabsTrigger value="Open" className="text-xs py-2 px-1">
+            <FolderOpen className="h-3 w-3 mr-1" />
+            مفتوح
             <Badge variant="secondary" className="mr-1 text-[10px] px-1">
-              {getRequestsByStatus('pending').length}
+              {getRequestsByStatus('Open').length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="in_progress" className="text-xs py-2 px-1">
+          <TabsTrigger value="In Progress" className="text-xs py-2 px-1">
             <RefreshCw className="h-3 w-3 mr-1" />
             جاري
             <Badge variant="secondary" className="mr-1 text-[10px] px-1">
-              {getRequestsByStatus('in_progress').length}
+              {getRequestsByStatus('In Progress').length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="completed" className="text-xs py-2 px-1">
+          <TabsTrigger value="Completed" className="text-xs py-2 px-1">
             <CheckCircle className="h-3 w-3 mr-1" />
             مكتمل
             <Badge variant="secondary" className="mr-1 text-[10px] px-1">
-              {getRequestsByStatus('completed').length}
+              {getRequestsByStatus('Completed').length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="cancelled" className="text-xs py-2 px-1">
+          <TabsTrigger value="Cancelled" className="text-xs py-2 px-1">
             <XCircle className="h-3 w-3 mr-1" />
             ملغي
             <Badge variant="secondary" className="mr-1 text-[10px] px-1">
-              {getRequestsByStatus('cancelled').length}
+              {getRequestsByStatus('Cancelled').length}
             </Badge>
           </TabsTrigger>
         </TabsList>
@@ -204,7 +217,7 @@ export function MobileMaintenanceList({ onNewRequestClick }: MobileMaintenanceLi
           )}
         </TabsContent>
 
-        {['pending', 'in_progress', 'completed', 'cancelled'].map((status) => (
+        {['Open', 'In Progress', 'Completed', 'Cancelled'].map((status) => (
           <TabsContent key={status} value={status} className="space-y-3 mt-4">
             {getRequestsByStatus(status).length === 0 ? (
               <Card>

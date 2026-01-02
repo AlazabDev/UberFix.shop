@@ -1,44 +1,40 @@
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPriorityConfig } from "@/constants/maintenanceStatusConstants";
 
 interface RequestPriorityBadgeProps {
-  priority: string;
+  priority: string | null | undefined;
   className?: string;
+  showIcon?: boolean;
 }
 
-export function RequestPriorityBadge({ priority, className }: RequestPriorityBadgeProps) {
-  const priorityConfig = {
-    low: { 
-      label: "منخفضة", 
-      icon: Info,
-      className: "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900 dark:text-blue-100"
-    },
-    medium: { 
-      label: "متوسطة", 
-      icon: AlertTriangle,
-      className: "bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-100"
-    },
-    high: { 
-      label: "عالية", 
-      icon: AlertCircle,
-      className: "bg-red-100 text-red-700 border-red-300 dark:bg-red-900 dark:text-red-100"
-    }
-  };
+const PRIORITY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  low: Info,
+  medium: AlertTriangle,
+  high: AlertCircle,
+  urgent: Zap,
+};
 
-  const config = priorityConfig[priority] || priorityConfig.medium;
-  const Icon = config.icon;
+export function RequestPriorityBadge({ 
+  priority, 
+  className,
+  showIcon = true
+}: RequestPriorityBadgeProps) {
+  const config = getPriorityConfig(priority);
+  const Icon = PRIORITY_ICONS[priority || 'medium'] || AlertTriangle;
 
   return (
     <Badge 
       variant="outline"
       className={cn(
         "text-xs font-medium gap-1",
-        config.className,
+        config.bgColor,
+        config.color,
         className
       )}
     >
-      <Icon className="h-3 w-3" />
+      {showIcon && <Icon className="h-3 w-3" />}
       {config.label}
     </Badge>
   );
