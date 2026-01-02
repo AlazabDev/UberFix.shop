@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MapLocationPicker } from "@/components/maps/MapLocationPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { useProperties } from "@/hooks/useProperties";
-import { PropertyForm } from "./PropertyForm";
+import { SmartPropertyForm } from "@/components/forms/property";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { maintenanceRequestFormSchema } from "@/lib/validationSchemas";
 import { getPropertyIcon } from "@/lib/propertyIcons";
@@ -269,12 +269,16 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
               يجب إضافة عقار أولاً قبل تقديم طلب الصيانة. يساعدنا ذلك في تقديم خدمة أفضل لك.
             </AlertDescription>
           </Alert>
-          <PropertyForm 
+          <SmartPropertyForm 
             skipNavigation={true}
             onSuccess={() => {
               setShowPropertyForm(false);
+            }}
+            onCancel={() => {
+              setShowPropertyForm(false);
               onCancel?.();
             }}
+            compact={true}
           />
         </CardContent>
       </Card>
@@ -328,13 +332,14 @@ export function NewRequestForm({ onSuccess, onCancel, initialPropertyId }: NewRe
                         <DialogHeader>
                           <DialogTitle>إضافة عقار جديد</DialogTitle>
                         </DialogHeader>
-                        <PropertyForm 
+                        <SmartPropertyForm 
                           skipNavigation={true}
                           onSuccess={() => {
                             toast({
                               title: "تم إضافة العقار بنجاح",
                             });
                           }}
+                          compact={true}
                         />
                       </DialogContent>
                     </Dialog>

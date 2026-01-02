@@ -26,9 +26,11 @@ interface SmartPropertyFormProps {
   propertyId?: string;
   skipNavigation?: boolean;
   onSuccess?: () => void;
+  onCancel?: () => void;
+  compact?: boolean; // للعرض داخل Dialog
 }
 
-export function SmartPropertyForm({ initialData, propertyId, skipNavigation, onSuccess }: SmartPropertyFormProps) {
+export function SmartPropertyForm({ initialData, propertyId, skipNavigation, onSuccess, onCancel, compact }: SmartPropertyFormProps) {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -522,7 +524,18 @@ export function SmartPropertyForm({ initialData, propertyId, skipNavigation, onS
           </Button>
         )}
 
-        <Button type="button" variant="ghost" onClick={() => navigate("/properties")} disabled={loading}>
+        <Button 
+          type="button" 
+          variant="ghost" 
+          onClick={() => {
+            if (onCancel) {
+              onCancel();
+            } else if (!skipNavigation) {
+              navigate("/properties");
+            }
+          }} 
+          disabled={loading}
+        >
           إلغاء
         </Button>
       </div>
