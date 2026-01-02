@@ -40,21 +40,20 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
       data: { subscription }
     } = supabase.auth.onAuthStateChange((event, session) => {
       const newUser = session?.user || null;
+      
+      // تحديث حالة المستخدم فقط - بدون توجيه تلقائي
+      // التوجيه يتم من صفحة تسجيل الدخول نفسها
+      // هذا يمنع إعادة التوجيه عند العودة للتبويب أو تجديد الجلسة
       setUser(newUser);
       setEmailConfirmed(!!newUser?.email_confirmed_at);
       setLoading(false);
-
-      // التوجيه التلقائي لصفحة الداشبورد بعد نجاح تسجيل الدخول وتأكيد البريد
-      if (event === 'SIGNED_IN' && newUser && newUser.email_confirmed_at) {
-        navigate('/dashboard', { replace: true });
-      }
     });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   if (loading) {
     return (
