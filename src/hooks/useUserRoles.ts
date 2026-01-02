@@ -20,6 +20,7 @@ interface UserRoles {
   hasRole: (role: AppRole) => boolean;
   hasAnyRole: (roles: AppRole[]) => boolean;
   hasPermission: (resource: string, action: string) => Promise<boolean>;
+  refetch: () => Promise<void>;
 }
 
 // Authorized owner emails - hardcoded for security
@@ -38,9 +39,10 @@ export const useUserRoles = (): UserRoles => {
 
   const fetchUserRoles = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      setLoading(true);
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (!user) {
+      if (userError || !user) {
         setRoles([]);
         setLoading(false);
         return;
@@ -56,18 +58,36 @@ export const useUserRoles = (): UserRoles => {
         return;
       }
 
-      // For non-owners, check profile role
+      // استخدام جدول user_roles بدلاً من profiles.role - أكثر أماناً
+      const { data: userRolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      if (!rolesError && userRolesData && userRolesData.length > 0) {
+        // تحويل الأدوار وتصفية owner للمستخدمين غير المصرح لهم
+        const fetchedRoles = userRolesData
+          .map(r => r.role as AppRole)
+          .filter(role => role !== 'owner'); // فقط المالكون المصرح لهم يحصلون على owner
+        
+        if (fetchedRoles.length > 0) {
+          setRoles(fetchedRoles);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // إذا لم يوجد في user_roles، تحقق من profiles كخطة بديلة
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profile?.role) {
-        // Non-owner users cannot have owner role
-        const userRole = profile.role === 'owner' ? 'customer' : profile.role;
-        setRoles([userRole as AppRole]);
+      if (profile?.role && profile.role !== 'owner') {
+        setRoles([profile.role as AppRole]);
       } else {
+        // المستخدم الجديد - الدور الافتراضي هو customer
         setRoles(['customer']);
       }
     } catch (error) {
@@ -81,13 +101,14 @@ export const useUserRoles = (): UserRoles => {
   useEffect(() => {
     fetchUserRoles();
 
+    // الاستماع لتغييرات جدول user_roles
     const channel = supabase
       .channel('user-roles-changes')
       .on('postgres_changes', 
         { 
           event: '*', 
           schema: 'public', 
-          table: 'profiles'
+          table: 'user_roles'
         },
         () => {
           fetchUserRoles();
@@ -149,6 +170,7 @@ export const useUserRoles = (): UserRoles => {
     isOwner: hasRole('owner'),
     hasRole,
     hasAnyRole,
-    hasPermission
+    hasPermission,
+    refetch: fetchUserRoles
   };
 };
