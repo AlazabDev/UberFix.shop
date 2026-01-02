@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { 
   Eye, 
   Calendar, 
@@ -13,14 +13,18 @@ import {
   Star,
   User,
   Wrench,
-  AlertCircle
+  MoreHorizontal
 } from "lucide-react";
 import { MaintenanceRequestActions } from "./MaintenanceRequestActions";
+import { RequestStatusBadge } from "./RequestStatusBadge";
+import { RequestPriorityBadge } from "./RequestPriorityBadge";
+import { getServiceTypeLabel } from "@/constants/maintenanceStatusConstants";
 
 interface MaintenanceRequest {
   id: string;
   title?: string;
   status: string;
+  workflow_stage?: string;
   priority?: string;
   client_name?: string;
   client_phone?: string;
@@ -39,48 +43,6 @@ interface MobileMaintenanceCardProps {
 export function MobileMaintenanceCard({ request }: MobileMaintenanceCardProps) {
   const navigate = useNavigate();
   const [showActions, setShowActions] = useState(false);
-
-  const getStatusBadge = (status: string) => {
-    const statusClasses = {
-      pending: "bg-warning/10 text-warning border-warning/20",
-      in_progress: "bg-info/10 text-info border-info/20",
-      completed: "bg-success/10 text-success border-success/20",
-      cancelled: "bg-destructive/10 text-destructive border-destructive/20"
-    };
-
-    const labels = {
-      pending: "في الانتظار",
-      in_progress: "قيد التنفيذ", 
-      completed: "مكتمل",
-      cancelled: "ملغي"
-    };
-
-    return (
-      <Badge variant="outline" className={statusClasses[status] || statusClasses.pending}>
-        {labels[status] || status}
-      </Badge>
-    );
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    const priorityClasses = {
-      low: "bg-muted text-muted-foreground border-muted",
-      medium: "bg-warning/10 text-warning border-warning/20",
-      high: "bg-destructive/10 text-destructive border-destructive/20"
-    };
-
-    const labels = {
-      low: "منخفضة",
-      medium: "متوسطة",
-      high: "عالية"
-    };
-
-    return (
-      <Badge variant="outline" className={priorityClasses[priority] || priorityClasses.medium}>
-        {labels[priority] || priority}
-      </Badge>
-    );
-  };
 
   const handleCallClient = () => {
     if (request.client_phone) {
@@ -108,8 +70,11 @@ export function MobileMaintenanceCard({ request }: MobileMaintenanceCardProps) {
               {request.title}
             </h3>
             <div className="flex items-center gap-2 mb-2">
-              {getStatusBadge(request.status)}
-              {getPriorityBadge(request.priority)}
+              <RequestStatusBadge 
+                status={request.status} 
+                workflowStage={request.workflow_stage}
+              />
+              <RequestPriorityBadge priority={request.priority} />
             </div>
           </div>
           <div className="text-xs text-muted-foreground text-right">
@@ -138,7 +103,9 @@ export function MobileMaintenanceCard({ request }: MobileMaintenanceCardProps) {
         {/* نوع الخدمة */}
         <div className="flex items-center gap-2">
           <Wrench className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <span className="text-sm text-muted-foreground">{request.service_type}</span>
+          <span className="text-sm text-muted-foreground">
+            {getServiceTypeLabel(request.service_type)}
+          </span>
         </div>
 
         {/* الموقع */}
@@ -188,7 +155,7 @@ export function MobileMaintenanceCard({ request }: MobileMaintenanceCardProps) {
           <Dialog open={showActions} onOpenChange={setShowActions}>
             <DialogTrigger asChild>
               <Button variant="default" size="sm" className="flex-1">
-                <AlertCircle className="h-4 w-4 mr-1" />
+                <MoreHorizontal className="h-4 w-4 mr-1" />
                 الإجراءات
               </Button>
             </DialogTrigger>

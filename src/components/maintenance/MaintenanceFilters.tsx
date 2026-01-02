@@ -19,6 +19,12 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { 
+  FILTER_STATUS_OPTIONS, 
+  FILTER_PRIORITY_OPTIONS,
+  getStatusConfig,
+  getPriorityConfig
+} from "@/constants/maintenanceStatusConstants";
 
 interface MaintenanceFiltersProps {
   searchTerm: string;
@@ -86,14 +92,14 @@ export function MaintenanceFilters({
   ].filter(Boolean).length;
 
   const serviceTypes = [
-    "كهرباء",
-    "سباكة", 
-    "تكييف",
-    "صيانة عامة",
-    "نظافة",
-    "طلاء",
-    "نجارة",
-    "أخرى"
+    { value: "plumbing", label: "سباكة" },
+    { value: "electrical", label: "كهرباء" },
+    { value: "hvac", label: "تكييف" },
+    { value: "general", label: "صيانة عامة" },
+    { value: "cleaning", label: "نظافة" },
+    { value: "painting", label: "طلاء" },
+    { value: "carpentry", label: "نجارة" },
+    { value: "other", label: "أخرى" },
   ];
 
   const locations = [
@@ -123,28 +129,31 @@ export function MaintenanceFilters({
           </div>
           
           <div className="flex flex-wrap gap-2">
+            {/* فلتر الحالة - استخدام قيم قاعدة البيانات */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="الحالة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل الحالات</SelectItem>
-                <SelectItem value="pending">في الانتظار</SelectItem>
-                <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
-                <SelectItem value="completed">مكتمل</SelectItem>
-                <SelectItem value="cancelled">ملغي</SelectItem>
+                {FILTER_STATUS_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
+            {/* فلتر الأولوية */}
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="الأولوية" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل الأولويات</SelectItem>
-                <SelectItem value="low">منخفضة</SelectItem>
-                <SelectItem value="medium">متوسطة</SelectItem>
-                <SelectItem value="high">عالية</SelectItem>
+                {FILTER_PRIORITY_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -207,8 +216,8 @@ export function MaintenanceFilters({
                   <SelectContent>
                     <SelectItem value="all">كل الخدمات</SelectItem>
                     {serviceTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -334,9 +343,7 @@ export function MaintenanceFilters({
             <div className="flex flex-wrap gap-2">
               {statusFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1">
-                  حالة: {statusFilter === 'pending' ? 'في الانتظار' : 
-                          statusFilter === 'in_progress' ? 'قيد التنفيذ' :
-                          statusFilter === 'completed' ? 'مكتمل' : 'ملغي'}
+                  حالة: {getStatusConfig(statusFilter).label}
                   <X 
                     className="h-3 w-3 cursor-pointer" 
                     onClick={() => setStatusFilter("all")}
@@ -346,8 +353,7 @@ export function MaintenanceFilters({
               
               {priorityFilter !== "all" && (
                 <Badge variant="secondary" className="gap-1">
-                  أولوية: {priorityFilter === 'low' ? 'منخفضة' :
-                           priorityFilter === 'medium' ? 'متوسطة' : 'عالية'}
+                  أولوية: {getPriorityConfig(priorityFilter).label}
                   <X 
                     className="h-3 w-3 cursor-pointer" 
                     onClick={() => setPriorityFilter("all")}
@@ -357,7 +363,7 @@ export function MaintenanceFilters({
               
               {serviceTypeFilter !== "all" && serviceTypeFilter && (
                 <Badge variant="secondary" className="gap-1">
-                  خدمة: {serviceTypeFilter}
+                  خدمة: {serviceTypes.find(s => s.value === serviceTypeFilter)?.label || serviceTypeFilter}
                   <X 
                     className="h-3 w-3 cursor-pointer" 
                     onClick={() => setServiceTypeFilter("all")}
