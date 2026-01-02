@@ -1,16 +1,12 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { Resend } from "npm:resend@2.0.0";
 
 /**
- * Send Maintenance Notification
- * ==============================
- * إرسال إشعارات متعددة القنوات عند تغيير حالة طلب الصيانة
+ * Event-Driven Notification System
+ * مربوط بدورة حياة طلب الصيانة - UberFix Maintenance Timeline
  * 
- * القنوات:
- * - WhatsApp (الأساسي)
- * - SMS (احتياطي)
- * - In-App Notifications
- * - Email (اختياري)
+ * القاعدة الحاكمة: كل تغيير حالة مؤثّر على العميل = إشعار واحد فقط
  */
 
 const corsHeaders = {
@@ -18,338 +14,558 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
-const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
-const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
-const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
-const TWILIO_PHONE = Deno.env.get('TWILIO_PHONE_NUMBER');
+// ==========================================
+// Types & Interfaces
+// ==========================================
+type NotificationChannel = 'email' | 'whatsapp';
+type NotificationStatus = 'received' | 'reviewed' | 'scheduled' | 'on_the_way' | 'in_progress' | 'completed' | 'closed';
 
 interface NotificationRequest {
   request_id: string;
+  event_type?: string;
   old_status?: string;
   new_status?: string;
   old_stage?: string;
   new_stage?: string;
-  event_type: 'status_changed' | 'stage_changed' | 'request_created' | 'request_assigned' | 
-              'request_scheduled' | 'request_in_progress' | 'request_completed' | 'request_cancelled' |
-              'technician_on_way' | 'appointment_reminder' | 'custom';
+  scheduled_date?: string;
+  scheduled_time?: string;
+  technician_name?: string;
   message?: string;
   send_whatsapp?: boolean;
   send_sms?: boolean;
   send_email?: boolean;
-  scheduled_date?: string;
-  scheduled_time?: string;
-  technician_name?: string;
+}
+
+interface NotificationTemplate {
+  status: NotificationStatus;
+  channels: NotificationChannel[];
+  email?: {
+    subject: string;
+    bodyTemplate: string;
+    buttonText: string;
+  };
+  whatsapp?: {
+    template: string;
+    buttonText: string;
+  };
 }
 
 // ==========================================
-// قوالب الرسائل لكل حالة
+// Notification Templates - Based on UberFix Timeline
 // ==========================================
-const STATUS_MESSAGES: Record<string, (data: {title: string, techName?: string, date?: string, time?: string}) => {
-  title: string;
-  message: string;
-  emoji: string;
-}> = {
-  pending: (data) => ({
-    emoji: '⏳',
-    title: 'تم استلام طلبك',
-    message: `⏳ *تم استلام طلب الصيانة*\n\n📝 ${data.title}\n\nسيتم مراجعة طلبك والرد عليك قريباً.\n\nللمتابعة، أرسل "حالة" على واتساب.`
-  }),
-  
-  assigned: (data) => ({
-    emoji: '👷',
-    title: 'تم تعيين فني',
-    message: `👷 *تم تعيين فني لطلبك*\n\n📝 ${data.title}\n${data.techName ? `\n👤 الفني: ${data.techName}` : ''}\n\nسيتم التواصل معك لتحديد موعد الزيارة.`
-  }),
-  
-  scheduled: (data) => ({
-    emoji: '📅',
-    title: 'تم جدولة الموعد',
-    message: `📅 *تم تحديد موعد الزيارة*\n\n📝 ${data.title}\n${data.date ? `\n📆 التاريخ: ${data.date}` : ''}${data.time ? `\n⏰ الوقت: ${data.time}` : ''}\n\nسيصلك تذكير قبل الموعد.`
-  }),
-  
-  in_progress: (data) => ({
-    emoji: '🔧',
-    title: 'جاري العمل',
-    message: `🔧 *جاري العمل على طلبك*\n\n📝 ${data.title}\n\nالفني يعمل الآن على حل المشكلة.\nسيتم إعلامك عند الانتهاء.`
-  }),
-  
-  completed: (data) => ({
-    emoji: '✅',
-    title: 'تم إتمام الخدمة',
-    message: `✅ *تم إتمام طلب الصيانة بنجاح!*\n\n📝 ${data.title}\n\n🎉 شكراً لثقتك بـ UberFix!\n\n⭐ نرجو تقييم الخدمة بإرسال:\n"تقييم 5" (أو أي رقم من 1-5)`
-  }),
-  
-  cancelled: (data) => ({
-    emoji: '❌',
-    title: 'تم إلغاء الطلب',
-    message: `❌ *تم إلغاء طلب الصيانة*\n\n📝 ${data.title}\n\nإذا كان لديك أي استفسار، أرسل "تواصل".`
-  }),
-  
-  technician_on_way: (data) => ({
-    emoji: '🚗',
-    title: 'الفني في الطريق',
-    message: `🚗 *الفني في الطريق إليك!*\n\n📝 ${data.title}\n${data.techName ? `\n👤 الفني: ${data.techName}` : ''}\n\nالوقت المتوقع للوصول: 15-30 دقيقة`
-  }),
-  
-  appointment_reminder: (data) => ({
-    emoji: '⏰',
-    title: 'تذكير بالموعد',
-    message: `⏰ *تذكير بموعد الصيانة*\n\n📝 ${data.title}\n${data.date ? `\n📆 التاريخ: ${data.date}` : ''}${data.time ? `\n⏰ الوقت: ${data.time}` : ''}\n\nيرجى التأكد من تواجدك في الموقع.`
-  })
+const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> = {
+  received: {
+    status: 'received',
+    channels: ['email', 'whatsapp'],
+    email: {
+      subject: 'تم استلام طلب الصيانة',
+      bodyTemplate: `مرحبًا {{customer_name}}،
+تم استلام طلب الصيانة الخاص بك بنجاح.
+رقم الطلب: {{order_id}}
+سنقوم بمراجعته والعودة إليك بالتحديثات.`,
+      buttonText: 'تتبّع طلب الصيانة',
+    },
+    whatsapp: {
+      template: `تم استلام طلب الصيانة بنجاح ✅
+رقم الطلب: {{order_id}}
+يمكنك متابعة حالة الطلب من هنا 👇
+{{track_url}}`,
+      buttonText: 'تتبّع الطلب',
+    },
+  },
+
+  reviewed: {
+    status: 'reviewed',
+    channels: ['email'],
+    email: {
+      subject: 'تمت مراجعة طلب الصيانة',
+      bodyTemplate: `مرحبًا {{customer_name}}،
+تمت مراجعة طلب الصيانة وجارٍ تجهيز التفاصيل اللازمة.`,
+      buttonText: 'عرض حالة الطلب',
+    },
+  },
+
+  scheduled: {
+    status: 'scheduled',
+    channels: ['email', 'whatsapp'],
+    email: {
+      subject: 'تم تحديد موعد الصيانة',
+      bodyTemplate: `مرحبًا {{customer_name}}،
+تم تحديد موعد الزيارة كما يلي:
+📅 {{date}} — ⏰ {{time}}`,
+      buttonText: 'عرض / تغيير الموعد',
+    },
+    whatsapp: {
+      template: `تم تحديد موعد الصيانة 🗓
+📅 {{date}} — ⏰ {{time}}
+لمراجعة التفاصيل أو تغيير الموعد:
+{{track_url}}`,
+      buttonText: 'إدارة الموعد',
+    },
+  },
+
+  on_the_way: {
+    status: 'on_the_way',
+    channels: ['whatsapp'],
+    whatsapp: {
+      template: `الفني في الطريق إليك الآن 🚚
+يمكنك متابعة الحالة لحظة بلحظة من هنا:
+{{track_url}}`,
+      buttonText: 'تتبّع الفني',
+    },
+  },
+
+  in_progress: {
+    status: 'in_progress',
+    channels: ['whatsapp'],
+    whatsapp: {
+      template: `بدأ تنفيذ أعمال الصيانة 🛠
+في حال احتجت أي تواصل أثناء التنفيذ:
+{{track_url}}`,
+      buttonText: 'التواصل مع الفني',
+    },
+  },
+
+  completed: {
+    status: 'completed',
+    channels: ['email', 'whatsapp'],
+    email: {
+      subject: 'تم الانتهاء من أعمال الصيانة',
+      bodyTemplate: `مرحبًا {{customer_name}}،
+تم الانتهاء من أعمال الصيانة بنجاح.
+يرجى مراجعة الأعمال واعتماد الإغلاق.`,
+      buttonText: 'اعتماد الإغلاق',
+    },
+    whatsapp: {
+      template: `تم الانتهاء من الصيانة ✅
+يرجى مراجعة الأعمال واعتماد الإغلاق:
+{{track_url}}`,
+      buttonText: 'اعتماد الإغلاق',
+    },
+  },
+
+  closed: {
+    status: 'closed',
+    channels: ['email'],
+    email: {
+      subject: 'تم إغلاق طلب الصيانة',
+      bodyTemplate: `مرحبًا {{customer_name}}،
+تم إغلاق طلب الصيانة بنجاح.
+نشكرك على ثقتك في UberFix.`,
+      buttonText: 'تقييم الخدمة',
+    },
+  },
 };
 
 // ==========================================
-// إرسال WhatsApp
+// Mapping Functions
 // ==========================================
-async function sendWhatsAppNotification(
-  to: string, 
-  message: string,
-  requestId: string,
-  supabase: ReturnType<typeof createClient>
-): Promise<boolean> {
-  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
-    console.log('⚠️ WhatsApp not configured, skipping');
-    return false;
-  }
+const stageToNotificationStatus = (stage: string): NotificationStatus | null => {
+  const mapping: Record<string, NotificationStatus> = {
+    'submitted': 'received',
+    'acknowledged': 'reviewed',
+    'assigned': 'reviewed',
+    'scheduled': 'scheduled',
+    'in_progress': 'in_progress',
+    'inspection': 'in_progress',
+    'completed': 'completed',
+    'closed': 'closed',
+    'paid': 'closed',
+  };
+  return mapping[stage] || null;
+};
 
+// Stages that don't trigger notifications
+const SILENT_STAGES = ['draft', 'waiting_parts', 'on_hold', 'cancelled', 'billed'];
+
+// ==========================================
+// Helper Functions
+// ==========================================
+const buildTrackUrl = (orderId: string): string => {
+  const baseUrl = Deno.env.get('PUBLIC_SITE_URL') || 'https://uberfix.shop';
+  return `${baseUrl}/track/${orderId}`;
+};
+
+const replaceVariables = (template: string, vars: Record<string, string>): string => {
+  let result = template;
+  Object.entries(vars).forEach(([key, value]) => {
+    result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value || '');
+  });
+  return result;
+};
+
+const formatPhoneNumber = (phone: string): string => {
+  let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = '20' + cleaned.substring(1);
+  }
+  if (!cleaned.startsWith('+')) {
+    cleaned = '+' + cleaned;
+  }
+  return cleaned;
+};
+
+// ==========================================
+// Send Email via Resend
+// ==========================================
+const sendEmail = async (
+  to: string,
+  subject: string,
+  body: string,
+  buttonText: string,
+  trackUrl: string
+): Promise<{ success: boolean; error?: string }> => {
   try {
-    // تنسيق الرقم
-    let formattedTo = to.replace(/\D/g, '');
-    if (formattedTo.startsWith('0')) {
-      formattedTo = '2' + formattedTo;
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      console.log('⚠️ RESEND_API_KEY not configured, skipping email');
+      return { success: false, error: 'Email not configured' };
     }
-    if (!formattedTo.startsWith('2') && formattedTo.length === 10) {
-      formattedTo = '2' + formattedTo;
+
+    const resend = new Resend(resendApiKey);
+    
+    const htmlBody = `
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; background-color: #f5f5f5; padding: 20px; margin: 0;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2563eb; padding-bottom: 20px;">
+      <h1 style="color: #2563eb; margin: 0; font-size: 28px;">UberFix</h1>
+      <p style="color: #666; font-size: 14px; margin-top: 5px;">نظام إدارة الصيانة</p>
+    </div>
+    
+    <div style="color: #333; line-height: 1.8; white-space: pre-line; font-size: 16px;">
+      ${body}
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="${trackUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        ${buttonText}
+      </a>
+    </div>
+    
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+    
+    <p style="color: #999; font-size: 12px; text-align: center;">
+      هذه رسالة آلية من نظام UberFix. لا ترد على هذا البريد.
+      <br>
+      <a href="${trackUrl}" style="color: #2563eb;">تتبع طلبك</a>
+    </p>
+  </div>
+</body>
+</html>`;
+
+    const result = await resend.emails.send({
+      from: 'UberFix <noreply@uberfix.shop>',
+      to: [to],
+      subject: subject,
+      html: htmlBody,
+    });
+
+    console.log('✅ Email sent successfully:', result);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Email send error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// ==========================================
+// Send WhatsApp via Twilio
+// ==========================================
+const sendWhatsApp = async (
+  supabase: ReturnType<typeof createClient>,
+  to: string,
+  message: string,
+  requestId: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
+
+    if (!accountSid || !authToken || !fromNumber) {
+      console.log('⚠️ Twilio credentials not configured, skipping WhatsApp');
+      return { success: false, error: 'WhatsApp not configured' };
     }
+
+    const formattedTo = formatPhoneNumber(to);
+    const formData = new URLSearchParams();
+    formData.append('To', `whatsapp:${formattedTo}`);
+    formData.append('From', `whatsapp:${fromNumber}`);
+    formData.append('Body', message);
 
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa(`${accountSid}:${authToken}`),
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          to: formattedTo,
-          type: 'text',
-          text: { body: message }
-        }),
+        body: formData,
       }
     );
 
     const result = await response.json();
 
-    if (!response.ok) {
-      console.error('❌ WhatsApp error:', result);
-      return false;
+    if (response.ok) {
+      console.log('✅ WhatsApp sent successfully:', result.sid);
+      
+      // Log the message
+      await supabase.from('message_logs').insert({
+        request_id: requestId,
+        recipient: formattedTo,
+        message_content: message,
+        message_type: 'whatsapp',
+        provider: 'twilio',
+        status: 'sent',
+        external_id: result.sid,
+        sent_at: new Date().toISOString(),
+        metadata: { type: 'notification', trigger: 'status_change' }
+      });
+
+      return { success: true };
+    } else {
+      console.error('❌ WhatsApp send failed:', result);
+      return { success: false, error: result.message || 'Failed to send' };
     }
-
-    console.log('✅ WhatsApp sent:', result.messages?.[0]?.id);
-
-    // حفظ في السجل
-    await supabase.from('message_logs').insert({
-      recipient: formattedTo,
-      message_content: message,
-      message_type: 'whatsapp',
-      provider: 'meta',
-      status: 'sent',
-      external_id: result.messages?.[0]?.id,
-      request_id: requestId,
-      sent_at: new Date().toISOString(),
-      metadata: { type: 'notification', trigger: 'status_change' }
-    });
-
-    return true;
   } catch (error) {
     console.error('❌ WhatsApp send error:', error);
-    return false;
+    return { success: false, error: error.message };
   }
-}
+};
 
 // ==========================================
-// إرسال SMS (احتياطي)
+// Send SMS as Fallback
 // ==========================================
-async function sendSMSNotification(
-  to: string, 
+const sendSMS = async (
+  supabase: ReturnType<typeof createClient>,
+  to: string,
   message: string,
-  requestId: string,
-  supabase: ReturnType<typeof createClient>
-): Promise<boolean> {
-  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
-    console.log('⚠️ Twilio not configured, skipping SMS');
-    return false;
-  }
-
+  requestId: string
+): Promise<{ success: boolean; error?: string }> => {
   try {
-    // تنسيق الرقم
-    let formattedTo = to.replace(/\D/g, '');
-    if (formattedTo.startsWith('0')) {
-      formattedTo = '+2' + formattedTo;
-    } else if (!formattedTo.startsWith('+')) {
-      formattedTo = '+' + formattedTo;
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
+
+    if (!accountSid || !authToken || !fromNumber) {
+      return { success: false, error: 'SMS not configured' };
     }
 
-    // تقصير الرسالة للـ SMS
-    const smsMessage = message
-      .replace(/\*/g, '')
-      .replace(/\n\n/g, '\n')
-      .slice(0, 160);
+    const formattedTo = formatPhoneNumber(to);
+    // Truncate for SMS
+    const smsMessage = message.replace(/\n+/g, ' ').substring(0, 160);
 
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+    const formData = new URLSearchParams();
+    formData.append('To', formattedTo);
+    formData.append('From', fromNumber);
+    formData.append('Body', smsMessage);
 
-    const response = await fetch(twilioUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)
-      },
-      body: new URLSearchParams({
-        To: formattedTo,
-        From: TWILIO_PHONE || '+12294082463',
-        Body: smsMessage
-      }).toString()
-    });
+    const response = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + btoa(`${accountSid}:${authToken}`),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData,
+      }
+    );
 
     const result = await response.json();
 
-    if (!response.ok) {
-      console.error('❌ SMS error:', result);
-      return false;
+    if (response.ok) {
+      console.log('✅ SMS sent:', result.sid);
+      
+      await supabase.from('message_logs').insert({
+        request_id: requestId,
+        recipient: formattedTo,
+        message_content: smsMessage,
+        message_type: 'sms',
+        provider: 'twilio',
+        status: 'sent',
+        external_id: result.sid,
+        sent_at: new Date().toISOString(),
+      });
+
+      return { success: true };
+    } else {
+      return { success: false, error: result.message };
     }
-
-    console.log('✅ SMS sent:', result.sid);
-
-    // حفظ في السجل
-    await supabase.from('message_logs').insert({
-      recipient: formattedTo,
-      message_content: smsMessage,
-      message_type: 'sms',
-      provider: 'twilio',
-      status: 'sent',
-      external_id: result.sid,
-      request_id: requestId,
-      sent_at: new Date().toISOString(),
-      metadata: { type: 'notification', trigger: 'status_change' }
-    });
-
-    return true;
   } catch (error) {
-    console.error('❌ SMS send error:', error);
-    return false;
+    return { success: false, error: error.message };
   }
-}
+};
 
 // ==========================================
 // Main Handler
 // ==========================================
-serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const requestData: NotificationRequest = await req.json();
+    const body: NotificationRequest = await req.json();
+    console.log('📤 Notification request:', body);
+
     const { 
       request_id, 
-      old_status, 
-      new_status, 
       event_type, 
-      message,
-      send_whatsapp = true,
-      send_sms = false,
+      new_stage,
       scheduled_date,
       scheduled_time,
-      technician_name
-    } = requestData;
+      send_sms = false,
+    } = body;
 
-    console.log('📤 Notification request:', { request_id, event_type, new_status });
+    // Validate request
+    if (!request_id) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing request_id' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // جلب معلومات الطلب
-    const { data: request, error: requestError } = await supabase
+    // Fetch request details
+    const { data: request, error: fetchError } = await supabase
       .from('maintenance_requests')
-      .select(`
-        id, title, client_name, client_phone, client_email, 
-        created_by, status, workflow_stage,
-        assigned_technician:technicians(name, phone)
-      `)
+      .select('*')
       .eq('id', request_id)
       .single();
 
-    if (requestError || !request) {
-      throw new Error(`Request not found: ${requestError?.message}`);
+    if (fetchError || !request) {
+      console.error('Request not found:', fetchError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Request not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // تحديد القالب
-    const statusKey = new_status || event_type.replace('request_', '');
-    const templateFn = STATUS_MESSAGES[statusKey] || STATUS_MESSAGES.pending;
+    // Determine stage
+    const stage = new_stage || request.workflow_stage || 'submitted';
     
-    const templateData = {
-      title: request.title,
-      techName: technician_name || (request.assigned_technician as { name: string })?.name,
-      date: scheduled_date,
-      time: scheduled_time
+    // Check if this is a silent stage
+    if (SILENT_STAGES.includes(stage)) {
+      console.log(`📵 Stage ${stage} is silent, skipping notification`);
+      return new Response(
+        JSON.stringify({ success: true, message: 'Silent stage, no notification sent' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get notification status
+    let notificationStatus = stageToNotificationStatus(stage);
+    
+    // Handle special event types
+    if (event_type === 'request_created') {
+      notificationStatus = 'received';
+    } else if (event_type === 'technician_on_way') {
+      notificationStatus = 'on_the_way';
+    }
+
+    if (!notificationStatus) {
+      console.log(`📵 No notification template for stage: ${stage}`);
+      return new Response(
+        JSON.stringify({ success: true, message: 'No template for this stage' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const template = NOTIFICATION_TEMPLATES[notificationStatus];
+    if (!template) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Template not found' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Build variables
+    const trackUrl = buildTrackUrl(request_id);
+    const shortOrderId = request_id.substring(0, 8).toUpperCase();
+    const variables: Record<string, string> = {
+      customer_name: request.client_name || 'عميلنا العزيز',
+      order_id: shortOrderId,
+      track_url: trackUrl,
+      date: scheduled_date || '',
+      time: scheduled_time || '',
     };
 
-    const template = templateFn(templateData);
-    const notificationMessage = message || template.message;
+    const results: Array<{ channel: string; success: boolean; error?: string }> = [];
 
-    const results: { channel: string; success: boolean; error?: string }[] = [];
+    // Send notifications based on template channels
+    for (const channel of template.channels) {
+      if (channel === 'email' && template.email && request.client_email) {
+        const emailBody = replaceVariables(template.email.bodyTemplate, variables);
+        const emailResult = await sendEmail(
+          request.client_email,
+          template.email.subject,
+          emailBody,
+          template.email.buttonText,
+          trackUrl
+        );
+        results.push({ channel: 'email', ...emailResult });
+      }
 
-    // 1. إرسال إشعار In-App للمستخدم
+      if (channel === 'whatsapp' && template.whatsapp && request.client_phone) {
+        const whatsappMessage = replaceVariables(template.whatsapp.template, variables);
+        const whatsappResult = await sendWhatsApp(
+          supabase,
+          request.client_phone,
+          whatsappMessage,
+          request_id
+        );
+        results.push({ channel: 'whatsapp', ...whatsappResult });
+
+        // Send SMS as fallback if WhatsApp fails
+        if (!whatsappResult.success && send_sms) {
+          const smsResult = await sendSMS(
+            supabase,
+            request.client_phone,
+            whatsappMessage,
+            request_id
+          );
+          results.push({ channel: 'sms', ...smsResult });
+        }
+      }
+    }
+
+    // Also send in-app notification
     if (request.created_by) {
-      const { error: notifError } = await supabase
-        .from('notifications')
-        .insert({
-          recipient_id: request.created_by,
-          title: `${template.emoji} ${template.title}`,
-          message: notificationMessage.replace(/\*/g, '').replace(/\n+/g, ' ').slice(0, 200),
-          type: new_status === 'completed' ? 'success' : 'info',
-          entity_type: 'maintenance_request',
-          entity_id: request_id,
-          whatsapp_sent: send_whatsapp,
-          sms_sent: send_sms
-        });
+      const statusLabels: Record<NotificationStatus, string> = {
+        received: 'تم استلام طلب الصيانة',
+        reviewed: 'تمت مراجعة الطلب',
+        scheduled: 'تم تحديد الموعد',
+        on_the_way: 'الفني في الطريق',
+        in_progress: 'جاري التنفيذ',
+        completed: 'تم الانتهاء',
+        closed: 'تم الإغلاق',
+      };
 
-      results.push({ 
-        channel: 'in_app', 
-        success: !notifError, 
-        error: notifError?.message 
+      await supabase.from('notifications').insert({
+        recipient_id: request.created_by,
+        title: statusLabels[notificationStatus],
+        message: `طلب رقم ${shortOrderId}`,
+        type: notificationStatus === 'completed' ? 'success' : 'info',
+        entity_type: 'maintenance_request',
+        entity_id: request_id,
+        whatsapp_sent: results.some(r => r.channel === 'whatsapp' && r.success),
       });
+      results.push({ channel: 'in_app', success: true });
     }
 
-    // 2. إرسال WhatsApp للعميل
-    if (send_whatsapp && request.client_phone) {
-      const whatsappSuccess = await sendWhatsAppNotification(
-        request.client_phone,
-        notificationMessage,
-        request_id,
-        supabase
-      );
-      results.push({ channel: 'whatsapp', success: whatsappSuccess });
-    }
-
-    // 3. إرسال SMS كاحتياطي إذا فشل WhatsApp أو مطلوب صراحة
-    const whatsappFailed = results.find(r => r.channel === 'whatsapp')?.success === false;
-    if ((send_sms || whatsappFailed) && request.client_phone) {
-      const smsSuccess = await sendSMSNotification(
-        request.client_phone,
-        notificationMessage,
-        request_id,
-        supabase
-      );
-      results.push({ channel: 'sms', success: smsSuccess });
-    }
-
-    // 4. إشعار للمسؤولين (فقط للأحداث المهمة)
-    if (['request_created', 'request_completed', 'request_cancelled'].includes(event_type)) {
+    // Notify staff for important events
+    if (['received', 'completed', 'closed'].includes(notificationStatus)) {
       const { data: staffUsers } = await supabase
         .from('user_roles')
         .select('user_id')
@@ -360,7 +576,7 @@ serve(async (req) => {
           .filter(u => u.user_id !== request.created_by)
           .map(u => ({
             recipient_id: u.user_id,
-            title: `${template.emoji} ${template.title}`,
+            title: `طلب جديد - ${shortOrderId}`,
             message: `${request.client_name || 'عميل'}: ${request.title}`,
             type: 'info',
             entity_type: 'maintenance_request',
@@ -379,22 +595,18 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         results,
-        message: 'Notifications processed'
+        template: notificationStatus 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('❌ Notification error:', error);
+    console.error('❌ Notification handler error:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : String(error) 
-      }),
-      { 
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ success: false, error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
-});
+};
+
+serve(handler);
