@@ -1,53 +1,117 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase, supabaseReady } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
 }
 
+// المسارات التي لا تتطلب مصادقة
+const PUBLIC_ROUTES = [
+  '/',
+  '/login',
+  '/register',
+  '/role-selection',
+  '/forgot-password',
+  '/auth/callback',
+  '/auth/update-password',
+  '/auth/verify-email-change',
+  '/auth/reauth',
+  '/auth/magic',
+  '/about',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/services',
+  '/gallery',
+  '/faq',
+  '/user-guide',
+  '/blog',
+  '/pwa-settings',
+  '/quick-request',
+  '/quick-request-from-map',
+  '/track-orders',
+  '/completed-services',
+  '/whatsapp-status',
+  '/technicians/register',
+  '/technicians/registration/wizard',
+  '/technicians/registration/thank-you',
+];
+
 export function AuthWrapper({ children }: AuthWrapperProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(supabaseReady);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [emailConfirmed, setEmailConfirmed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // التحقق مما إذا كان المسار الحالي عام
+  const isPublicRoute = useCallback(() => {
+    const path = location.pathname;
+    // التحقق من المسارات العامة الثابتة
+    if (PUBLIC_ROUTES.includes(path)) return true;
+    // التحقق من المسارات الديناميكية
+    if (path.startsWith('/qr/')) return true;
+    if (path.startsWith('/quick-request/')) return true;
+    if (path.startsWith('/track/')) return true;
+    if (path.startsWith('/blog/')) return true;
+    if (path.startsWith('/projects')) return true;
+    return false;
+  }, [location.pathname]);
 
   useEffect(() => {
-    if (!supabaseReady) return;
+    if (!supabaseReady) {
+      setLoading(false);
+      return;
+    }
 
     let isMounted = true;
 
-    // Check initial session
+    // إعداد مستمع تغييرات المصادقة أولاً
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (!isMounted) return;
+      
+      // تحديث حالة الجلسة والمستخدم
+      setSession(newSession);
+      setUser(newSession?.user || null);
+      setEmailConfirmed(!!newSession?.user?.email_confirmed_at);
+      
+      // معالجة تسجيل الخروج
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setSession(null);
+        setEmailConfirmed(false);
+      }
+    });
+
+    // ثم التحقق من الجلسة الحالية
     supabase.auth
       .getSession()
-      .then(({ data: { session } }) => {
+      .then(({ data: { session: currentSession }, error }) => {
         if (!isMounted) return;
-        const currentUser = session?.user || null;
-        setUser(currentUser);
-        setEmailConfirmed(!!currentUser?.email_confirmed_at);
+        
+        if (error) {
+          console.error('خطأ في تحميل الجلسة:', error.message);
+          // إذا كانت الجلسة منتهية أو غير صالحة، قم بتسجيل الخروج
+          if (error.message.includes('invalid') || error.message.includes('expired')) {
+            supabase.auth.signOut();
+          }
+        }
+        
+        setSession(currentSession);
+        setUser(currentSession?.user || null);
+        setEmailConfirmed(!!currentSession?.user?.email_confirmed_at);
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error loading session', error);
+        console.error('خطأ في تحميل الجلسة:', error);
         if (isMounted) {
           setLoading(false);
         }
       });
-
-    // Listen for auth changes
-    const {
-      data: { subscription }
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      const newUser = session?.user || null;
-      
-      // تحديث حالة المستخدم فقط - بدون توجيه تلقائي
-      // التوجيه يتم من صفحة تسجيل الدخول نفسها
-      // هذا يمنع إعادة التوجيه عند العودة للتبويب أو تجديد الجلسة
-      setUser(newUser);
-      setEmailConfirmed(!!newUser?.email_confirmed_at);
-      setLoading(false);
-    });
 
     return () => {
       isMounted = false;
@@ -55,6 +119,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     };
   }, []);
 
+  // شاشة التحميل
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -66,8 +131,22 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
+  // إذا كان Supabase غير جاهز
+  if (!supabaseReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4 text-center">
+        <div className="space-y-3 max-w-md">
+          <p className="text-lg font-semibold text-foreground">لا يمكن الاتصال بقاعدة البيانات</p>
+          <p className="text-muted-foreground text-sm">
+            يرجى المحاولة مرة أخرى لاحقاً.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // إذا كان المستخدم مسجل لكن البريد غير مؤكد
-  if (user && !emailConfirmed) {
+  if (user && !emailConfirmed && !isPublicRoute()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full bg-card border border-border rounded-lg p-6 text-center space-y-4">
@@ -97,22 +176,8 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
-  if (!supabaseReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4 text-center">
-        <div className="space-y-3 max-w-md">
-          <p className="text-lg font-semibold text-foreground">لا يمكن الاتصال بقاعدة البيانات</p>
-          <p className="text-muted-foreground text-sm">
-            يرجى التحقق من إعدادات Supabase (المتغيرات VITE_SUPABASE_URL و VITE_SUPABASE_PUBLISHABLE_KEY)
-            أو المحاولة مرة أخرى لاحقاً. سيتم تشغيل التطبيق بوضع القراءة المحدود إلى أن يتم تصحيح الإعدادات.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    // توجيه المستخدم غير المسجل إلى صفحة اختيار الدور
+  // إذا لم يكن هناك مستخدم والمسار يتطلب مصادقة
+  if (!user && !isPublicRoute()) {
     navigate('/role-selection', { replace: true });
     return null;
   }
