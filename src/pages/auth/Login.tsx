@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Cog, Shield, Users, Wrench, Phone } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
 import { PhoneOTPLogin } from "@/components/auth/PhoneOTPLogin";
 
 export default function Login() {
@@ -93,6 +94,36 @@ export default function Login() {
         options: {
           redirectTo: redirectUrl,
         }
+      });
+
+      if (error) {
+        toast({
+          title: "خطأ في تسجيل الدخول",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "حدث خطأ",
+        description: "حاول مرة أخرى لاحقاً",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    setIsLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "facebook",
+        options: {
+          redirectTo: redirectUrl,
+        },
       });
 
       if (error) {
@@ -215,6 +246,16 @@ export default function Login() {
                   >
                     <FcGoogle className="ml-2 h-5 w-5" />
                     تسجيل الدخول باستخدام Google
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleFacebookLogin}
+                    disabled={isLoading}
+                  >
+                    <FaFacebook className="ml-2 h-5 w-5 text-[#1877F2]" />
+                    تسجيل الدخول باستخدام Facebook
                   </Button>
 
                   <Button 
