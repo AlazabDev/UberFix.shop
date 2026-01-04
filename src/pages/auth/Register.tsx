@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowRight, Cog } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
 import { registerFormSchema } from "@/lib/validationSchemas";
 
 type RegisterFormData = z.infer<typeof registerFormSchema>;
@@ -104,6 +105,36 @@ export default function Register() {
             prompt: 'consent',
           }
         }
+      });
+
+      if (error) {
+        toast({
+          title: "خطأ في التسجيل",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "حدث خطأ",
+        description: "حاول مرة أخرى لاحقاً",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookSignup = async () => {
+    setIsLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "facebook",
+        options: {
+          redirectTo: redirectUrl,
+        },
       });
 
       if (error) {
@@ -256,6 +287,16 @@ export default function Register() {
               >
                 <FcGoogle className="ml-2 h-5 w-5" />
                 التسجيل باستخدام Google
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleFacebookSignup}
+                disabled={isLoading}
+              >
+                <FaFacebook className="ml-2 h-5 w-5 text-[#1877F2]" />
+                التسجيل باستخدام Facebook
               </Button>
             </form>
           </Form>
