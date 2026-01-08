@@ -1,103 +1,42 @@
-import { Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
-import { PageErrorBoundary } from "@/components/error-boundaries/PageErrorBoundary";
-import { ProtectedRoute } from "@/routes/ProtectedRoute";
-import { protectedRoutes } from "@/routes/routes.config";
-import { publicRoutes } from "@/routes/publicRoutes.config";
-import { Loader2 } from "lucide-react";
-import { useMaintenanceLock } from "@/hooks/useMaintenanceLock";
-import { MaintenanceOverlay } from "@/components/MaintenanceOverlay";
 
-// Lazy load PWA prompt to prevent blocking initial render
-import { lazy } from "react";
-const PWAInstallPrompt = lazy(() => 
-  import("@/components/PWAInstallPrompt").then(m => ({ default: m.PWAInstallPrompt }))
-);
+// Public Pages
+import Index from "./pages/Index";
+import PrivacyPolicy from "./pages/public/PrivacyPolicy";
+import TermsOfService from "./pages/public/TermsOfService";
+import DataDeletion from "./pages/public/DataDeletion";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      retry: 1,
-      retryDelay: 1000,
-      networkMode: 'online',
-    },
-  },
-});
+// Auth Pages
+import AuthCallback from "./pages/auth/AuthCallback";
+import AuthV1Callback from "./pages/auth/AuthV1Callback";
 
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen bg-background">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  </div>
-);
+// 404 Page
+import NotFound from "./pages/NotFound";
 
-const AppContent = () => {
-  const { data: lockStatus, isLoading } = useMaintenanceLock();
-  
-  // Don't block rendering while checking maintenance status
-  // Only show maintenance overlay if explicitly locked and data is loaded
-  if (!isLoading && lockStatus?.isLocked) {
-    return <MaintenanceOverlay message={lockStatus.message} />;
-  }
+import "./index.css";
 
+function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          {/* Public Routes */}
-          {publicRoutes.map(({ path, element }) => (
-            <Route key={path} path={path} element={element} />
-          ))}
-
-          {/* Protected Routes */}
-          {protectedRoutes.map(({ path, element, withLayout }) => (
-            <Route
-              key={path}
-              path={path}
-              element={
-                <ProtectedRoute withLayout={withLayout}>
-                  {element}
-                </ProtectedRoute>
-              }
-            />
-          ))}
-        </Routes>
-      </Suspense>
+      <Routes>
+        {/* Public Routes - No Authentication Required */}
+        <Route path="/" element={<Index />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/data-deletion" element={<DataDeletion />} />
+        <Route path="/delete-data" element={<DataDeletion />} />
+        
+        {/* Auth Callback Routes */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/auth/v1/callback" element={<AuthV1Callback />} />
+        
+        {/* 404 Fallback */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </BrowserRouter>
   );
-};
-
-const App = () => {
-  console.log('[App] Rendering application...');
-  
-  return (
-    <PageErrorBoundary pageName="Application">
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppContent />
-            {/* PWA prompt loaded lazily after main content */}
-            <Suspense fallback={null}>
-              <PWAInstallPrompt />
-            </Suspense>
-          </TooltipProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </PageErrorBoundary>
-  );
-};
+}
 
 export default App;
