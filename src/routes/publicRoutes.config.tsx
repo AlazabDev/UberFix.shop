@@ -15,7 +15,13 @@ const MagicLink = lazy(() => import("@/pages/auth/MagicLink"));
 // Public pages
 const About = lazy(() => import("@/pages/public/About"));
 const PrivacyPolicy = lazy(() => import("@/pages/public/PrivacyPolicy"));
+const PrivacyPolicyEnglish = lazy(() => import("@/pages/public/PrivacyPolicyEnglish"));
 const TermsOfService = lazy(() => import("@/pages/public/TermsOfService"));
+const TermsEnglish = lazy(() => import("@/pages/public/TermsEnglish"));
+const AcceptableUsePolicy = lazy(() => import("@/pages/public/AcceptableUsePolicy"));
+const AuthDocumentation = lazy(() => import("@/pages/public/AuthDocumentation"));
+const APIDocumentation = lazy(() => import("@/pages/public/APIDocumentation"));
+const ComplianceStatements = lazy(() => import("@/pages/public/ComplianceStatements"));
 const Services = lazy(() => import("@/pages/public/Services"));
 const Gallery = lazy(() => import("@/pages/public/Gallery"));
 const Blog = lazy(() => import("@/pages/public/Blog"));
