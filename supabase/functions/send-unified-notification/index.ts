@@ -38,20 +38,31 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// HTML Escape function to prevent XSS in email templates
+function escapeHtml(unsafe: string | undefined | null): string {
+  if (!unsafe) return '';
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // قوالب الرسائل
 const messageTemplates = {
   request_created: {
     title: "طلب صيانة جديد",
-    message: (data: any) => `تم إنشاء طلب صيانة جديد: ${data.request_title}`,
+    message: (data: any) => `تم إنشاء طلب صيانة جديد: ${escapeHtml(data.request_title)}`,
     email_subject: "طلب صيانة جديد - UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
         <h2 style="color: #2563eb;">طلب صيانة جديد</h2>
         <p>تم إنشاء طلب صيانة جديد:</p>
         <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
-          <p><strong>العنوان:</strong> ${data.request_title}</p>
-          ${data.property_name ? `<p><strong>العقار:</strong> ${data.property_name}</p>` : ''}
-          <p><strong>الحالة:</strong> ${data.request_status || 'مفتوح'}</p>
+          <p><strong>العنوان:</strong> ${escapeHtml(data.request_title)}</p>
+          ${data.property_name ? `<p><strong>العقار:</strong> ${escapeHtml(data.property_name)}</p>` : ''}
+          <p><strong>الحالة:</strong> ${escapeHtml(data.request_status) || 'مفتوح'}</p>
         </div>
         <p>يرجى متابعة الطلب من لوحة التحكم.</p>
       </div>
@@ -59,32 +70,32 @@ const messageTemplates = {
   },
   status_updated: {
     title: "تحديث حالة الطلب",
-    message: (data: any) => `تم تحديث حالة طلب "${data.request_title}" من ${data.old_status} إلى ${data.new_status}`,
+    message: (data: any) => `تم تحديث حالة طلب "${escapeHtml(data.request_title)}" من ${escapeHtml(data.old_status)} إلى ${escapeHtml(data.new_status)}`,
     email_subject: "تحديث حالة طلب الصيانة - UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
         <h2 style="color: #2563eb;">تحديث حالة الطلب</h2>
         <p>تم تحديث حالة طلب الصيانة الخاص بك:</p>
         <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
-          <p><strong>العنوان:</strong> ${data.request_title}</p>
-          <p><strong>الحالة السابقة:</strong> <span style="color: #6b7280;">${data.old_status}</span></p>
-          <p><strong>الحالة الجديدة:</strong> <span style="color: #059669;">${data.new_status}</span></p>
-          ${data.notes ? `<p><strong>ملاحظات:</strong> ${data.notes}</p>` : ''}
+          <p><strong>العنوان:</strong> ${escapeHtml(data.request_title)}</p>
+          <p><strong>الحالة السابقة:</strong> <span style="color: #6b7280;">${escapeHtml(data.old_status)}</span></p>
+          <p><strong>الحالة الجديدة:</strong> <span style="color: #059669;">${escapeHtml(data.new_status)}</span></p>
+          ${data.notes ? `<p><strong>ملاحظات:</strong> ${escapeHtml(data.notes)}</p>` : ''}
         </div>
       </div>
     `
   },
   vendor_assigned: {
     title: "تم تخصيص فني",
-    message: (data: any) => `تم تخصيص الفني ${data.vendor_name} لطلب "${data.request_title}"`,
+    message: (data: any) => `تم تخصيص الفني ${escapeHtml(data.vendor_name)} لطلب "${escapeHtml(data.request_title)}"`,
     email_subject: "تم تخصيص فني لطلبك - UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
         <h2 style="color: #2563eb;">تم تخصيص فني</h2>
         <p>تم تخصيص فني لطلب الصيانة الخاص بك:</p>
         <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
-          <p><strong>الطلب:</strong> ${data.request_title}</p>
-          <p><strong>الفني:</strong> ${data.vendor_name}</p>
+          <p><strong>الطلب:</strong> ${escapeHtml(data.request_title)}</p>
+          <p><strong>الفني:</strong> ${escapeHtml(data.vendor_name)}</p>
         </div>
         <p>سيتواصل معك الفني قريباً.</p>
       </div>
@@ -92,15 +103,15 @@ const messageTemplates = {
   },
   sla_warning: {
     title: "⚠️ تنبيه SLA",
-    message: (data: any) => `تنبيه: اقتراب موعد استحقاق SLA للطلب "${data.request_title}"`,
+    message: (data: any) => `تنبيه: اقتراب موعد استحقاق SLA للطلب "${escapeHtml(data.request_title)}"`,
     email_subject: "⚠️ تنبيه موعد استحقاق SLA - UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
         <h2 style="color: #dc2626;">⚠️ تنبيه موعد استحقاق</h2>
         <p>يقترب موعد استحقاق SLA للطلب التالي:</p>
         <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #dc2626;">
-          <p><strong>الطلب:</strong> ${data.request_title}</p>
-          <p><strong>الموعد النهائي:</strong> ${data.sla_deadline}</p>
+          <p><strong>الطلب:</strong> ${escapeHtml(data.request_title)}</p>
+          <p><strong>الموعد النهائي:</strong> ${escapeHtml(data.sla_deadline)}</p>
         </div>
         <p style="color: #dc2626;"><strong>يرجى اتخاذ الإجراء اللازم فوراً!</strong></p>
       </div>
@@ -108,15 +119,15 @@ const messageTemplates = {
   },
   request_completed: {
     title: "تم إكمال الطلب",
-    message: (data: any) => `تم إكمال طلب الصيانة: ${data.request_title}`,
+    message: (data: any) => `تم إكمال طلب الصيانة: ${escapeHtml(data.request_title)}`,
     email_subject: "تم إكمال طلب الصيانة - UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
         <h2 style="color: #059669;">✓ تم إكمال الطلب</h2>
         <p>تم إكمال طلب الصيانة الخاص بك بنجاح:</p>
         <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #059669;">
-          <p><strong>الطلب:</strong> ${data.request_title}</p>
-          ${data.notes ? `<p><strong>ملاحظات الفني:</strong> ${data.notes}</p>` : ''}
+          <p><strong>الطلب:</strong> ${escapeHtml(data.request_title)}</p>
+          ${data.notes ? `<p><strong>ملاحظات الفني:</strong> ${escapeHtml(data.notes)}</p>` : ''}
         </div>
         <p>نرجو أن تكون راضياً عن الخدمة. يمكنك تقييم الخدمة من لوحة التحكم.</p>
       </div>
@@ -124,12 +135,12 @@ const messageTemplates = {
   },
   technician_approved: {
     title: "🎉 تم قبول طلب التسجيل",
-    message: (data: any) => `تهانينا ${data.technician_name}! تم قبول طلب التسجيل في منصة UberFix. يمكنك الآن البدء في استقبال الطلبات.`,
+    message: (data: any) => `تهانينا ${escapeHtml(data.technician_name)}! تم قبول طلب التسجيل في منصة UberFix. يمكنك الآن البدء في استقبال الطلبات.`,
     email_subject: "مبروك! تم قبولك كفني في UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
         <h2 style="color: #059669;">🎉 مبروك! تم قبول طلبك</h2>
-        <p>عزيزي ${data.technician_name}،</p>
+        <p>عزيزي ${escapeHtml(data.technician_name)}،</p>
         <p>يسعدنا إبلاغك بأنه تم قبول طلب تسجيلك كفني في منصة <strong>UberFix</strong>.</p>
         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-right: 4px solid #059669;">
           <h3 style="margin-top: 0;">الخطوات التالية:</h3>
@@ -139,7 +150,7 @@ const messageTemplates = {
             <li>حدد حالتك إلى "متاح" لبدء استقبال الطلبات</li>
           </ul>
         </div>
-        <a href="${data.login_url || 'https://uberfix.shop/technician/dashboard'}" 
+        <a href="${escapeHtml(data.login_url) || 'https://uberfix.shop/technician/dashboard'}" 
            style="display: inline-block; background: #059669; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
           الدخول إلى لوحة التحكم
         </a>
@@ -149,16 +160,16 @@ const messageTemplates = {
   },
   technician_rejected: {
     title: "❌ لم يتم قبول طلب التسجيل",
-    message: (data: any) => `عذراً ${data.technician_name}، لم يتم قبول طلب التسجيل. السبب: ${data.rejection_reason || 'لم يتم تحديد سبب'}`,
+    message: (data: any) => `عذراً ${escapeHtml(data.technician_name)}، لم يتم قبول طلب التسجيل. السبب: ${escapeHtml(data.rejection_reason) || 'لم يتم تحديد سبب'}`,
     email_subject: "بخصوص طلب التسجيل في UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
         <h2 style="color: #dc2626;">بخصوص طلب التسجيل</h2>
-        <p>عزيزي ${data.technician_name}،</p>
+        <p>عزيزي ${escapeHtml(data.technician_name)}،</p>
         <p>نأسف لإبلاغك بأنه لم يتم قبول طلب تسجيلك في منصة UberFix في الوقت الحالي.</p>
         <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 15px 0; border-right: 4px solid #dc2626;">
           <p><strong>السبب:</strong></p>
-          <p>${data.rejection_reason || 'لم يتم تحديد سبب محدد'}</p>
+          <p>${escapeHtml(data.rejection_reason) || 'لم يتم تحديد سبب محدد'}</p>
         </div>
         <p>يمكنك إعادة تقديم طلب التسجيل بعد استيفاء المتطلبات اللازمة.</p>
         <p style="margin-top: 20px; color: #6b7280;">نشكرك على اهتمامك بالانضمام إلى UberFix.</p>
@@ -167,7 +178,7 @@ const messageTemplates = {
   },
   technician_job_assigned: {
     title: "🔧 طلب صيانة جديد",
-    message: (data: any) => `لديك طلب صيانة جديد "${data.request_title}" على بعد ${data.distance || '?'} كم - ${data.job_type || 'عام'}`,
+    message: (data: any) => `لديك طلب صيانة جديد "${escapeHtml(data.request_title)}" على بعد ${escapeHtml(data.distance) || '?'} كم - ${escapeHtml(data.job_type) || 'عام'}`,
     email_subject: "طلب صيانة جديد متاح - UberFix",
     email_html: (data: any) => `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
@@ -175,10 +186,10 @@ const messageTemplates = {
         <p>مرحباً،</p>
         <p>لديك طلب صيانة جديد متاح:</p>
         <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 15px 0; border-right: 4px solid #2563eb;">
-          <p><strong>نوع الخدمة:</strong> ${data.job_type || 'صيانة عامة'}</p>
-          <p><strong>العنوان:</strong> ${data.request_title || 'طلب صيانة'}</p>
-          <p><strong>المسافة:</strong> ${data.distance || '?'} كم</p>
-          ${data.property_name ? `<p><strong>الموقع:</strong> ${data.property_name}</p>` : ''}
+          <p><strong>نوع الخدمة:</strong> ${escapeHtml(data.job_type) || 'صيانة عامة'}</p>
+          <p><strong>العنوان:</strong> ${escapeHtml(data.request_title) || 'طلب صيانة'}</p>
+          <p><strong>المسافة:</strong> ${escapeHtml(data.distance) || '?'} كم</p>
+          ${data.property_name ? `<p><strong>الموقع:</strong> ${escapeHtml(data.property_name)}</p>` : ''}
         </div>
         <a href="https://uberfix.shop/technician/requests" 
            style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
