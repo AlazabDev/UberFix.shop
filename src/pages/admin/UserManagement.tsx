@@ -72,32 +72,25 @@ export default function UserManagement() {
     try {
       setLoading(true);
       
-      // Get all users
-      const { data: authUsers } = await supabase.auth.admin.listUsers();
+      // Use Edge Function to list users (requires admin role)
+      const { data, error } = await supabase.functions.invoke('admin-list-users');
       
-      if (!authUsers) {
+      if (error) {
+        console.error('Error fetching users:', error);
+        if (error.message?.includes('Forbidden') || error.message?.includes('403')) {
+          toast.error('ليس لديك صلاحية للوصول إلى هذه الصفحة');
+          window.location.href = '/';
+          return;
+        }
+        throw error;
+      }
+
+      if (!data?.users) {
         setUsers([]);
         return;
       }
 
-      // Get roles for each user
-      const usersWithRoles = await Promise.all(
-        authUsers.users.map(async (user) => {
-          const { data: roles } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id);
-
-          return {
-            id: user.id,
-            email: user.email || '',
-            created_at: user.created_at,
-            roles: roles?.map(r => r.role) || []
-          };
-        })
-      );
-
-      setUsers(usersWithRoles);
+      setUsers(data.users);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('فشل تحميل المستخدمين');
