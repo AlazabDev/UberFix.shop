@@ -1,95 +1,205 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <!-- Mobile-optimized viewport -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-
+    <!-- تحسين إعدادات viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    
     <!-- PWA Configuration -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="UberFix" />
-    <meta name="theme-color" content="#3b82f6" />
+    <meta name="theme-color" content="#12007d" />
     <meta name="application-name" content="UberFix" />
     <meta name="msapplication-TileColor" content="#3b82f6" />
     <meta name="msapplication-tap-highlight" content="no" />
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TVRTW1CK9J"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TVRTW1CK9J');
-    </script>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TVRTW1CK9J"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TVRTW1CK9J');
-    </script>
-
-    <!-- Apple Touch Icons -->
-    <link
-      rel="apple-touch-icon"
-      href="https://storage.googleapis.com/gpt-engineer-file-uploads/dmiUcYug6mgFnkhRfrySrDYZmFR2/uploads/1762298790053-uber-icon.gif"
-    />
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/manifest.webmanifest" />
-
-    <title>UberFix.shop- نظام إدارة طلبات الصيانة المحمول</title>
-    <meta
-      name="description"
-      content="نظام إدارة طلبات الصيانة المتطور - UberFix.shop. منصة شاملة لإدارة الصيانة والموردين والتقارير بكفاءة عالية."
-    />
-    <meta name="keywords" content="إدارة الصيانة, طلبات الصيانة, نظام إدارة, موردين, تقارير الصيانة, azab services" />
+    
+    <!-- إضافة سياسة الأمان -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    
+    <!-- تحسين SEO -->
+    <title>UberFix.shop | نظام إدارة طلبات الصيانة المحمول المتكامل</title>
+    <meta name="description" content="نظام إدارة طلبات الصيانة المتطور من UberFix.shop - منصة شاملة لإدارة الصيانة والموردين والتقارير بكفاءة عالية." />
+    <meta name="keywords" content="إدارة الصيانة, طلبات الصيانة, نظام إدارة, موردين, تقارير الصيانة, azab services, صيانة, إصلاح, فنيين" />
     <meta name="author" content="uberfix.shop" />
-
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://uberfix.shop/" />
+    <meta property="og:title" content="UberFix.shop | نظام إدارة طلبات الصيانة المحمول" />
+    <meta property="og:description" content="منصة متكاملة لإدارة طلبات الصيانة والموردين والتقارير بكفاءة عالية." />
+    <meta property="og:image" content="https://al-azab.co/img/abuauf-az-arahab.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="ar_SA" />
+    
+    <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
-
+    <meta name="twitter:site" content="@uberfix" />
+    <meta name="twitter:title" content="UberFix.shop | نظام إدارة طلبات الصيانة المحمول" />
+    <meta name="twitter:description" content="منصة متكاملة لإدارة طلبات الصيانة والموردين والتقارير بكفاءة عالية." />
+    <meta name="twitter:image" content="https://al-azab.co/img/abuauf-az-arahab.jpg" />
+    
+    <!-- Canonical -->
     <link rel="canonical" href="https://uberfix.shop/" />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="https://storage.googleapis.com/gpt-engineer-file-uploads/dmiUcYug6mgFnkhRfrySrDYZmFR2/uploads/1762298790053-uber-icon.gif"
-    />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="https://al-azab.co/favicon.ico" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="https://al-azab.co/uberfix-icon.gif" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://al-azab.co/uberfix-icon.gif" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://al-azab.co/uberfix-icon.gif" />
+    <link rel="apple-touch-icon" sizes="167x167" href="https://al-azab.co/uberfix-icon.gif" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <!-- تحسين تحميل الموارد -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://storage.googleapis.com" />
+    <link rel="preconnect" href="https://cdn.jotfor.ms" />
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "UberFix.shop",
+        "url": "https://uberfix.shop",
+        "description": "نظام إدارة طلبات الصيانة المحمول المتكامل",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "SAR"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "UberFix"
+        }
+    }
+    </script>
+    
+    <!-- تحميل CSS الأساسي -->
+    <style>
+        /* CSS لتحسين العرض الأولي */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Arabic', sans-serif;
+        }
+        
+        #root {
+            min-height: 100vh;
+        }
+        
+        /* أنيميشن للتحميل */
+        .loading-skeleton {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
 
-    <meta
-      property="og:image"
-      content="https://storage.googleapis.com/gpt-engineer-file-uploads/dmiUcYug6mgFnkhRfrySrDYZmFR2/social-images/social-1760689845366-d57e8678-dc97-47d6-acfc-ba08731d8d90-1635294513.webp"
-    />
-    <meta
-      name="twitter:image"
-      content="https://storage.googleapis.com/gpt-engineer-file-uploads/dmiUcYug6mgFnkhRfrySrDYZmFR2/social-images/social-1760689845366-d57e8678-dc97-47d6-acfc-ba08731d8d90-1635294513.webp"
-    />
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M2FD7JFX"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <div id="root">
+        <!-- Skeleton Loader -->
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+            <div style="text-align: center; color: white;">
+                <div style="width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 36px;">🔧</span>
+                </div>
+                <h1 style="margin: 0 0 10px; font-size: 24px;">UberFix.shop</h1>
+                <p style="opacity: 0.8; margin: 0;">جاري تحميل النظام...</p>
+            </div>
+        </div>
+    </div>
 
-    <meta property="og:title" content="UberFix.shop- نظام إدارة طلبات الصيانة المحمول" />
-    <meta name="twitter:title" content="UberFix.shop- نظام إدارة طلبات الصيانة المحمول" />
-    <meta
-      property="og:description"
-      content="نظام إدارة طلبات الصيانة المتطور - UberFix.shop. منصة شاملة لإدارة الصيانة والموردين والتقارير بكفاءة عالية."
-    />
-    <meta
-      name="twitter:description"
-      content="نظام إدارة طلبات الصيانة المتطور - UberFix.shop. منصة شاملة لإدارة الصيانة والموردين والتقارير بكفاءة عالية."
-    />
-  </head>
+    <!-- تحميل scripts بشكل غير متزامن مع تحسين الترتيب -->
+    <!-- Google Tag Manager -->
+    <script>
+        (function(w,d,s,l,i){
+            w[l]=w[l]||[];
+            w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+            var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+            j.async=true;
+            j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+            f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-M2FD7JFX');
+    </script>
+    <!-- End Google Tag Manager -->
 
-  <body>
-    <div id="root"></div>
+    <!-- Google Analytics - deferred loading -->
+    <script>
+        // تحميل GA بعد تحميل الصفحة
+        window.addEventListener('load', function() {
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-TVRTW1CK9J';
+            document.head.appendChild(script);
+            
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TVRTW1CK9J', {
+                'transport_type': 'beacon',
+                'anonymize_ip': true
+            });
+        });
+    </script>
 
-    <script type="module" src="/src/main.tsx"></script>
-
-    <!-- AzaBot Jotform Chat Widget -->
-    <script src="https://cdn.jotfor.ms/agent/embedjs/0194abdee59871f7b73e2eae35ed720e8ce0/embed.js" async></script>
-  </body>
+    <!-- التطبيق الرئيسي -->
+    <script type="module" src="/src/main.tsx" defer></script>
+    
+    <!-- Jotform Chat Widget - تحميل متأخر -->
+    <script>
+        // تحميل widget المحادثة بعد تفاعل المستخدم
+        function loadChatWidget() {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jotfor.ms/agent/embedjs/0194abdee59871f7b73e2eae35ed720e8ce0/embed.js';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+        
+        // تحميل widget عند التمرير أو النقر
+        window.addEventListener('scroll', function() {
+            if (!window.chatWidgetLoaded) {
+                loadChatWidget();
+                window.chatWidgetLoaded = true;
+            }
+        }, { once: true });
+        
+        window.addEventListener('click', function() {
+            if (!window.chatWidgetLoaded) {
+                loadChatWidget();
+                window.chatWidgetLoaded = true;
+            }
+        }, { once: true });
+        
+        // تحميل تلقائي بعد 5 ثواني
+        setTimeout(function() {
+            if (!window.chatWidgetLoaded) {
+                loadChatWidget();
+                window.chatWidgetLoaded = true;
+            }
+        }, 5000);
+    </script>
+</body>
 </html>
