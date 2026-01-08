@@ -97,17 +97,17 @@
     --primary-light: 220 84% 35%;
     --primary-dark: 220 84% 15%;
 
-    /* Secondary orange accent */
-    --secondary: 38 92.126% 50.1961%;
-    --secondary-foreground: 0 0% 98%;
-    --secondary-light: 25 95% 63%;
+    /* Secondary yellow/gold accent - #ffb900 */
+    --secondary: 44 100% 50%;
+    --secondary-foreground: 0 0% 10%;
+    --secondary-light: 44 100% 60%;
 
     /* Success green */
     --success: 120 60% 50%;
     --success-foreground: 0 0% 98%;
 
-    /* Warning colors */
-    --warning: 38 92% 50%;
+    /* Warning colors - #ffb900 */
+    --warning: 44 100% 50%;
     --warning-foreground: 0 0% 98%;
 
     --muted: 220 14% 96%;
