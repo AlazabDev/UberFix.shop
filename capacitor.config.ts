@@ -4,8 +4,8 @@ import { CapacitorConfig } from '@capacitor/cli';
 const isProduction = process.env.NODE_ENV === 'production';
 
 const config: CapacitorConfig = {
-  appId: 'com.uberfix.app',
-  appName: 'UberFix',
+  appId: 'app.lovable.c6adaf510eef43e8bf45d65ac7ebe1aa',
+  appName: 'UberFix - صيانة المباني',
   webDir: 'dist',
   
   // Server configuration - only for development
@@ -26,7 +26,7 @@ const config: CapacitorConfig = {
       showSpinner: true,
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "small",
-      spinnerColor: "#f5bf23",
+      spinnerColor: "#ffb900",
       splashFullScreen: true,
       splashImmersive: true,
       layoutName: "launch_screen",
@@ -49,11 +49,16 @@ const config: CapacitorConfig = {
     },
   },
   
-  // Android specific settings
+  // Android specific settings for Google Play
   android: {
     allowMixedContent: false,
     captureInput: true,
     webContentsDebuggingEnabled: !isProduction,
+    backgroundColor: '#0b1e36',
+    buildOptions: {
+      keystorePath: 'android/app/release.keystore',
+      keystoreAlias: 'uberfix',
+    }
   },
   
   // iOS specific settings
