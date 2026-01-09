@@ -13,6 +13,7 @@ import RoleSelection from "./pages/auth/RoleSelection";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import TermsOfService from "./pages/public/TermsOfService";
 import DataDeletion from "./pages/public/DataDeletion";
+import ServiceMap from "./pages/maintenance/ServiceMap";
 
 // Auth Pages
 import AuthCallback from "./pages/auth/AuthCallback";
@@ -43,6 +44,7 @@ function App() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/data-deletion" element={<DataDeletion />} />
         <Route path="/delete-data" element={<DataDeletion />} />
+        <Route path="/service-map" element={<ServiceMap />} />
         
         {/* Auth Callback Routes */}
         <Route path="/auth/callback" element={<AuthCallback />} />
