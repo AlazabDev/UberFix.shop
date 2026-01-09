@@ -118,7 +118,15 @@ Deno.serve(async (req) => {
         ip: clientIP,
         timestamp: new Date().toISOString()
       }
-    }).then(() => {}).catch(e => console.warn('Failed to log QR access:', e));
+    });
+
+    // Extract city/district names (handle array response from join)
+    const cityName = Array.isArray(property.cities) 
+      ? property.cities[0]?.name_ar 
+      : (property.cities as { name_ar?: string } | null)?.name_ar;
+    const districtName = Array.isArray(property.districts) 
+      ? property.districts[0]?.name_ar 
+      : (property.districts as { name_ar?: string } | null)?.name_ar;
 
     // Return only safe data - NO coordinates, NO sensitive info
     return new Response(
@@ -128,8 +136,8 @@ Deno.serve(async (req) => {
           name: property.name,
           address: property.address,
           type: property.type,
-          city: property.cities?.name_ar,
-          district: property.districts?.name_ar
+          city: cityName,
+          district: districtName
         }
       }),
       { 

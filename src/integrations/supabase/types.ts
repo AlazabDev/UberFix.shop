@@ -1520,6 +1520,129 @@ export type Database = {
           },
         ]
       }
+      media_files: {
+        Row: {
+          created_at: string | null
+          direction: string | null
+          file_size: number | null
+          file_type: string | null
+          filename: string | null
+          from_phone: string | null
+          id: number
+          media_id: string
+          message_id: string
+          meta_url: string | null
+          mime_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          direction?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          filename?: string | null
+          from_phone?: string | null
+          id?: number
+          media_id: string
+          message_id: string
+          meta_url?: string | null
+          mime_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          direction?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          filename?: string | null
+          from_phone?: string | null
+          id?: number
+          media_id?: string
+          message_id?: string
+          meta_url?: string | null
+          mime_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      media_processing_errors: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          error_stack: string | null
+          error_type: string | null
+          file_type: string | null
+          from_phone: string | null
+          id: string
+          media_id: string | null
+          message_id: string | null
+          occurred_at: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          error_stack?: string | null
+          error_type?: string | null
+          file_type?: string | null
+          from_phone?: string | null
+          id?: string
+          media_id?: string | null
+          message_id?: string | null
+          occurred_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          error_stack?: string | null
+          error_type?: string | null
+          file_type?: string | null
+          from_phone?: string | null
+          id?: string
+          media_id?: string | null
+          message_id?: string | null
+          occurred_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      media_stats_daily: {
+        Row: {
+          by_type: Json | null
+          created_at: string | null
+          date: string
+          id: string
+          inbound_count: number | null
+          outbound_count: number | null
+          total_files: number | null
+          total_size: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          by_type?: Json | null
+          created_at?: string | null
+          date: string
+          id?: string
+          inbound_count?: number | null
+          outbound_count?: number | null
+          total_files?: number | null
+          total_size?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          by_type?: Json | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          inbound_count?: number | null
+          outbound_count?: number | null
+          total_files?: number | null
+          total_size?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       message_logs: {
         Row: {
           created_at: string
@@ -4729,6 +4852,75 @@ export type Database = {
           unit_rate?: number | null
           updated_at?: string
           version?: number
+        }
+        Relationships: []
+      }
+      whatsapp_media_storage: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          direction: string | null
+          file_size: number | null
+          file_type: string
+          from_phone: string
+          id: string
+          media_id: string
+          message_id: string | null
+          metadata: Json | null
+          mime_type: string | null
+          original_filename: string | null
+          processed_at: string | null
+          s3_bucket: string | null
+          s3_key: string
+          s3_url: string | null
+          sha256_hash: string | null
+          status: string | null
+          updated_at: string | null
+          whatsapp_url: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          direction?: string | null
+          file_size?: number | null
+          file_type: string
+          from_phone: string
+          id?: string
+          media_id: string
+          message_id?: string | null
+          metadata?: Json | null
+          mime_type?: string | null
+          original_filename?: string | null
+          processed_at?: string | null
+          s3_bucket?: string | null
+          s3_key: string
+          s3_url?: string | null
+          sha256_hash?: string | null
+          status?: string | null
+          updated_at?: string | null
+          whatsapp_url?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          direction?: string | null
+          file_size?: number | null
+          file_type?: string
+          from_phone?: string
+          id?: string
+          media_id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          mime_type?: string | null
+          original_filename?: string | null
+          processed_at?: string | null
+          s3_bucket?: string | null
+          s3_key?: string
+          s3_url?: string | null
+          sha256_hash?: string | null
+          status?: string | null
+          updated_at?: string | null
+          whatsapp_url?: string | null
         }
         Relationships: []
       }
