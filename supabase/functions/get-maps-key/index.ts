@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from '../_shared/cors.ts';
-import { verifyAuth, unauthorizedResponse } from '../_shared/auth.ts';
-import { rateLimit, createRateLimitResponse } from '../_shared/rateLimiter.ts';
+import { verifyAuth } from '../_shared/auth.ts';
+import { rateLimit } from '../_shared/rateLimiter.ts';
 
 // Allowed origins for additional validation
 const ALLOWED_ORIGINS = [
@@ -26,20 +25,31 @@ serve(async (req) => {
   }
 
   try {
-    // Verify authentication
-    const auth = await verifyAuth(req);
-    if (!auth.isAuthenticated || !auth.user) {
-      console.log('⚠️ Unauthorized request for maps key');
+    if (!ALLOWED_ORIGINS.includes(origin)) {
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', message: 'يجب تسجيل الدخول' }),
-        { status: 401, headers: { ...responseHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Forbidden', message: 'النطاق غير مسموح به' }),
+        { status: 403, headers: { ...responseHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Rate limiting per user (30 requests per minute)
-    const isAllowed = rateLimit(auth.user.id, { windowMs: 60000, maxRequests: 30 });
+    // Verify authentication (optional for public map access)
+    const auth = await verifyAuth(req);
+    const clientIdentifier =
+      auth.isAuthenticated && auth.user
+        ? auth.user.id
+        : req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          req.headers.get('cf-connecting-ip') ||
+          origin ||
+          'anonymous';
+
+    if (!auth.isAuthenticated || !auth.user) {
+      console.log('ℹ️ Unauthenticated request for maps key (public access)');
+    }
+
+    // Rate limiting per user or IP (30 requests per minute)
+    const isAllowed = rateLimit(clientIdentifier, { windowMs: 60000, maxRequests: 30 });
     if (!isAllowed) {
-      console.log(`⚠️ Rate limit exceeded for user: ${auth.user.id}`);
+      console.log(`⚠️ Rate limit exceeded for identifier: ${clientIdentifier}`);
       return new Response(
         JSON.stringify({ 
           error: 'Too Many Requests', 
@@ -81,7 +91,8 @@ serve(async (req) => {
     }
 
     // Log access for audit
-    console.log(`✅ API key retrieved by user: ${auth.user.id} (${keySource})`);
+    const requesterLabel = auth.user?.id ?? clientIdentifier;
+    console.log(`✅ API key retrieved by user: ${requesterLabel} (${keySource})`);
 
     return new Response(
       JSON.stringify({ apiKey, keySource }),
