@@ -27,7 +27,8 @@ export function PropertyQRDialog({
 
   const qrUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/quick-request/${propertyId}?locale=${language}`;
+    // Use public route /qr/ that doesn't require authentication
+    return `${window.location.origin}/qr/${propertyId}?locale=${language}`;
   }, [propertyId, language]);
 
   const copyToClipboard = () => {
