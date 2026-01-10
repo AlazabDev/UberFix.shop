@@ -4,6 +4,7 @@ import { QuickRequestForm } from "@/components/forms/QuickRequestForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function QuickRequest() {
   const { propertyId } = useParams();
@@ -21,26 +22,19 @@ export default function QuickRequest() {
       }
 
       try {
-        const functionUrl = `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/get-property-for-qr?propertyId=${propertyId}`;
-        
-        const response = await fetch(functionUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const { data, error } = await supabase.functions.invoke('get-property-for-qr', {
+          body: { propertyId },
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch property: ${response.status}`);
+        if (error) {
+          throw error;
         }
-
-        const data = await response.json();
         
-        if (data.error) {
+        if (data?.error) {
           throw new Error(data.error);
         }
 
-        if (!data.property) {
+        if (!data?.property) {
           throw new Error('Property not found');
         }
 

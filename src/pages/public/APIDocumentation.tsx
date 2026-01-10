@@ -49,8 +49,11 @@ export default function APIDocumentation() {
             </div>
 
             <h3 className="text-xl font-medium mt-6 mb-3">1.1 Base URL</h3>
-            <div className="bg-muted p-4 rounded-lg">
-              <code className="text-primary">https://api.uberfix.shop/v1</code>
+            <div className="bg-muted p-4 rounded-lg space-y-2">
+              <p className="text-sm text-muted-foreground m-0">
+                The current production integration uses Supabase Edge Functions:
+              </p>
+              <code className="text-primary">https://&lt;project-ref&gt;.supabase.co/functions/v1</code>
             </div>
 
             <h3 className="text-xl font-medium mt-6 mb-3">1.2 API Versioning</h3>
@@ -97,7 +100,7 @@ export default function APIDocumentation() {
               <p className="font-semibold mb-2">Required Headers:</p>
               <pre className="text-sm overflow-x-auto m-0">
 {`Authorization: Bearer {access_token}
-X-API-Key: {api_key}
+apikey: {anon_key}
 Content-Type: application/json`}
               </pre>
             </div>
