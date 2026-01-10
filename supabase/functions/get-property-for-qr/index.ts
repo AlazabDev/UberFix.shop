@@ -18,7 +18,16 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const propertyId = url.searchParams.get('propertyId');
+    let propertyId = url.searchParams.get('propertyId');
+
+    if (!propertyId && req.method === 'POST') {
+      try {
+        const body = await req.json();
+        propertyId = body?.propertyId || body?.property_id || null;
+      } catch (error) {
+        console.error('Failed to parse request body:', error);
+      }
+    }
 
     if (!propertyId) {
       return new Response(
