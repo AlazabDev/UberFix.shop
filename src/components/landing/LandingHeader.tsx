@@ -3,19 +3,22 @@ import { Cog, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-
-const navItems = [
-  { to: "/", label: "الرئيسية" },
-  { to: "/about", label: "من نحن" },
-  { to: "/services", label: "خدماتنا" },
-  { to: "/projects", label: "مشاريعنا" },
-  { to: "/gallery", label: "معرض الصور" },
-  { to: "/blog", label: "المدونة" },
-  { to: "/quick-request", label: "طلب صيانة" },
-];
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 
 export const LandingHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const navItems = [
+    { to: "/", label: t('nav.home') },
+    { to: "/about", label: t('nav.about') },
+    { to: "/services", label: t('nav.services') },
+    { to: "/projects", label: t('nav.projects') },
+    { to: "/gallery", label: t('nav.gallery') },
+    { to: "/blog", label: t('nav.blog') },
+    { to: "/quick-request", label: t('nav.quickRequest') },
+  ];
 
   return (
     <header className="bg-card/95 backdrop-blur-md border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
@@ -33,7 +36,7 @@ export const LandingHeader = () => {
           </div>
           <div className="hidden xs:block">
             <h1 className="text-lg sm:text-xl font-bold text-primary tracking-tight">UberFix.shop</h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium line-clamp-1">نظام إدارة طلبات الصيانة المتطور</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium line-clamp-1">{t('footer.smartSystem')}</p>
           </div>
         </Link>
       </div>
@@ -51,15 +54,16 @@ export const LandingHeader = () => {
         ))}
       </nav>
 
-      {/* Auth Buttons - visible on all screens */}
+      {/* Auth Buttons & Language Switcher */}
       <div className="flex items-center gap-2 sm:gap-3">
+        <LanguageSwitcher />
         <Link to="/role-selection" className="hidden xs:block">
           <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9">
-            تسجيل الدخول
+            {t('nav.login')}
           </Button>
         </Link>
         <Link to="/role-selection">
-          <Button size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9">إنشاء حساب</Button>
+          <Button size="sm" className="text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9">{t('nav.register')}</Button>
         </Link>
       </div>
 
@@ -68,7 +72,7 @@ export const LandingHeader = () => {
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8 sm:h-9 sm:w-9">
             <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="sr-only">فتح القائمة</span>
+            <span className="sr-only">{t('nav.openMenu')}</span>
           </Button>
         </SheetTrigger>
         <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0">
@@ -106,13 +110,16 @@ export const LandingHeader = () => {
 
             {/* Mobile Auth Buttons */}
             <div className="p-4 border-t border-border space-y-3">
+              <div className="flex justify-center mb-3">
+                <LanguageSwitcher />
+              </div>
               <Link to="/role-selection" className="block" onClick={() => setIsOpen(false)}>
                 <Button variant="outline" className="w-full">
-                  تسجيل الدخول
+                  {t('nav.login')}
                 </Button>
               </Link>
               <Link to="/role-selection" className="block" onClick={() => setIsOpen(false)}>
-                <Button className="w-full">إنشاء حساب</Button>
+                <Button className="w-full">{t('nav.register')}</Button>
               </Link>
             </div>
           </div>

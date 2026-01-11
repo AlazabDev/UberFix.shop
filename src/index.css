@@ -207,8 +207,16 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    direction: rtl;
     overflow-x: hidden;
+  }
+
+  /* RTL and LTR direction support */
+  [dir="rtl"] body {
+    direction: rtl;
+  }
+
+  [dir="ltr"] body {
+    direction: ltr;
   }
 
   /* Backdrop filter with webkit prefix for Safari */
@@ -334,7 +342,37 @@
   @keyframes shimmer {
     0% {
       transform: translateX(-100%);
-    }
+  /* LTR specific overrides */
+  [dir="ltr"] [data-sidebar] {
+    border-right: 1px solid hsl(var(--border));
+    border-left: none;
+  }
+
+  [dir="ltr"] [data-sidebar="sidebar"] {
+    left: 0;
+    right: auto;
+  }
+
+  /* RTL/LTR margin utilities */
+  .ltr\:mr-2 {
+    margin-right: 0.5rem;
+  }
+  .rtl\:ml-2 {
+    margin-left: 0.5rem;
+  }
+  [dir="ltr"] .ltr\:mr-2 {
+    margin-right: 0.5rem;
+  }
+  [dir="ltr"] .rtl\:ml-2 {
+    margin-left: 0;
+  }
+  [dir="rtl"] .ltr\:mr-2 {
+    margin-right: 0;
+  }
+  [dir="rtl"] .rtl\:ml-2 {
+    margin-left: 0.5rem;
+  }
+}
     100% {
       transform: translateX(100%);
     }
