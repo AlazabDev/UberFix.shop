@@ -1,11 +1,13 @@
 import { MAPS_CONFIG } from '@/config/maps';
-import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * Google Maps Loader - يستخدم المفتاح من البيئة مباشرة
+ * للاستخدام الفعلي في التطبيق (ServiceMap, InteractiveMap, etc.)
+ */
 class GoogleMapsLoader {
   private static instance: GoogleMapsLoader;
   private loadPromise: Promise<void> | null = null;
   private isLoaded = false;
-  private apiKey: string | null = null;
 
   private constructor() {}
 
@@ -16,18 +18,13 @@ class GoogleMapsLoader {
     return GoogleMapsLoader.instance;
   }
 
-  private async fetchApiKey(): Promise<string> {
-    if (this.apiKey) return this.apiKey;
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('get-maps-key');
-      if (error) throw error;
-      this.apiKey = data?.apiKey || '';
-      return this.apiKey;
-    } catch (err) {
-      console.error('Failed to get Google Maps API key:', err);
-      throw new Error('فشل في الحصول على مفتاح Google Maps');
+  private getApiKey(): string {
+    // استخدام المفتاح من متغيرات البيئة مباشرة (publishable key)
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.warn('Google Maps API key not found in environment variables');
     }
+    return apiKey || '';
   }
 
   async load(): Promise<void> {
@@ -40,44 +37,44 @@ class GoogleMapsLoader {
     }
 
     this.loadPromise = new Promise((resolve, reject) => {
-      const initiateLoad = async () => {
-        if (window.google?.maps) {
-          this.isLoaded = true;
-          resolve();
-          return;
-        }
+      // تحقق إذا كانت الخريطة محملة مسبقاً
+      if (window.google?.maps) {
+        this.isLoaded = true;
+        resolve();
+        return;
+      }
 
-        try {
-          const apiKey = await this.fetchApiKey();
-          if (!apiKey) {
-            reject(new Error('Google Maps API key not configured'));
-            return;
-          }
+      const apiKey = this.getApiKey();
+      if (!apiKey) {
+        reject(new Error('Google Maps API key not configured. Please add VITE_GOOGLE_MAPS_API_KEY to .env'));
+        return;
+      }
 
-          const libs = MAPS_CONFIG.libraries.join(',');
-          const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libs}&language=ar&region=EG&v=weekly`;
-          script.async = true;
-          script.defer = true;
+      // إزالة أي سكريبت قديم
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
 
-          script.onload = () => {
-            this.isLoaded = true;
-            resolve();
-          };
+      const libs = MAPS_CONFIG.libraries.join(',');
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libs}&language=ar&region=EG&v=weekly`;
+      script.async = true;
+      script.defer = true;
 
-          script.onerror = () => {
-            this.loadPromise = null;
-            reject(new Error('فشل في تحميل Google Maps'));
-          };
-
-          document.head.appendChild(script);
-        } catch (err) {
-          this.loadPromise = null;
-          reject(err);
-        }
+      script.onload = () => {
+        this.isLoaded = true;
+        console.log('✅ Google Maps loaded successfully');
+        resolve();
       };
 
-      void initiateLoad();
+      script.onerror = (error) => {
+        this.loadPromise = null;
+        console.error('❌ Failed to load Google Maps:', error);
+        reject(new Error('فشل في تحميل Google Maps'));
+      };
+
+      document.head.appendChild(script);
     });
 
     return this.loadPromise;
@@ -90,10 +87,14 @@ class GoogleMapsLoader {
   reset(): void {
     this.loadPromise = null;
     this.isLoaded = false;
-    this.apiKey = null;
+  }
+
+  getMapId(): string {
+    return MAPS_CONFIG.defaultOptions.mapId || '';
   }
 }
 
 export const googleMapsLoader = GoogleMapsLoader.getInstance();
 export const loadGoogleMaps = () => googleMapsLoader.load();
 export const resetGoogleMapsLoader = () => googleMapsLoader.reset();
+export const getGoogleMapsId = () => googleMapsLoader.getMapId();

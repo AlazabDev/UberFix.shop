@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { getMapboxToken } from '@/lib/mapboxLoader';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Globe } from 'lucide-react';
 
 interface BranchLocation {
   id: string;
@@ -91,7 +91,15 @@ export const Globe3D: React.FC<Globe3DProps> = ({
     const initMap = async () => {
       try {
         setLoading(true);
-        const token = await getMapboxToken();
+        
+        // استخدام المفتاح مباشرة من البيئة
+        const token = getMapboxToken();
+        if (!token) {
+          setError('مفتاح Mapbox غير متوفر');
+          setLoading(false);
+          return;
+        }
+        
         mapboxgl.accessToken = token;
 
         map.current = new mapboxgl.Map({
