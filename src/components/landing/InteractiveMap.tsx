@@ -124,7 +124,8 @@ export const InteractiveMap: React.FC = () => {
         
         if (!isMounted) return;
 
-        const token = await getMapboxToken();
+        // استخدام المفتاح مباشرة من البيئة
+        const token = getMapboxToken();
         
         if (!token || !isMounted) {
           if (isMounted) {
