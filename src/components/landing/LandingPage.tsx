@@ -15,23 +15,31 @@ import { TechnicianSection } from "./TechnicianSection";
 import { TestimonialsSection } from "./TestimonialsSection";
 import { Footer } from "./Footer";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useDirection } from "@/hooks/useDirection";
 
 // Lazy load the map component to prevent blocking initial render
 const InteractiveMap = lazy(() => import("./InteractiveMap"));
 
 // Loading fallback for map
-const MapLoadingFallback = () => (
-  <div className="w-full h-[400px] rounded-2xl bg-muted/50 flex items-center justify-center">
-    <div className="text-center">
-      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
-      <p className="text-sm text-muted-foreground">جاري تحميل الخريطة...</p>
+const MapLoadingFallback = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="w-full h-[400px] rounded-2xl bg-muted/50 flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
+        <p className="text-sm text-muted-foreground">{t('map.loading')}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const LandingPage = () => {
+  const { t } = useTranslation();
+  const { direction } = useDirection();
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground" dir={direction}>
       <LandingHeader />
 
       {/* قسم الهيرو */}
@@ -42,15 +50,15 @@ export const LandingPage = () => {
 
       {/* قسم مستقل للخريطة */}
       <section className="py-12 md:py-16 bg-muted/30">
-        <div className="container mx-auto px-4 space-y-6" dir="rtl">
+        <div className="container mx-auto px-4 space-y-6">
           <div className="max-w-2xl mx-auto text-center space-y-2">
             <p className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              شبكة أوبر فيكس على الخريطة
+              {t('map.title')}
             </p>
             <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">
-              تغطية تشغيلية{" "}
+              {t('map.subtitle')}{" "}
               <span className="bg-gradient-to-l from-primary to-secondary bg-clip-text text-transparent">
-                للفروع والعملاء
+                {t('map.highlight')}
               </span>
             </h2>
           </div>
