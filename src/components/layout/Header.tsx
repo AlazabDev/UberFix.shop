@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationsList } from "@/components/notifications/NotificationsList";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -124,6 +125,9 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
 
       {/* User Profile */}
       <div className="flex items-center gap-2 sm:gap-4">
+        {/* Theme Toggle */}
+        <ThemeToggle />
+        
         {/* Notifications */}
         <NotificationsList />
 
