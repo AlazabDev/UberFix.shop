@@ -1,37 +1,40 @@
 import { Button } from "@/components/ui/button";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Download } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export const Footer = () => {
+  const { t } = useTranslation();
+
   const footerLinks = {
     services: [
-      { label: "إدارة الصيانة", href: "#" },
-      { label: "إدارة العقارات", href: "#" },
-      { label: "التقارير والتحليلات", href: "#" },
-      { label: "إدارة الموردين", href: "#" },
-      { label: "نظام المواعيد", href: "#" },
-      { label: "طلب صيانة سريع", href: "/quick-request" }
+      { label: t('services.maintenance'), href: "#" },
+      { label: t('services.property'), href: "#" },
+      { label: t('services.reports'), href: "#" },
+      { label: t('services.vendors'), href: "#" },
+      { label: t('services.appointments'), href: "#" },
+      { label: t('services.quickMaintenance'), href: "/quick-request" }
     ],
     support: [
-      { label: "مركز المساعدة", href: "#" },
-      { label: "الدعم الفني", href: "#" },
-      { label: "التدريب", href: "#" },
-      { label: "الأسئلة الشائعة", href: "#" },
-      { label: "تواصل معنا", href: "#" }
+      { label: t('footer.helpCenter'), href: "#" },
+      { label: t('footer.technicalSupport'), href: "#" },
+      { label: t('footer.training'), href: "#" },
+      { label: t('footer.faq'), href: "#" },
+      { label: t('footer.contactUs'), href: "#" }
     ],
     company: [
-      { label: "عن الشركة", href: "/about" },
-      { label: "فريق العمل", href: "#" },
-      { label: "الشراكات", href: "#" },
-      { label: "الوظائف", href: "#" },
-      { label: "الأخبار", href: "#" }
+      { label: t('footer.aboutCompany'), href: "/about" },
+      { label: t('footer.team'), href: "#" },
+      { label: t('footer.partnerships'), href: "#" },
+      { label: t('footer.careers'), href: "#" },
+      { label: t('footer.news'), href: "#" }
     ],
     legal: [
-      { label: "شروط الاستخدام", href: "/terms-of-service" },
-      { label: "سياسة الخصوصية", href: "/privacy-policy" },
-      { label: "سياسة الإرجاع", href: "#" },
-      { label: "الأمان والحماية", href: "#" },
-      { label: "دعم الفنيين", href: "/technicians/register" }
+      { label: t('footer.terms'), href: "/terms-of-service" },
+      { label: t('footer.privacy'), href: "/privacy-policy" },
+      { label: t('footer.refund'), href: "#" },
+      { label: t('footer.security'), href: "#" },
+      { label: t('footer.technicianSupport'), href: "/technicians/register" }
     ],
   };
 
@@ -56,12 +59,12 @@ export const Footer = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">UberFix.shop</h3>
-                  <p className="text-sm text-primary-foreground/70">نظام إدارة الصيانة الذكي</p>
+                  <p className="text-sm text-primary-foreground/70">{t('footer.smartSystem')}</p>
                 </div>
               </div>
 
               <p className="text-primary-foreground/80 leading-relaxed">
-                منصة شاملة لإدارة عمليات الصيانة والعقارات مع أحدث التقنيات وأفضل الممارسات لضمان كفاءة وجودة الخدمة.
+                {t('footer.description')}
               </p>
             </div>
 
@@ -83,23 +86,23 @@ export const Footer = () => {
 
             {/* App Download */}
             <div className="space-y-3">
-              <h4 className="font-semibold">تطبيق سهل لإدارة عقاراتك</h4>
+              <h4 className="font-semibold">{t('footer.appTitle')}</h4>
               <div className="flex gap-3">
                 <Button
                   variant="outline"
                   size="sm"
                   className="text-primary bg-primary-foreground hover:bg-primary-foreground/90"
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  App Store
+                  <Download className="h-4 w-4 ltr:mr-2 rtl:ml-2" />
+                  {t('footer.appStore')}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="text-primary bg-primary-foreground hover:bg-primary-foreground/90"
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Google Play
+                  <Download className="h-4 w-4 ltr:mr-2 rtl:ml-2" />
+                  {t('footer.googlePlay')}
                 </Button>
               </div>
             </div>
@@ -107,7 +110,7 @@ export const Footer = () => {
 
           {/* Services */}
           <div>
-            <h4 className="font-semibold mb-4">خدماتنا</h4>
+            <h4 className="font-semibold mb-4">{t('footer.services')}</h4>
             <ul className="space-y-2">
               {footerLinks.services.map((link, index) => (
                 <li key={index}>
@@ -124,7 +127,7 @@ export const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold mb-4">الدعم</h4>
+            <h4 className="font-semibold mb-4">{t('footer.support')}</h4>
             <ul className="space-y-2">
               {footerLinks.support.map((link, index) => (
                 <li key={index}>
@@ -141,7 +144,7 @@ export const Footer = () => {
 
           {/* Company & Legal */}
           <div>
-            <h4 className="font-semibold mb-4">الشركة</h4>
+            <h4 className="font-semibold mb-4">{t('footer.company')}</h4>
             <ul className="space-y-2 mb-6">
               {footerLinks.company.map((link, index) => (
                 <li key={index}>
@@ -155,7 +158,7 @@ export const Footer = () => {
               ))}
             </ul>
 
-            <h4 className="font-semibold mb-4">قانوني</h4>
+            <h4 className="font-semibold mb-4">{t('footer.legal')}</h4>
             <ul className="space-y-2">
               {footerLinks.legal.map((link, index) => (
                 <li key={index}>
@@ -177,7 +180,7 @@ export const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-primary-foreground/70">
-              © 2024 UberFix.shop - Platform for Technicians. جميع الحقوق محفوظة.
+              {t('footer.rights')}
             </div>
 
             {/* Social Links */}

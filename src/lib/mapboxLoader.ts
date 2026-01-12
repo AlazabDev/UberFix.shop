@@ -1,57 +1,53 @@
-import { supabase } from '@/integrations/supabase/client';
+/**
+ * Mapbox Loader - للاستخدام الترويجي فقط (Globe 3D)
+ * ليس للاستخدام الفعلي في التطبيق
+ */
 
-class MapboxLoader {
-  private static instance: MapboxLoader;
-  private token: string | null = null;
-  private loadingPromise: Promise<string> | null = null;
+import type mapboxglType from 'mapbox-gl';
 
-  private constructor() {}
+let mapboxLoaded = false;
+let mapboxPromise: Promise<typeof mapboxglType> | null = null;
 
-  static getInstance(): MapboxLoader {
-    if (!MapboxLoader.instance) {
-      MapboxLoader.instance = new MapboxLoader();
-    }
-    return MapboxLoader.instance;
+export const getMapboxToken = (): string => {
+  // استخدام المفتاح من البيئة مباشرة (publishable token)
+  return import.meta.env.VITE_MAPBOX_TOKEN || '';
+};
+
+export const loadMapbox = async (): Promise<typeof mapboxglType> => {
+  if (mapboxPromise) {
+    return mapboxPromise;
   }
 
-  async getToken(): Promise<string> {
-    if (this.token) return this.token;
+  mapboxPromise = (async () => {
+    const mapboxgl = await import('mapbox-gl');
     
-    if (this.loadingPromise) return this.loadingPromise;
+    const token = getMapboxToken();
+    if (!token) {
+      console.warn('Mapbox token not found - Globe visualization may not work');
+    } else {
+      mapboxgl.default.accessToken = token;
+    }
+    
+    mapboxLoaded = true;
+    console.log('✅ Mapbox loaded successfully (promotional use only)');
+    
+    return mapboxgl.default;
+  })();
 
-    this.loadingPromise = new Promise(async (resolve, reject) => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        if (error) {
-          console.error('Error fetching Mapbox token:', error);
-          reject(new Error('فشل في جلب مفتاح Mapbox'));
-          return;
-        }
+  return mapboxPromise;
+};
 
-        if (!data?.token) {
-          reject(new Error('مفتاح Mapbox غير متوفر'));
-          return;
-        }
+export const isMapboxLoaded = (): boolean => mapboxLoaded;
 
-        this.token = data.token;
-        resolve(this.token);
-      } catch (err) {
-        console.error('Mapbox token fetch error:', err);
-        reject(err);
-      } finally {
-        this.loadingPromise = null;
-      }
-    });
+export const mapboxLoader = {
+  getToken: getMapboxToken,
+  load: loadMapbox,
+  isLoaded: isMapboxLoaded,
+};
 
-    return this.loadingPromise;
-  }
-
-  reset(): void {
-    this.token = null;
-    this.loadingPromise = null;
+// تصريح للنافذة
+declare global {
+  interface Window {
+    mapboxgl?: typeof mapboxglType;
   }
 }
-
-export const mapboxLoader = MapboxLoader.getInstance();
-export const getMapboxToken = () => mapboxLoader.getToken();

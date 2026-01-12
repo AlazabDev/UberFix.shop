@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { publicRoutes } from "./routes/publicRoutes.config";
+import { protectedRoutes } from "./routes/routes.config";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,13 +33,27 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <TooltipProvider>
           <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
+                {/* Public Routes - لا تتطلب تسجيل دخول */}
                 {publicRoutes.map((route) => (
                   <Route key={route.path} path={route.path} element={route.element} />
+                ))}
+                
+                {/* Protected Routes - تتطلب تسجيل دخول */}
+                {protectedRoutes.map((route) => (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={
+                      <ProtectedRoute withLayout={route.withLayout}>
+                        {route.element}
+                      </ProtectedRoute>
+                    }
+                  />
                 ))}
               </Routes>
             </Suspense>

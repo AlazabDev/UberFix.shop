@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Wrench } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Wrench } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useDirection } from "@/hooks/useDirection";
 
 // Animated particles with mouse interaction
 const ParticleCanvas = () => {
@@ -126,11 +128,11 @@ const AnimatedOrbs = () => (
 );
 
 // Hero Badge with shimmer
-const HeroBadge = () => (
+const HeroBadge = ({ text }: { text: string }) => (
   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 animate-[fadeInDown_0.6s_ease-out_0.2s_both] relative overflow-hidden group">
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
     <Wrench className="h-4 w-4 text-secondary animate-pulse" />
-    <span className="text-sm font-medium text-white/90">حلول صيانة مبتكرة</span>
+    <span className="text-sm font-medium text-white/90">{text}</span>
   </div>
 );
 
@@ -194,7 +196,7 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = "" }: { end: number; d
 };
 
 // Scroll Indicator
-const ScrollIndicator = ({ onClick }: { onClick: () => void }) => (
+const ScrollIndicator = ({ onClick, text }: { onClick: () => void; text: string }) => (
   <button
     onClick={onClick}
     className="flex flex-col items-center gap-2 text-white/50 hover:text-white transition-colors cursor-pointer animate-[fadeInUp_0.6s_ease-out_1.5s_both]"
@@ -202,12 +204,12 @@ const ScrollIndicator = ({ onClick }: { onClick: () => void }) => (
     <div className="w-6 h-10 rounded-full border-2 border-current flex justify-center pt-2">
       <div className="w-1 h-2 bg-current rounded-full animate-[scrollWheel_2s_ease-in-out_infinite]" />
     </div>
-    <span className="text-xs">انتقل لأسفل</span>
+    <span className="text-xs">{text}</span>
   </button>
 );
 
 // Animated Border Button
-const AnimatedBorderButton = ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
+const AnimatedBorderButton = ({ children, onClick, isRTL }: { children: React.ReactNode; onClick: () => void; isRTL: boolean }) => (
   <button
     onClick={onClick}
     className="relative group px-8 py-4 rounded-lg overflow-hidden bg-primary hover:bg-primary/90 transition-all duration-300 hover:-translate-y-1"
@@ -221,11 +223,15 @@ const AnimatedBorderButton = ({ children, onClick }: { children: React.ReactNode
 );
 
 export const HeroSection = () => {
+  const { t } = useTranslation();
+  const { isRTL } = useDirection();
   const isTextVisible = useSmoothReveal(600);
 
   const scrollToContent = useCallback(() => {
     window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
   }, []);
+
+  const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
   return (
     <section className="relative min-h-[100dvh] bg-[#0a1929] overflow-hidden flex flex-col items-center justify-center">
@@ -237,37 +243,36 @@ export const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a1929]/50 to-[#0a1929] z-[3]" />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-16 relative z-10 text-center" dir="rtl">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-16 relative z-10 text-center">
         {/* Badge */}
         <div className="flex justify-center mb-6 sm:mb-8">
-          <HeroBadge />
+          <HeroBadge text={t('hero.badge')} />
         </div>
 
         {/* Main Title */}
         <div className="max-w-5xl mx-auto mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[fadeInUp_0.6s_ease-out_both]">
-            <span className="text-white block mb-2">إدارة الصيانة والمنشآت</span>
+            <span className="text-white block mb-2">{t('hero.titleLine1')}</span>
             <span 
               className={`text-[#d4a017] transition-all duration-700 ease-out ${
                 isTextVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
             >
-              بمعايير الجودة العالمية
+              {t('hero.titleLine2')}
             </span>
           </h1>
         </div>
 
         {/* Subtitle */}
         <p className="text-sm sm:text-base md:text-lg text-white/70 leading-relaxed max-w-3xl mx-auto mb-8 sm:mb-10 animate-[fadeInUp_0.6s_ease-out_0.6s_both] px-2">
-          نوفر حلولاً ذكية لإدارة الصيانة والمنشآت مع معايير جودة واضحة تضمن كفاءة التشغيل،
-          وتقليل الأعطال، والحفاظ على مستوى ثابت من الأداء.
+          {t('hero.subtitle')}
         </p>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 animate-[fadeInUp_0.6s_ease-out_0.9s_both] px-4 sm:px-0">
-          <AnimatedBorderButton onClick={() => (window.location.href = "/role-selection")}>
-            ابدأ رحلتك معنا
-            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 group-hover:-translate-x-1 transition-transform" />
+          <AnimatedBorderButton onClick={() => (window.location.href = "/role-selection")} isRTL={isRTL}>
+            {t('hero.cta')}
+            <ArrowIcon className="h-4 w-4 sm:h-5 sm:w-5 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" />
           </AnimatedBorderButton>
 
           <Button
@@ -276,8 +281,8 @@ export const HeroSection = () => {
             className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
             onClick={() => (window.location.href = "/contact")}
           >
-            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
-            احجز استشارة
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 ltr:mr-2 rtl:ml-2" />
+            {t('hero.consultation')}
           </Button>
         </div>
 
@@ -285,27 +290,27 @@ export const HeroSection = () => {
         <div className="flex flex-wrap justify-center gap-6 sm:gap-8 md:gap-16 mb-8 sm:mb-12 animate-[fadeInUp_0.6s_ease-out_1.2s_both]">
           <div className="text-center min-w-[80px]">
             <AnimatedCounter end={99} suffix="" />
-            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">رضا العملاء %</div>
+            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">{t('hero.stats.satisfaction')}</div>
           </div>
           
           <div className="hidden sm:block w-px h-12 sm:h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
           
           <div className="text-center min-w-[80px]">
             <AnimatedCounter end={1500} suffix="+" />
-            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">مشروع مكتمل</div>
+            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">{t('hero.stats.projects')}</div>
           </div>
           
           <div className="hidden sm:block w-px h-12 sm:h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
           
           <div className="text-center min-w-[80px]">
             <AnimatedCounter end={50} suffix="+" />
-            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">خبير متخصص</div>
+            <div className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">{t('hero.stats.experts')}</div>
           </div>
         </div>
 
         {/* Scroll Indicator - Hidden on small screens */}
         <div className="hidden sm:block">
-          <ScrollIndicator onClick={scrollToContent} />
+          <ScrollIndicator onClick={scrollToContent} text={t('hero.scrollDown')} />
         </div>
       </div>
     </section>

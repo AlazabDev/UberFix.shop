@@ -54,12 +54,21 @@ export function ChatBot() {
     setIsLoading(true);
 
     try {
+
       const { data, error } = await supabase.functions.invoke("chatbot", {
         body: { message },
       });
 
       if (error) {
         throw new Error(error.message || 'فشل في الحصول على الرد');
+
+      const { data, error } = await supabase.functions.invoke('chatbot', {
+        body: { message: input },
+      });
+
+      if (error) {
+        throw error;
+
       }
       
       const assistantMessage: Message = {
