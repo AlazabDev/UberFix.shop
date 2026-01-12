@@ -40,10 +40,11 @@ export function ChatBot() {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+    const message = input.trim();
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: message,
       role: 'user',
       timestamp: new Date()
     };
@@ -53,12 +54,21 @@ export function ChatBot() {
     setIsLoading(true);
 
     try {
+
+      const { data, error } = await supabase.functions.invoke("chatbot", {
+        body: { message },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'فشل في الحصول على الرد');
+
       const { data, error } = await supabase.functions.invoke('chatbot', {
         body: { message: input },
       });
 
       if (error) {
         throw error;
+
       }
       
       const assistantMessage: Message = {
