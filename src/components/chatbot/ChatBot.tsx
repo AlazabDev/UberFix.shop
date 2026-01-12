@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -52,23 +53,17 @@ export function ChatBot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: input }),
+      const { data, error } = await supabase.functions.invoke('chatbot', {
+        body: { message: input },
       });
 
-      if (!response.ok) {
-        throw new Error('فشل في الحصول على الرد');
+      if (error) {
+        throw error;
       }
-
-      const data = await response.json();
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: data?.response || 'عذراً، لم أتمكن من فهم طلبك. يرجى المحاولة مرة أخرى.',
         role: 'assistant',
         timestamp: new Date()
       };

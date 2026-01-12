@@ -9,6 +9,7 @@ import {
   MapPin, Send, CheckCircle2, Building2, Camera, X, 
   Loader2, Wrench, Zap, Wind, Hammer, Paintbrush, Sparkles, HelpCircle
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PublicQuickRequestFormProps {
   property: {
@@ -105,26 +106,22 @@ export function PublicQuickRequestForm({ property, locale }: PublicQuickRequestF
     setLoading(true);
 
     try {
-      const functionUrl = `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/submit-public-request`;
-      
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('submit-public-request', {
+        body: {
           property_id: property.id,
           service_type: selectedService,
           notes: notes.trim(),
           client_phone: phone.trim(),
           images: images,
-        }),
+        },
       });
 
-      const data = await response.json();
+      if (error) {
+        throw error;
+      }
 
-      if (!response.ok) {
-        throw new Error(data.message_ar || data.error || 'Submission failed');
+      if (!data) {
+        throw new Error('Submission failed');
       }
 
       setTrackingNumber(data.tracking_number);
