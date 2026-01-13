@@ -764,14 +764,25 @@ const Testing = () => {
       const duration = Date.now() - start;
       
       if (session) {
-        const expiresIn = new Date(session.expires_at || 0).getTime() - Date.now();
-        const hoursLeft = Math.floor(expiresIn / (1000 * 60 * 60));
+        // session.expires_at هو Unix timestamp بالثواني
+        const expiresAtMs = (session.expires_at || 0) * 1000;
+        const expiresIn = expiresAtMs - Date.now();
+        const hoursLeft = Math.max(0, Math.floor(expiresIn / (1000 * 60 * 60)));
+        const minutesLeft = Math.max(0, Math.floor((expiresIn % (1000 * 60 * 60)) / (1000 * 60)));
         
-        updateTestResult(index, { 
-          status: 'success', 
-          message: `جلسة نشطة - تنتهي خلال ${hoursLeft} ساعة - ${duration}ms`,
-          duration 
-        });
+        if (expiresIn > 0) {
+          updateTestResult(index, { 
+            status: 'success', 
+            message: `جلسة نشطة - تنتهي خلال ${hoursLeft} ساعة و ${minutesLeft} دقيقة - ${duration}ms`,
+            duration 
+          });
+        } else {
+          updateTestResult(index, { 
+            status: 'warning', 
+            message: `جلسة منتهية الصلاحية - يرجى تسجيل الدخول مجدداً - ${duration}ms`,
+            duration 
+          });
+        }
       } else {
         updateTestResult(index, { 
           status: 'error', 
