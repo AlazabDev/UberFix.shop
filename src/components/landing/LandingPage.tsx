@@ -19,13 +19,13 @@ import { useTranslation } from "react-i18next";
 import { useDirection } from "@/hooks/useDirection";
 
 // Lazy load the map component to prevent blocking initial render
-const InteractiveMap = lazy(() => import("./InteractiveMap"));
+const BranchesMapbox = lazy(() => import("@/components/maps/BranchesMapbox"));
 
 // Loading fallback for map
 const MapLoadingFallback = () => {
   const { t } = useTranslation();
   return (
-    <div className="w-full h-[400px] rounded-2xl bg-muted/50 flex items-center justify-center">
+    <div className="w-full h-[500px] rounded-2xl bg-muted/50 flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
         <p className="text-sm text-muted-foreground">{t('map.loading')}</p>
@@ -63,9 +63,9 @@ export const LandingPage = () => {
             </h2>
           </div>
 
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <Suspense fallback={<MapLoadingFallback />}>
-              <InteractiveMap />
+              <BranchesMapbox height="500px" showStats={true} initialMode="globe" />
             </Suspense>
           </div>
         </div>

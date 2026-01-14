@@ -301,9 +301,9 @@ const sendEmail = async (
 
     console.log('✅ Email sent successfully:', result);
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ Email send error:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 };
 
@@ -367,9 +367,9 @@ const sendWhatsApp = async (
       console.error('❌ WhatsApp send failed:', result);
       return { success: false, error: result.message || 'Failed to send' };
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ WhatsApp send error:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 };
 
@@ -432,8 +432,8 @@ const sendSMS = async (
     } else {
       return { success: false, error: result.message };
     }
-  } catch (error) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 };
 
@@ -649,10 +649,10 @@ const handler = async (req: Request): Promise<Response> => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ Notification handler error:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
