@@ -92,8 +92,8 @@ export const Globe3D: React.FC<Globe3DProps> = ({
       try {
         setLoading(true);
         
-        // استخدام المفتاح مباشرة من البيئة
-        const token = getMapboxToken();
+        // جلب المفتاح بشكل غير متزامن
+        const token = await getMapboxToken();
         if (!token) {
           setError('مفتاح Mapbox غير متوفر');
           setLoading(false);

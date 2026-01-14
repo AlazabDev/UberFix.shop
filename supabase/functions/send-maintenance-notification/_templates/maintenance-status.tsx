@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "npm:react@18";
 import {
   Body,
   Button,
@@ -13,7 +13,7 @@ import {
   Text,
   Row,
   Column,
-} from "@react-email/components";
+} from "npm:@react-email/components@0.0.28";
 
 interface MaintenanceStatusEmailProps {
   customerName: string
