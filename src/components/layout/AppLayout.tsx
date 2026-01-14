@@ -98,31 +98,35 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background" dir="rtl">
+      <div className="min-h-screen flex w-full bg-background safe-area-inset" dir="rtl">
         <RoleBasedSidebar />
         
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Header with trigger and user menu */}
-          <header className="h-14 flex items-center border-b border-border px-4 bg-card/95 backdrop-blur-sm sticky top-0 z-30 shadow-sm">
-            <SidebarTrigger className="ml-2" />
+          <header className="h-14 flex items-center border-b border-border px-3 sm:px-4 bg-card/95 backdrop-blur-sm sticky top-0 z-30 shadow-sm standalone-header">
+            <SidebarTrigger className="ml-2 touch-target tap-highlight-none" />
             
-            <div className="flex-1 flex items-center justify-between">
+            <div className="flex-1 flex items-center justify-between min-w-0">
               {/* Logo */}
-              <div className="flex items-center gap-3">
-                <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="relative w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                   <div className="relative">
-                    <span className="text-primary-foreground font-bold text-base">A</span>
-                    <Cog className="absolute -top-1 -right-1 h-2.5 w-2.5 text-primary-foreground/80 animate-spin" style={{ animationDuration: '8s' }} />
+                    <span className="text-primary-foreground font-bold text-sm sm:text-base">A</span>
+                    <Cog className="absolute -top-1 -right-1 h-2 w-2 sm:h-2.5 sm:w-2.5 text-primary-foreground/80 animate-spin" style={{ animationDuration: '8s' }} />
                   </div>
                 </div>
-                <div className="hidden sm:block">
-                  <h1 className="text-lg font-bold text-primary">UberFix.shop</h1>
-                  <p className="text-xs text-muted-foreground">إدارة الصيانة</p>
+                <div className="hidden sm:block min-w-0">
+                  <h1 className="text-base sm:text-lg font-bold text-primary truncate">UberFix.shop</h1>
+                  <p className="text-xs text-muted-foreground truncate">إدارة الصيانة</p>
+                </div>
+                {/* Mobile Logo */}
+                <div className="block sm:hidden min-w-0">
+                  <h1 className="text-xs font-bold text-primary truncate">UberFix</h1>
                 </div>
               </div>
 
               {/* User section */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
                 {/* Notifications */}
                 <NotificationsList />
 
@@ -131,15 +135,15 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="ghost" 
-                      className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-200 p-1 rounded-xl"
+                      className="flex items-center gap-1 sm:gap-2 hover:bg-primary/10 transition-all duration-200 p-1 rounded-xl touch-target tap-highlight-none"
                     >
-                      <Avatar className="h-9 w-9 border-2 border-primary/30 shadow-lg ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
+                      <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border-2 border-primary/30 shadow-lg ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
                         <AvatarImage 
                           src={userData?.avatarUrl || "/lovable-uploads/fb9d438e-077d-4ce0-997b-709c295e2b35.png"} 
                           alt={getFullName()} 
                           className="object-cover"
                         />
-                        <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-bold text-sm">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-bold text-xs sm:text-sm">
                           {getInitials()}
                         </AvatarFallback>
                       </Avatar>
@@ -200,8 +204,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           </header>
           
           {/* Page content */}
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+          <main className="flex-1 overflow-auto scroll-mobile">
+            <div className="container mx-auto p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl">
               {children}
             </div>
             <AppFooter variant="simple" />
