@@ -2,7 +2,7 @@
 // Using Mapbox for 3D Globe visualization only
 // Error-safe implementation with fallback to prevent white screen crashes
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Loader2, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMapboxToken } from "@/lib/mapboxLoader";
@@ -124,11 +124,12 @@ export const InteractiveMap: React.FC = () => {
         
         if (!isMounted) return;
 
-        // استخدام المفتاح مباشرة من البيئة
-        const token = getMapboxToken();
+        // جلب المفتاح من Edge Function (async)
+        const token = await getMapboxToken();
         
         if (!token || !isMounted) {
           if (isMounted) {
+            console.warn('Mapbox token not available, showing fallback');
             setError('مفتاح الخريطة غير متوفر');
             setLoading(false);
           }

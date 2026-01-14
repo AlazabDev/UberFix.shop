@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from '../_shared/cors.ts';
-import { verifyAuth } from '../_shared/auth.ts';
 import { rateLimit } from '../_shared/rateLimiter.ts';
 
 // Allowed origins for additional validation
@@ -11,13 +10,17 @@ const ALLOWED_ORIGINS = [
   'https://lovableproject.com',
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://id-preview--c6adaf51-0eef-43e8-bf45-d65ac7ebe1aa.lovable.app',
+  'https://c6adaf51-0eef-43e8-bf45-d65ac7ebe1aa.lovableproject.com',
 ];
 
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
+  const isAllowedOrigin = ALLOWED_ORIGINS.some(o => origin.includes(o.replace('https://', '').replace('http://', '')));
+  
   const responseHeaders = {
     ...corsHeaders,
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.some(o => origin.includes(o)) ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Origin': isAllowedOrigin ? origin : ALLOWED_ORIGINS[0],
   };
 
   // Handle CORS preflight requests
@@ -26,26 +29,16 @@ serve(async (req) => {
   }
 
   try {
-    // Verify authentication
-    const auth = await verifyAuth(req);
-    if (!auth.isAuthenticated || !auth.user) {
-      console.error('❌ Unauthorized attempt to access Mapbox token');
-      return new Response(
-        JSON.stringify({ 
-          error: 'Unauthorized',
-          message: 'يجب تسجيل الدخول للوصول إلى هذه الخدمة'
-        }),
-        { 
-          status: 401,
-          headers: { ...responseHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Rate limiting per user (30 requests per minute)
-    const isAllowed = rateLimit(auth.user.id, { windowMs: 60000, maxRequests: 30 });
+    // للخريطة الترويجية على صفحة Landing - نستخدم rate limiting بناءً على IP
+    // هذا آمن لأن المفتاح هو public token وليس secret
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('cf-connecting-ip') || 
+                     'anonymous';
+    
+    // Rate limiting (60 requests per minute per IP for public access)
+    const isAllowed = rateLimit(clientIP, { windowMs: 60000, maxRequests: 60 });
     if (!isAllowed) {
-      console.log(`⚠️ Rate limit exceeded for user: ${auth.user.id}`);
+      console.log(`⚠️ Rate limit exceeded for IP: ${clientIP}`);
       return new Response(
         JSON.stringify({ 
           error: 'Too Many Requests', 
@@ -58,6 +51,21 @@ serve(async (req) => {
             'Content-Type': 'application/json',
             'Retry-After': '60'
           } 
+        }
+      );
+    }
+
+    // التحقق من أن الطلب من origin مسموح به
+    if (!isAllowedOrigin && origin) {
+      console.error(`❌ Rejected request from unauthorized origin: ${origin}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Forbidden',
+          message: 'Origin not allowed'
+        }),
+        { 
+          status: 403,
+          headers: { ...responseHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -78,7 +86,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`✅ Mapbox token retrieved by user: ${auth.user.id}`);
+    console.log(`✅ Mapbox token retrieved for origin: ${origin || 'unknown'}`);
 
     return new Response(
       JSON.stringify({ token: mapboxToken }),
@@ -86,7 +94,7 @@ serve(async (req) => {
         headers: { 
           ...responseHeaders, 
           'Content-Type': 'application/json',
-          'Cache-Control': 'private, max-age=300' // Cache for 5 minutes
+          'Cache-Control': 'public, max-age=600' // Cache for 10 minutes
         }
       }
     );
