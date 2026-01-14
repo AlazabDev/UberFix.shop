@@ -21,11 +21,11 @@ export const LandingHeader = () => {
   ];
 
   return (
-    <header className="bg-card/95 backdrop-blur-md border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+    <header className="bg-card/95 backdrop-blur-md border-b border-border/50 px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm safe-area-inset standalone-header tap-highlight-none">
       {/* Logo */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Link to="/" className="flex items-center gap-2 sm:gap-3">
-          <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="relative w-9 h-9 sm:w-12 sm:h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
             <div className="relative">
               <span className="text-primary-foreground font-bold text-base sm:text-lg">Az</span>
               <Cog
@@ -70,8 +70,8 @@ export const LandingHeader = () => {
       {/* Mobile Menu Button */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8 sm:h-9 sm:w-9">
-            <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 sm:h-10 sm:w-10 touch-target tap-highlight-none">
+            <Menu className="h-5 w-5 sm:h-5 sm:w-5" />
             <span className="sr-only">{t('nav.openMenu')}</span>
           </Button>
         </SheetTrigger>
@@ -93,14 +93,14 @@ export const LandingHeader = () => {
             </div>
 
             {/* Mobile Navigation */}
-            <nav className="flex-1 overflow-y-auto py-4">
+            <nav className="flex-1 overflow-y-auto py-4 scroll-mobile">
               <div className="flex flex-col gap-1 px-2">
                 {navItems.map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-muted transition-colors font-medium"
+                    className="flex items-center gap-3 px-4 py-4 rounded-lg text-foreground hover:bg-muted transition-colors font-medium touch-target"
                   >
                     {item.label}
                   </Link>
