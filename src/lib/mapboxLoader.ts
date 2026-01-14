@@ -1,16 +1,50 @@
 /**
  * Mapbox Loader - للاستخدام الترويجي فقط (Globe 3D)
- * ليس للاستخدام الفعلي في التطبيق
+ * يجلب المفتاح من Edge Function للأمان
  */
 
 import type mapboxglType from 'mapbox-gl';
+import { supabase } from '@/integrations/supabase/client';
 
 let mapboxLoaded = false;
 let mapboxPromise: Promise<typeof mapboxglType> | null = null;
+let cachedToken: string | null = null;
 
-export const getMapboxToken = (): string => {
-  // استخدام المفتاح من البيئة مباشرة (publishable token)
-  return import.meta.env.VITE_MAPBOX_TOKEN || '';
+/**
+ * جلب مفتاح Mapbox من Edge Function
+ */
+export const getMapboxToken = async (): Promise<string> => {
+  // إذا كان المفتاح موجود في الذاكرة المؤقتة
+  if (cachedToken) {
+    return cachedToken;
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+    
+    if (error) {
+      console.warn('Failed to get Mapbox token from Edge Function:', error);
+      return '';
+    }
+    
+    if (data?.token) {
+      cachedToken = data.token;
+      return data.token;
+    }
+    
+    return '';
+  } catch (err) {
+    console.warn('Error fetching Mapbox token:', err);
+    return '';
+  }
+};
+
+/**
+ * الحصول على المفتاح بشكل متزامن (للتوافق مع الكود القديم)
+ * يستخدم القيمة المُخزنة مؤقتًا فقط
+ */
+export const getMapboxTokenSync = (): string => {
+  return cachedToken || '';
 };
 
 export const loadMapbox = async (): Promise<typeof mapboxglType> => {
@@ -21,7 +55,7 @@ export const loadMapbox = async (): Promise<typeof mapboxglType> => {
   mapboxPromise = (async () => {
     const mapboxgl = await import('mapbox-gl');
     
-    const token = getMapboxToken();
+    const token = await getMapboxToken();
     if (!token) {
       console.warn('Mapbox token not found - Globe visualization may not work');
     } else {
@@ -41,6 +75,7 @@ export const isMapboxLoaded = (): boolean => mapboxLoaded;
 
 export const mapboxLoader = {
   getToken: getMapboxToken,
+  getTokenSync: getMapboxTokenSync,
   load: loadMapbox,
   isLoaded: isMapboxLoaded,
 };

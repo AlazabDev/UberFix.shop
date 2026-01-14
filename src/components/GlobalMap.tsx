@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { getMapboxToken } from '@/lib/mapboxLoader';
 
 interface BranchLocation {
   name: string;
@@ -13,11 +14,31 @@ interface BranchLocation {
 const GlobalMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
   const [branches, setBranches] = useState<BranchLocation[]>([]);
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
-  const mapError = !mapboxToken
-    ? 'مطلوب مفتاح Mapbox صالح لعرض الخريطة.'
+  const [tokenLoaded, setTokenLoaded] = useState(false);
+  const [mapboxToken, setMapboxToken] = useState<string>('');
+
+  // جلب المفتاح من Edge Function
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = await getMapboxToken();
+        if (token) {
+          setMapboxToken(token);
+          setTokenLoaded(true);
+        } else {
+          setRuntimeError('مطلوب مفتاح Mapbox صالح لعرض الخريطة.');
+        }
+      } catch {
+        setRuntimeError('فشل في تحميل مفتاح الخريطة.');
+      }
+    };
+    fetchToken();
+  }, []);
+
+  const mapError = !tokenLoaded && !mapboxToken
+    ? (runtimeError || 'جاري تحميل الخريطة...')
     : runtimeError;
 
   useEffect(() => {
@@ -36,7 +57,7 @@ const GlobalMap = () => {
   }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || branches.length === 0 || !mapboxToken) return;
+    if (!mapContainer.current || branches.length === 0 || !mapboxToken || !tokenLoaded) return;
 
     mapboxgl.accessToken = mapboxToken;
     
@@ -157,7 +178,7 @@ const GlobalMap = () => {
     return () => {
       map.current?.remove();
     };
-  }, [branches, mapboxToken]);
+  }, [branches, mapboxToken, tokenLoaded]);
 
   return (
     <section className="relative py-20 bg-background overflow-hidden" style={{ backgroundColor: '#f4f4f4' }}>
