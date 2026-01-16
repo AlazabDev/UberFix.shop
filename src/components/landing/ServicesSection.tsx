@@ -8,8 +8,12 @@ import {
   Wind, 
   Building2, 
   ArrowLeft,
-  CheckCircle
+  CheckCircle,
+  MessageCircle
 } from "lucide-react";
+
+// WhatsApp phone number - يمكن تغييره لاحقاً
+const WHATSAPP_NUMBER = "201000000000"; // رقم واتساب للاختبار
 
 export const ServicesSection = () => {
   const services = [
@@ -19,7 +23,8 @@ export const ServicesSection = () => {
       description: "تركيب، صيانة دورية، وإصلاح جميع أنواع أجهزة التكييف مع ضمان الجودة",
       image: "https://zrrffsjbfkphridqyais.supabase.co/storage/v1/object/public/az_gallery/images/maintenance/00451-klima-montaj.jpg",
       features: ["تركيب احترافي", "صيانة دورية", "شحن فريون", "غسيل وتنظيف"],
-      badge: "الأكثر طلباً"
+      badge: "الأكثر طلباً",
+      whatsappMessage: "مرحباً، أريد الاستفسار عن خدمة تركيب وصيانة المكيفات 🌬️"
     },
     {
       icon: Zap,
@@ -27,7 +32,8 @@ export const ServicesSection = () => {
       description: "تأسيس وتمديد الكهرباء، صيانة اللوحات الكهربائية، وحل جميع المشاكل الكهربائية",
       image: "https://zrrffsjbfkphridqyais.supabase.co/storage/v1/object/public/az_gallery/images/maintenance/62294-establish-electricity.jpg",
       features: ["تأسيس كهرباء", "صيانة لوحات", "كشف أعطال", "تركيب إضاءة"],
-      badge: "متوفر 24/7"
+      badge: "متوفر 24/7",
+      whatsappMessage: "مرحباً، أحتاج خدمة كهرباء ⚡"
     },
     {
       icon: Droplets,
@@ -35,7 +41,8 @@ export const ServicesSection = () => {
       description: "كشف وإصلاح تسريبات المياه، تركيب وصيانة الأدوات الصحية والمواسير",
       image: "https://zrrffsjbfkphridqyais.supabase.co/storage/v1/object/public/az_gallery/images/maintenance/05214-water-leak-repair.jpg",
       features: ["كشف تسريبات", "إصلاح مواسير", "تركيب صحي", "صيانة خزانات"],
-      badge: "خدمة سريعة"
+      badge: "خدمة سريعة",
+      whatsappMessage: "مرحباً، لدي مشكلة في السباكة وأحتاج مساعدة 💧"
     },
     {
       icon: Building2,
@@ -43,9 +50,17 @@ export const ServicesSection = () => {
       description: "تجهيز شامل للمحلات التجارية من تصميم وتنفيذ بأحدث المعايير والتقنيات",
       image: "https://zrrffsjbfkphridqyais.supabase.co/storage/v1/object/public/az_gallery/images/construction/abuauf_11.jpg",
       features: ["تصميم داخلي", "تنفيذ ديكورات", "تركيب واجهات", "تجهيز كامل"],
-      badge: "مشاريع متكاملة"
+      badge: "مشاريع متكاملة",
+      whatsappMessage: "مرحباً، أريد الاستفسار عن تجهيز محل تجاري 🏪"
     }
   ];
+
+  // فتح واتساب مع رسالة محددة
+  const openWhatsApp = (message: string) => {
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <section className="py-20 bg-muted/30">
@@ -105,10 +120,19 @@ export const ServicesSection = () => {
                     </div>
                   ))}
                 </div>
-                <Button className="w-full group/btn">
-                  اطلب الخدمة
-                  <ArrowLeft className="h-4 w-4 mr-2 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
+                <div className="flex gap-3">
+                  <Button className="flex-1 group/btn">
+                    اطلب الخدمة
+                    <ArrowLeft className="h-4 w-4 mr-2 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button 
+                    onClick={() => openWhatsApp(service.whatsappMessage)}
+                    className="bg-[#25D366] hover:bg-[#128C7E] text-white px-6 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    واتساب
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
