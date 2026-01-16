@@ -5,7 +5,7 @@ import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 
 // WhatsApp phone number - يمكن تغييره لاحقاً
-const WHATSAPP_NUMBER = "201000000000"; // رقم واتساب للاختبار
+const WHATSAPP_NUMBER = "201004006620";
 
 interface WhatsAppFloatingButtonProps {
   message?: string;

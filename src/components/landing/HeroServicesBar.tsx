@@ -5,7 +5,7 @@ import { Wind, Zap, Droplets, Wrench, Building2, ArrowLeft, MessageCircle } from
 import { Button } from "@/components/ui/button";
 
 // WhatsApp phone number - يمكن تغييره لاحقاً
-const WHATSAPP_NUMBER = "201000000000"; // رقم واتساب للاختبار
+const WHATSAPP_NUMBER = "201004006620";
 
 const services = [
   {

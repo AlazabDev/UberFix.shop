@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 // WhatsApp phone number - يمكن تغييره لاحقاً
-const WHATSAPP_NUMBER = "201000000000"; // رقم واتساب للاختبار
+const WHATSAPP_NUMBER = "201004006620";
 
 export const ServicesSection = () => {
   const services = [
