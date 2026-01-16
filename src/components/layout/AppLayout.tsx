@@ -4,6 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NotificationsList } from "@/components/notifications/NotificationsList";
 import { AppFooter } from "@/components/shared/AppFooter";
+import { WhatsAppFloatingButton } from "@/components/ui/WhatsAppFloatingButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -211,6 +212,9 @@ export function AppLayout({ children }: AppLayoutProps) {
             <AppFooter variant="simple" />
           </main>
         </div>
+        
+        {/* Floating WhatsApp Button */}
+        <WhatsAppFloatingButton message="مرحباً، أحتاج مساعدة في نظام إدارة الصيانة 🔧" />
       </div>
     </SidebarProvider>
   );
