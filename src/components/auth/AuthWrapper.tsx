@@ -40,7 +40,7 @@ const PUBLIC_ROUTES = [
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [emailConfirmed, setEmailConfirmed] = useState(false);
   const navigate = useNavigate();
@@ -177,9 +177,22 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   // إذا لم يكن هناك مستخدم والمسار يتطلب مصادقة
+  // استخدام useEffect لتجنب مشاكل الـ render على الهواتف
+  useEffect(() => {
+    if (!user && !isPublicRoute()) {
+      navigate('/role-selection', { replace: true });
+    }
+  }, [user, isPublicRoute, navigate]);
+
   if (!user && !isPublicRoute()) {
-    navigate('/role-selection', { replace: true });
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">جاري التحويل...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
