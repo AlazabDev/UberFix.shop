@@ -1,18 +1,21 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, Calendar, Phone, DollarSign, Plus, MapPin } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, Calendar, Phone, DollarSign, Plus, MapPin, List, LayoutGrid } from "lucide-react";
 import { MaintenanceRequestActions } from "./MaintenanceRequestActions";
 import { MaintenanceFilters } from "./MaintenanceFilters";
 import { MaintenanceExport } from "./MaintenanceExport";
 import { MaintenanceStats } from "./MaintenanceStats";
 import { RequestStatusBadge } from "./RequestStatusBadge";
 import { RequestPriorityBadge } from "./RequestPriorityBadge";
+import { WorkOrdersCalendar } from "./WorkOrdersCalendar";
 import { getServiceTypeLabel } from "@/constants/maintenanceStatusConstants";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MaintenanceRequestsListProps {
   onNewRequestClick?: () => void;
@@ -21,6 +24,8 @@ interface MaintenanceRequestsListProps {
 export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceRequestsListProps) {
   const navigate = useNavigate();
   const { requests, loading, error } = useMaintenanceRequests();
+  const [activeView, setActiveView] = useState<"list" | "calendar">("list");
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -31,6 +36,18 @@ export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceReques
   const [minCostFilter, setMinCostFilter] = useState("");
   const [maxCostFilter, setMaxCostFilter] = useState("");
   const [ratingFilter, setRatingFilter] = useState("all");
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from('categories')
+        .select('id, name')
+        .order('sort_order');
+      if (data) setCategories(data);
+    };
+    fetchCategories();
+  }, []);
 
   const filteredRequests = useMemo(() => {
     return requests?.filter(request => {
@@ -89,13 +106,42 @@ export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceReques
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            إدارة طلبات الصيانة
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            إدارة ومتابعة جميع طلبات الصيانة مع تحليلات شاملة
-          </p>
+        <div className="flex items-center gap-6">
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+              Work Orders
+            </h2>
+          </div>
+          
+          {/* List/Calendar Toggle */}
+          <div className="flex items-center border-b border-border">
+            <button
+              onClick={() => setActiveView("list")}
+              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                activeView === "list"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <List className="h-4 w-4" />
+                List
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveView("calendar")}
+              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+                activeView === "calendar"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Calendar
+              </span>
+            </button>
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
@@ -104,58 +150,59 @@ export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceReques
             filteredRequests={filteredRequests}
           />
           <Button 
-            className="gap-2 bg-gradient-primary hover:bg-gradient-primary/90" 
+            className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" 
             onClick={() => onNewRequestClick?.()}
           >
             <Plus className="h-4 w-4" />
-            طلب صيانة جديد
+            + Work Order
           </Button>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="px-3 py-1">
-              المعروض: {filteredRequests.length}
-            </Badge>
-            <Badge variant="outline" className="px-3 py-1">
-              المجموع: {requests?.length || 0}
-            </Badge>
-          </div>
         </div>
       </div>
 
-      {/* Statistics - استخدام قيم قاعدة البيانات الصحيحة */}
-      <MaintenanceStats stats={{
-        total: requests?.length || 0,
-        open: requests?.filter(r => r.status === 'Open').length || 0,
-        inProgress: requests?.filter(r => r.status === 'In Progress').length || 0,
-        completed: requests?.filter(r => r.status === 'Completed').length || 0,
-        overdue: 0
-      }} />
+      {/* Calendar View */}
+      {activeView === "calendar" ? (
+        <WorkOrdersCalendar
+          requests={requests || []}
+          categories={categories}
+          onRequestClick={(id) => navigate(`/requests/${id}`)}
+        />
+      ) : (
+        <>
+          {/* Statistics - List View Only */}
+          <MaintenanceStats stats={{
+            total: requests?.length || 0,
+            open: requests?.filter(r => r.status === 'Open').length || 0,
+            inProgress: requests?.filter(r => r.status === 'In Progress').length || 0,
+            completed: requests?.filter(r => r.status === 'Completed').length || 0,
+            overdue: 0
+          }} />
 
-      {/* Advanced Filters */}
-      <MaintenanceFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        priorityFilter={priorityFilter}
-        setPriorityFilter={setPriorityFilter}
-        serviceTypeFilter={serviceTypeFilter}
-        setServiceTypeFilter={setServiceTypeFilter}
-        locationFilter={locationFilter}
-        setLocationFilter={setLocationFilter}
-        dateFromFilter={dateFromFilter}
-        setDateFromFilter={setDateFromFilter}
-        dateToFilter={dateToFilter}
-        setDateToFilter={setDateToFilter}
-        minCostFilter={minCostFilter}
-        setMinCostFilter={setMinCostFilter}
-        maxCostFilter={maxCostFilter}
-        setMaxCostFilter={setMaxCostFilter}
-        ratingFilter={ratingFilter}
-        setRatingFilter={setRatingFilter}
-        onClearFilters={clearFilters}
-        filteredCount={filteredRequests.length}
-        totalCount={requests?.length || 0}
-      />
+          {/* Advanced Filters */}
+          <MaintenanceFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            priorityFilter={priorityFilter}
+            setPriorityFilter={setPriorityFilter}
+            serviceTypeFilter={serviceTypeFilter}
+            setServiceTypeFilter={setServiceTypeFilter}
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            dateFromFilter={dateFromFilter}
+            setDateFromFilter={setDateFromFilter}
+            dateToFilter={dateToFilter}
+            setDateToFilter={setDateToFilter}
+            minCostFilter={minCostFilter}
+            setMinCostFilter={setMinCostFilter}
+            maxCostFilter={maxCostFilter}
+            setMaxCostFilter={setMaxCostFilter}
+            ratingFilter={ratingFilter}
+            setRatingFilter={setRatingFilter}
+            onClearFilters={clearFilters}
+            filteredCount={filteredRequests.length}
+            totalCount={requests?.length || 0}
+          />
 
       {/* Requests Table */}
       <Card className="card-elegant">
@@ -297,6 +344,8 @@ export function MaintenanceRequestsList({ onNewRequestClick }: MaintenanceReques
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }
