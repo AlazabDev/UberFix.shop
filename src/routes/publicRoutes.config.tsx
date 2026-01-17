@@ -28,6 +28,7 @@ const Blog = lazy(() => import("@/pages/public/Blog"));
 const BlogPost = lazy(() => import("@/pages/public/BlogPost"));
 const FAQ = lazy(() => import("@/pages/public/FAQ"));
 const UserGuide = lazy(() => import("@/pages/public/UserGuide"));
+const BookConsultation = lazy(() => import("@/pages/public/BookConsultation"));
 
 // Other public pages
 const Projects = lazy(() => import("@/pages/projects/Projects"));
@@ -68,6 +69,7 @@ export const publicRoutes = [
   { path: "/gallery", element: <Gallery /> },
   { path: "/faq", element: <FAQ /> },
   { path: "/user-guide", element: <UserGuide /> },
+  { path: "/book-consultation", element: <BookConsultation /> },
   { path: "/projects", element: <Projects /> },
   { path: "/blog", element: <Blog /> },
   { path: "/blog/:slug", element: <BlogPost /> },

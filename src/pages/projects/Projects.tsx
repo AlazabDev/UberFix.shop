@@ -141,7 +141,7 @@ export default function Projects() {
             نقدم استشارات معمارية مجانية لمساعدتك في تحقيق رؤيتك المعمارية
           </p>
           <a
-            href="/contact"
+            href="/book-consultation"
             className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             طلب استشارة مجانية
