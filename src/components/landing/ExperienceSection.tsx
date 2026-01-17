@@ -52,7 +52,12 @@ export const ExperienceSection = () => {
           </p>
         </div>
 
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 py-12">
+        {/* شريط الصور السينمائي */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 py-8">
+          {/* تأثير التلاشي على الأطراف */}
+          <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-background to-transparent z-10" />
+          <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background to-transparent z-10" />
+          
           <div
             ref={scrollRef}
             className="flex gap-6 overflow-x-hidden"
@@ -61,9 +66,9 @@ export const ExperienceSection = () => {
             {doubledImages.map((image, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-32 h-32 md:w-40 md:h-40"
+                className="flex-shrink-0 w-28 h-28 md:w-36 md:h-36"
               >
-                <div className="relative w-full h-full rounded-full border-4 border-dashed border-primary/30 p-1 hover:scale-110 transition-transform duration-300">
+                <div className="relative w-full h-full rounded-full border-4 border-dashed border-primary/30 p-1 hover:scale-110 transition-transform duration-300 shadow-lg">
                   <img
                     src={image}
                     alt={`فريق العمل ${(index % teamImages.length) + 1}`}
@@ -72,6 +77,18 @@ export const ExperienceSection = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* GIF Animation أسفل شريط الصور */}
+        <div className="mt-8 max-w-4xl mx-auto">
+          <div className="w-full rounded-2xl overflow-hidden shadow-xl">
+            <img 
+              src="https://al-azab.co/img/uberfix/uber-hero.gif" 
+              alt="UberFix Network Animation"
+              className="w-full h-auto object-contain"
+              loading="lazy"
+            />
           </div>
         </div>
       </div>

@@ -65,14 +65,9 @@ export const LandingPage = () => {
           </div>
 
           <div className="max-w-6xl mx-auto">
-            <div className="w-full rounded-2xl overflow-hidden shadow-xl">
-              <img 
-                src="https://al-azab.co/img/uberfix/uber-hero.gif" 
-                alt="UberFix Network Animation"
-                className="w-full h-auto object-contain"
-                loading="lazy"
-              />
-            </div>
+            <Suspense fallback={<MapLoadingFallback />}>
+              <BranchesMapbox height="500px" showStats={true} initialMode="globe" />
+            </Suspense>
           </div>
         </div>
       </section>
