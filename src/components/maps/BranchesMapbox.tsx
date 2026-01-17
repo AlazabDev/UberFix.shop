@@ -285,14 +285,20 @@ export const BranchesMapbox: React.FC<BranchesMapboxProps> = ({
 
         const isGlobe = viewMode === 'globe';
         
+        // Detect mobile for better initial zoom
+        const isMobile = window.innerWidth < 768;
+        
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
           style: isGlobe ? 'mapbox://styles/mapbox/standard' : 'mapbox://styles/mapbox/streets-v12',
           projection: isGlobe ? 'globe' : 'mercator',
-          zoom: isGlobe ? 1.8 : 10,
+          zoom: isGlobe ? (isMobile ? 1.2 : 1.8) : 10,
           center: [31.2357, 30.0444], // Cairo center
-          pitch: isGlobe ? 25 : 0,
+          pitch: isGlobe ? (isMobile ? 15 : 25) : 0,
           bearing: 0,
+          attributionControl: false,
+          touchZoomRotate: true,
+          dragRotate: isGlobe,
         });
 
         map.current.on('load', () => {
