@@ -181,9 +181,9 @@ export default function Services() {
               تواصل معنا اليوم واحصل على استشارة مجانية لمشروعك
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/register">
+              <Link to="/book-consultation">
                 <Button size="lg" variant="secondary" className="group">
-                  ابدأ الآن
+                  احجز استشارة مجانية
                   <ArrowLeft className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>

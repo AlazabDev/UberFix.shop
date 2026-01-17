@@ -173,3 +173,7 @@ verify_jwt = false
 [functions.meta-delete-data]
 verify_jwt = false
 # Meta data deletion callback - validates x-hub-signature-256 internally
+
+[functions.send-booking-notification]
+verify_jwt = false
+# Public booking form - has input validation

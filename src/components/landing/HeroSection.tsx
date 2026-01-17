@@ -279,7 +279,7 @@ export const HeroSection = () => {
             variant="outline-light"
             size="lg"
             className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base backdrop-blur-sm transition-all duration-300 hover:-translate-y-1"
-            onClick={() => (window.location.href = "/contact")}
+            onClick={() => (window.location.href = "/book-consultation")}
           >
             <Calendar className="h-4 w-4 sm:h-5 sm:w-5 ltr:mr-2 rtl:ml-2" />
             {t('hero.consultation')}
