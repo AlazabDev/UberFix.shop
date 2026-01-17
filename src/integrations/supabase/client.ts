@@ -9,28 +9,35 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Supabase is always ready with direct configuration
 export const supabaseReady = true;
 
+// In-memory storage fallback for mobile browsers with restricted localStorage
+const memoryStorage: Record<string, string> = {};
+const inMemoryStorage = {
+  getItem: (key: string) => memoryStorage[key] || null,
+  setItem: (key: string, value: string) => { memoryStorage[key] = value; },
+  removeItem: (key: string) => { delete memoryStorage[key]; },
+};
+
 // Safe localStorage check for private browsing mode compatibility
-const getStorage = () => {
+const getStorage = (): Storage => {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    return inMemoryStorage as unknown as Storage;
+  }
+  
   try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      // Test if localStorage is actually available
+    // Check if localStorage exists and is accessible
+    if (window.localStorage) {
       const testKey = '__storage_test__';
       window.localStorage.setItem(testKey, testKey);
       window.localStorage.removeItem(testKey);
       return window.localStorage;
     }
   } catch (e) {
-    // localStorage not available (private browsing mode)
+    // localStorage not available (private browsing mode or security restrictions)
     console.warn('localStorage not available, using memory storage');
   }
   
-  // Fallback to memory storage
-  const memoryStorage: Record<string, string> = {};
-  return {
-    getItem: (key: string) => memoryStorage[key] || null,
-    setItem: (key: string, value: string) => { memoryStorage[key] = value; },
-    removeItem: (key: string) => { delete memoryStorage[key]; },
-  };
+  return inMemoryStorage as unknown as Storage;
 };
 
 // Import the supabase client like this:
