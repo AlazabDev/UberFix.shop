@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { publicRoutes } from "./routes/publicRoutes.config";
 import { protectedRoutes } from "./routes/routes.config";
@@ -8,6 +8,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
+import AppErrorBoundary from "@/components/error-boundaries/AppErrorBoundary";
 
 import "./index.css";
 
@@ -30,39 +31,59 @@ const queryClient = new QueryClient({
   },
 });
 
+// Hydration-safe App wrapper
+function AppContent() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show minimal loading state until client is mounted
+  if (!mounted) {
+    return <PageLoader />;
+  }
+
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public Routes - لا تتطلب تسجيل دخول */}
+          {publicRoutes.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
+          
+          {/* Protected Routes - تتطلب تسجيل دخول */}
+          {protectedRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                <ProtectedRoute withLayout={route.withLayout}>
+                  {route.element}
+                </ProtectedRoute>
+              }
+            />
+          ))}
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}
+
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <TooltipProvider>
-          <BrowserRouter>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {/* Public Routes - لا تتطلب تسجيل دخول */}
-                {publicRoutes.map((route) => (
-                  <Route key={route.path} path={route.path} element={route.element} />
-                ))}
-                
-                {/* Protected Routes - تتطلب تسجيل دخول */}
-                {protectedRoutes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={
-                      <ProtectedRoute withLayout={route.withLayout}>
-                        {route.element}
-                      </ProtectedRoute>
-                    }
-                  />
-                ))}
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <AppErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <TooltipProvider>
+            <AppContent />
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </AppErrorBoundary>
   );
 }
 
