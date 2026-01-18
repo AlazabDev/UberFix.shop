@@ -3,17 +3,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, Loader2, ArrowRight, Wrench, Zap, Droplets, Wind, ClipboardCheck, HelpCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, User, Mail, Phone, MessageSquare, CheckCircle, Loader2, ArrowRight, Wrench, Zap, Droplets, Wind, ClipboardCheck, HelpCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { Footer } from "@/components/landing/Footer";
+import { format, addDays, isSameDay } from "date-fns";
+import { ar } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const bookingSchema = z.object({
   full_name: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل").max(100),
@@ -38,21 +42,28 @@ const serviceTypes = [
 ];
 
 const timeSlots = [
-  "09:00 صباحاً",
-  "10:00 صباحاً",
-  "11:00 صباحاً",
-  "12:00 ظهراً",
-  "01:00 مساءً",
-  "02:00 مساءً",
-  "03:00 مساءً",
-  "04:00 مساءً",
-  "05:00 مساءً",
-  "06:00 مساءً",
+  { value: "08:00", label: "8:00 صباحاً" },
+  { value: "08:30", label: "8:30 صباحاً" },
+  { value: "09:00", label: "9:00 صباحاً" },
+  { value: "09:30", label: "9:30 صباحاً" },
+  { value: "10:00", label: "10:00 صباحاً" },
+  { value: "10:30", label: "10:30 صباحاً" },
+  { value: "11:00", label: "11:00 صباحاً" },
+  { value: "11:30", label: "11:30 صباحاً" },
+  { value: "12:00", label: "12:00 ظهراً" },
+  { value: "13:00", label: "1:00 مساءً" },
+  { value: "14:00", label: "2:00 مساءً" },
+  { value: "15:00", label: "3:00 مساءً" },
+  { value: "16:00", label: "4:00 مساءً" },
+  { value: "17:00", label: "5:00 مساءً" },
 ];
 
 export default function BookConsultation() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2>(1);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -72,7 +83,6 @@ export default function BookConsultation() {
   const onSubmit = async (data: BookingFormData) => {
     setIsSubmitting(true);
     try {
-      // Insert booking into database
       const { data: booking, error: dbError } = await supabase
         .from("consultation_bookings")
         .insert({
@@ -89,7 +99,6 @@ export default function BookConsultation() {
 
       if (dbError) throw dbError;
 
-      // Send notifications
       const { error: notifError } = await supabase.functions.invoke("send-booking-notification", {
         body: {
           ...data,
@@ -99,7 +108,6 @@ export default function BookConsultation() {
 
       if (notifError) {
         console.error("Notification error:", notifError);
-        // Don't throw - booking was saved successfully
       }
 
       setIsSuccess(true);
@@ -119,12 +127,33 @@ export default function BookConsultation() {
     }
   };
 
-  // Get minimum date (tomorrow)
-  const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0];
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date) {
+      form.setValue("preferred_date", format(date, "yyyy-MM-dd"));
+    }
+    setSelectedTime(null);
+    form.setValue("preferred_time", "");
   };
+
+  const handleTimeSelect = (time: string) => {
+    setSelectedTime(time);
+    form.setValue("preferred_time", time);
+  };
+
+  const handleContinue = () => {
+    if (selectedDate && selectedTime) {
+      setStep(2);
+    } else {
+      toast({
+        title: "يرجى اختيار الموعد",
+        description: "حدد التاريخ والوقت المناسب للاستشارة",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const tomorrow = addDays(new Date(), 1);
 
   if (isSuccess) {
     return (
@@ -145,7 +174,7 @@ export default function BookConsultation() {
                   <Button onClick={() => navigate("/")} variant="outline">
                     العودة للرئيسية
                   </Button>
-                  <Button onClick={() => { setIsSuccess(false); form.reset(); }}>
+                  <Button onClick={() => { setIsSuccess(false); setStep(1); setSelectedDate(undefined); setSelectedTime(null); form.reset(); }}>
                     حجز آخر
                   </Button>
                 </div>
@@ -163,283 +192,294 @@ export default function BookConsultation() {
       <LandingHeader />
       
       <main className="pt-24 pb-16">
-        {/* Hero Section */}
-        <section className="py-12 bg-gradient-to-b from-primary/5 to-background">
+        {/* Header Section */}
+        <section className="py-8 bg-gradient-to-b from-muted/50 to-background border-b">
           <div className="container mx-auto px-4 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <Calendar className="w-4 h-4" />
-              احجز استشارتك المجانية
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                <User className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold mb-1">Mohamed Azab</h1>
+              <p className="text-muted-foreground">صفحة الحجز</p>
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-              استشارة فنية <span className="text-primary">متخصصة</span>
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              فريقنا من الخبراء جاهز لمساعدتك في جميع احتياجاتك الفنية. احجز موعدك الآن واحصل على استشارة مجانية!
-            </p>
           </div>
         </section>
 
-        {/* Booking Form */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {/* Form */}
-              <div className="lg:col-span-2">
-                <Card className="shadow-xl border-border/50">
-                  <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-primary" />
-                      بيانات الحجز
-                    </CardTitle>
-                    <CardDescription>
-                      املأ البيانات التالية وسنتواصل معك لتأكيد الموعد
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        {/* Personal Info */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="full_name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="flex items-center gap-2">
-                                  <User className="w-4 h-4" />
-                                  الاسم الكامل
-                                </FormLabel>
-                                <FormControl>
-                                  <Input placeholder="أدخل اسمك الكامل" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="flex items-center gap-2">
-                                  <Phone className="w-4 h-4" />
-                                  رقم الهاتف
-                                </FormLabel>
-                                <FormControl>
-                                  <Input placeholder="01xxxxxxxxx" type="tel" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+        <div className="container mx-auto px-4 py-8">
+          {step === 1 ? (
+            <>
+              {/* Meeting Type Selection */}
+              <section className="max-w-3xl mx-auto mb-8">
+                <h2 className="text-center text-lg font-semibold mb-4">اختيار نوع الاجتماع</h2>
+                <Card className="border-2 border-primary/30 bg-primary/5">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <CalendarIcon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold">Alazab Team Manager 🏢</h3>
+                        <p className="text-sm text-muted-foreground">احجز الوقت للاتصال بي</p>
+                      </div>
+                      <span className="text-sm text-muted-foreground">ساعة واحدة</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
 
+              {/* Calendar & Time Selection */}
+              <section className="max-w-4xl mx-auto">
+                <h2 className="text-center text-lg font-semibold mb-6">الأوقات المتاحة</h2>
+                
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Calendar */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={handleDateSelect}
+                        disabled={(date) => date < tomorrow}
+                        locale={ar}
+                        className="pointer-events-auto"
+                        classNames={{
+                          head_cell: "text-muted-foreground font-normal text-center w-9",
+                          cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-r-md last:[&:has([aria-selected])]:rounded-l-md focus-within:relative focus-within:z-20",
+                          day: cn(
+                            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md"
+                          ),
+                          day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                          day_today: "bg-accent text-accent-foreground",
+                          day_disabled: "text-muted-foreground opacity-50",
+                          nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                          caption: "flex justify-center pt-1 relative items-center",
+                        }}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Time Slots */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        {selectedDate 
+                          ? format(selectedDate, "EEEE، d MMMM", { locale: ar })
+                          : "اختر التاريخ أولاً"
+                        }
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2 max-h-[320px] overflow-y-auto">
+                      {selectedDate ? (
+                        timeSlots.map((slot) => (
+                          <button
+                            key={slot.value}
+                            onClick={() => handleTimeSelect(slot.value)}
+                            className={cn(
+                              "w-full py-3 px-4 rounded-lg border text-right transition-all",
+                              selectedTime === slot.value
+                                ? "border-primary bg-primary/10 text-primary font-medium"
+                                : "border-border hover:border-primary/50 hover:bg-muted/50"
+                            )}
+                          >
+                            {slot.label}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <CalendarIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                          <p>حدد تاريخاً من التقويم لعرض الأوقات المتاحة</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Continue Button */}
+                <div className="flex justify-center mt-8">
+                  <Button 
+                    size="lg" 
+                    onClick={handleContinue}
+                    disabled={!selectedDate || !selectedTime}
+                    className="gap-2 px-8"
+                  >
+                    التالي
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                </div>
+              </section>
+            </>
+          ) : (
+            /* Step 2: Contact Form */
+            <section className="max-w-2xl mx-auto">
+              <Button 
+                variant="ghost" 
+                onClick={() => setStep(1)}
+                className="mb-4 gap-2"
+              >
+                <ChevronRight className="w-4 h-4" />
+                رجوع للتقويم
+              </Button>
+
+              {/* Selected Appointment Summary */}
+              <Card className="mb-6 bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <CalendarIcon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">موعدك المحدد</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedDate && format(selectedDate, "EEEE، d MMMM yyyy", { locale: ar })} - {timeSlots.find(t => t.value === selectedTime)?.label}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-xl border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <User className="w-5 h-5 text-primary" />
+                    بياناتك الشخصية
+                  </CardTitle>
+                  <CardDescription>
+                    أكمل بياناتك لتأكيد الحجز
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                      <div className="grid md:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
-                          name="email"
+                          name="full_name"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="flex items-center gap-2">
-                                <Mail className="w-4 h-4" />
-                                البريد الإلكتروني
+                                <User className="w-4 h-4" />
+                                الاسم الكامل
                               </FormLabel>
                               <FormControl>
-                                <Input placeholder="example@email.com" type="email" {...field} />
+                                <Input placeholder="أدخل اسمك الكامل" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-
-                        {/* Service Type */}
+                        
                         <FormField
                           control={form.control}
-                          name="service_type"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>نوع الخدمة</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="اختر نوع الخدمة" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {serviceTypes.map((service) => (
-                                    <SelectItem key={service.value} value={service.value}>
-                                      <div className="flex items-center gap-2">
-                                        <service.icon className={`w-4 h-4 ${service.color}`} />
-                                        {service.label}
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Date & Time */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="preferred_date"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4" />
-                                  التاريخ المفضل
-                                </FormLabel>
-                                <FormControl>
-                                  <Input type="date" min={getMinDate()} {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="preferred_time"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="flex items-center gap-2">
-                                  <Clock className="w-4 h-4" />
-                                  الوقت المفضل
-                                </FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="اختر الوقت" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {timeSlots.map((time) => (
-                                      <SelectItem key={time} value={time}>
-                                        {time}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        {/* Message */}
-                        <FormField
-                          control={form.control}
-                          name="message"
+                          name="phone"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="flex items-center gap-2">
-                                <MessageSquare className="w-4 h-4" />
-                                تفاصيل إضافية (اختياري)
+                                <Phone className="w-4 h-4" />
+                                رقم الهاتف
                               </FormLabel>
                               <FormControl>
-                                <Textarea
-                                  placeholder="اكتب أي تفاصيل إضافية تود مشاركتها معنا..."
-                                  rows={4}
-                                  {...field}
-                                />
+                                <Input placeholder="01xxxxxxxxx" type="tel" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+                      </div>
 
-                        <Button
-                          type="submit"
-                          size="lg"
-                          className="w-full gap-2"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin" />
-                              جاري الحجز...
-                            </>
-                          ) : (
-                            <>
-                              تأكيد الحجز
-                              <ArrowRight className="w-5 h-5" />
-                            </>
-                          )}
-                        </Button>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              </div>
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                              <Mail className="w-4 h-4" />
+                              البريد الإلكتروني
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="example@email.com" type="email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Why Choose Us */}
-                <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="text-lg">لماذا تختارنا؟</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {[
-                      { icon: "✅", text: "استشارة مجانية 100%" },
-                      { icon: "⏱️", text: "رد خلال 24 ساعة" },
-                      { icon: "👨‍🔧", text: "خبراء متخصصون" },
-                      { icon: "🛡️", text: "ضمان جودة الخدمة" },
-                      { icon: "💬", text: "دعم فني متواصل" },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <span className="text-xl">{item.icon}</span>
-                        <span className="text-sm font-medium">{item.text}</span>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                      <FormField
+                        control={form.control}
+                        name="service_type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>نوع الخدمة</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="اختر نوع الخدمة" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {serviceTypes.map((service) => (
+                                  <SelectItem key={service.value} value={service.value}>
+                                    <div className="flex items-center gap-2">
+                                      <service.icon className={`w-4 h-4 ${service.color}`} />
+                                      {service.label}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                {/* Contact Info */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">تواصل معنا</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <a
-                      href="tel:+201004006620"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Phone className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">اتصل بنا</p>
-                        <p className="font-medium" dir="ltr">+20 100 400 6620</p>
-                      </div>
-                    </a>
-                    <a
-                      href="https://wa.me/201004006620"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 hover:bg-green-100 dark:hover:bg-green-950/50 transition-colors"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">واتساب</p>
-                        <p className="font-medium text-green-600">تحدث معنا الآن</p>
-                      </div>
-                    </a>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
+                      <FormField
+                        control={form.control}
+                        name="message"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                              <MessageSquare className="w-4 h-4" />
+                              تفاصيل إضافية (اختياري)
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="اكتب أي تفاصيل إضافية تود مشاركتها معنا..."
+                                rows={3}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button
+                        type="submit"
+                        size="lg"
+                        className="w-full gap-2"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            جاري الحجز...
+                          </>
+                        ) : (
+                          <>
+                            تأكيد الحجز
+                            <ArrowRight className="w-5 h-5" />
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+        </div>
       </main>
-
+      
       <Footer />
     </div>
   );
