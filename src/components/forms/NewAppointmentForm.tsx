@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,13 +13,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Calendar, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { appointmentFormSchema } from "@/lib/validationSchemas";
 import { getPropertyIcon } from "@/lib/propertyIcons";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
-import { Badge } from "@/components/ui/badge";
 
 interface NewAppointmentFormProps {
   onClose: () => void;
@@ -46,6 +44,14 @@ export const NewAppointmentForm = ({ onClose, onSuccess }: NewAppointmentFormPro
   const [properties, setProperties] = useState<Property[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
 
+  // Time slots
+  const timeSlots = [
+    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+    "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+    "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+  ];
+
   const form = useForm<AppointmentFormData>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues: {
@@ -62,31 +68,6 @@ export const NewAppointmentForm = ({ onClose, onSuccess }: NewAppointmentFormPro
       appointment_time: "",
     },
   });
-
-  // Watch form values for slot availability
-  const watchedDate = useWatch({ control: form.control, name: 'appointment_date' });
-  const watchedVendor = useWatch({ control: form.control, name: 'vendor_id' });
-  const watchedDuration = useWatch({ control: form.control, name: 'duration_minutes' });
-
-  // Use the available slots hook
-  const { 
-    slots, 
-    loading: slotsLoading, 
-    fetchAvailableSlots,
-    checkSlotAvailability 
-  } = useAvailableSlots({ 
-    vendorId: watchedVendor || undefined,
-    duration: watchedDuration || 60 
-  });
-
-  // Fetch available slots when date, vendor, or duration changes
-  useEffect(() => {
-    if (watchedDate) {
-      fetchAvailableSlots(watchedDate);
-      // Reset time selection when date changes
-      form.setValue('appointment_time', '');
-    }
-  }, [watchedDate, watchedVendor, watchedDuration, fetchAvailableSlots]);
 
   useEffect(() => {
     fetchProperties();
@@ -125,24 +106,6 @@ export const NewAppointmentForm = ({ onClose, onSuccess }: NewAppointmentFormPro
 
   const onSubmit = async (data: AppointmentFormData) => {
     try {
-      // Double-check slot availability before booking
-      const isAvailable = await checkSlotAvailability(
-        data.appointment_date,
-        data.appointment_time,
-        data.duration_minutes
-      );
-
-      if (!isAvailable) {
-        toast({
-          title: "الفترة غير متاحة",
-          description: "تم حجز هذه الفترة للتو. يرجى اختيار فترة أخرى.",
-          variant: "destructive"
-        });
-        // Refresh available slots
-        fetchAvailableSlots(data.appointment_date);
-        return;
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       
       const { error } = await supabase
@@ -294,65 +257,24 @@ export const NewAppointmentForm = ({ onClose, onSuccess }: NewAppointmentFormPro
                 name="appointment_time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      وقت الموعد *
-                      {slotsLoading && <Loader2 className="h-3 w-3 animate-spin" />}
-                    </FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      value={field.value}
-                      disabled={!watchedDate || slotsLoading}
-                    >
+                    <FormLabel>وقت الموعد *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={
-                            !watchedDate 
-                              ? "اختر التاريخ أولاً" 
-                              : slotsLoading 
-                                ? "جاري التحميل..." 
-                                : "اختر الوقت"
-                          } />
+                          <SelectValue placeholder="اختر الوقت" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="max-h-[300px]">
-                        {slots.length === 0 && !slotsLoading && (
-                          <div className="p-2 text-sm text-muted-foreground text-center">
-                            اختر تاريخاً لعرض الفترات المتاحة
-                          </div>
-                        )}
-                        {slots.map((slot) => (
-                          <SelectItem 
-                            key={slot.time} 
-                            value={slot.time}
-                            disabled={!slot.available}
-                            className={cn(
-                              "flex items-center justify-between",
-                              !slot.available && "opacity-50"
-                            )}
-                          >
-                            <div className="flex items-center gap-2 w-full">
-                              {slot.available ? (
-                                <CheckCircle className="w-4 h-4 text-green-500" />
-                              ) : (
-                                <XCircle className="w-4 h-4 text-red-500" />
-                              )}
-                              <Clock className="w-4 h-4" />
-                              <span>{slot.time}</span>
-                              {!slot.available && slot.reason && (
-                                <Badge variant="secondary" className="mr-auto text-xs">
-                                  {slot.reason}
-                                </Badge>
-                              )}
+                      <SelectContent>
+                        {timeSlots.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            <div className="flex items-center">
+                              <Clock className="w-4 h-4 mr-2" />
+                              {time}
                             </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {watchedDate && !slotsLoading && (
-                      <FormDescription>
-                        {slots.filter(s => s.available).length} فترة متاحة من أصل {slots.length}
-                      </FormDescription>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
