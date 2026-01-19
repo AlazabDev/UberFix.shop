@@ -1,4 +1,5 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   ClipboardList,
@@ -19,10 +20,12 @@ import {
   Briefcase,
   Award,
   Shield,
-  UserCheck
+  UserCheck,
+  Lock
 } from "lucide-react";
 import { useModulePermissions } from "@/hooks/useModulePermissions";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
+import { ModuleAccessDialog } from "./ModuleAccessDialog";
 
 import {
   Sidebar,
@@ -36,6 +39,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 // All possible menu items with their module keys
 const allMenuItems = [
@@ -72,72 +76,131 @@ const allMenuItems = [
 export function RoleBasedSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
   const { requests } = useMaintenanceRequests();
   const { isModuleEnabled, loading, userRole } = useModulePermissions();
+  
+  // State for access denied dialog
+  const [accessDeniedDialog, setAccessDeniedDialog] = useState({
+    open: false,
+    moduleName: ""
+  });
 
   const isActive = (path: string) => currentPath === path;
 
-  // Filter menu items based on permissions
-  const visibleMenuItems = allMenuItems.filter(item => {
-    if (loading) return false;
-    return isModuleEnabled(item.moduleKey);
-  });
+  // Handle menu item click - check permission before navigation
+  const handleMenuClick = (e: React.MouseEvent, item: typeof allMenuItems[0]) => {
+    const hasAccess = isModuleEnabled(item.moduleKey);
+    
+    if (!hasAccess) {
+      e.preventDefault();
+      setAccessDeniedDialog({
+        open: true,
+        moduleName: item.label
+      });
+    }
+    // If has access, let the NavLink handle navigation normally
+  };
+
+  const getRoleLabel = (role: string): string => {
+    switch (role) {
+      case 'owner': return 'المالك';
+      case 'manager': return 'مدير';
+      case 'technician': return 'فني';
+      default: return 'عميل';
+    }
+  };
 
   return (
-    <Sidebar
-      side="right"
-      className={state === "collapsed" ? "w-14" : "w-64"}
-      collapsible="icon"
-    >
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            القائمة الرئيسية
-            {userRole && (
-              <span className="text-xs text-muted-foreground mr-2">
-                ({userRole === 'owner' ? 'المالك' : 
-                  userRole === 'manager' ? 'مدير' : 
-                  userRole === 'technician' ? 'فني' : 'عميل'})
-              </span>
-            )}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleMenuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                    <NavLink to={item.href} end>
-                      <item.icon className="h-4 w-4" />
-                      {state !== "collapsed" && (
-                        <>
-                          <span>{item.label}</span>
-                          {item.showBadge && requests.length > 0 && (
-                            <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-semibold mr-auto">
-                              {requests.length}
-                            </span>
+    <>
+      <Sidebar
+        side="right"
+        className={state === "collapsed" ? "w-14" : "w-64"}
+        collapsible="icon"
+      >
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>
+              القائمة الرئيسية
+              {userRole && (
+                <span className="text-xs text-muted-foreground mr-2">
+                  ({getRoleLabel(userRole)})
+                </span>
+              )}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {/* Show ALL menu items, not just enabled ones */}
+                {allMenuItems.map((item) => {
+                  const hasAccess = loading ? true : isModuleEnabled(item.moduleKey);
+                  
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.href)}
+                        className={cn(
+                          !hasAccess && "opacity-60"
+                        )}
+                      >
+                        <NavLink 
+                          to={hasAccess ? item.href : "#"}
+                          onClick={(e) => handleMenuClick(e, item)}
+                          end
+                        >
+                          <div className="relative">
+                            <item.icon className="h-4 w-4" />
+                            {/* Lock indicator for disabled modules */}
+                            {!hasAccess && (
+                              <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-muted-foreground" />
+                            )}
+                          </div>
+                          {state !== "collapsed" && (
+                            <>
+                              <span className={cn(!hasAccess && "text-muted-foreground")}>
+                                {item.label}
+                              </span>
+                              {/* Lock badge for disabled modules */}
+                              {!hasAccess && (
+                                <Lock className="h-3 w-3 text-muted-foreground mr-auto" />
+                              )}
+                              {/* Badge for requests count - only if has access */}
+                              {hasAccess && item.showBadge && requests.length > 0 && (
+                                <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-semibold mr-auto">
+                                  {requests.length}
+                                </span>
+                              )}
+                            </>
                           )}
-                        </>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
 
-      <SidebarFooter>
-        <div className="p-2 border-t border-border">
-          {state !== "collapsed" && (
-            <div className="text-xs text-muted-foreground text-center space-y-1">
-              <p className="font-medium">نسخة 1.0.0</p>
-              <p>© 2024 UberFix.shop</p>
-            </div>
-          )}
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+        <SidebarFooter>
+          <div className="p-2 border-t border-border">
+            {state !== "collapsed" && (
+              <div className="text-xs text-muted-foreground text-center space-y-1">
+                <p className="font-medium">نسخة 1.0.0</p>
+                <p>© 2024 UberFix.shop</p>
+              </div>
+            )}
+          </div>
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Access Denied Dialog */}
+      <ModuleAccessDialog 
+        open={accessDeniedDialog.open}
+        onOpenChange={(open) => setAccessDeniedDialog({ ...accessDeniedDialog, open })}
+        moduleName={accessDeniedDialog.moduleName}
+      />
+    </>
   );
 }
