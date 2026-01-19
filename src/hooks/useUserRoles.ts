@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-type AppRole = 'admin' | 'manager' | 'staff' | 'technician' | 'vendor' | 'customer' | 'dispatcher' | 'finance' | 'owner';
+import { 
+  type AppRole, 
+  AUTHORIZED_OWNER_EMAILS, 
+  isAuthorizedOwner 
+} from '@/config/owners';
 
 export type { AppRole };
 
@@ -23,16 +26,6 @@ interface UserRoles {
   refetch: () => Promise<void>;
 }
 
-// Authorized owner emails - hardcoded for security
-const AUTHORIZED_OWNER_EMAILS = [
-  'mohamed@alazab.com',
-  'admin@alazab.com',
-  'uberfix@alazab.com',
-  'magdy@alazab.com',
-  'ceo@alazab.com',
-  'm.uberfix@alazab.com'
-];
-
 export const useUserRoles = (): UserRoles => {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,9 +43,8 @@ export const useUserRoles = (): UserRoles => {
 
       // Check if user is authorized owner using auth email directly (more reliable)
       const userEmail = user.email?.toLowerCase();
-      const isAuthorizedOwner = userEmail && AUTHORIZED_OWNER_EMAILS.includes(userEmail);
       
-      if (isAuthorizedOwner) {
+      if (isAuthorizedOwner(userEmail)) {
         setRoles(['owner']);
         setLoading(false);
         return;
