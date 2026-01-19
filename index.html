@@ -61,6 +61,7 @@
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     <link rel="preconnect" href="https://storage.googleapis.com" />
     <link rel="preconnect" href="https://cdn.jotfor.ms" />
+    <link rel="preconnect" href="https://connect.facebook.net" />
     
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
@@ -145,6 +146,27 @@
         })(window,document,'script','dataLayer','GTM-M2FD7JFX');
     </script>
     <!-- End Google Tag Manager -->
+
+    <!-- Facebook SDK -->
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId      : '1234567890',
+                cookie     : true,
+                xfbml      : true,
+                version    : 'v18.0'
+            });
+            FB.AppEvents.logPageView();
+        };
+        (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+    <!-- End Facebook SDK -->
 
     <!-- Google Analytics - deferred loading -->
     <script>
