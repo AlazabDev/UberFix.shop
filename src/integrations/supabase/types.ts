@@ -5793,6 +5793,7 @@ export type Database = {
         Args: { fullname: string; phone: string }
         Returns: undefined
       }
+      current_user_is_owner: { Args: never; Returns: boolean }
       find_nearest_vendor: {
         Args: {
           request_latitude: number
@@ -5979,7 +5980,9 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
-      is_authorized_owner: { Args: { _user_id: string }; Returns: boolean }
+      is_authorized_owner:
+        | { Args: { _user_id: string }; Returns: boolean }
+        | { Args: { user_email: string }; Returns: boolean }
       is_email_confirmed: { Args: never; Returns: boolean }
       is_owner_email: { Args: never; Returns: boolean }
       is_staff:
@@ -6034,6 +6037,8 @@ export type Database = {
         | "accounting"
         | "engineering"
         | "dispatcher"
+        | "owner"
+        | "finance"
       company_model_enum: "local_provider" | "third_party"
       company_type_enum: "individual" | "small_team" | "company"
       document_type_enum:
@@ -6266,6 +6271,8 @@ export const Constants = {
         "accounting",
         "engineering",
         "dispatcher",
+        "owner",
+        "finance",
       ],
       company_model_enum: ["local_provider", "third_party"],
       company_type_enum: ["individual", "small_team", "company"],
