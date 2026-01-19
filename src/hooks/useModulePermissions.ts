@@ -40,34 +40,28 @@ export const useModulePermissions = () => {
           return;
         }
 
-        // Owner sees everything - no need to fetch permissions
+        // Always fetch all permissions for sidebar display
+        const { data: allData } = await supabase
+          .from('module_permissions')
+          .select('*')
+          .order('role', { ascending: true })
+          .order('module_key', { ascending: true });
+        
+        setAllPermissions(allData || []);
+
+        // Owner sees everything - no need to filter
         if (isOwner) {
-          // Fetch all permissions for management
-          const { data: allData } = await supabase
-            .from('module_permissions')
-            .select('*')
-            .order('role', { ascending: true })
-            .order('module_key', { ascending: true });
-          
-          setAllPermissions(allData || []);
           setLoading(false);
           return;
         }
 
-        // Fetch permissions for user's actual role
-        const { data, error } = await supabase
-          .from('module_permissions')
-          .select('*')
-          .eq('role', userRole)
-          .eq('is_enabled', true);
-
-        if (error) {
-          console.error('Error fetching permissions:', error);
-        } else {
-          setPermissions(data || []);
-        }
+        // Filter permissions for user's actual role
+        const rolePermissions = (allData || []).filter(
+          p => p.role === userRole && p.is_enabled
+        );
+        setPermissions(rolePermissions);
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching permissions:', error);
       } finally {
         setLoading(false);
       }
