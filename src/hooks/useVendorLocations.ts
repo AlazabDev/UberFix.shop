@@ -34,66 +34,15 @@ export const useVendorLocations = (serviceType?: string) => {
   const fetchVendorLocations = async () => {
     try {
       setLoading(true);
-      
-      // جلب مواقع الموردين مع تفاصيل الموردين
-      const { data: vendorLocData, error: locError } = await supabase
-        .from('vendor_locations')
-        .select('*')
-        .eq('is_active', true);
 
-      if (locError) throw locError;
+      // جلب مواقع الموردين بشكل آمن عبر Edge Function (يحترم الصلاحيات بدون تعريض PII)
+      const { data, error: fnError } = await supabase.functions.invoke(
+        'get-vendor-locations-public',
+        { body: { serviceType } }
+      );
+      if (fnError) throw fnError;
 
-      if (!vendorLocData || vendorLocData.length === 0) {
-        setLocations([]);
-        setError(null);
-        return;
-      }
-
-      // جلب تفاصيل الموردين
-      const vendorIds = vendorLocData.map(loc => loc.vendor_id);
-      const { data: vendorsData, error: vendorError } = await supabase
-        .from('vendors')
-        .select('*')
-        .in('id', vendorIds)
-        .eq('status', 'active');
-
-      if (vendorError) throw vendorError;
-
-      // دمج البيانات
-      const combinedData: VendorLocation[] = [];
-      
-      for (const loc of vendorLocData) {
-        const vendor = vendorsData?.find(v => v.id === loc.vendor_id);
-        if (!vendor) continue;
-        
-        // تصفية حسب نوع الخدمة إذا كان محدد
-        if (serviceType && vendor.specialization) {
-          if (!vendor.specialization.includes(serviceType)) {
-            continue;
-          }
-        }
-
-        combinedData.push({
-          id: loc.id,
-          vendor_id: loc.vendor_id,
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-          address: loc.address,
-          is_active: loc.is_active,
-          vendor: {
-            id: vendor.id,
-            name: vendor.name,
-            company_name: vendor.company_name,
-            specialization: vendor.specialization,
-            phone: vendor.phone,
-            email: vendor.email,
-            rating: vendor.rating,
-            profile_image: vendor.profile_image
-          }
-        });
-      }
-
-      setLocations(combinedData);
+      setLocations((data?.data || []) as VendorLocation[]);
       setError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'فشل تحميل مواقع مزودي الخدمات';
