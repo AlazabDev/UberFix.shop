@@ -47,8 +47,22 @@ export default function Invoices() {
       }
 
       const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
+        .from('invoices_safe')
+        .select(`
+          id,
+          invoice_number,
+          customer_name,
+          customer_email,
+          customer_phone,
+          amount,
+          currency,
+          due_date,
+          issue_date,
+          status,
+          payment_method,
+          notes,
+          created_at
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

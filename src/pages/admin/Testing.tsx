@@ -290,10 +290,10 @@ const Testing = () => {
     const start = Date.now();
     
     try {
-      // استخدام الجدول الأساسي للاختبار
+      // استخدام View آمن للاختبار لتجنب إرجاع أعمدة حساسة/غير لازمة
       const { data, error } = await supabase
-        .from('appointments')
-        .select('*')
+        .from('appointments_safe')
+        .select('id')
         .limit(1);
       
       const duration = Date.now() - start;
@@ -319,8 +319,8 @@ const Testing = () => {
     
     try {
       const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
+        .from('invoices_safe')
+        .select('id')
         .limit(1);
       
       const duration = Date.now() - start;
