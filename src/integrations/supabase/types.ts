@@ -1260,6 +1260,13 @@ export type Database = {
             referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       invoices: {
@@ -5197,6 +5204,129 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      appointments_safe: {
+        Row: {
+          appointment_date: string | null
+          appointment_time: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string | null
+          location: string | null
+          maintenance_request_id: string | null
+          notes: string | null
+          property_address: string | null
+          property_id: string | null
+          property_name: string | null
+          reminder_sent: boolean | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+          vendor_id: string | null
+          vendor_name: string | null
+          vendor_specialization: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices_safe: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          due_date: string | null
+          id: string | null
+          invoice_number: string | null
+          is_locked: boolean | null
+          issue_date: string | null
+          last_modified_by: string | null
+          notes: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          status: string | null
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          due_date?: string | null
+          id?: string | null
+          invoice_number?: string | null
+          is_locked?: boolean | null
+          issue_date?: string | null
+          last_modified_by?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          due_date?: string | null
+          id?: string | null
+          invoice_number?: string | null
+          is_locked?: boolean | null
+          issue_date?: string | null
+          last_modified_by?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          status?: string | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: []
       }
       profiles_public_safe: {
         Row: {

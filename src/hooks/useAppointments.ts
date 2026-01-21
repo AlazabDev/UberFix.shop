@@ -52,19 +52,71 @@ export const useAppointments = () => {
 
   const fetchAppointments = async () => {
     try {
-      // استخدام الجدول الأساسي مباشرة
+      // استخدم View آمن لتجنب إرجاع أعمدة حساسة/غير لازمة (مثل *_enc)
       const { data, error} = await supabase
-        .from('appointments')
+        .from('appointments_safe')
         .select(`
-          *,
-          properties:property_id(name, address),
-          vendors:vendor_id(name, specialization)
+          id,
+          title,
+          description,
+          customer_name,
+          customer_phone,
+          customer_email,
+          appointment_date,
+          appointment_time,
+          duration_minutes,
+          status,
+          property_id,
+          vendor_id,
+          maintenance_request_id,
+          location,
+          notes,
+          reminder_sent,
+          created_by,
+          created_at,
+          updated_at,
+          property_name,
+          property_address,
+          vendor_name,
+          vendor_specialization
         `)
         .order('appointment_date', { ascending: true })
         .order('appointment_time', { ascending: true });
 
       if (error) throw error;
-      setAppointments((data || []) as Appointment[]);
+      const mapped = (data || []).map((row: any) => {
+        const appointment: Appointment = {
+          id: row.id,
+          title: row.title,
+          description: row.description ?? undefined,
+          customer_name: row.customer_name,
+          customer_phone: row.customer_phone ?? undefined,
+          customer_email: row.customer_email ?? undefined,
+          appointment_date: row.appointment_date,
+          appointment_time: row.appointment_time,
+          duration_minutes: row.duration_minutes,
+          status: row.status,
+          property_id: row.property_id ?? undefined,
+          vendor_id: row.vendor_id ?? undefined,
+          maintenance_request_id: row.maintenance_request_id ?? undefined,
+          location: row.location ?? undefined,
+          notes: row.notes ?? undefined,
+          reminder_sent: !!row.reminder_sent,
+          created_by: row.created_by ?? undefined,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          properties: row.property_name
+            ? { name: row.property_name, address: row.property_address || '' }
+            : undefined,
+          vendors: row.vendor_name
+            ? { name: row.vendor_name, specialization: row.vendor_specialization || [] }
+            : undefined,
+        };
+
+        return appointment;
+      });
+
+      setAppointments(mapped);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'خطأ في تحميل البيانات');
     } finally {
