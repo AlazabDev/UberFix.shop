@@ -133,6 +133,10 @@ verify_jwt = true
 verify_jwt = false
 # Public QR scanning - but function has rate limiting and only returns safe data
 
+[functions.get-default-company-branch]
+verify_jwt = false
+# Public helper returning only IDs (company_id, branch_id)
+
 [functions.submit-public-request]
 verify_jwt = false
 # Public QR request submission - has rate limiting and input validation

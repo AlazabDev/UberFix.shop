@@ -149,27 +149,22 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
     setUploadProgress(0);
     
     try {
-      // Get first available company and branch
-      const { data: companies } = await supabase
-        .from('companies')
-        .select('id')
-        .limit(1);
+      // Public-safe: get default company/branch IDs via Edge Function
+      const idsRes = await fetch(
+        'https://zrrffsjbfkphridqyais.supabase.co/functions/v1/get-default-company-branch',
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
-      const companyId = companies?.[0]?.id;
-      if (!companyId) {
-        throw new Error('No company found in system');
+      const idsJson = await idsRes.json().catch(() => ({}));
+      if (!idsRes.ok || !idsJson?.company_id || !idsJson?.branch_id) {
+        throw new Error(idsJson?.error || 'Failed to determine default company/branch');
       }
 
-      const { data: branches } = await supabase
-        .from('branches')
-        .select('id')
-        .eq('company_id', companyId)
-        .limit(1);
-
-      const branchId = branches?.[0]?.id;
-      if (!branchId) {
-        throw new Error('No branch found in system');
-      }
+      const companyId = idsJson.company_id as string;
+      const branchId = idsJson.branch_id as string;
 
       // Create maintenance request with all data
       const serviceNames = selectedServices.map(id => 
