@@ -14,7 +14,7 @@ import { FeaturesSection } from "./FeaturesSection";
 import { TechnicianSection } from "./TechnicianSection";
 import { TestimonialsSection } from "./TestimonialsSection";
 import { Footer } from "./Footer";
-import { WhatsAppFloatingButton } from "@/components/ui/WhatsAppFloatingButton";
+import { FloatingButtons } from "@/components/ui/FloatingButtons";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useDirection } from "@/hooks/useDirection";
@@ -82,8 +82,8 @@ export const LandingPage = () => {
       <TestimonialsSection />
       <Footer />
       
-      {/* Floating WhatsApp Button */}
-      <WhatsAppFloatingButton />
+      {/* Floating Communication Buttons */}
+      <FloatingButtons />
     </div>
   );
 };
