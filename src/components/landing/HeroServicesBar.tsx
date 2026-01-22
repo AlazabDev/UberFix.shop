@@ -1,10 +1,10 @@
 // src/components/landing/HeroServicesBar.tsx
 // Quick services bar shown directly below hero section
 
-import { Wind, Zap, Droplets, Wrench, Building2, ArrowLeft, MessageCircle } from "lucide-react";
+import { Wind, Zap, Droplets, Wrench, Building2, ArrowLeft, MessageCircle, PaintBucket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// WhatsApp phone number - يمكن تغييره لاحقاً
+// WhatsApp phone number
 const WHATSAPP_NUMBER = "201004006620";
 
 const services = [
@@ -43,6 +43,13 @@ const services = [
     href: "/services/fitout",
     whatsappMessage: "مرحباً، أريد تجهيز محل تجاري 🏪"
   },
+  {
+    icon: PaintBucket,
+    title: "دهانات",
+    description: "داخلية وخارجية",
+    href: "/services/painting",
+    whatsappMessage: "مرحباً، أحتاج خدمة دهانات 🎨"
+  },
 ];
 
 // فتح واتساب مع رسالة محددة
@@ -57,7 +64,7 @@ export const HeroServicesBar = () => {
     <section className="bg-card border-y border-border py-8" dir="rtl">
       <div className="container mx-auto px-4">
         {/* Services Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
           {services.map((service, index) => (
             <div
               key={index}
@@ -69,15 +76,28 @@ export const HeroServicesBar = () => {
               <h3 className="font-semibold text-foreground text-sm mb-1">{service.title}</h3>
               <p className="text-xs text-muted-foreground mb-3">{service.description}</p>
               
-              {/* WhatsApp Button */}
-              <Button 
-                size="sm"
-                onClick={() => openWhatsApp(service.whatsappMessage)}
-                className="bg-[#25D366] hover:bg-[#128C7E] text-white text-xs px-3 py-1 h-8 flex items-center gap-1.5 font-medium shadow-md hover:shadow-lg transition-all w-full"
-              >
-                <MessageCircle className="h-3.5 w-3.5" />
-                واتساب
-              </Button>
+              {/* Dual Button Layout */}
+              <div className="flex gap-2 w-full">
+                {/* WhatsApp Button */}
+                <Button 
+                  size="sm"
+                  onClick={() => openWhatsApp(service.whatsappMessage)}
+                  className="bg-[#25D366] hover:bg-[#128C7E] text-white text-xs px-2 py-1 h-8 flex items-center justify-center gap-1 font-medium shadow-md hover:shadow-lg transition-all flex-1"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">واتساب</span>
+                </Button>
+                
+                {/* Order Button */}
+                <Button 
+                  size="sm"
+                  onClick={() => (window.location.href = service.href)}
+                  className="bg-primary hover:bg-primary-light text-primary-foreground text-xs px-2 py-1 h-8 flex items-center justify-center gap-1 font-medium shadow-md hover:shadow-lg transition-all flex-1"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">اطلب</span>
+                </Button>
+              </div>
             </div>
           ))}
         </div>
