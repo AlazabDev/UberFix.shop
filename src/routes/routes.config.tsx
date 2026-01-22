@@ -44,6 +44,9 @@ const PropertyLifecycle = lazy(() => import("@/pages/reports/PropertyLifecycle")
 const UserManagement = lazy(
   () => import("@/pages/admin/UserManagement")
 );
+const CompanyBranchImport = lazy(
+  () => import("@/pages/admin/CompanyBranchImport")
+);
 
 // Technicians
 const TechnicianRegistration = lazy(
@@ -161,6 +164,7 @@ export const protectedRoutes = [
   { path: "/production-monitor", element: <ProductionMonitor />, withLayout: true },
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
+  { path: "/admin/company-branch-import", element: <CompanyBranchImport />, withLayout: true },
   { path: "/admin/technician-approval", element: <TechnicianApprovalQueue />, withLayout: true },
   { path: "/admin/module-settings", element: <ModuleSettings />, withLayout: true },
   { path: "/users", element: <UsersPage />, withLayout: true },
