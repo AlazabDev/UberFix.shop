@@ -3,6 +3,7 @@
 
 import { Wind, Zap, Droplets, Wrench, Building2, ArrowLeft, MessageCircle, PaintBucket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 // WhatsApp phone number
 const WHATSAPP_NUMBER = "201004006620";
@@ -12,42 +13,42 @@ const services = [
     icon: Wind,
     title: "تكييف",
     description: "تركيب وصيانة",
-    href: "/services/hvac",
+    serviceType: "hvac",
     whatsappMessage: "مرحباً، أريد خدمة تكييف 🌬️"
   },
   {
     icon: Zap,
     title: "كهرباء",
     description: "تأسيس وصيانة",
-    href: "/services/electrical",
+    serviceType: "electrical",
     whatsappMessage: "مرحباً، أحتاج خدمة كهرباء ⚡"
   },
   {
     icon: Droplets,
     title: "سباكة",
     description: "كشف تسريبات",
-    href: "/services/plumbing",
+    serviceType: "plumbing",
     whatsappMessage: "مرحباً، أحتاج خدمة سباكة 💧"
   },
   {
     icon: Wrench,
     title: "صيانة عامة",
     description: "إصلاحات متنوعة",
-    href: "/services/general",
+    serviceType: "general",
     whatsappMessage: "مرحباً، أحتاج خدمة صيانة عامة 🔧"
   },
   {
     icon: Building2,
     title: "تجهيز محلات",
     description: "تشطيبات كاملة",
-    href: "/services/fitout",
+    serviceType: "fitout",
     whatsappMessage: "مرحباً، أريد تجهيز محل تجاري 🏪"
   },
   {
     icon: PaintBucket,
     title: "دهانات",
     description: "داخلية وخارجية",
-    href: "/services/painting",
+    serviceType: "painting",
     whatsappMessage: "مرحباً، أحتاج خدمة دهانات 🎨"
   },
 ];
@@ -60,6 +61,12 @@ const openWhatsApp = (message: string) => {
 };
 
 export const HeroServicesBar = () => {
+  const navigate = useNavigate();
+
+  const handleServiceRequest = (serviceType: string) => {
+    navigate(`/service-request?service=${serviceType}`);
+  };
+
   return (
     <section className="bg-card border-y border-border py-8" dir="rtl">
       <div className="container mx-auto px-4">
@@ -91,7 +98,7 @@ export const HeroServicesBar = () => {
                 {/* Order Button */}
                 <Button 
                   size="sm"
-                  onClick={() => (window.location.href = service.href)}
+                  onClick={() => handleServiceRequest(service.serviceType)}
                   className="bg-primary hover:bg-primary-light text-primary-foreground text-xs px-2 py-1 h-8 flex items-center justify-center gap-1 font-medium shadow-md hover:shadow-lg transition-all flex-1"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -112,7 +119,7 @@ export const HeroServicesBar = () => {
               variant="default" 
               size="sm"
               className="bg-primary hover:bg-primary-light text-primary-foreground"
-              onClick={() => (window.location.href = "/quick-request")}
+              onClick={() => navigate("/service-request")}
             >
               اطلب خدمة
               <ArrowLeft className="h-4 w-4 mr-2" />

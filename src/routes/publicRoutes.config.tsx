@@ -29,6 +29,7 @@ const BlogPost = lazy(() => import("@/pages/public/BlogPost"));
 const FAQ = lazy(() => import("@/pages/public/FAQ"));
 const UserGuide = lazy(() => import("@/pages/public/UserGuide"));
 const BookConsultation = lazy(() => import("@/pages/public/BookConsultation"));
+const ServiceRequest = lazy(() => import("@/pages/public/ServiceRequest"));
 
 // Other public pages
 const Projects = lazy(() => import("@/pages/projects/Projects"));
@@ -66,6 +67,7 @@ export const publicRoutes = [
   { path: "/privacy-policy", element: <PrivacyPolicy /> },
   { path: "/terms-of-service", element: <TermsOfService /> },
   { path: "/services", element: <Services /> },
+  { path: "/service-request", element: <ServiceRequest /> },
   { path: "/gallery", element: <Gallery /> },
   { path: "/faq", element: <FAQ /> },
   { path: "/user-guide", element: <UserGuide /> },
