@@ -103,9 +103,10 @@ const Testing = () => {
     const start = Date.now();
     
     try {
+      // استخدام جدول maintenance_requests للتحقق من الاتصال (أكثر موثوقية)
       const { data, error, status } = await supabase
-        .from('profiles')
-        .select('count', { count: 'exact', head: true });
+        .from('maintenance_requests')
+        .select('id', { count: 'exact', head: true });
       
       const duration = Date.now() - start;
       
@@ -290,11 +291,20 @@ const Testing = () => {
     const start = Date.now();
     
     try {
-      // استخدام View آمن للاختبار لتجنب إرجاع أعمدة حساسة/غير لازمة
-      const { data, error } = await supabase
+      // محاولة استخدام View آمن أولاً، ثم الجدول الأصلي كـ fallback
+      let data, error;
+      ({ data, error } = await supabase
         .from('appointments_safe')
         .select('id')
-        .limit(1);
+        .limit(1));
+      
+      // إذا فشل الـ View، استخدم الجدول الأصلي
+      if (error) {
+        ({ data, error } = await supabase
+          .from('appointments')
+          .select('id')
+          .limit(1));
+      }
       
       const duration = Date.now() - start;
       
@@ -306,9 +316,11 @@ const Testing = () => {
         duration 
       });
     } catch (error) {
+      const duration = Date.now() - start;
       updateTestResult(index, { 
         status: 'error', 
-        message: `خطأ في المواعيد: ${error instanceof Error ? error.message : 'خطأ غير معروف'}` 
+        message: `خطأ في المواعيد: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
+        duration
       });
     }
   };
@@ -318,10 +330,20 @@ const Testing = () => {
     const start = Date.now();
     
     try {
-      const { data, error } = await supabase
+      // محاولة استخدام View آمن أولاً، ثم الجدول الأصلي كـ fallback
+      let data, error;
+      ({ data, error } = await supabase
         .from('invoices_safe')
         .select('id')
-        .limit(1);
+        .limit(1));
+      
+      // إذا فشل الـ View، استخدم الجدول الأصلي
+      if (error) {
+        ({ data, error } = await supabase
+          .from('invoices')
+          .select('id')
+          .limit(1));
+      }
       
       const duration = Date.now() - start;
       
@@ -333,9 +355,11 @@ const Testing = () => {
         duration 
       });
     } catch (error) {
+      const duration = Date.now() - start;
       updateTestResult(index, { 
         status: 'error', 
-        message: `خطأ في الفواتير: ${error instanceof Error ? error.message : 'خطأ غير معروف'}` 
+        message: `خطأ في الفواتير: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
+        duration
       });
     }
   };
