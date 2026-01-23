@@ -59,8 +59,8 @@ const allMenuItems = [
   
   // Owner/Admin only
   { icon: PlayCircle, label: "اختبار النظام", href: "/testing", moduleKey: "testing" },
-  { icon: BarChart3, label: "تقرير الإنتاج", href: "/production-report", moduleKey: "production_report" },
-  { icon: Clock, label: "لوحة SLA", href: "/sla-dashboard", moduleKey: "sla_dashboard" },
+  { icon: BarChart3, label: "تقرير الإنتاج", href: "/reports/production", moduleKey: "production_report" },
+  { icon: Clock, label: "لوحة SLA", href: "/reports/sla", moduleKey: "sla_dashboard" },
   { icon: Activity, label: "مراقب الإنتاج", href: "/production-monitor", moduleKey: "production_monitor" },
   { icon: UserCheck, label: "إدارة المستخدمين", href: "/admin/users", moduleKey: "admin_users" },
   { icon: UserCheck, label: "موافقات الفنيين", href: "/admin/technician-approval", moduleKey: "technician_approval" },
