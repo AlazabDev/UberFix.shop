@@ -20,6 +20,7 @@ const Dashboard = () => {
   const { projects } = useProjects();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  // Calculate project stats - always compute to avoid hooks order issues
   const projectStats = {
     totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
     actualCost: projects.reduce((sum, p) => sum + (p.actual_cost || 0), 0),
@@ -27,10 +28,13 @@ const Dashboard = () => {
     completedProjects: projects.filter(p => p.status === 'completed').length,
   };
 
+  // Render loading state but keep component structure consistent
   if (loading || !stats) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
