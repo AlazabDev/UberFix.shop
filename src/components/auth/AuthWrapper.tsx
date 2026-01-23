@@ -36,6 +36,7 @@ const PUBLIC_ROUTES = [
   '/technicians/register',
   '/technicians/registration/wizard',
   '/technicians/registration/thank-you',
+  '/service-request',
 ];
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
@@ -57,8 +58,17 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     if (path.startsWith('/track/')) return true;
     if (path.startsWith('/blog/')) return true;
     if (path.startsWith('/projects')) return true;
+    if (path.startsWith('/service-request')) return true;
     return false;
   }, [location.pathname]);
+
+  // CRITICAL: All hooks must be called BEFORE any early returns
+  // This useEffect handles redirect for unauthenticated users
+  useEffect(() => {
+    if (!loading && !user && !isPublicRoute()) {
+      navigate('/role-selection', { replace: true });
+    }
+  }, [loading, user, isPublicRoute, navigate]);
 
   useEffect(() => {
     if (!supabaseReady) {
@@ -176,14 +186,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
-  // إذا لم يكن هناك مستخدم والمسار يتطلب مصادقة
-  // استخدام useEffect لتجنب مشاكل الـ render على الهواتف
-  useEffect(() => {
-    if (!user && !isPublicRoute()) {
-      navigate('/role-selection', { replace: true });
-    }
-  }, [user, isPublicRoute, navigate]);
-
+  // إذا لم يكن هناك مستخدم والمسار يتطلب مصادقة - show loading while redirecting
   if (!user && !isPublicRoute()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
