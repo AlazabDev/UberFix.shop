@@ -2963,6 +2963,13 @@ export type Database = {
             foreignKeyName: "technician_agreements_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_agreements_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technician_profiles_safe"
             referencedColumns: ["id"]
           },
@@ -3164,6 +3171,13 @@ export type Database = {
             foreignKeyName: "technician_coverage_areas_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_coverage_areas_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technician_profiles_safe"
             referencedColumns: ["id"]
           },
@@ -3172,6 +3186,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_coverage_areas_technician_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -3299,6 +3320,13 @@ export type Database = {
             foreignKeyName: "technician_documents_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_documents_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technician_profiles_safe"
             referencedColumns: ["id"]
           },
@@ -3307,6 +3335,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_documents_technician_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -3824,6 +3859,13 @@ export type Database = {
             foreignKeyName: "technician_service_prices_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_service_prices_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technician_profiles_safe"
             referencedColumns: ["id"]
           },
@@ -3839,6 +3881,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_service_prices_technician_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -4189,6 +4238,13 @@ export type Database = {
             foreignKeyName: "technician_trades_profile_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_trades_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technician_profiles_safe"
             referencedColumns: ["id"]
           },
@@ -4197,6 +4253,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_trades_technician_profile_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -4403,6 +4466,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_verifications_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -4758,6 +4828,13 @@ export type Database = {
             columns: ["technician_profile_id"]
             isOneToOne: false
             referencedRelation: "technician_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technicians_technician_profile_id_fkey"
+            columns: ["technician_profile_id"]
+            isOneToOne: false
+            referencedRelation: "technician_profiles_public_safe"
             referencedColumns: ["id"]
           },
           {
@@ -5332,28 +5409,25 @@ export type Database = {
         Row: {
           avatar_url: string | null
           company_id: string | null
+          created_at: string | null
           full_name: string | null
           id: string | null
-          name: string | null
-          position: string | null
           role: string | null
         }
         Insert: {
           avatar_url?: string | null
           company_id?: string | null
+          created_at?: string | null
           full_name?: string | null
           id?: string | null
-          name?: string | null
-          position?: string | null
           role?: string | null
         }
         Update: {
           avatar_url?: string | null
           company_id?: string | null
+          created_at?: string | null
           full_name?: string | null
           id?: string | null
-          name?: string | null
-          position?: string | null
           role?: string | null
         }
         Relationships: [
@@ -5488,6 +5562,60 @@ export type Database = {
             columns: ["assigned_technician_id"]
             isOneToOne: false
             referencedRelation: "technicians_public_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technician_profiles_public_safe: {
+        Row: {
+          city_id: number | null
+          company_name: string | null
+          company_type: string | null
+          created_at: string | null
+          district_id: number | null
+          full_name: string | null
+          id: string | null
+          preferred_language: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          city_id?: number | null
+          company_name?: string | null
+          company_type?: string | null
+          created_at?: string | null
+          district_id?: number | null
+          full_name?: string | null
+          id?: string | null
+          preferred_language?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          city_id?: number | null
+          company_name?: string | null
+          company_type?: string | null
+          created_at?: string | null
+          district_id?: number | null
+          full_name?: string | null
+          id?: string | null
+          preferred_language?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_profiles_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_profiles_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
             referencedColumns: ["id"]
           },
         ]
