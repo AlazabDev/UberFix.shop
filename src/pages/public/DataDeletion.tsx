@@ -177,10 +177,10 @@ export default function DataDeletion() {
               <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                 Home
               </Link>
-              <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/privacy-policy" className="text-muted-foreground hover:text-foreground transition-colors">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">
                 Terms of Service
               </Link>
             </nav>

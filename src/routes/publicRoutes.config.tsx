@@ -22,6 +22,7 @@ const AcceptableUsePolicy = lazy(() => import("@/pages/public/AcceptableUsePolic
 const AuthDocumentation = lazy(() => import("@/pages/public/AuthDocumentation"));
 const APIDocumentation = lazy(() => import("@/pages/public/APIDocumentation"));
 const ComplianceStatements = lazy(() => import("@/pages/public/ComplianceStatements"));
+const DataDeletion = lazy(() => import("@/pages/public/DataDeletion"));
 const Services = lazy(() => import("@/pages/public/Services"));
 const Gallery = lazy(() => import("@/pages/public/Gallery"));
 const Blog = lazy(() => import("@/pages/public/Blog"));
@@ -65,7 +66,16 @@ export const publicRoutes = [
   { path: "/auth/magic", element: <MagicLink /> },
   { path: "/about", element: <About /> },
   { path: "/privacy-policy", element: <PrivacyPolicy /> },
+  { path: "/privacy", element: <PrivacyPolicy /> },
+  { path: "/privacy-policy-english", element: <PrivacyPolicyEnglish /> },
   { path: "/terms-of-service", element: <TermsOfService /> },
+  { path: "/terms", element: <TermsOfService /> },
+  { path: "/terms-english", element: <TermsEnglish /> },
+  { path: "/data-deletion", element: <DataDeletion /> },
+  { path: "/compliance", element: <ComplianceStatements /> },
+  { path: "/acceptable-use-policy", element: <AcceptableUsePolicy /> },
+  { path: "/api-documentation", element: <APIDocumentation /> },
+  { path: "/auth-documentation", element: <AuthDocumentation /> },
   { path: "/services", element: <Services /> },
   { path: "/service-request", element: <ServiceRequest /> },
   { path: "/gallery", element: <Gallery /> },
