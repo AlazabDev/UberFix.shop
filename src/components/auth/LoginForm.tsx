@@ -112,10 +112,16 @@ export function LoginForm() {
 
   const handleGoogleLogin = async () => {
     try {
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
@@ -123,7 +129,7 @@ export function LoginForm() {
     } catch {
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: "تعذر تسجيل الدخول بجوجل",
+        description: "تعذر تسجيل الدخول بجوجل. تأكد من تفعيل Google OAuth في Supabase.",
         variant: "destructive",
       });
     }
@@ -131,10 +137,13 @@ export function LoginForm() {
 
   const handleFacebookLogin = async () => {
     try {
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: redirectUrl,
+          scopes: 'email,public_profile',
         }
       });
       
@@ -142,7 +151,7 @@ export function LoginForm() {
     } catch {
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: "تعذر تسجيل الدخول بفيسبوك",
+        description: "تعذر تسجيل الدخول بفيسبوك. تأكد من تفعيل Facebook OAuth في Supabase.",
         variant: "destructive",
       });
     }

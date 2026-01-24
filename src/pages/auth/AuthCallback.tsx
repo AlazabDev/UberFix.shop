@@ -144,7 +144,36 @@ const AuthCallback = () => {
           }
         }
 
-        // Handle OAuth callback (Google, etc.) - check for existing session
+        // Handle OAuth callback (Google, Facebook, etc.)
+        // Step 1: Try direct token exchange first (tokens in URL hash/query)
+        if (accessToken && refreshToken) {
+          setMessage('جاري تسجيل الدخول عبر OAuth...');
+          console.log('OAuth: Setting session from URL tokens');
+          
+          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (sessionError) {
+            console.error('OAuth token exchange error:', sessionError);
+            setError('فشل في تسجيل الدخول. حاول مرة أخرى.');
+            return;
+          }
+
+          if (sessionData?.session) {
+            console.log('OAuth: Session established successfully');
+            toast({
+              title: "تم تسجيل الدخول بنجاح",
+              description: "مرحباً بك في UberFix",
+            });
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+        }
+
+        // Step 2: Check for existing session (Supabase may have auto-exchanged tokens)
+        setMessage('جاري التحقق من الجلسة...');
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           console.log('Existing session found, redirecting to dashboard');
@@ -156,21 +185,11 @@ const AuthCallback = () => {
           return;
         }
 
-        // Handle direct token exchange (OAuth callback with tokens in URL)
-        if (accessToken && refreshToken) {
-          setMessage('جاري تسجيل الدخول...');
-          
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-
-          if (sessionError) {
-            console.error('Token exchange error:', sessionError);
-            setError('فشل في تسجيل الدخول. حاول مرة أخرى.');
-            return;
-          }
-
+        // Step 3: Wait a moment for async session establishment, then check again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const { data: { session: retrySession } } = await supabase.auth.getSession();
+        if (retrySession) {
+          console.log('Session found on retry');
           toast({
             title: "تم تسجيل الدخول بنجاح",
             description: "مرحباً بك في UberFix",
