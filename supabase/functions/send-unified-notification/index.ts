@@ -290,8 +290,8 @@ const sendWhatsAppNotification = async (
   requestId?: string
 ): Promise<{ success: boolean; messageLogId?: string; error?: any }> => {
   try {
-    // استخدام send-twilio-message مع type: 'whatsapp'
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-twilio-message`, {
+    // استخدام Meta API مباشرة لإرسال WhatsApp (ليس Twilio)
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-whatsapp-meta`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -300,7 +300,6 @@ const sendWhatsAppNotification = async (
       body: JSON.stringify({
         to: phone,
         message: message,
-        type: 'whatsapp',
         requestId: requestId
       })
     });
@@ -312,8 +311,8 @@ const sendWhatsAppNotification = async (
       return { success: false, error: result.error || 'WhatsApp sending failed' };
     }
 
-    console.log('WhatsApp sent successfully:', result.messageSid);
-    return { success: true, messageLogId: result.messageSid };
+    console.log('WhatsApp sent successfully via Meta:', result.messageId);
+    return { success: true, messageLogId: result.messageId };
   } catch (error) {
     console.error('Error sending WhatsApp:', error);
     return { success: false, error };

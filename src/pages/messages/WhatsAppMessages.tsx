@@ -14,6 +14,7 @@ import { z } from 'zod';
 type WhatsAppFormData = z.infer<typeof whatsappFormSchema>;
 
 export default function WhatsAppMessages() {
+  // يستخدم Meta API مباشرة الآن (ليس Twilio)
   const { sendWhatsApp, isSending } = useTwilioMessages();
 
   const form = useForm<WhatsAppFormData>({

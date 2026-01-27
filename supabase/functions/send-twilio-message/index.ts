@@ -1,19 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+/**
+ * SMS Messaging via Twilio
+ * ========================
+ * هذه الوظيفة مخصصة فقط لإرسال رسائل SMS عبر Twilio
+ * 
+ * ملاحظة: WhatsApp يتم إرساله عبر Meta API مباشرة (send-whatsapp-meta)
+ */
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface TwilioMessageRequest {
+interface SMSMessageRequest {
   to: string;
   message: string;
-  type?: 'sms' | 'whatsapp';
+  type?: 'sms'; // فقط SMS مدعوم هنا
   requestId?: string;
-  templateId?: string;
-  variables?: Record<string, string>;
-  media_url?: string;
 }
 
 // التحقق من صحة رقم الهاتف (صيغة دولية)
@@ -23,9 +28,26 @@ function validatePhoneNumber(phone: string): boolean {
 }
 
 // التحقق من طول الرسالة
-function validateMessage(msg: string, type: string): boolean {
-  const maxLength = type === 'whatsapp' ? 4096 : 1600;
+function validateMessage(msg: string): boolean {
+  const maxLength = 1600; // SMS limit
   return msg.length > 0 && msg.length <= maxLength;
+}
+
+// تنسيق رقم الهاتف
+function formatPhoneNumber(phone: string): string {
+  let formatted = phone;
+  
+  if (!phone.startsWith('+')) {
+    if (phone.startsWith('01')) {
+      formatted = `+2${phone}`;
+    } else if (phone.startsWith('201')) {
+      formatted = `+${phone}`;
+    } else {
+      formatted = `+${phone}`;
+    }
+  }
+  
+  return formatted;
 }
 
 serve(async (req) => {
@@ -39,7 +61,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // التحقق من المستخدم (اختياري - يمكن استخدامها داخلياً بدون auth)
+    // التحقق من المستخدم (اختياري)
     let userId: string | null = null;
     const authHeader = req.headers.get('Authorization');
     
@@ -50,7 +72,7 @@ serve(async (req) => {
       if (!authError && user) {
         userId = user.id;
         
-        // Rate limiting للمستخدمين المسجلين
+        // Rate limiting
         const { data: recentMessages } = await supabase
           .from('message_logs')
           .select('created_at')
@@ -58,7 +80,10 @@ serve(async (req) => {
           .gte('created_at', new Date(Date.now() - 60000).toISOString());
 
         if (recentMessages && recentMessages.length >= 10) {
-          throw new Error('Rate limit exceeded. Maximum 10 messages per minute.');
+          return new Response(
+            JSON.stringify({ success: false, error: 'Rate limit exceeded. Maximum 10 messages per minute.' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
       }
     }
@@ -66,77 +91,66 @@ serve(async (req) => {
     const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
     const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
     const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER') || '+12294082463';
-    const twilioWhatsAppNumber = 'whatsapp:+14155238886';
 
     if (!twilioAccountSid || !twilioAuthToken) {
-      throw new Error('Missing Twilio credentials');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing Twilio credentials for SMS' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const requestData: TwilioMessageRequest = await req.json();
-    const { to, message, type = 'sms', requestId, templateId, variables, media_url } = requestData;
+    const requestData: SMSMessageRequest = await req.json();
+    const { to, message, type = 'sms', requestId } = requestData;
+
+    // التحقق من نوع الرسالة - فقط SMS مدعوم
+    if (type === 'whatsapp') {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'WhatsApp messages should use send-whatsapp-meta function instead',
+          redirect: 'send-whatsapp-meta'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (!to || !message) {
-      throw new Error('Missing required fields: to, message');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing required fields: to, message' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('📤 Sending message:', { to, type, requestId, templateId });
+    console.log('📤 Sending SMS via Twilio:', { to, requestId });
 
-    // تجهيز رقم المرسل والمستقبل
-    let fromNumber = type === 'whatsapp' ? twilioWhatsAppNumber : twilioPhoneNumber;
-    let toNumber = to;
+    // تنسيق رقم الهاتف
+    const toNumber = formatPhoneNumber(to);
 
-    // التحقق من صحة رقم الهاتف
-    if (!to.startsWith('whatsapp:') && !to.startsWith('+')) {
-      if (to.startsWith('01')) {
-        toNumber = `+2${to}`;
-      } else if (to.startsWith('201')) {
-        toNumber = `+${to}`;
-      }
-    }
-
-    // إضافة بادئة whatsapp إذا لزم الأمر
-    if (type === 'whatsapp' && !toNumber.startsWith('whatsapp:')) {
-      toNumber = `whatsapp:${toNumber}`;
-    }
-
-    // التحقق من صحة الرقم بعد التنسيق
-    const cleanNumber = toNumber.replace('whatsapp:', '');
-    if (!validatePhoneNumber(cleanNumber)) {
-      throw new Error('Invalid phone number format. Use international format: +201234567890');
+    // التحقق من صحة الرقم
+    if (!validatePhoneNumber(toNumber)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid phone number format. Use international format: +201234567890' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // التحقق من طول الرسالة
-    if (!validateMessage(message, type)) {
-      const maxLength = type === 'whatsapp' ? 4096 : 1600;
-      throw new Error(`Message must be between 1 and ${maxLength} characters`);
+    if (!validateMessage(message)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Message must be between 1 and 1600 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // إعداد الجسم الأساسي للرسالة
+    // إعداد الطلب لـ Twilio
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
     
-    let messageBody = message;
-    let formData: Record<string, string> = {
+    const formData: Record<string, string> = {
       To: toNumber,
-      From: fromNumber,
+      From: twilioPhoneNumber,
+      Body: message,
+      StatusCallback: `${supabaseUrl}/functions/v1/twilio-delivery-status`
     };
-
-    // إذا كان هناك قالب WhatsApp
-    if (type === 'whatsapp' && templateId) {
-      formData['ContentSid'] = templateId;
-      if (variables) {
-        formData['ContentVariables'] = JSON.stringify(variables);
-      }
-    } else {
-      formData['Body'] = messageBody;
-    }
-
-    // إضافة media_url إذا وجد
-    if (media_url) {
-      formData['MediaUrl'] = media_url;
-    }
-
-    // إضافة webhook للحالة
-    formData['StatusCallback'] = `${supabaseUrl}/functions/v1/twilio-delivery-status`;
 
     // تحويل البيانات إلى URL-encoded
     const encodedData = Object.entries(formData)
@@ -162,30 +176,31 @@ serve(async (req) => {
       await supabase.from('message_logs').insert({
         request_id: requestId,
         recipient: toNumber,
-        message_type: type,
-        message_content: messageBody,
+        message_type: 'sms',
+        message_content: message,
         provider: 'twilio',
         status: 'failed',
         error_message: twilioResult.message || 'Unknown error',
         metadata: {
           sender_id: userId,
-          twilio_error: twilioResult,
-          has_media: !!media_url,
-          template_id: templateId,
+          twilio_error: twilioResult
         }
       });
 
-      throw new Error(twilioResult.message || 'Failed to send message');
+      return new Response(
+        JSON.stringify({ success: false, error: twilioResult.message || 'Failed to send SMS' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('✅ Message sent successfully:', twilioResult.sid);
+    console.log('✅ SMS sent successfully:', twilioResult.sid);
 
     // حفظ السجل في قاعدة البيانات
     const { error: dbError } = await supabase.from('message_logs').insert({
       request_id: requestId,
       recipient: toNumber,
-      message_type: type,
-      message_content: messageBody,
+      message_type: 'sms',
+      message_content: message,
       provider: 'twilio',
       status: twilioResult.status,
       external_id: twilioResult.sid,
@@ -193,10 +208,7 @@ serve(async (req) => {
       metadata: {
         sender_id: userId,
         price: twilioResult.price,
-        price_unit: twilioResult.price_unit,
-        has_media: !!media_url,
-        template_id: templateId,
-        variables: variables,
+        price_unit: twilioResult.price_unit
       }
     });
 
@@ -210,7 +222,8 @@ serve(async (req) => {
         messageSid: twilioResult.sid,
         status: twilioResult.status,
         to: toNumber,
-        type
+        type: 'sms',
+        provider: 'twilio'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -219,7 +232,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in send-twilio-message:', error);
+    console.error('Error in send-twilio-message (SMS):', error);
     return new Response(
       JSON.stringify({
         success: false,
