@@ -3,39 +3,35 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * Hook موحد لإرسال رسائل SMS و WhatsApp
+ * Hook موحد لإرسال الرسائل
  * 
- * ملاحظة: SMS يستخدم Twilio، WhatsApp يستخدم Meta API مباشرة
+ * SMS: عبر Twilio
+ * WhatsApp: عبر Meta Graph API مباشرة
  * 
  * @example
+ * const { sendSMS, sendWhatsApp, loading } = useMessaging();
+ * 
  * // إرسال SMS
- * const { sendSMS } = useTwilioMessages();
  * await sendSMS('+201234567890', 'مرحباً');
  * 
- * @example
- * // إرسال WhatsApp (عبر Meta API)
- * const { sendWhatsApp } = useTwilioMessages();
- * await sendWhatsApp('+201234567890', 'مرحباً', 'request-id');
+ * // إرسال WhatsApp
+ * await sendWhatsApp('+201234567890', 'مرحباً');
  */
 
-interface SendMessageParams {
-  to: string;
-  message: string;
-  type?: 'sms' | 'whatsapp';
-  requestId?: string;
-  templateId?: string;
-  variables?: Record<string, string>;
-  media_url?: string;
+interface SendResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
 }
 
-export function useTwilioMessages() {
+export function useMessaging() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   /**
    * إرسال رسالة SMS عبر Twilio
    */
-  const sendSMS = async (to: string, message: string, requestId?: string) => {
+  const sendSMS = async (to: string, message: string, requestId?: string): Promise<SendResult> => {
     try {
       setLoading(true);
 
@@ -55,28 +51,37 @@ export function useTwilioMessages() {
       }
 
       toast({
-        title: 'تم إرسال الرسالة',
-        description: 'تم إرسال رسالة SMS بنجاح',
+        title: 'تم إرسال SMS',
+        description: 'تم إرسال الرسالة النصية بنجاح',
       });
 
-      return data;
+      return { success: true, messageId: data.messageSid };
     } catch (error) {
       console.error('Error sending SMS:', error);
       toast({
-        title: 'خطأ في إرسال الرسالة',
+        title: 'خطأ في إرسال SMS',
         description: error instanceof Error ? error.message : 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * إرسال رسالة WhatsApp عبر Meta API (ليس Twilio)
+   * إرسال رسالة WhatsApp عبر Meta API
    */
-  const sendWhatsApp = async (to: string, message: string, requestId?: string, media_url?: string) => {
+  const sendWhatsApp = async (
+    to: string, 
+    message: string, 
+    options?: {
+      requestId?: string;
+      mediaUrl?: string;
+      mediaType?: 'image' | 'video' | 'document';
+      buttons?: Array<{ id: string; title: string }>;
+    }
+  ): Promise<SendResult> => {
     try {
       setLoading(true);
 
@@ -86,9 +91,10 @@ export function useTwilioMessages() {
         body: { 
           to, 
           message, 
-          requestId,
-          mediaUrl: media_url,
-          mediaType: media_url ? 'image' : undefined
+          requestId: options?.requestId,
+          mediaUrl: options?.mediaUrl,
+          mediaType: options?.mediaType,
+          buttons: options?.buttons
         },
         headers: session ? {
           Authorization: `Bearer ${session.access_token}`,
@@ -102,19 +108,19 @@ export function useTwilioMessages() {
       }
 
       toast({
-        title: 'تم إرسال الرسالة',
+        title: 'تم إرسال WhatsApp',
         description: 'تم إرسال رسالة WhatsApp بنجاح',
       });
 
-      return data;
+      return { success: true, messageId: data.messageId };
     } catch (error) {
       console.error('Error sending WhatsApp:', error);
       toast({
-        title: 'خطأ في إرسال الرسالة',
+        title: 'خطأ في إرسال WhatsApp',
         description: error instanceof Error ? error.message : 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     } finally {
       setLoading(false);
     }
@@ -125,30 +131,24 @@ export function useTwilioMessages() {
    */
   const sendWhatsAppTemplate = async (
     to: string,
-    templateId: string,
-    variables: Record<string, string>,
+    templateName: string,
+    templateComponents?: Array<{
+      type: string;
+      parameters: Array<{ type: string; text?: string }>;
+    }>,
     requestId?: string
-  ) => {
+  ): Promise<SendResult> => {
     try {
       setLoading(true);
 
       const { data: { session } } = await supabase.auth.getSession();
 
-      // تحويل المتغيرات إلى تنسيق Meta
-      const templateComponents = [{
-        type: 'body',
-        parameters: Object.values(variables).map(value => ({
-          type: 'text',
-          text: value
-        }))
-      }];
-
       const { data, error } = await supabase.functions.invoke('send-whatsapp-meta', {
-        body: {
-          to,
-          message: '',
+        body: { 
+          to, 
+          message: '', 
           type: 'template',
-          templateName: templateId,
+          templateName,
           templateComponents,
           requestId
         },
@@ -168,7 +168,7 @@ export function useTwilioMessages() {
         description: 'تم إرسال قالب WhatsApp بنجاح',
       });
 
-      return data;
+      return { success: true, messageId: data.messageId };
     } catch (error) {
       console.error('Error sending WhatsApp template:', error);
       toast({
@@ -176,50 +176,16 @@ export function useTwilioMessages() {
         description: error instanceof Error ? error.message : 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * إرسال إشعار صيانة موحد
-   */
-  const sendMaintenanceNotification = async (
-    requestId: string,
-    phone: string,
-    type: 'created' | 'assigned' | 'in_progress' | 'completed',
-    preferredMethod: 'sms' | 'whatsapp' = 'whatsapp'
-  ) => {
-    const messages = {
-      created: 'تم استلام طلب الصيانة الخاص بك. سيتم التواصل معك قريباً.',
-      assigned: 'تم تعيين فني لطلب الصيانة الخاص بك.',
-      in_progress: 'الفني في طريقه إليك الآن.',
-      completed: 'تم إكمال طلب الصيانة بنجاح. شكراً لثقتك بنا.'
-    };
-
-    if (preferredMethod === 'whatsapp') {
-      return sendWhatsApp(phone, messages[type], requestId);
-    } else {
-      return sendSMS(phone, messages[type], requestId);
-    }
-  };
-
-  // دالة موحدة للتوافق مع الكود القديم
-  const sendMessage = async (params: SendMessageParams) => {
-    if (params.type === 'whatsapp') {
-      return sendWhatsApp(params.to, params.message, params.requestId, params.media_url);
-    } else {
-      return sendSMS(params.to, params.message, params.requestId);
-    }
-  };
-
   return {
-    sendMessage,
     sendSMS,
     sendWhatsApp,
     sendWhatsAppTemplate,
-    sendMaintenanceNotification,
     loading,
     isSending: loading,
   };

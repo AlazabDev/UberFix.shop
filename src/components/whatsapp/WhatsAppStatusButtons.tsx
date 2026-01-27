@@ -41,15 +41,19 @@ const WhatsAppStatusButtons = () => {
 
     setLoading(statusType);
     try {
-      const { data, error } = await supabase.functions.invoke("send-twilio-message", {
+      // استخدام Meta API مباشرة بدلاً من Twilio
+      const { data, error } = await supabase.functions.invoke("send-whatsapp-meta", {
         body: {
           to: phone,
           message,
-          type: "whatsapp",
         },
       });
 
       if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'فشل في الإرسال');
+      }
 
       toast({
         title: "تم الإرسال",
@@ -59,7 +63,7 @@ const WhatsAppStatusButtons = () => {
       console.error("Error sending WhatsApp:", error);
       toast({
         title: "خطأ",
-        description: "فشل في إرسال الرسالة",
+        description: error instanceof Error ? error.message : "فشل في إرسال الرسالة",
         variant: "destructive",
       });
     } finally {

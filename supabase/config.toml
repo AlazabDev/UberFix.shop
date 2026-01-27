@@ -75,6 +75,11 @@ verify_jwt = true
 
 [functions.send-twilio-message]
 verify_jwt = true
+# SMS only - WhatsApp uses send-whatsapp-meta
+
+[functions.send-whatsapp-meta]
+verify_jwt = true
+# WhatsApp via Meta Graph API (not Twilio)
 
 [functions.calculate-route]
 verify_jwt = true

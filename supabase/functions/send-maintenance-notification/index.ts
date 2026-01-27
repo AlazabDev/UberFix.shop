@@ -308,7 +308,7 @@ const sendEmail = async (
 };
 
 // ==========================================
-// Send WhatsApp via Twilio
+// Send WhatsApp via Meta Graph API (NOT Twilio)
 // ==========================================
 const sendWhatsApp = async (
   supabase: ReturnType<typeof createClient>,
@@ -317,37 +317,40 @@ const sendWhatsApp = async (
   requestId: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
+    const accessToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
+    const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
 
-    if (!accountSid || !authToken || !fromNumber) {
-      console.log('⚠️ Twilio credentials not configured, skipping WhatsApp');
+    if (!accessToken || !phoneNumberId) {
+      console.log('⚠️ Meta WhatsApp credentials not configured, skipping WhatsApp');
       return { success: false, error: 'WhatsApp not configured' };
     }
 
     const formattedTo = formatPhoneNumber(to);
-    const formData = new URLSearchParams();
-    formData.append('To', `whatsapp:${formattedTo}`);
-    formData.append('From', `whatsapp:${fromNumber}`);
-    formData.append('Body', message);
+    
+    const body = {
+      messaging_product: 'whatsapp',
+      to: formattedTo,
+      type: 'text',
+      text: { body: message }
+    };
 
     const response = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+      `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`,
       {
         method: 'POST',
         headers: {
-          'Authorization': 'Basic ' + btoa(`${accountSid}:${authToken}`),
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
-        body: formData,
+        body: JSON.stringify(body),
       }
     );
 
     const result = await response.json();
 
     if (response.ok) {
-      console.log('✅ WhatsApp sent successfully:', result.sid);
+      const messageId = result.messages?.[0]?.id;
+      console.log('✅ WhatsApp sent successfully via Meta:', messageId);
       
       // Log the message
       await supabase.from('message_logs').insert({
@@ -355,17 +358,17 @@ const sendWhatsApp = async (
         recipient: formattedTo,
         message_content: message,
         message_type: 'whatsapp',
-        provider: 'twilio',
+        provider: 'meta',
         status: 'sent',
-        external_id: result.sid,
+        external_id: messageId,
         sent_at: new Date().toISOString(),
         metadata: { type: 'notification', trigger: 'status_change' }
       });
 
       return { success: true };
     } else {
-      console.error('❌ WhatsApp send failed:', result);
-      return { success: false, error: result.message || 'Failed to send' };
+      console.error('❌ WhatsApp send failed via Meta:', result);
+      return { success: false, error: result.error?.message || 'Failed to send' };
     }
   } catch (error: unknown) {
     console.error('❌ WhatsApp send error:', error);

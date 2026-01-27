@@ -95,7 +95,7 @@ export function useWhatsAppNotifications() {
   }, [toast]);
 
   /**
-   * إرسال رسالة WhatsApp مخصصة
+   * إرسال رسالة WhatsApp مخصصة عبر Meta API
    */
   const sendCustomMessage = useCallback(async (
     phone: string,
@@ -105,11 +105,11 @@ export function useWhatsAppNotifications() {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase.functions.invoke('send-twilio-message', {
+      // استخدام Meta API مباشرة بدلاً من Twilio
+      const { data, error } = await supabase.functions.invoke('send-whatsapp-meta', {
         body: {
           to: phone,
           message,
-          type: 'whatsapp',
           requestId
         }
       });
