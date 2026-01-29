@@ -362,18 +362,46 @@ serve(async (req) => {
     const token = url.searchParams.get('hub.verify_token');
     const challenge = url.searchParams.get('hub.challenge');
 
-    console.log('🔐 Webhook verification:', { mode, token });
+    console.log('🔐 Webhook verification request:', { 
+      mode, 
+      receivedToken: token,
+      hasStoredToken: !!VERIFY_TOKEN,
+      storedTokenLength: VERIFY_TOKEN?.length || 0,
+      challenge: challenge?.substring(0, 20) + '...'
+    });
+
+    // للتطوير: إذا لم يكن الـ token محدداً، نقبل أي token
+    if (!VERIFY_TOKEN) {
+      console.warn('⚠️ WHATSAPP_VERIFY_TOKEN not set - accepting any token for development');
+      if (mode === 'subscribe' && challenge) {
+        console.log('✅ Webhook verified (dev mode)!');
+        return new Response(challenge, { 
+          status: 200,
+          headers: { 'Content-Type': 'text/plain', ...corsHeaders }
+        });
+      }
+    }
 
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('✅ Webhook verified!');
+      console.log('✅ Webhook verified successfully!');
       return new Response(challenge, { 
         status: 200,
-        headers: { 'Content-Type': 'text/plain' }
+        headers: { 'Content-Type': 'text/plain', ...corsHeaders }
       });
     }
 
-    console.error('❌ Verification failed');
-    return new Response('Forbidden', { status: 403 });
+    console.error('❌ Verification failed:', {
+      modeMatch: mode === 'subscribe',
+      tokenMatch: token === VERIFY_TOKEN,
+      receivedTokenLength: token?.length || 0
+    });
+    return new Response(JSON.stringify({ 
+      error: 'Verification failed',
+      hint: 'Check WHATSAPP_VERIFY_TOKEN matches your Meta dashboard setting'
+    }), { 
+      status: 403,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
   }
 
   // ==========================================
