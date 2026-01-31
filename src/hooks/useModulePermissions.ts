@@ -18,15 +18,13 @@ export const useModulePermissions = () => {
   // Use the centralized useUserRoles hook which properly checks owner email whitelist
   const { roles, loading: rolesLoading, isOwner, isManager, isTechnician, isCustomer } = useUserRoles();
 
-  // Determine actual role from useUserRoles
-  const getUserRole = (): string => {
+  // Determine actual role from useUserRoles - must be computed inside render
+  const userRole = (() => {
     if (isOwner) return 'owner';
     if (isManager) return 'manager';
     if (isTechnician) return 'technician';
     return 'customer';
-  };
-
-  const userRole = getUserRole();
+  })();
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -74,8 +72,14 @@ export const useModulePermissions = () => {
     // Owner sees everything always
     if (isOwner) return true;
     
-    const permission = permissions.find(p => p.module_key === moduleKey);
-    return permission?.is_enabled ?? false;
+    // Check in allPermissions for this role and module
+    const permission = allPermissions.find(
+      p => p.module_key === moduleKey && p.role === userRole
+    );
+    
+    // If permission found, return its is_enabled value
+    // If not found, default to TRUE (allow access if not configured)
+    return permission?.is_enabled ?? true;
   };
 
   const updatePermission = async (id: string, isEnabled: boolean): Promise<boolean> => {
