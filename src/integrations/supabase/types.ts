@@ -1112,6 +1112,100 @@ export type Database = {
         }
         Relationships: []
       }
+      facebook_leads: {
+        Row: {
+          ad_id: string | null
+          address: string | null
+          adgroup_id: string | null
+          campaign_id: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          field_data: Json | null
+          form_id: string
+          full_name: string | null
+          id: string
+          leadgen_id: string
+          maintenance_request_id: string | null
+          message: string | null
+          page_id: string
+          phone: string | null
+          processed_at: string | null
+          raw_data: Json | null
+          service_type: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ad_id?: string | null
+          address?: string | null
+          adgroup_id?: string | null
+          campaign_id?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          field_data?: Json | null
+          form_id: string
+          full_name?: string | null
+          id?: string
+          leadgen_id: string
+          maintenance_request_id?: string | null
+          message?: string | null
+          page_id: string
+          phone?: string | null
+          processed_at?: string | null
+          raw_data?: Json | null
+          service_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ad_id?: string | null
+          address?: string | null
+          adgroup_id?: string | null
+          campaign_id?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          field_data?: Json | null
+          form_id?: string
+          full_name?: string | null
+          id?: string
+          leadgen_id?: string
+          maintenance_request_id?: string | null
+          message?: string | null
+          page_id?: string
+          phone?: string | null
+          processed_at?: string | null
+          raw_data?: Json | null
+          service_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facebook_leads_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facebook_leads_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facebook_leads_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gallery_images: {
         Row: {
           category: string
