@@ -214,13 +214,13 @@
             }
         }, { once: true });
         
-        // تحميل تلقائي بعد 5 ثواني
+        // تحميل تلقائي بعد 10 ثواني
         setTimeout(function() {
             if (!window.chatWidgetLoaded) {
                 loadChatWidget();
                 window.chatWidgetLoaded = true;
             }
-        }, 5000);
+        }, 10000);
     </script>
 </body>
 </html>
