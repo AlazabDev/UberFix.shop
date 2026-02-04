@@ -17,7 +17,7 @@ const corsHeaders = {
 interface SMSMessageRequest {
   to: string;
   message: string;
-  type?: 'sms'; // فقط SMS مدعوم هنا
+  type?: 'sms' | 'whatsapp'; // للتوافق مع الطلبات القديمة
   requestId?: string;
 }
 
