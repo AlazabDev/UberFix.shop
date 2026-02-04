@@ -5075,6 +5075,160 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_template_events: {
+        Row: {
+          actor_id: string | null
+          correlation_id: string | null
+          created_at: string
+          error_message: string | null
+          event_source: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          new_quality: Database["public"]["Enums"]["wa_template_quality"] | null
+          new_status: Database["public"]["Enums"]["wa_template_status"] | null
+          old_quality: Database["public"]["Enums"]["wa_template_quality"] | null
+          old_status: Database["public"]["Enums"]["wa_template_status"] | null
+          template_id: string
+          tenant_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_source?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          new_quality?:
+            | Database["public"]["Enums"]["wa_template_quality"]
+            | null
+          new_status?: Database["public"]["Enums"]["wa_template_status"] | null
+          old_quality?:
+            | Database["public"]["Enums"]["wa_template_quality"]
+            | null
+          old_status?: Database["public"]["Enums"]["wa_template_status"] | null
+          template_id: string
+          tenant_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_source?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          new_quality?:
+            | Database["public"]["Enums"]["wa_template_quality"]
+            | null
+          new_status?: Database["public"]["Enums"]["wa_template_status"] | null
+          old_quality?:
+            | Database["public"]["Enums"]["wa_template_quality"]
+            | null
+          old_status?: Database["public"]["Enums"]["wa_template_status"] | null
+          template_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_template_events_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "wa_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wa_templates: {
+        Row: {
+          approved_at: string | null
+          body_text: string
+          buttons: Json | null
+          category: Database["public"]["Enums"]["wa_template_category"]
+          components: Json | null
+          created_at: string
+          created_by: string | null
+          footer_text: string | null
+          header_content: string | null
+          header_media_url: string | null
+          header_type: string | null
+          id: string
+          is_locked: boolean
+          language: string
+          meta_template_id: string | null
+          meta_template_name: string | null
+          name: string
+          quality: Database["public"]["Enums"]["wa_template_quality"] | null
+          quality_reason: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["wa_template_status"]
+          submitted_at: string | null
+          tenant_id: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          approved_at?: string | null
+          body_text: string
+          buttons?: Json | null
+          category?: Database["public"]["Enums"]["wa_template_category"]
+          components?: Json | null
+          created_at?: string
+          created_by?: string | null
+          footer_text?: string | null
+          header_content?: string | null
+          header_media_url?: string | null
+          header_type?: string | null
+          id?: string
+          is_locked?: boolean
+          language?: string
+          meta_template_id?: string | null
+          meta_template_name?: string | null
+          name: string
+          quality?: Database["public"]["Enums"]["wa_template_quality"] | null
+          quality_reason?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["wa_template_status"]
+          submitted_at?: string | null
+          tenant_id: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          approved_at?: string | null
+          body_text?: string
+          buttons?: Json | null
+          category?: Database["public"]["Enums"]["wa_template_category"]
+          components?: Json | null
+          created_at?: string
+          created_by?: string | null
+          footer_text?: string | null
+          header_content?: string | null
+          header_media_url?: string | null
+          header_type?: string | null
+          id?: string
+          is_locked?: boolean
+          language?: string
+          meta_template_id?: string | null
+          meta_template_name?: string | null
+          name?: string
+          quality?: Database["public"]["Enums"]["wa_template_quality"] | null
+          quality_reason?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["wa_template_status"]
+          submitted_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       whatsapp_media_storage: {
         Row: {
           caption: string | null
@@ -6477,6 +6631,17 @@ export type Database = {
         | "feedback"
         | "payment"
         | "note"
+      wa_template_category: "utility" | "marketing" | "authentication"
+      wa_template_quality: "unknown" | "high" | "medium" | "low"
+      wa_template_status:
+        | "draft"
+        | "submitted"
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "paused"
+        | "disabled"
+        | "deleted"
       wo_status:
         | "Pending"
         | "Scheduled"
@@ -6719,6 +6884,18 @@ export const Constants = {
         "feedback",
         "payment",
         "note",
+      ],
+      wa_template_category: ["utility", "marketing", "authentication"],
+      wa_template_quality: ["unknown", "high", "medium", "low"],
+      wa_template_status: [
+        "draft",
+        "submitted",
+        "pending",
+        "approved",
+        "rejected",
+        "paused",
+        "disabled",
+        "deleted",
       ],
       wo_status: [
         "Pending",
