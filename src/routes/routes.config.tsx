@@ -20,6 +20,8 @@ const EmergencyService = lazy(
 const MaintenanceProcedures = lazy(
   () => import("@/pages/maintenance/MaintenanceProcedures")
 );
+// All Requests page - alias to Requests with different default filter
+const AllRequests = lazy(() => import("@/pages/maintenance/Requests"));
 
 // Properties
 const Properties = lazy(() => import("@/pages/properties/Properties"));
@@ -132,6 +134,7 @@ export const protectedRoutes = [
   // Maintenance
   { path: "/requests", element: <Requests />, withLayout: true },
   { path: "/requests/:id", element: <RequestDetails />, withLayout: true },
+  { path: "/all-requests", element: <AllRequests />, withLayout: true },
   { path: "/request-lifecycle", element: <RequestLifecycleJourney />, withLayout: true },
   { path: "/service-request", element: <ServiceRequest />, withLayout: true },
   { path: "/maintenance/overview", element: <MaintenanceOverview />, withLayout: true },

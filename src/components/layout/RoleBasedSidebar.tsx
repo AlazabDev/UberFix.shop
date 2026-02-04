@@ -21,7 +21,8 @@ import {
   Award,
   Shield,
   UserCheck,
-  Lock
+  Lock,
+  MessageSquare
 } from "lucide-react";
 import { useModulePermissions } from "@/hooks/useModulePermissions";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
@@ -65,6 +66,7 @@ const allMenuItems = [
   { icon: UserCheck, label: "إدارة المستخدمين", href: "/admin/users", moduleKey: "admin_users" },
   { icon: UserCheck, label: "موافقات الفنيين", href: "/admin/technician-approval", moduleKey: "technician_approval" },
   { icon: Shield, label: "إعدادات المديولات", href: "/admin/module-settings", moduleKey: "module_settings" },
+  { icon: MessageSquare, label: "قوالب الرسائل", href: "/dashboard/whatsapp/templates", moduleKey: "whatsapp_templates" },
   
   // Technician specific
   { icon: Home, label: "لوحة الفني", href: "/technicians/dashboard", moduleKey: "technician_dashboard" },
