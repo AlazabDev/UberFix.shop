@@ -115,11 +115,16 @@ function buildMetaComponents(template: any): TemplateComponent[] {
   return components;
 }
 
-// Create authenticated Supabase client from request
-function createSupabaseClient(authHeader: string | null) {
+// Create Service Role Supabase client (bypasses RLS)
+function createServiceClient() {
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+}
+
+// Create authenticated Supabase client for user verification
+function createAuthClient(authHeader: string) {
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     global: {
-      headers: authHeader ? { Authorization: authHeader } : {},
+      headers: { Authorization: authHeader },
     },
   });
 }
@@ -160,10 +165,11 @@ serve(async (req) => {
     });
   }
 
-  const supabase = createSupabaseClient(authHeader);
+  // Use auth client only for user verification
+  const authClient = createAuthClient(authHeader);
   
   // Get current user
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await authClient.auth.getUser();
   if (userError || !user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
@@ -171,12 +177,19 @@ serve(async (req) => {
     });
   }
 
-  // Get user's tenant/company
-  const { data: profile } = await supabase
+  // Use service client for all database operations (bypasses RLS)
+  const supabase = createServiceClient();
+
+  // Get user's tenant/company using service client
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("company_id, role")
     .eq("id", user.id)
     .single();
+
+  if (profileError) {
+    console.error("Profile fetch error:", profileError);
+  }
 
   // Allow users without company_id - use their user.id as tenant_id
   // This supports owner/admin users who may not have a company assigned
@@ -186,7 +199,7 @@ serve(async (req) => {
   const action = url.searchParams.get("action");
   const correlationId = crypto.randomUUID();
 
-  console.log(`[${correlationId}] Action: ${action}, User: ${user.id}, Tenant: ${tenantId}`);
+  console.log(`[${correlationId}] Action: ${action}, User: ${user.id}, Tenant: ${tenantId}, Role: ${userRole}`);
 
   try {
     switch (action) {
@@ -221,10 +234,35 @@ serve(async (req) => {
 
         if (error) throw error;
 
-        // Get stats
-        const { data: stats } = await supabase.rpc("get_wa_template_stats_by_tenant", {
-          p_tenant_id: tenantId,
-        }).single();
+        // Get stats - calculate inline instead of using RPC to avoid potential missing function errors
+        const { data: allTemplates } = await supabase
+          .from("wa_templates")
+          .select("status, quality")
+          .eq("tenant_id", tenantId)
+          .neq("status", "deleted");
+
+        const stats = {
+          total: allTemplates?.length || 0,
+          draft: 0,
+          submitted: 0,
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+          paused: 0,
+          disabled: 0,
+          quality_high: 0,
+          quality_medium: 0,
+          quality_low: 0,
+        };
+
+        allTemplates?.forEach((t) => {
+          if (t.status && t.status in stats) {
+            (stats as any)[t.status]++;
+          }
+          if (t.quality === "high") stats.quality_high++;
+          if (t.quality === "medium") stats.quality_medium++;
+          if (t.quality === "low") stats.quality_low++;
+        });
 
         return new Response(
           JSON.stringify({
@@ -232,17 +270,7 @@ serve(async (req) => {
             total: count,
             page,
             limit,
-            stats: stats || {
-              total: 0,
-              approved: 0,
-              pending: 0,
-              rejected: 0,
-              draft: 0,
-              paused: 0,
-              quality_high: 0,
-              quality_medium: 0,
-              quality_low: 0,
-            },
+            stats,
           }),
           {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
