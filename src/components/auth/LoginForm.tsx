@@ -143,7 +143,34 @@ export function LoginForm() {
     try {
       const result = await facebookLogin();
       
-      if (result.success && result.user) {
+      if (result.success && result.user && result.accessToken) {
+        // Sync with Supabase backend
+        try {
+          const response = await fetch(
+            'https://zrrffsjbfkphridqyais.supabase.co/functions/v1/facebook-auth-sync',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpycmZmc2piZmtwaHJpZHF5YWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MzE1NzMsImV4cCI6MjA3MjAwNzU3M30.AwzY48mSUGeopBv5P6gzAPlipTbQasmXK8DR-L_Tm9A`,
+              },
+              body: JSON.stringify({
+                facebookId: result.user.id,
+                email: result.user.email,
+                name: result.user.name,
+                pictureUrl: result.user.picture?.data?.url,
+                accessToken: result.accessToken,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            console.warn('Facebook sync warning:', await response.text());
+          }
+        } catch (syncError) {
+          console.warn('Facebook sync error (non-blocking):', syncError);
+        }
+
         toast({
           title: "تم تسجيل الدخول بنجاح",
           description: `مرحباً ${result.user.name}`,

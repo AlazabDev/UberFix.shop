@@ -1206,6 +1206,45 @@ export type Database = {
           },
         ]
       }
+      facebook_users: {
+        Row: {
+          access_token: string | null
+          created_at: string | null
+          email: string | null
+          facebook_id: string
+          id: string
+          last_login_at: string | null
+          name: string
+          picture_url: string | null
+          supabase_user_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string | null
+          email?: string | null
+          facebook_id: string
+          id?: string
+          last_login_at?: string | null
+          name: string
+          picture_url?: string | null
+          supabase_user_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string | null
+          email?: string | null
+          facebook_id?: string
+          id?: string
+          last_login_at?: string | null
+          name?: string
+          picture_url?: string | null
+          supabase_user_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       gallery_images: {
         Row: {
           category: string
