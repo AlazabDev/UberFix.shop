@@ -178,15 +178,10 @@ serve(async (req) => {
     .eq("id", user.id)
     .single();
 
-  if (!profile?.company_id) {
-    return new Response(JSON.stringify({ error: "User not associated with a company" }), {
-      status: 403,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const tenantId = profile.company_id;
-  const userRole = profile.role;
+  // Allow users without company_id - use their user.id as tenant_id
+  // This supports owner/admin users who may not have a company assigned
+  const tenantId = profile?.company_id || user.id;
+  const userRole = profile?.role || "customer";
   const url = new URL(req.url);
   const action = url.searchParams.get("action");
   const correlationId = crypto.randomUUID();
