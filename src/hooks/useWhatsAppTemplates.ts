@@ -105,47 +105,16 @@ const callTemplatesAPI = async (action: string, body?: any, params?: Record<stri
   }
 
   const queryParams = new URLSearchParams({ action, ...params });
+  const url = `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/whatsapp-templates?${queryParams}`;
   
-  const response = await supabase.functions.invoke('whatsapp-templates', {
-    body: body ? JSON.stringify(body) : undefined,
+  const res = await fetch(url, {
     method: body ? 'POST' : 'GET',
     headers: {
+      Authorization: `Bearer ${sessionData.session.access_token}`,
       'Content-Type': 'application/json',
     },
+    ...(body && { body: JSON.stringify(body) }),
   });
-
-  // For GET requests, we need to use fetch directly with query params
-  if (!body) {
-    const { data: { session } } = await supabase.auth.getSession();
-    const res = await fetch(
-      `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/whatsapp-templates?${queryParams}`,
-      {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || 'Request failed');
-    }
-    return res.json();
-  }
-
-  // For POST requests with body
-  const { data: { session } } = await supabase.auth.getSession();
-  const res = await fetch(
-    `https://zrrffsjbfkphridqyais.supabase.co/functions/v1/whatsapp-templates?${queryParams}`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session?.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    }
-  );
   
   if (!res.ok) {
     const error = await res.json();
