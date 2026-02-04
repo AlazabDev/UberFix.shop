@@ -2,9 +2,22 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase, supabaseReady } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { getStoredFacebookSession, FacebookUserData } from '@/lib/facebookAuth';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
+}
+
+// Unified auth user type
+interface AuthUser {
+  id: string;
+  email?: string;
+  name?: string;
+  avatarUrl?: string;
+  provider: 'supabase' | 'facebook';
+  supabaseUser?: User;
+  facebookUser?: FacebookUserData;
+  emailConfirmed?: boolean;
 }
 
 // المسارات التي لا تتطلب مصادقة
@@ -40,10 +53,9 @@ const PUBLIC_ROUTES = [
 ];
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [emailConfirmed, setEmailConfirmed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -65,67 +77,112 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   // CRITICAL: All hooks must be called BEFORE any early returns
   // This useEffect handles redirect for unauthenticated users
   useEffect(() => {
-    if (!loading && !user && !isPublicRoute()) {
+    if (!loading && !authUser && !isPublicRoute()) {
       navigate('/role-selection', { replace: true });
     }
-  }, [loading, user, isPublicRoute, navigate]);
+  }, [loading, authUser, isPublicRoute, navigate]);
 
   useEffect(() => {
-    if (!supabaseReady) {
-      setLoading(false);
-      return;
-    }
-
     let isMounted = true;
 
-    // إعداد مستمع تغييرات المصادقة أولاً
-    const {
-      data: { subscription }
-    } = supabase.auth.onAuthStateChange((event, newSession) => {
-      if (!isMounted) return;
-      
-      // تحديث حالة الجلسة والمستخدم
-      setSession(newSession);
-      setUser(newSession?.user || null);
-      setEmailConfirmed(!!newSession?.user?.email_confirmed_at);
-      
-      // معالجة تسجيل الخروج
-      if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setSession(null);
-        setEmailConfirmed(false);
+    const initializeAuth = async () => {
+      // Check Supabase session first
+      if (supabaseReady) {
+        try {
+          const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+          
+          if (!isMounted) return;
+          
+          if (error) {
+            console.error('خطأ في تحميل الجلسة:', error.message);
+            if (error.message.includes('invalid') || error.message.includes('expired')) {
+              await supabase.auth.signOut();
+            }
+          }
+          
+          if (currentSession?.user) {
+            setSession(currentSession);
+            setAuthUser({
+              id: currentSession.user.id,
+              email: currentSession.user.email,
+              name: currentSession.user.user_metadata?.full_name || currentSession.user.email,
+              avatarUrl: currentSession.user.user_metadata?.avatar_url,
+              provider: 'supabase',
+              supabaseUser: currentSession.user,
+              emailConfirmed: !!currentSession.user.email_confirmed_at,
+            });
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error('خطأ في تحميل الجلسة:', error);
+        }
       }
-    });
 
-    // ثم التحقق من الجلسة الحالية
-    supabase.auth
-      .getSession()
-      .then(({ data: { session: currentSession }, error }) => {
+      // If no Supabase session, check Facebook session
+      const fbSession = getStoredFacebookSession();
+      if (fbSession && isMounted) {
+        setAuthUser({
+          id: fbSession.user.id,
+          email: fbSession.user.email,
+          name: fbSession.user.name,
+          avatarUrl: fbSession.user.picture?.data?.url,
+          provider: 'facebook',
+          facebookUser: fbSession.user,
+          emailConfirmed: true, // Facebook users are always considered confirmed
+        });
+      }
+
+      if (isMounted) {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for Supabase auth changes
+    let subscription: { unsubscribe: () => void } | null = null;
+    
+    if (supabaseReady) {
+      const { data } = supabase.auth.onAuthStateChange((event, newSession) => {
         if (!isMounted) return;
         
-        if (error) {
-          console.error('خطأ في تحميل الجلسة:', error.message);
-          // إذا كانت الجلسة منتهية أو غير صالحة، قم بتسجيل الخروج
-          if (error.message.includes('invalid') || error.message.includes('expired')) {
-            supabase.auth.signOut();
+        if (newSession?.user) {
+          setSession(newSession);
+          setAuthUser({
+            id: newSession.user.id,
+            email: newSession.user.email,
+            name: newSession.user.user_metadata?.full_name || newSession.user.email,
+            avatarUrl: newSession.user.user_metadata?.avatar_url,
+            provider: 'supabase',
+            supabaseUser: newSession.user,
+            emailConfirmed: !!newSession.user.email_confirmed_at,
+          });
+        } else if (event === 'SIGNED_OUT') {
+          // Check if there's still a Facebook session
+          const fbSession = getStoredFacebookSession();
+          if (fbSession) {
+            setAuthUser({
+              id: fbSession.user.id,
+              email: fbSession.user.email,
+              name: fbSession.user.name,
+              avatarUrl: fbSession.user.picture?.data?.url,
+              provider: 'facebook',
+              facebookUser: fbSession.user,
+              emailConfirmed: true,
+            });
+          } else {
+            setAuthUser(null);
           }
-        }
-        
-        setSession(currentSession);
-        setUser(currentSession?.user || null);
-        setEmailConfirmed(!!currentSession?.user?.email_confirmed_at);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('خطأ في تحميل الجلسة:', error);
-        if (isMounted) {
-          setLoading(false);
+          setSession(null);
         }
       });
+      subscription = data.subscription;
+    }
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
@@ -141,8 +198,8 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
-  // إذا كان Supabase غير جاهز
-  if (!supabaseReady) {
+  // إذا كان Supabase غير جاهز وليس هناك جلسة Facebook
+  if (!supabaseReady && !authUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4 text-center">
         <div className="space-y-3 max-w-md">
@@ -155,8 +212,8 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
     );
   }
 
-  // إذا كان المستخدم مسجل لكن البريد غير مؤكد
-  if (user && !emailConfirmed && !isPublicRoute()) {
+  // إذا كان المستخدم مسجل عبر Supabase لكن البريد غير مؤكد
+  if (authUser && authUser.provider === 'supabase' && !authUser.emailConfirmed && !isPublicRoute()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full bg-card border border-border rounded-lg p-6 text-center space-y-4">
@@ -167,7 +224,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
           </div>
           <h2 className="text-xl font-bold text-foreground">تأكيد البريد الإلكتروني مطلوب</h2>
           <p className="text-muted-foreground">
-            تم إرسال رسالة تأكيد إلى بريدك الإلكتروني <span className="font-semibold text-foreground">{user.email}</span>
+            تم إرسال رسالة تأكيد إلى بريدك الإلكتروني <span className="font-semibold text-foreground">{authUser.email}</span>
           </p>
           <p className="text-sm text-muted-foreground">
             الرجاء التحقق من بريدك الإلكتروني والضغط على رابط التأكيد لإكمال عملية التسجيل.
@@ -187,7 +244,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   // إذا لم يكن هناك مستخدم والمسار يتطلب مصادقة - show loading while redirecting
-  if (!user && !isPublicRoute()) {
+  if (!authUser && !isPublicRoute()) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
