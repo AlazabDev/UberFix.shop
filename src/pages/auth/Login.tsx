@@ -10,6 +10,7 @@ import { Loader2, ArrowRight, Cog, Shield, Users, Wrench, Phone } from "lucide-r
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { PhoneOTPLogin } from "@/components/auth/PhoneOTPLogin";
+import { useFacebookAuth } from "@/hooks/useFacebookAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,7 @@ export default function Login() {
   const selectedRole = searchParams.get("role") || "customer";
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login: facebookLogin, isLoading: isFacebookLoading } = useFacebookAuth();
 
   const roleConfig = {
     admin: {
@@ -115,21 +117,19 @@ export default function Login() {
   };
 
   const handleFacebookLogin = async () => {
-    setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "facebook",
-        options: {
-          redirectTo: redirectUrl,
-        },
-      });
-
-      if (error) {
+      const result = await facebookLogin();
+      
+      if (result.success && result.user) {
+        toast({
+          title: "تم تسجيل الدخول بنجاح",
+          description: `مرحباً ${result.user.name}`,
+        });
+        navigate("/dashboard");
+      } else {
         toast({
           title: "خطأ في تسجيل الدخول",
-          description: error.message,
+          description: result.error || "تعذر تسجيل الدخول بفيسبوك",
           variant: "destructive",
         });
       }
@@ -139,8 +139,6 @@ export default function Login() {
         description: "حاول مرة أخرى لاحقاً",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -252,9 +250,13 @@ export default function Login() {
                     variant="outline"
                     className="w-full"
                     onClick={handleFacebookLogin}
-                    disabled={isLoading}
+                    disabled={isLoading || isFacebookLoading}
                   >
-                    <FaFacebook className="ml-2 h-5 w-5 text-[#1877F2]" />
+                    {isFacebookLoading ? (
+                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                    ) : (
+                      <FaFacebook className="ml-2 h-5 w-5 text-[#1877F2]" />
+                    )}
                     تسجيل الدخول باستخدام Facebook
                   </Button>
 

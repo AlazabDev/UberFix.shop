@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { Loader2, Building2, UserPlus } from 'lucide-react';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
 import { smartSignup, smartLogin } from '@/lib/smartAuth';
 import { loginFormSchema } from '@/lib/validationSchemas';
+import { useFacebookAuth } from '@/hooks/useFacebookAuth';
 import { z } from 'zod';
 
 type LoginFormData = z.infer<typeof loginFormSchema>;
@@ -19,6 +21,8 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { login: facebookLogin, isLoading: isFacebookLoading } = useFacebookAuth();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -137,21 +141,25 @@ export function LoginForm() {
 
   const handleFacebookLogin = async () => {
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
+      const result = await facebookLogin();
       
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: {
-          redirectTo: redirectUrl,
-          scopes: 'email,public_profile',
-        }
-      });
-      
-      if (error) throw error;
+      if (result.success && result.user) {
+        toast({
+          title: "تم تسجيل الدخول بنجاح",
+          description: `مرحباً ${result.user.name}`,
+        });
+        navigate('/dashboard');
+      } else {
+        toast({
+          title: "خطأ في تسجيل الدخول",
+          description: result.error || "تعذر تسجيل الدخول بفيسبوك",
+          variant: "destructive",
+        });
+      }
     } catch {
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: "تعذر تسجيل الدخول بفيسبوك. تأكد من تفعيل Facebook OAuth في Supabase.",
+        description: "تعذر تسجيل الدخول بفيسبوك. تأكد من تفعيل Facebook OAuth.",
         variant: "destructive",
       });
     }
@@ -252,9 +260,13 @@ export function LoginForm() {
                 variant="outline"
                 onClick={handleFacebookLogin}
                 className="flex-1 gap-2"
-                disabled={isLoading || isSigningUp}
+                disabled={isLoading || isSigningUp || isFacebookLoading}
               >
-                <FaFacebook className="h-4 w-4 text-blue-600" />
+                {isFacebookLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FaFacebook className="h-4 w-4 text-blue-600" />
+                )}
                 فيسبوك
               </Button>
             </div>
