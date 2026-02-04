@@ -1,0 +1,63 @@
+{
+  "name": "UberFix.shop",
+  "short_name": "UberFix",
+  "description": "نظام إدارة طلبات الصيانة المحمول المتكامل",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#12007d",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "https://al-azab.co/uberfix-icon.gif",
+      "sizes": "512x512",
+      "type": "image/gif",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://al-azab.co/favicon.ico",
+      "sizes": "48x48 32x32 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "https://al-azab.co/uberfix-icon.gif",
+      "sizes": "512x512",
+      "type": "image/gif",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "طلبات جديدة",
+      "short_name": "طلبات",
+      "description": "عرض الطلبات الجديدة",
+      "url": "/requests",
+      "icons": [
+        {
+          "src": "https://al-azab.co/uberfix-icon.gif",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "لوحة التحكم",
+      "short_name": "لوحة",
+      "description": "لوحة التحكم الرئيسية",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "https://al-azab.co/uberfix-icon.gif",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <!-- تحسين إعدادات viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    
+    <!-- PWA Configuration -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="UberFix" />
+    <meta name="theme-color" content="#12007d" />
+    <meta name="application-name" content="UberFix" />
+    <meta name="msapplication-TileColor" content="#666666" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- إضافة سياسة الأمان -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    
+    <!-- تحسين SEO -->
+    <title>UberFix.shop | نظام إدارة طلبات الصيانة المحمول المتكامل</title>
+    <meta name="description" content="نظام إدارة طلبات الصيانة المتطور من UberFix.shop - منصة شاملة لإدارة الصيانة والموردين والتقارير بكفاءة عالية." />
+    <meta name="keywords" content="إدارة الصيانة, طلبات الصيانة, نظام إدارة, موردين, تقارير الصيانة, azab services, صيانة, إصلاح, فنيين" />
+    <meta name="author" content="uberfix.shop" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://uberfix.shop/" />
+    <meta property="og:title" content="UberFix.shop | نظام إدارة طلبات الصيانة المحمول" />
+    <meta property="og:description" content="منصة متكاملة لإدارة طلبات الصيانة والموردين والتقارير بكفاءة عالية." />
+    <meta property="og:image" content="https://al-azab.co/uberfix-icon.gif" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="ar_SA" />
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@uberfix" />
+    <meta name="twitter:title" content="UberFix.shop | نظام إدارة طلبات الصيانة المحمول" />
+    <meta name="twitter:description" content="منصة متكاملة لإدارة طلبات الصيانة والموردين والتقارير بكفاءة عالية." />
+    <meta name="twitter:image" content="https://al-azab.co/uberfix-icon.gif" />
+    
+    <!-- Canonical -->
+    <link rel="canonical" href="https://uberfix.shop/" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="https://al-azab.co/favicon.ico" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="https://al-azab.co/uberfix-icon.gif" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://al-azab.co/uberfix-icon.gif" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://al-azab.co/uberfix-icon.gif" />
+    <link rel="apple-touch-icon" sizes="167x167" href="https://al-azab.co/uberfix-icon.gif" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <!-- تحسين تحميل الموارد -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://storage.googleapis.com" />
+    <link rel="preconnect" href="https://cdn.jotfor.ms" />
+    <link rel="preconnect" href="https://connect.facebook.net" />
+    <link rel="preconnect" href="https://al-azab.co" />
+    
+    <!-- تحميل الصورة مسبقاً -->
+    <link rel="preload" as="image" href="https://al-azab.co/uberfix-icon.gif" />
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "UberFix.shop",
+        "url": "https://uberfix.shop",
+        "description": "نظام إدارة طلبات الصيانة المحمول المتكامل",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "SAR"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "UberFix"
+        }
+    }
+    </script>
+    
+    <!-- تحميل CSS الأساسي مع لون رمادي فاتح -->
+    <style>
+        /* CSS لتحسين العرض الأولي */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5; /* رمادي فاتح */
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Arabic', sans-serif;
+            color: #333333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        #root {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* أنيميشن للتحميل */
+        .loading-skeleton {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+            }
+            50% { 
+                opacity: 0.7; 
+            }
+        }
+        
+        /* تحسينات للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        /* تحسينات للطباعة */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+            }
+        }
+        
+        /* تحسينات للأجهزة التي تستخدم الوضع المظلم */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #e0e0e0;
+            }
+        }
+        
+        /* تحسينات للأجهزة التي تحتوي على notch */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: min(0vmin, env(safe-area-inset-left));
+                padding-right: min(0vmin, env(safe-area-inset-right));
+                padding-top: min(0vmin, env(safe-area-inset-top));
+                padding-bottom: min(0vmin, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M2FD7JFX"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <div id="root">
+        <!-- Skeleton Loader - محسّن مع الخلفية الرمادية -->
+        <div style="
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            position: relative;
+            overflow: hidden;
+        ">
+            <!-- نمط خلفية خفيف -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-image: 
+                    radial-gradient(circle at 25% 25%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 75% 75%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+                z-index: 1;
+            "></div>
+            
+            <!-- محتوى التحميل -->
+            <div style="
+                text-align: center; 
+                color: #333333;
+                z-index: 2;
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(10px);
+                max-width: 90%;
+                width: 400px;
+            ">
+                <!-- الصورة المتحركة -->
+                <div style="
+                    width: 120px; 
+                    height: 120px; 
+                    margin: 0 auto 25px; 
+                    border-radius: 50%; 
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center;
+                    border: 3px solid #ffffff;
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                    padding: 10px;
+                ">
+                    <img 
+                        src="https://al-azab.co/uberfix-icon.gif" 
+                        alt="UberFix Logo" 
+                        style="
+                            width: 100%;
+                            height: 100%;
+                            object-fit: contain;
+                            border-radius: 50%;
+                        "
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='🔧'"
+                    />
+                </div>
+                
+                <!-- نص التحميل -->
+                <h1 style="
+                    margin: 0 0 10px; 
+                    font-size: 28px; 
+                    font-weight: 700;
+                    color: #2d3748;
+                    letter-spacing: -0.5px;
+                ">
+                    UberFix.shop
+                </h1>
+                
+                <p style="
+                    opacity: 0.8; 
+                    margin: 0 0 25px; 
+                    font-size: 16px;
+                    color: #4a5568;
+                ">
+                    جاري تحميل النظام...
+                </p>
+                
+                <!-- شريط التقدم -->
+                <div style="
+                    width: 100%;
+                    height: 6px;
+                    background-color: #e2e8f0;
+                    border-radius: 3px;
+                    overflow: hidden;
+                    margin-bottom: 20px;
+                ">
+                    <div style="
+                        width: 60%;
+                        height: 100%;
+                        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+                        border-radius: 3px;
+                        animation: loading 2s ease-in-out infinite;
+                    "></div>
+                </div>
+                
+                <!-- تلميح -->
+                <p style="
+                    font-size: 12px;
+                    color: #718096;
+                    margin: 0;
+                    opacity: 0.7;
+                ">
+                    نظام إدارة الصيانة المحمول المتكامل
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحميل scripts بشكل غير متزامن مع تحسين الترتيب -->
+    <!-- Google Tag Manager -->
+    <script>
+        (function(w,d,s,l,i){
+            w[l]=w[l]||[];
+            w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+            var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+            j.async=true;
+            j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+            f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-M2FD7JFX');
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Facebook SDK -->
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId            : '724370950034089',
+                autoLogAppEvents : true,
+                xfbml            : true,
+                version          : 'v24.0'
+            });
+        };
+        (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+    <!-- End Facebook SDK -->
+
+    <!-- Google Analytics - deferred loading -->
+    <script>
+        // تحميل GA بعد تحميل الصفحة
+        window.addEventListener('load', function() {
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-TVRTW1CK9J';
+            document.head.appendChild(script);
+            
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TVRTW1CK9J', {
+                'transport_type': 'beacon',
+                'anonymize_ip': true
+            });
+        });
+    </script>
+
+    <!-- أنيميشن شريط التحميل -->
+    <style>
+        @keyframes loading {
+            0% {
+                transform: translateX(-100%);
+            }
+            50% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+    </style>
+
+    <!-- التطبيق الرئيسي -->
+    <script type="module" src="/src/main.tsx" defer></script>
+    
+    <!-- Jotform Chat Widget - تحميل متأخر -->
+    <script>
+        // تحميل widget المحادثة بعد تفاعل المستخدم
+        function loadChatWidget() {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jotfor.ms/agent/embedjs/0194abdee59871f7b73e2eae35ed720e8ce0/embed.js';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+        
+        // تحميل widget عند التمرير أو النقر
+        window.addEventListener('scroll', function() {
+            if (!window.chatWidgetLoaded) {
+                loadChatWidget();
+                window.chatWidgetLoaded = true;
+            }
+        }, { once: true });
+        
+        window.addEventListener('click', function() {
+            if (!window.chatWidgetLoaded) {
+                loadChatWidget();
+                window.chatWidgetLoaded = true;
+            }
+        }, { once: true });
+        
+        // تحميل تلقائي بعد 10 ثواني
+        setTimeout(function() {
+            if (!window.chatWidgetLoaded) {
+                loadChatWidget();
+                window.chatWidgetLoaded = true;
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
