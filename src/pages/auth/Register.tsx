@@ -13,6 +13,7 @@ import { Loader2, ArrowRight, Cog } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { registerFormSchema } from "@/lib/validationSchemas";
+import { secureGoogleSignIn, secureFacebookSignIn } from "@/lib/secureOAuth";
 
 type RegisterFormData = z.infer<typeof registerFormSchema>;
 
@@ -94,23 +95,12 @@ export default function Register() {
   const handleGoogleSignup = async () => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      });
+      const result = await secureGoogleSignIn('/auth/callback');
 
-      if (error) {
+      if (!result.success) {
         toast({
           title: "خطأ في التسجيل",
-          description: error.message,
+          description: result.error?.message || "تعذر التسجيل بجوجل",
           variant: "destructive",
         });
       }
@@ -128,19 +118,12 @@ export default function Register() {
   const handleFacebookSignup = async () => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
+      const result = await secureFacebookSignIn('/auth/callback');
 
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "facebook",
-        options: {
-          redirectTo: redirectUrl,
-        },
-      });
-
-      if (error) {
+      if (!result.success) {
         toast({
           title: "خطأ في التسجيل",
-          description: error.message,
+          description: result.error?.message || "تعذر التسجيل بفيسبوك",
           variant: "destructive",
         });
       }
