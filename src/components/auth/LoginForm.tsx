@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Building2, UserPlus } from 'lucide-react';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
 import { smartSignup, smartLogin } from '@/lib/smartAuth';
 import { loginFormSchema } from '@/lib/validationSchemas';
 import { useFacebookAuth } from '@/hooks/useFacebookAuth';
+import { secureGoogleSignIn } from '@/lib/secureOAuth';
 import { z } from 'zod';
 
 type LoginFormData = z.infer<typeof loginFormSchema>;
@@ -116,21 +116,13 @@ export function LoginForm() {
 
   const handleGoogleLogin = async () => {
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
+      const result = await secureGoogleSignIn('/auth/callback');
       
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      });
-      
-      if (error) throw error;
-    } catch {
+      if (!result.success) {
+        throw result.error;
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
       toast({
         title: "خطأ في تسجيل الدخول",
         description: "تعذر تسجيل الدخول بجوجل. تأكد من تفعيل Google OAuth في Supabase.",

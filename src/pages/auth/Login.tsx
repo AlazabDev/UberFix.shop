@@ -11,7 +11,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { PhoneOTPLogin } from "@/components/auth/PhoneOTPLogin";
 import { useFacebookAuth } from "@/hooks/useFacebookAuth";
-
+import { secureGoogleSignIn } from "@/lib/secureOAuth";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -89,19 +89,12 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-        }
-      });
+      const result = await secureGoogleSignIn('/auth/callback');
 
-      if (error) {
+      if (!result.success) {
         toast({
           title: "خطأ في تسجيل الدخول",
-          description: error.message,
+          description: result.error?.message || "تعذر تسجيل الدخول بجوجل",
           variant: "destructive",
         });
       }
