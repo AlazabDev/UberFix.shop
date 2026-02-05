@@ -1,18 +1,50 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { detectUserRole } from '@/lib/roleRedirect';
 
 type AuthType = 'signup' | 'recovery' | 'magiclink' | 'email_change' | 'invite' | 'email' | null;
 
+/**
+ * OAuth Callback Handler
+ * 
+ * المعمارية الصحيحة:
+ * 1. استقبال OAuth callback
+ * 2. تأسيس الجلسة
+ * 3. اكتشاف الدور من DB
+ * 4. التوجيه الذكي حسب الدور
+ */
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const [message, setMessage] = useState('جاري معالجة طلب المصادقة...');
   const [error, setError] = useState<string | null>(null);
+
+  // التوجيه الذكي بعد المصادقة
+  const handleSmartRedirect = async (userId: string, userEmail?: string) => {
+    try {
+      setMessage('جاري تحديد صلاحياتك...');
+      const roleInfo = await detectUserRole(userId, userEmail);
+      
+      toast({
+        title: "تم تسجيل الدخول بنجاح",
+        description: roleInfo.isNewUser ? "مرحباً بك! يرجى اختيار نوع حسابك" : "مرحباً بك في UberFix",
+      });
+      
+      navigate(roleInfo.redirectPath, { replace: true });
+    } catch (err) {
+      console.error('Role detection failed:', err);
+      // Fallback to dashboard
+      toast({
+        title: "تم تسجيل الدخول بنجاح",
+        description: "مرحباً بك في UberFix",
+      });
+      navigate('/dashboard', { replace: true });
+    }
+  };
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -26,18 +58,16 @@ const AuthCallback = () => {
         const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
         const type = (hashParams.get('type') || queryParams.get('type')) as AuthType;
         const tokenHash = hashParams.get('token_hash') || queryParams.get('token_hash');
-        const token = hashParams.get('token') || queryParams.get('token');
         const errorParam = hashParams.get('error') || queryParams.get('error');
         const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
         const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
 
-        console.log('Auth callback params:', { type, tokenHash: !!tokenHash, token: !!token, accessToken: !!accessToken, errorParam, errorCode });
+        console.log('Auth callback params:', { type, tokenHash: !!tokenHash, accessToken: !!accessToken, errorParam, errorCode });
 
         // Handle errors from Supabase
         if (errorParam) {
           let errorMsg = decodeURIComponent(errorDescription || errorParam);
           
-          // Translate common errors
           if (errorParam === 'access_denied' || errorCode === 'otp_expired') {
             errorMsg = 'انتهت صلاحية الرابط. يرجى طلب رابط جديد.';
           } else if (errorCode === 'invalid_credentials') {
@@ -53,41 +83,32 @@ const AuthCallback = () => {
         if (type === 'recovery') {
           setMessage('جاري تحضير صفحة إعادة تعيين كلمة المرور...');
           
-          // Method 1: Using token_hash (newer method)
           if (tokenHash) {
-            console.log('Verifying recovery with token_hash');
             const { data, error: verifyError } = await supabase.auth.verifyOtp({
               token_hash: tokenHash,
               type: 'recovery',
             });
 
             if (verifyError) {
-              console.error('Token hash verification failed:', verifyError);
-              if (verifyError.message.includes('expired') || verifyError.message.includes('not found')) {
-                setError('انتهت صلاحية رابط إعادة تعيين كلمة المرور. يرجى طلب رابط جديد.');
-              } else {
-                setError(verifyError.message);
-              }
+              setError(verifyError.message.includes('expired') 
+                ? 'انتهت صلاحية رابط إعادة تعيين كلمة المرور. يرجى طلب رابط جديد.'
+                : verifyError.message);
               return;
             }
 
             if (data?.session) {
-              console.log('Recovery session established via token_hash');
               navigate('/auth/update-password', { replace: true });
               return;
             }
           }
           
-          // Method 2: Direct token exchange
           if (accessToken && refreshToken) {
-            console.log('Setting recovery session from tokens');
             const { error: sessionError } = await supabase.auth.setSession({ 
               access_token: accessToken, 
               refresh_token: refreshToken 
             });
             
             if (sessionError) {
-              console.error('Session set failed:', sessionError);
               setError('فشل في تفعيل الجلسة. يرجى طلب رابط جديد.');
               return;
             }
@@ -96,8 +117,7 @@ const AuthCallback = () => {
             return;
           }
           
-          // No valid recovery tokens found
-          setError('رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.');
+          setError('رابط إعادة تعيين كلمة المرور غير صالح.');
           return;
         }
 
@@ -125,30 +145,21 @@ const AuthCallback = () => {
           });
 
           if (verifyError) {
-            console.error('Email verification error:', verifyError);
-            if (verifyError.message.includes('expired')) {
-              setError('انتهت صلاحية رابط التأكيد. يرجى إعادة التسجيل.');
-            } else {
-              setError(verifyError.message);
-            }
+            setError(verifyError.message.includes('expired') 
+              ? 'انتهت صلاحية رابط التأكيد. يرجى إعادة التسجيل.'
+              : verifyError.message);
             return;
           }
 
-          if (data?.session) {
-            toast({
-              title: "تم تأكيد البريد بنجاح",
-              description: "مرحباً بك في UberFix",
-            });
-            navigate('/dashboard', { replace: true });
+          if (data?.session?.user) {
+            await handleSmartRedirect(data.session.user.id, data.session.user.email);
             return;
           }
         }
 
         // Handle OAuth callback (Google, Facebook, etc.)
-        // Step 1: Try direct token exchange first (tokens in URL hash/query)
         if (accessToken && refreshToken) {
-          setMessage('جاري تسجيل الدخول عبر OAuth...');
-          console.log('OAuth: Setting session from URL tokens');
+          setMessage('جاري تسجيل الدخول...');
           
           const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -161,45 +172,29 @@ const AuthCallback = () => {
             return;
           }
 
-          if (sessionData?.session) {
-            console.log('OAuth: Session established successfully');
-            toast({
-              title: "تم تسجيل الدخول بنجاح",
-              description: "مرحباً بك في UberFix",
-            });
-            navigate('/dashboard', { replace: true });
+          if (sessionData?.session?.user) {
+            await handleSmartRedirect(sessionData.session.user.id, sessionData.session.user.email);
             return;
           }
         }
 
-        // Step 2: Check for existing session (Supabase may have auto-exchanged tokens)
+        // Check for existing session
         setMessage('جاري التحقق من الجلسة...');
         const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          console.log('Existing session found, redirecting to dashboard');
-          toast({
-            title: "تم تسجيل الدخول بنجاح",
-            description: "مرحباً بك في UberFix",
-          });
-          navigate('/dashboard', { replace: true });
+        if (session?.user) {
+          await handleSmartRedirect(session.user.id, session.user.email);
           return;
         }
 
-        // Step 3: Wait a moment for async session establishment, then check again
+        // Retry after 1 second
         await new Promise(resolve => setTimeout(resolve, 1000));
         const { data: { session: retrySession } } = await supabase.auth.getSession();
-        if (retrySession) {
-          console.log('Session found on retry');
-          toast({
-            title: "تم تسجيل الدخول بنجاح",
-            description: "مرحباً بك في UberFix",
-          });
-          navigate('/dashboard', { replace: true });
+        if (retrySession?.user) {
+          await handleSmartRedirect(retrySession.user.id, retrySession.user.email);
           return;
         }
 
         // No valid auth parameters found
-        console.log('No valid auth parameters found');
         setError('لم يتم العثور على معلومات المصادقة الصالحة.');
         
       } catch (err) {
@@ -211,7 +206,7 @@ const AuthCallback = () => {
     handleAuthCallback();
   }, [navigate, toast]);
 
-  // Show error state with action buttons
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">

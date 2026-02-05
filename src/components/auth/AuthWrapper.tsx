@@ -76,9 +76,10 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
 
   // CRITICAL: All hooks must be called BEFORE any early returns
   // This useEffect handles redirect for unauthenticated users
+  // تحويل المستخدم غير المصادق إلى صفحة تسجيل الدخول الموحدة (ليس role-selection)
   useEffect(() => {
     if (!loading && !authUser && !isPublicRoute()) {
-      navigate('/role-selection', { replace: true });
+      navigate('/login', { replace: true });
     }
   }, [loading, authUser, isPublicRoute, navigate]);
 

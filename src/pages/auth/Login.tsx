@@ -1,61 +1,60 @@
 import { useState } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowRight, Cog, Shield, Users, Wrench, Phone } from "lucide-react";
+import { Loader2, ArrowRight, Cog, Shield, Phone } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { PhoneOTPLogin } from "@/components/auth/PhoneOTPLogin";
 import { useFacebookAuth } from "@/hooks/useFacebookAuth";
 import { secureGoogleSignIn } from "@/lib/secureOAuth";
+import { detectUserRole } from "@/lib/roleRedirect";
+
+/**
+ * صفحة تسجيل الدخول الموحدة
+ * 
+ * المعمارية الصحيحة لـ OAuth:
+ * - نقطة دخول واحدة (بدون role في URL)
+ * - Identity First: المستخدم يسجل دخول أولاً
+ * - Role Detection: يتم اكتشاف الدور بعد المصادقة
+ * - Smart Redirect: يتم التوجيه حسب الدور المكتشف
+ */
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
-  const [searchParams] = useSearchParams();
-  const selectedRole = searchParams.get("role") || "customer";
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login: facebookLogin, isLoading: isFacebookLoading } = useFacebookAuth();
 
-  const roleConfig = {
-    admin: {
-      title: "الإدارة",
-      description: "تسجيل الدخول لحساب الإدارة",
-      icon: Shield,
-      color: "purple",
-      bgGradient: "from-purple-50/50 to-background dark:from-purple-950/20"
-    },
-    vendor: {
-      title: "الفنيون",
-      description: "هذه البوابة مخصصة للفنيين فقط لاستقبال الطلبات",
-      icon: Wrench,
-      color: "green",
-      bgGradient: "from-green-50/50 to-background dark:from-green-950/20"
-    },
-    customer: {
-      title: "العملاء",
-      description: "تسجيل الدخول لحساب العملاء",
-      icon: Users,
-      color: "blue",
-      bgGradient: "from-blue-50/50 to-background dark:from-blue-950/20"
+  // التوجيه الذكي بعد تسجيل الدخول
+  const handleSuccessfulAuth = async (userId: string, userEmail?: string) => {
+    try {
+      const roleInfo = await detectUserRole(userId, userEmail);
+      
+      toast({
+        title: "تم تسجيل الدخول بنجاح",
+        description: "مرحباً بك في نظام إدارة الصيانة",
+      });
+      
+      navigate(roleInfo.redirectPath, { replace: true });
+    } catch (error) {
+      console.error('Role detection error:', error);
+      navigate('/dashboard', { replace: true });
     }
   };
-
-  const currentRole = roleConfig[selectedRole as keyof typeof roleConfig] || roleConfig.customer;
-  const IconComponent = currentRole.icon;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -68,12 +67,8 @@ export default function Login() {
             : error.message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "تم تسجيل الدخول بنجاح",
-          description: "مرحباً بك في نظام إدارة الصيانة",
-        });
-        navigate("/dashboard");
+      } else if (data.user) {
+        await handleSuccessfulAuth(data.user.id, data.user.email);
       }
     } catch (error) {
       toast({
@@ -98,6 +93,7 @@ export default function Login() {
           variant: "destructive",
         });
       }
+      // OAuth callback سيتولى التوجيه
     } catch (error) {
       toast({
         title: "حدث خطأ",
@@ -114,11 +110,19 @@ export default function Login() {
       const result = await facebookLogin();
       
       if (result.success && result.user) {
-        toast({
-          title: "تم تسجيل الدخول بنجاح",
-          description: `مرحباً ${result.user.name}`,
-        });
-        navigate("/dashboard");
+        // Facebook SDK يعيد المستخدم مباشرة، نحتاج جلب الجلسة
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          await handleSuccessfulAuth(session.user.id, session.user.email);
+        } else {
+          // Fallback إذا لم نجد جلسة Supabase
+          toast({
+            title: "تم تسجيل الدخول بنجاح",
+            description: `مرحباً ${result.user.name}`,
+          });
+          navigate("/dashboard", { replace: true });
+        }
       } else {
         toast({
           title: "خطأ في تسجيل الدخول",
@@ -138,6 +142,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="relative w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg">
@@ -151,16 +156,17 @@ export default function Login() {
           <p className="text-muted-foreground mt-2">نظام إدارة طلبات الصيانة المتطور</p>
         </div>
 
-        <Card className={`bg-gradient-to-br ${currentRole.bgGradient} border-2`}>
+        {/* Login Card - موحد بدون role */}
+        <Card className="bg-gradient-to-br from-primary/5 to-background border-2">
           <CardHeader>
             <div className="flex items-center justify-center mb-4">
-              <div className={`w-16 h-16 bg-${currentRole.color}-100 dark:bg-${currentRole.color}-900/30 rounded-full flex items-center justify-center`}>
-                <IconComponent className={`h-8 w-8 text-${currentRole.color}-600 dark:text-${currentRole.color}-400`} />
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <Shield className="h-8 w-8 text-primary" />
               </div>
             </div>
-            <CardTitle className="text-center text-2xl">{currentRole.title}</CardTitle>
+            <CardTitle className="text-center text-2xl">تسجيل الدخول</CardTitle>
             <CardDescription className="text-center">
-              {currentRole.description}
+              سجل دخولك للوصول إلى حسابك
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -270,28 +276,24 @@ export default function Login() {
             <div className="mt-6 text-center space-y-2">
               <p className="text-sm text-muted-foreground">
                 ليس لديك حساب؟{" "}
-                <Link to={`/register?role=${selectedRole}`} className="text-primary hover:underline font-medium">
+                <Link to="/register" className="text-primary hover:underline font-medium">
                   إنشاء حساب جديد
                 </Link>
               </p>
-              {selectedRole === "vendor" && (
-                <div className="pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                    onClick={() => navigate("/technicians/register")}
-                  >
-                    سجل كفني جديد
-                    <ArrowRight className="mr-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-              <p className="text-sm">
-                <Link to="/role-selection" className="text-muted-foreground hover:text-primary transition-colors">
-                  اختيار نوع حساب آخر
-                </Link>
-              </p>
+              
+              {/* رابط التسجيل كفني */}
+              <div className="pt-2 border-t">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="text-sm text-muted-foreground hover:text-primary"
+                  onClick={() => navigate("/technicians/register")}
+                >
+                  هل أنت فني؟ سجل هنا
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                </Button>
+              </div>
+              
               <p className="text-sm">
                 <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
                   العودة للصفحة الرئيسية
