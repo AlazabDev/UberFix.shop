@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw, Loader2 } from 'lucide-react';
+import { Plus, RefreshCw, Loader2, Settings } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { TemplateKPIs } from '@/components/whatsapp/templates/TemplateKPIs';
 import { TemplateFiltersBar } from '@/components/whatsapp/templates/TemplateFiltersBar';
@@ -8,6 +8,7 @@ import { TemplatesTable } from '@/components/whatsapp/templates/TemplatesTable';
 import { TemplateEditor } from '@/components/whatsapp/templates/TemplateEditor';
 import { TemplateDetailsView } from '@/components/whatsapp/templates/TemplateDetailsView';
 import { TemplatePagination } from '@/components/whatsapp/templates/TemplatePagination';
+import { WhatsAppSettingsModal } from '@/components/whatsapp/WhatsAppSettingsModal';
 import { 
   useWhatsAppTemplates, 
   type WATemplate, 
@@ -27,6 +28,7 @@ export default function WhatsAppTemplatesPage() {
   // UI state
   const [editorOpen, setEditorOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<WATemplate | null>(null);
   const [templateEvents, setTemplateEvents] = useState<TemplateEvent[]>([]);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -112,6 +114,14 @@ export default function WhatsAppTemplatesPage() {
         <div className="flex gap-2">
           <Button 
             variant="outline" 
+            size="icon"
+            onClick={() => setSettingsOpen(true)}
+            title="إعدادات API"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
             onClick={() => syncFromMeta()} 
             disabled={isSyncing}
           >
@@ -176,6 +186,12 @@ export default function WhatsAppTemplatesPage() {
         onDelete={() => selectedTemplate && handleDelete(selectedTemplate)}
         isSubmitting={isSubmitting}
         isDeleting={isDeleting}
+      />
+
+      {/* Settings Modal */}
+      <WhatsAppSettingsModal
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
       />
     </PageContainer>
   );
