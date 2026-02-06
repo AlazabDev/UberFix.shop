@@ -69,7 +69,7 @@ export interface FacebookAuthResult {
 }
 
 // Facebook App ID from index.html
-const FACEBOOK_APP_ID = '724370950034089';
+const FACEBOOK_APP_ID = '1600405558046527';
 
 /**
  * Check if Facebook SDK is loaded
