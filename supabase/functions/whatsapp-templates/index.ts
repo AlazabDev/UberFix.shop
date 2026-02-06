@@ -902,6 +902,54 @@ serve(async (req) => {
         });
       }
 
+      // =====================================================
+      // CHECK CONFIG - Verify if secrets are configured
+      // =====================================================
+      case "check-config": {
+        const accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
+        const wabaId = Deno.env.get("WHATSAPP_BUSINESS_ACCOUNT_ID");
+        const phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+        const verifyToken = Deno.env.get("WHATSAPP_VERIFY_TOKEN");
+
+        return new Response(
+          JSON.stringify({
+            accessToken: !!accessToken && accessToken.length > 10,
+            wabaId: !!wabaId && /^\d+$/.test(wabaId),
+            phoneNumberId: !!phoneNumberId && phoneNumberId.length > 5,
+            verifyToken: !!verifyToken && verifyToken.length > 5,
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // =====================================================
+      // UPDATE CONFIG - Note: Secrets can only be updated via Supabase dashboard
+      // =====================================================
+      case "update-config": {
+        // This action informs the user that secrets must be updated through Supabase
+        // We cannot programmatically update environment secrets from edge functions
+        return new Response(
+          JSON.stringify({
+            error: "Secrets must be updated through Supabase dashboard or Lovable secrets manager",
+            instructions: [
+              "1. Go to Supabase Dashboard > Edge Functions > Secrets",
+              "2. Update the following secrets:",
+              "   - WHATSAPP_ACCESS_TOKEN",
+              "   - WHATSAPP_BUSINESS_ACCOUNT_ID", 
+              "   - WHATSAPP_PHONE_NUMBER_ID",
+              "   - WHATSAPP_VERIFY_TOKEN",
+              "Or use Lovable's secrets manager to add/update these values."
+            ]
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
       default:
         return new Response(JSON.stringify({ error: "Invalid action" }), {
           status: 400,
