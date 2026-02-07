@@ -29,7 +29,7 @@ const ROLE_DASHBOARDS: Record<UserRole, string> = {
 const DEFAULT_DASHBOARD = '/dashboard';
 
 // صفحة اختيار الدور للمستخدمين الجدد
-export const ROLE_SELECTION_PATH = '/onboarding/select-role';
+export const ROLE_SELECTION_PATH = '/role-selection';
 
 export interface DetectedUserRole {
   roles: UserRole[];
