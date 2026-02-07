@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Shield, Users, Wrench, Cog, ArrowRight } from "lucide-react";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { Footer } from "@/components/landing/Footer";
+import { secureGoogleSignIn } from "@/lib/secureOAuth";
+import { loginWithFacebook } from "@/lib/facebookAuth";
+import { toast } from "sonner";
+import { FaFacebook, FaGoogle } from "react-icons/fa";
 
 /**
  * صفحة اختيار نوع الحساب للمستخدمين الجدد
@@ -12,6 +16,20 @@ import { Footer } from "@/components/landing/Footer";
  * المستخدمين الحاليين يتم توجيههم مباشرة من /auth/callback حسب دورهم
  */
 export default function RoleSelection() {
+  const handleGoogleLogin = async () => {
+    const result = await secureGoogleSignIn();
+    if (!result.success) {
+      toast.error("فشل تسجيل الدخول بـ Google");
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    const result = await loginWithFacebook();
+    if (!result.success) {
+      toast.error(result.error || "فشل تسجيل الدخول بـ Facebook");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 via-background to-primary/10">
       {/* Header */}
@@ -27,6 +45,45 @@ export default function RoleSelection() {
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">مرحباً بك في UberFix</h2>
           <p className="text-muted-foreground mt-2 text-sm sm:text-base">يرجى اختيار نوع الحساب المناسب لك</p>
+        </div>
+
+        {/* Login Section - Moved above cards */}
+        <div className="container max-w-4xl mx-auto px-4 pb-6">
+          <Card className="p-6 bg-gradient-to-r from-muted/50 to-background border-2 border-dashed">
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground">
+                لديك حساب بالفعل؟{" "}
+                <Link to="/login" className="text-primary hover:underline font-medium">
+                  تسجيل الدخول
+                </Link>
+              </p>
+              
+              <div className="flex items-center gap-4 justify-center">
+                <div className="h-px bg-border flex-1 max-w-20" />
+                <span className="text-sm text-muted-foreground">أو سجل دخولك عبر</span>
+                <div className="h-px bg-border flex-1 max-w-20" />
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 h-11 border-[#4285F4] text-[#4285F4] hover:bg-[#4285F4] hover:text-white transition-colors"
+                  onClick={handleGoogleLogin}
+                >
+                  <FaGoogle className="h-5 w-5" />
+                  Google
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-2 h-11 border-[#1877F2] text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition-colors"
+                  onClick={handleFacebookLogin}
+                >
+                  <FaFacebook className="h-5 w-5" />
+                  Facebook
+                </Button>
+              </div>
+            </div>
+          </Card>
         </div>
 
         {/* Role Cards */}
@@ -111,15 +168,6 @@ export default function RoleSelection() {
             </Card>
           </div>
 
-          {/* Already have account */}
-          <div className="text-center mt-8">
-            <p className="text-muted-foreground">
-              لديك حساب بالفعل؟{" "}
-              <Link to="/login" className="text-primary hover:underline font-medium">
-                تسجيل الدخول
-              </Link>
-            </p>
-          </div>
 
           {/* System Features */}
           <div className="mt-16">
