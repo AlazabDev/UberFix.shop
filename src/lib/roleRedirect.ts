@@ -17,12 +17,12 @@ const ROLE_DASHBOARDS: Record<UserRole, string> = {
   owner: '/dashboard',
   admin: '/dashboard',
   manager: '/dashboard',
-  technician: '/technician/dashboard',
-  vendor: '/vendor/dashboard',
-  customer: '/customer/dashboard',
+  technician: '/technicians/dashboard',
+  vendor: '/dashboard',
+  customer: '/dashboard',
   staff: '/dashboard',
-  dispatcher: '/dispatcher/dashboard',
-  finance: '/finance/dashboard',
+  dispatcher: '/dashboard',
+  finance: '/dashboard',
 };
 
 // الصفحة الافتراضية للمستخدمين الجدد
