@@ -15,6 +15,8 @@ export function AppFooter({ className = "", variant = "simple" }: AppFooterProps
           <Link to="/terms-of-service" className="hover:text-primary transition-colors">شروط الاستخدام</Link>
           <span>•</span>
           <Link to="/privacy-policy" className="hover:text-primary transition-colors">سياسة الخصوصية</Link>
+          <span>•</span>
+          <Link to="/data-deletion" className="hover:text-primary transition-colors">حذف البيانات</Link>
         </div>
         <div className="mt-2">
           جميع الحقوق محفوظة © 2025 UberFix.shop

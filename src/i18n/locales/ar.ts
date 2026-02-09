@@ -100,12 +100,19 @@ const arTranslations = {
     privacy: 'سياسة الخصوصية',
     refund: 'سياسة الإرجاع',
     security: 'الأمان والحماية',
-    technicianSupport: 'دعم الفنيين',
+    technicianSupport: 'انضم كفني',
     appTitle: 'تطبيق سهل لإدارة عقاراتك',
     appStore: 'App Store',
     googlePlay: 'Google Play',
     rights: '© 2024 UberFix.shop - Platform for Technicians. جميع الحقوق محفوظة.',
-    smartSystem: 'نظام إدارة الصيانة الذكي'
+    smartSystem: 'نظام إدارة الصيانة الذكي',
+    gallery: 'معرض الأعمال',
+    serviceRequest: 'طلب خدمة',
+    userGuide: 'دليل المستخدم',
+    blog: 'المدونة',
+    dataDeletion: 'حذف البيانات',
+    acceptableUse: 'سياسة الاستخدام المقبول',
+    compliance: 'بيانات الامتثال'
   },
 
   // Stats
