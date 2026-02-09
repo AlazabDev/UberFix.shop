@@ -4781,6 +4781,13 @@ export type Database = {
             foreignKeyName: "technician_withdrawals_processed_by_fkey"
             columns: ["processed_by"]
             isOneToOne: false
+            referencedRelation: "profiles_minimal_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_withdrawals_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
             referencedRelation: "profiles_public_safe"
             referencedColumns: ["id"]
           },
@@ -5692,6 +5699,38 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles_minimal_public: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          role: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles_public_safe: {
         Row: {
           avatar_url: string | null
@@ -5857,38 +5896,29 @@ export type Database = {
         Row: {
           city_id: number | null
           company_name: string | null
-          company_type: string | null
           created_at: string | null
-          district_id: number | null
-          full_name: string | null
+          email: string | null
           id: string | null
-          preferred_language: string | null
+          phone: string | null
           status: string | null
-          user_id: string | null
         }
         Insert: {
           city_id?: number | null
           company_name?: string | null
-          company_type?: string | null
           created_at?: string | null
-          district_id?: number | null
-          full_name?: string | null
+          email?: never
           id?: string | null
-          preferred_language?: string | null
+          phone?: never
           status?: string | null
-          user_id?: string | null
         }
         Update: {
           city_id?: number | null
           company_name?: string | null
-          company_type?: string | null
           created_at?: string | null
-          district_id?: number | null
-          full_name?: string | null
+          email?: never
           id?: string | null
-          preferred_language?: string | null
+          phone?: never
           status?: string | null
-          user_id?: string | null
         }
         Relationships: [
           {
@@ -5896,13 +5926,6 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technician_profiles_district_id_fkey"
-            columns: ["district_id"]
-            isOneToOne: false
-            referencedRelation: "districts"
             referencedColumns: ["id"]
           },
         ]

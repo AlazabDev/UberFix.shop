@@ -264,32 +264,45 @@ export const BranchesMapbox: React.FC<BranchesMapboxProps> = ({
   useEffect(() => {
     if (!mapContainer.current || branches.length === 0) return;
 
+    let currentMap: mapboxgl.Map | null = null;
+    let isMounted = true;
+
     const initMap = async () => {
       try {
         setLoading(true);
         setError(null);
         
         const token = await getMapboxToken();
-        if (!token) {
-          setError('مفتاح Mapbox غير متوفر');
-          setLoading(false);
+        if (!token || !isMounted) {
+          if (isMounted) {
+            setError('مفتاح Mapbox غير متوفر');
+            setLoading(false);
+          }
           return;
         }
         
         mapboxgl.accessToken = token;
 
-        // Clean up existing map
+        // Clean up existing map safely
         if (map.current) {
-          map.current.remove();
+          try {
+            clearMarkers();
+            map.current.remove();
+          } catch (e) {
+            console.warn('Map cleanup warning:', e);
+          }
+          map.current = null;
         }
+
+        if (!isMounted || !mapContainer.current) return;
 
         const isGlobe = viewMode === 'globe';
         
         // Detect mobile for better initial zoom
         const isMobile = window.innerWidth < 768;
         
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current!,
+        currentMap = new mapboxgl.Map({
+          container: mapContainer.current,
           style: isGlobe ? 'mapbox://styles/mapbox/standard' : 'mapbox://styles/mapbox/streets-v12',
           projection: isGlobe ? 'globe' : 'mercator',
           zoom: isGlobe ? (isMobile ? 1.2 : 1.8) : 10,
@@ -301,10 +314,14 @@ export const BranchesMapbox: React.FC<BranchesMapboxProps> = ({
           dragRotate: isGlobe,
         });
 
-        map.current.on('load', () => {
-          if (isGlobe && map.current) {
+        map.current = currentMap;
+
+        currentMap.on('load', () => {
+          if (!isMounted || !currentMap) return;
+          
+          if (isGlobe) {
             // Add atmospheric fog for globe mode
-            map.current.setFog({
+            currentMap.setFog({
               color: 'rgb(15, 20, 35)',
               'high-color': 'rgb(35, 45, 75)',
               'horizon-blend': 0.4,
@@ -318,55 +335,70 @@ export const BranchesMapbox: React.FC<BranchesMapboxProps> = ({
         });
 
         // Navigation controls
-        map.current.addControl(
+        currentMap.addControl(
           new mapboxgl.NavigationControl({ visualizePitch: true }),
           'top-right'
         );
 
         // Enable scroll zoom only in 2D mode
         if (!isGlobe) {
-          map.current.scrollZoom.enable();
+          currentMap.scrollZoom.enable();
         } else {
-          map.current.scrollZoom.disable();
+          currentMap.scrollZoom.disable();
         }
 
         // Interaction handlers for globe spinning
         if (isGlobe) {
-          map.current.on('mousedown', () => { userInteractingRef.current = true; });
-          map.current.on('dragstart', () => { userInteractingRef.current = true; });
-          map.current.on('mouseup', () => { 
+          currentMap.on('mousedown', () => { userInteractingRef.current = true; });
+          currentMap.on('dragstart', () => { userInteractingRef.current = true; });
+          currentMap.on('mouseup', () => { 
             userInteractingRef.current = false; 
             spinGlobe(); 
           });
-          map.current.on('touchend', () => { 
+          currentMap.on('touchend', () => { 
             userInteractingRef.current = false; 
             spinGlobe(); 
           });
-          map.current.on('moveend', spinGlobe);
+          currentMap.on('moveend', spinGlobe);
           
           // Start spinning
           spinGlobe();
         }
 
-        map.current.on('error', (e) => {
+        currentMap.on('error', (e) => {
           console.error('Mapbox error:', e);
         });
 
       } catch (err) {
         console.error('Error initializing map:', err);
-        setError('فشل في تحميل الخريطة');
-        setLoading(false);
+        if (isMounted) {
+          setError('فشل في تحميل الخريطة');
+          setLoading(false);
+        }
       }
     };
 
     initMap();
 
     return () => {
+      isMounted = false;
+      
       if (spinAnimationRef.current) {
         cancelAnimationFrame(spinAnimationRef.current);
+        spinAnimationRef.current = null;
       }
+      
       clearMarkers();
-      map.current?.remove();
+      
+      // Safely remove map
+      if (currentMap) {
+        try {
+          currentMap.remove();
+        } catch (e) {
+          console.warn('Map removal warning:', e);
+        }
+      }
+      map.current = null;
     };
   }, [branches, viewMode, addMarkers, spinGlobe, clearMarkers]);
 
