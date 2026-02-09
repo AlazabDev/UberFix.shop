@@ -100,12 +100,19 @@ const enTranslations = {
     privacy: 'Privacy Policy',
     refund: 'Refund Policy',
     security: 'Security',
-    technicianSupport: 'Technician Support',
+    technicianSupport: 'Join as Technician',
     appTitle: 'Easy App to Manage Your Properties',
     appStore: 'App Store',
     googlePlay: 'Google Play',
     rights: '© 2024 UberFix.shop - Platform for Technicians. All rights reserved.',
-    smartSystem: 'Smart Maintenance Management System'
+    smartSystem: 'Smart Maintenance Management System',
+    gallery: 'Work Gallery',
+    serviceRequest: 'Service Request',
+    userGuide: 'User Guide',
+    blog: 'Blog',
+    dataDeletion: 'Data Deletion',
+    acceptableUse: 'Acceptable Use Policy',
+    compliance: 'Compliance Statements'
   },
 
   // Stats

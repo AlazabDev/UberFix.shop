@@ -8,33 +8,27 @@ export const Footer = () => {
 
   const footerLinks = {
     services: [
-      { label: t('services.maintenance'), href: "#" },
-      { label: t('services.property'), href: "#" },
-      { label: t('services.reports'), href: "#" },
-      { label: t('services.vendors'), href: "#" },
-      { label: t('services.appointments'), href: "#" },
-      { label: t('services.quickMaintenance'), href: "/quick-request" }
+      { label: t('services.maintenance'), href: "/services" },
+      { label: t('services.quickMaintenance'), href: "/quick-request" },
+      { label: t('footer.gallery'), href: "/gallery" },
+      { label: t('footer.serviceRequest'), href: "/service-request" }
     ],
     support: [
-      { label: t('footer.helpCenter'), href: "#" },
-      { label: t('footer.technicalSupport'), href: "#" },
-      { label: t('footer.training'), href: "#" },
-      { label: t('footer.faq'), href: "#" },
-      { label: t('footer.contactUs'), href: "#" }
+      { label: t('footer.faq'), href: "/faq" },
+      { label: t('footer.userGuide'), href: "/user-guide" },
+      { label: t('footer.contactUs'), href: "/book-consultation" }
     ],
     company: [
       { label: t('footer.aboutCompany'), href: "/about" },
-      { label: t('footer.team'), href: "#" },
-      { label: t('footer.partnerships'), href: "#" },
-      { label: t('footer.careers'), href: "#" },
-      { label: t('footer.news'), href: "#" }
+      { label: t('footer.blog'), href: "/blog" },
+      { label: t('footer.technicianSupport'), href: "/technicians/register" }
     ],
     legal: [
       { label: t('footer.terms'), href: "/terms-of-service" },
       { label: t('footer.privacy'), href: "/privacy-policy" },
-      { label: t('footer.refund'), href: "#" },
-      { label: t('footer.security'), href: "#" },
-      { label: t('footer.technicianSupport'), href: "/technicians/register" }
+      { label: t('footer.dataDeletion'), href: "/data-deletion" },
+      { label: t('footer.acceptableUse'), href: "/acceptable-use-policy" },
+      { label: t('footer.compliance'), href: "/compliance" }
     ],
   };
 
