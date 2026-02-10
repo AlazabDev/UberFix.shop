@@ -1468,6 +1468,134 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_contracts: {
+        Row: {
+          auto_renew: boolean | null
+          billing_type: Database["public"]["Enums"]["contract_billing_type"]
+          branch_id: string | null
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          company_id: string
+          contract_number: string
+          contract_value: number | null
+          covered_services: string[] | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_percentage: number | null
+          end_date: string
+          excluded_services: string[] | null
+          id: string
+          includes_parts: boolean | null
+          internal_notes: string | null
+          max_requests: number | null
+          property_id: string | null
+          renewal_reminder_days: number | null
+          sla_resolution_hours: number | null
+          sla_response_hours: number | null
+          start_date: string
+          status: Database["public"]["Enums"]["contract_status"]
+          terms_and_conditions: string | null
+          title: string
+          updated_at: string
+          used_requests: number | null
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          billing_type?: Database["public"]["Enums"]["contract_billing_type"]
+          branch_id?: string | null
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          company_id: string
+          contract_number: string
+          contract_value?: number | null
+          covered_services?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          end_date: string
+          excluded_services?: string[] | null
+          id?: string
+          includes_parts?: boolean | null
+          internal_notes?: string | null
+          max_requests?: number | null
+          property_id?: string | null
+          renewal_reminder_days?: number | null
+          sla_resolution_hours?: number | null
+          sla_response_hours?: number | null
+          start_date: string
+          status?: Database["public"]["Enums"]["contract_status"]
+          terms_and_conditions?: string | null
+          title: string
+          updated_at?: string
+          used_requests?: number | null
+        }
+        Update: {
+          auto_renew?: boolean | null
+          billing_type?: Database["public"]["Enums"]["contract_billing_type"]
+          branch_id?: string | null
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          company_id?: string
+          contract_number?: string
+          contract_value?: number | null
+          covered_services?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          end_date?: string
+          excluded_services?: string[] | null
+          id?: string
+          includes_parts?: boolean | null
+          internal_notes?: string | null
+          max_requests?: number | null
+          property_id?: string | null
+          renewal_reminder_days?: number | null
+          sla_resolution_hours?: number | null
+          sla_response_hours?: number | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["contract_status"]
+          terms_and_conditions?: string | null
+          title?: string
+          updated_at?: string
+          used_requests?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_contracts_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_requests: {
         Row: {
           actual_cost: number | null
@@ -1482,6 +1610,7 @@ export type Database = {
           client_name: string | null
           client_phone: string | null
           company_id: string
+          contract_id: string | null
           created_at: string
           created_by: string | null
           customer_notes: string | null
@@ -1526,6 +1655,7 @@ export type Database = {
           client_name?: string | null
           client_phone?: string | null
           company_id: string
+          contract_id?: string | null
           created_at?: string
           created_by?: string | null
           customer_notes?: string | null
@@ -1570,6 +1700,7 @@ export type Database = {
           client_name?: string | null
           client_phone?: string | null
           company_id?: string
+          contract_id?: string | null
           created_at?: string
           created_by?: string | null
           customer_notes?: string | null
@@ -1684,6 +1815,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_contracts"
             referencedColumns: ["id"]
           },
           {
@@ -6609,6 +6747,18 @@ export type Database = {
         | "finance"
       company_model_enum: "local_provider" | "third_party"
       company_type_enum: "individual" | "small_team" | "company"
+      contract_billing_type:
+        | "per_request"
+        | "monthly"
+        | "quarterly"
+        | "semi_annual"
+        | "annual"
+      contract_status:
+        | "draft"
+        | "active"
+        | "expired"
+        | "suspended"
+        | "cancelled"
       document_type_enum:
         | "tax_card"
         | "commercial_registration"
@@ -6855,6 +7005,14 @@ export const Constants = {
       ],
       company_model_enum: ["local_provider", "third_party"],
       company_type_enum: ["individual", "small_team", "company"],
+      contract_billing_type: [
+        "per_request",
+        "monthly",
+        "quarterly",
+        "semi_annual",
+        "annual",
+      ],
+      contract_status: ["draft", "active", "expired", "suspended", "cancelled"],
       document_type_enum: [
         "tax_card",
         "commercial_registration",

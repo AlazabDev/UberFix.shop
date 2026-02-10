@@ -22,7 +22,8 @@ import {
   Shield,
   UserCheck,
   Lock,
-  MessageSquare
+  MessageSquare,
+  ScrollText
 } from "lucide-react";
 import { useModulePermissions } from "@/hooks/useModulePermissions";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
@@ -54,6 +55,7 @@ const allMenuItems = [
   { icon: Building2, label: "العقارات", href: "/properties", moduleKey: "properties" },
   { icon: Calendar, label: "المواعيد", href: "/appointments", moduleKey: "appointments" },
   { icon: DollarSign, label: "الفواتير", href: "/invoices", moduleKey: "invoices" },
+  { icon: ScrollText, label: "عقود الصيانة", href: "/contracts", moduleKey: "contracts" },
   { icon: MapPin, label: "خريطة الخدمات", href: "/service-map", moduleKey: "service_map" },
   { icon: FileText, label: "التوثيق", href: "/documentation", moduleKey: "documentation" },
   { icon: Settings, label: "الإعدادات", href: "/settings", moduleKey: "settings" },
