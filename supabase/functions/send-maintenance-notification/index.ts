@@ -311,7 +311,7 @@ const sendEmail = async (
 // Send WhatsApp via Meta Graph API (NOT Twilio)
 // ==========================================
 const sendWhatsApp = async (
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   to: string,
   message: string,
   requestId: string
@@ -380,7 +380,7 @@ const sendWhatsApp = async (
 // Send SMS as Fallback
 // ==========================================
 const sendSMS = async (
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   to: string,
   message: string,
   requestId: string
