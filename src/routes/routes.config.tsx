@@ -126,6 +126,10 @@ const ModuleSettings = lazy(() => import("@/pages/admin/ModuleSettings"));
 const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
 const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
 
+// Contracts
+const ContractsList = lazy(() => import("@/pages/contracts/ContractsList"));
+const ContractDetails = lazy(() => import("@/pages/contracts/ContractDetails"));
+
 export const protectedRoutes = [
   { path: "/dashboard", element: <Dashboard />, withLayout: true },
   { path: "/monitoring", element: <MonitoringDashboard />, withLayout: true },
@@ -140,6 +144,10 @@ export const protectedRoutes = [
   { path: "/maintenance/overview", element: <MaintenanceOverview />, withLayout: true },
   { path: "/maintenance/create", element: <CreateMaintenanceRequest />, withLayout: true },
   { path: "/maintenance/:id", element: <RequestDetails />, withLayout: true },
+
+  // Contracts
+  { path: "/contracts", element: <ContractsList />, withLayout: true },
+  { path: "/contracts/:id", element: <ContractDetails />, withLayout: true },
 
   // Vendors
   { path: "/vendors", element: <Vendors />, withLayout: true },
