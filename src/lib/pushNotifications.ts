@@ -84,7 +84,8 @@ export class PushNotificationManager {
     }
 
     try {
-      const subscription = await this.registration.pushManager.subscribe({
+      const reg = this.registration as any;
+      const subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: this.urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource
       });
@@ -110,7 +111,8 @@ export class PushNotificationManager {
     }
 
     try {
-      const subscription = await this.registration.pushManager.getSubscription();
+      const reg = this.registration as any;
+      const subscription = await reg.pushManager.getSubscription();
       
       if (subscription) {
         await subscription.unsubscribe();
@@ -133,7 +135,8 @@ export class PushNotificationManager {
       return null;
     }
 
-    return await this.registration.pushManager.getSubscription();
+    const reg = this.registration as any;
+    return await reg.pushManager.getSubscription();
   }
 
   /**
