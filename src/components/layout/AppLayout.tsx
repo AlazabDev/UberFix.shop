@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Settings, User, LogOut, Cog } from "lucide-react";
+import { AppLauncher } from "./AppLauncher";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -128,8 +129,11 @@ export function AppLayout({ children }: AppLayoutProps) {
 
               {/* User section */}
               <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
-                {/* Notifications */}
+              {/* Notifications */}
                 <NotificationsList />
+
+                {/* App Launcher */}
+                <AppLauncher />
 
                 {/* User Menu */}
                 <DropdownMenu>
