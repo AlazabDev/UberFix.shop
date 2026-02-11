@@ -10,6 +10,7 @@ import { NotificationsSettings } from "@/components/settings/NotificationsSettin
 import { UISettings } from "@/components/settings/UISettings";
 import { IntegrationsSettings } from "@/components/settings/IntegrationsSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
+import { LauncherSettings } from "@/components/settings/LauncherSettings";
 import { 
   User, 
   Building2, 
@@ -21,10 +22,15 @@ import {
   Bell,
   Palette,
   Plug,
-  Shield
+  Shield,
+  LayoutGrid
 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 export default function Settings() {
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "account";
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="mb-6">
@@ -37,8 +43,8 @@ export default function Settings() {
         </p>
       </div>
       
-      <Tabs defaultValue="account" dir="rtl" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 lg:grid-cols-11 gap-1 h-auto p-1">
+      <Tabs defaultValue={defaultTab} dir="rtl" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-1 h-auto p-1">
           <TabsTrigger value="account" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-2">
             <User className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">الحساب</span>
@@ -82,6 +88,10 @@ export default function Settings() {
           <TabsTrigger value="subscription" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-2">
             <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">الاشتراك</span>
+          </TabsTrigger>
+          <TabsTrigger value="launcher" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-2">
+            <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">التطبيقات</span>
           </TabsTrigger>
         </TabsList>
 
@@ -127,6 +137,10 @@ export default function Settings() {
 
         <TabsContent value="subscription">
           <SubscriptionSettings />
+        </TabsContent>
+
+        <TabsContent value="launcher">
+          <LauncherSettings />
         </TabsContent>
       </Tabs>
     </div>
