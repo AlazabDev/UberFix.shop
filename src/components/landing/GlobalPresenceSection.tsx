@@ -40,7 +40,7 @@ export const GlobalPresenceSection = () => {
           </div>
 
           {/* الخريطة على اليسار (RTL) */}
-          <div className="order-1 md:order-2 relative h-[500px]">
+          <div className="order-1 md:order-2 relative h-[650px]">
             {/* خريطة العالم بنقاط سداسية */}
             <div className="absolute inset-0 flex items-center justify-center">
               <svg viewBox="0 0 1000 600" className="w-full h-full">
