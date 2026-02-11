@@ -100,10 +100,10 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background safe-area-inset" dir="rtl">
+      <div className="h-screen flex w-full bg-background safe-area-inset overflow-hidden" dir="rtl">
         <RoleBasedSidebar />
         
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Header with trigger and user menu */}
           <header className="h-14 flex items-center border-b border-border px-3 sm:px-4 bg-card/95 backdrop-blur-sm sticky top-0 z-30 shadow-sm standalone-header">
             <SidebarTrigger className="ml-2 touch-target tap-highlight-none" />
