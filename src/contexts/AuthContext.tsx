@@ -1,9 +1,9 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getStoredFacebookSession, FacebookUserData } from '@/lib/facebookAuth';
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   email?: string;
   name?: string;
@@ -11,6 +11,7 @@ interface AuthUser {
   provider: 'supabase' | 'facebook';
   supabaseUser?: User;
   facebookUser?: FacebookUserData;
+  emailConfirmed?: boolean;
 }
 
 interface AuthContextType {
@@ -28,93 +29,92 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for existing sessions
-    const initializeAuth = async () => {
-      setIsLoading(true);
+  const mapSupabaseSession = useCallback((s: Session): AuthUser => ({
+    id: s.user.id,
+    email: s.user.email,
+    name: s.user.user_metadata?.full_name || s.user.email,
+    avatarUrl: s.user.user_metadata?.avatar_url,
+    provider: 'supabase',
+    supabaseUser: s.user,
+    emailConfirmed: !!s.user.email_confirmed_at,
+  }), []);
 
-      // First check Supabase session
-      const { data: { session: supabaseSession } } = await supabase.auth.getSession();
-      
-      if (supabaseSession?.user) {
-        setSession(supabaseSession);
-        setUser({
-          id: supabaseSession.user.id,
-          email: supabaseSession.user.email,
-          name: supabaseSession.user.user_metadata?.full_name || supabaseSession.user.email,
-          avatarUrl: supabaseSession.user.user_metadata?.avatar_url,
-          provider: 'supabase',
-          supabaseUser: supabaseSession.user,
-        });
-      } else {
-        // Check for Facebook session
-        const fbSession = getStoredFacebookSession();
-        if (fbSession) {
-          setUser({
-            id: fbSession.user.id,
-            email: fbSession.user.email,
-            name: fbSession.user.name,
-            avatarUrl: fbSession.user.picture?.data?.url,
-            provider: 'facebook',
-            facebookUser: fbSession.user,
-          });
+  const mapFacebookUser = useCallback((fb: FacebookUserData): AuthUser => ({
+    id: fb.id,
+    email: fb.email,
+    name: fb.name,
+    avatarUrl: fb.picture?.data?.url,
+    provider: 'facebook',
+    facebookUser: fb,
+    emailConfirmed: true,
+  }), []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    // 1. Set up auth state listener FIRST (Supabase best practice)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        if (!isMounted) return;
+
+        if (newSession?.user) {
+          setSession(newSession);
+          setUser(mapSupabaseSession(newSession));
+        } else if (event === 'SIGNED_OUT') {
+          const fbSession = getStoredFacebookSession();
+          if (fbSession) {
+            setUser(mapFacebookUser(fbSession.user));
+          } else {
+            setUser(null);
+          }
+          setSession(null);
         }
       }
+    );
 
-      setIsLoading(false);
+    // 2. THEN check for existing session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (!isMounted) return;
+
+        if (error) {
+          console.error('Session error:', error.message);
+          if (error.message.includes('invalid') || error.message.includes('expired')) {
+            await supabase.auth.signOut();
+          }
+        }
+
+        if (currentSession?.user) {
+          setSession(currentSession);
+          setUser(mapSupabaseSession(currentSession));
+        } else {
+          const fbSession = getStoredFacebookSession();
+          if (fbSession && isMounted) {
+            setUser(mapFacebookUser(fbSession.user));
+          }
+        }
+      } catch (error) {
+        console.error('Auth init error:', error);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     };
 
     initializeAuth();
 
-    // Listen for Supabase auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, supabaseSession) => {
-      if (supabaseSession?.user) {
-        setSession(supabaseSession);
-        setUser({
-          id: supabaseSession.user.id,
-          email: supabaseSession.user.email,
-          name: supabaseSession.user.user_metadata?.full_name || supabaseSession.user.email,
-          avatarUrl: supabaseSession.user.user_metadata?.avatar_url,
-          provider: 'supabase',
-          supabaseUser: supabaseSession.user,
-        });
-      } else if (event === 'SIGNED_OUT') {
-        // Check if there's still a Facebook session
-        const fbSession = getStoredFacebookSession();
-        if (fbSession) {
-          setUser({
-            id: fbSession.user.id,
-            email: fbSession.user.email,
-            name: fbSession.user.name,
-            avatarUrl: fbSession.user.picture?.data?.url,
-            provider: 'facebook',
-            facebookUser: fbSession.user,
-          });
-          setSession(null);
-        } else {
-          setUser(null);
-          setSession(null);
-        }
-      }
-    });
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [mapSupabaseSession, mapFacebookUser]);
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signOut = async () => {
-    // Sign out from Supabase
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    
-    // Clear Facebook session
-    try {
-      localStorage.removeItem('facebook_session');
-    } catch (e) {
-      console.warn('Failed to clear Facebook session:', e);
-    }
-
+    try { localStorage.removeItem('facebook_session'); } catch {}
     setUser(null);
     setSession(null);
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{

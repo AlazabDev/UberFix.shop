@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,15 +13,11 @@ import { PhoneOTPLogin } from "@/components/auth/PhoneOTPLogin";
 import { useFacebookAuth } from "@/hooks/useFacebookAuth";
 import { secureGoogleSignIn } from "@/lib/secureOAuth";
 import { detectUserRole } from "@/lib/roleRedirect";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * صفحة تسجيل الدخول الموحدة
- * 
- * المعمارية الصحيحة لـ OAuth:
- * - نقطة دخول واحدة (بدون role في URL)
- * - Identity First: المستخدم يسجل دخول أولاً
- * - Role Detection: يتم اكتشاف الدور بعد المصادقة
- * - Smart Redirect: يتم التوجيه حسب الدور المكتشف
+ * تتحقق تلقائياً من وجود جلسة وتعيد التوجيه
  */
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -29,8 +25,28 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { login: facebookLogin, isLoading: isFacebookLoading } = useFacebookAuth();
+  const { user, isLoading: authLoading } = useAuth();
+
+  // ✅ سحب المستخدم تلقائياً إذا كان مسجل دخول بالفعل
+  useEffect(() => {
+    if (!authLoading && user) {
+      // المستخدم مسجل بالفعل - وجهه للداشبورد
+      const from = (location.state as any)?.from;
+      if (from && from !== '/login' && from !== '/register') {
+        navigate(from, { replace: true });
+      } else {
+        // اكتشاف الدور والتوجيه الذكي
+        detectUserRole(user.id, user.email).then(roleInfo => {
+          navigate(roleInfo.redirectPath, { replace: true });
+        }).catch(() => {
+          navigate('/dashboard', { replace: true });
+        });
+      }
+    }
+  }, [authLoading, user, navigate, location.state]);
 
   // التوجيه الذكي بعد تسجيل الدخول
   const handleSuccessfulAuth = async (userId: string, userEmail?: string) => {

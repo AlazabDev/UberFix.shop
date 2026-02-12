@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { registerFormSchema } from "@/lib/validationSchemas";
 import { secureGoogleSignIn, secureFacebookSignIn } from "@/lib/secureOAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 type RegisterFormData = z.infer<typeof registerFormSchema>;
 
@@ -23,6 +24,14 @@ export default function Register() {
   const selectedRole = searchParams.get("role") || "customer";
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isLoading: authLoading } = useAuth();
+
+  // ✅ إذا كان المستخدم مسجل بالفعل - وجهه للداشبورد
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [authLoading, user, navigate]);
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),

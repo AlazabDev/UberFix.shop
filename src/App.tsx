@@ -10,6 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import AppErrorBoundary from "@/components/error-boundaries/AppErrorBoundary";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 import "./index.css";
 
@@ -47,28 +48,30 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      <ScrollToTop />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Public Routes - لا تتطلب تسجيل دخول */}
-          {publicRoutes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
-          
-          {/* Protected Routes - تتطلب تسجيل دخول */}
-          {protectedRoutes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                <ProtectedRoute withLayout={route.withLayout}>
-                  {route.element}
-                </ProtectedRoute>
-              }
-            />
-          ))}
-        </Routes>
-      </Suspense>
+      <AuthProvider>
+        <ScrollToTop />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public Routes - لا تتطلب تسجيل دخول */}
+            {publicRoutes.map((route) => (
+              <Route key={route.path} path={route.path} element={route.element} />
+            ))}
+            
+            {/* Protected Routes - تتطلب تسجيل دخول */}
+            {protectedRoutes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={
+                  <ProtectedRoute withLayout={route.withLayout}>
+                    {route.element}
+                  </ProtectedRoute>
+                }
+              />
+            ))}
+          </Routes>
+        </Suspense>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
