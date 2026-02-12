@@ -32,13 +32,12 @@ export default function Login() {
 
   // ✅ سحب المستخدم تلقائياً إذا كان مسجل دخول بالفعل
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !isLoading) {
       // المستخدم مسجل بالفعل - وجهه للداشبورد
       const from = (location.state as any)?.from;
       if (from && from !== '/login' && from !== '/register') {
         navigate(from, { replace: true });
       } else {
-        // اكتشاف الدور والتوجيه الذكي
         detectUserRole(user.id, user.email).then(roleInfo => {
           navigate(roleInfo.redirectPath, { replace: true });
         }).catch(() => {
@@ -46,7 +45,7 @@ export default function Login() {
         });
       }
     }
-  }, [authLoading, user, navigate, location.state]);
+  }, [authLoading, user, navigate, location.state, isLoading]);
 
   // التوجيه الذكي بعد تسجيل الدخول
   const handleSuccessfulAuth = async (userId: string, userEmail?: string) => {
@@ -57,11 +56,16 @@ export default function Login() {
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بك في نظام إدارة الصيانة",
       });
-      
-      navigate(roleInfo.redirectPath, { replace: true });
+
+      // تأخير بسيط لضمان تحديث الجلسة في AuthContext
+      setTimeout(() => {
+        navigate(roleInfo.redirectPath, { replace: true });
+      }, 100);
     } catch (error) {
       console.error('Role detection error:', error);
-      navigate('/dashboard', { replace: true });
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     }
   };
 
