@@ -17,7 +17,8 @@ export const AUTHORIZED_OWNER_EMAILS: readonly string[] = [
   'uberfix@alazab.com',
   'admin@alazab.com',
   'mohamed@alazab.com',
-  'magdy@alazab.com'
+  'magdy@alazab.com',
+  'azab68320@gmail.com'
 ] as const;
 
 // ============================================

@@ -57,9 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, newSession) => {
         if (!isMounted) return;
 
+        console.log('[Auth] State changed:', event, !!newSession?.user);
+
         if (newSession?.user) {
           setSession(newSession);
           setUser(mapSupabaseSession(newSession));
+          // ضمان أن isLoading يصبح false عند تسجيل دخول جديد
+          setIsLoading(false);
         } else if (event === 'SIGNED_OUT') {
           const fbSession = getStoredFacebookSession();
           if (fbSession) {
@@ -68,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
           }
           setSession(null);
+          setIsLoading(false);
         }
       }
     );
