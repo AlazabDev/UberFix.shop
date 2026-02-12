@@ -12,11 +12,18 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3000',
 ];
 
+const isAllowedOrigin = (origin: string) => {
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  // Allow Lovable preview domains
+  if (origin.includes('.lovable.app') || origin.includes('.lovableproject.com')) return true;
+  return false;
+};
+
 serve(async (req) => {
   const origin = req.headers.get('origin') || '';
   const responseHeaders = {
     ...corsHeaders,
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Origin': isAllowedOrigin(origin) ? origin : ALLOWED_ORIGINS[0],
   };
 
   // Handle CORS preflight requests
@@ -25,7 +32,7 @@ serve(async (req) => {
   }
 
   try {
-    if (!ALLOWED_ORIGINS.includes(origin)) {
+    if (!isAllowedOrigin(origin)) {
       return new Response(
         JSON.stringify({ error: 'Forbidden', message: 'النطاق غير مسموح به' }),
         { status: 403, headers: { ...responseHeaders, 'Content-Type': 'application/json' } }

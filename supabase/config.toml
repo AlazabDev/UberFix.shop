@@ -66,8 +66,8 @@ verify_jwt = true
 
 # HIGH PRIORITY: Map keys require auth to prevent abuse
 [functions.get-maps-key]
-verify_jwt = true
-# Changed from false - returns Google Maps API key, requires authentication
+verify_jwt = false
+# Public access with rate limiting and origin validation inside function
 
 [functions.get-mapbox-token]
 verify_jwt = true
