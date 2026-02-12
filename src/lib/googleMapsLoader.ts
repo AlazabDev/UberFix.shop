@@ -1,13 +1,14 @@
 import { MAPS_CONFIG } from '@/config/maps';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Google Maps Loader - يستخدم المفتاح من البيئة مباشرة
- * للاستخدام الفعلي في التطبيق (ServiceMap, InteractiveMap, etc.)
+ * Google Maps Loader - يجلب المفتاح من Edge Function
  */
 class GoogleMapsLoader {
   private static instance: GoogleMapsLoader;
   private loadPromise: Promise<void> | null = null;
   private isLoaded = false;
+  private cachedApiKey: string | null = null;
 
   private constructor() {}
 
@@ -18,13 +19,29 @@ class GoogleMapsLoader {
     return GoogleMapsLoader.instance;
   }
 
-  private getApiKey(): string {
-    // استخدام المفتاح من متغيرات البيئة مباشرة (publishable key)
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      console.warn('Google Maps API key not found in environment variables');
+  private async getApiKey(): Promise<string> {
+    if (this.cachedApiKey) return this.cachedApiKey;
+
+    // Try edge function first
+    try {
+      const { data, error } = await supabase.functions.invoke('get-maps-key');
+      if (!error && data?.apiKey) {
+        this.cachedApiKey = data.apiKey;
+        return data.apiKey;
+      }
+      console.warn('Edge function failed:', error);
+    } catch (e) {
+      console.warn('Failed to fetch maps key from edge function:', e);
     }
-    return apiKey || '';
+
+    // Fallback to env var
+    const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (envKey) {
+      this.cachedApiKey = envKey;
+      return envKey;
+    }
+
+    throw new Error('Google Maps API key not available');
   }
 
   async load(): Promise<void> {
@@ -36,46 +53,37 @@ class GoogleMapsLoader {
       return this.loadPromise;
     }
 
-    this.loadPromise = new Promise((resolve, reject) => {
-      // تحقق إذا كانت الخريطة محملة مسبقاً
+    this.loadPromise = (async () => {
       if (window.google?.maps) {
         this.isLoaded = true;
-        resolve();
         return;
       }
 
-      const apiKey = this.getApiKey();
-      if (!apiKey) {
-        reject(new Error('Google Maps API key not configured. Please add VITE_GOOGLE_MAPS_API_KEY to .env'));
-        return;
-      }
+      const apiKey = await this.getApiKey();
 
-      // إزالة أي سكريبت قديم
+      // Remove any old script
       const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-      if (existingScript) {
-        existingScript.remove();
-      }
+      if (existingScript) existingScript.remove();
 
       const libs = MAPS_CONFIG.libraries.join(',');
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libs}&language=ar&region=EG&v=weekly`;
-      script.async = true;
-      script.defer = true;
 
-      script.onload = () => {
-        this.isLoaded = true;
-        console.log('✅ Google Maps loaded successfully');
-        resolve();
-      };
-
-      script.onerror = (error) => {
-        this.loadPromise = null;
-        console.error('❌ Failed to load Google Maps:', error);
-        reject(new Error('فشل في تحميل Google Maps'));
-      };
-
-      document.head.appendChild(script);
-    });
+      await new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libs}&language=ar&region=EG&v=weekly`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          this.isLoaded = true;
+          console.log('✅ Google Maps loaded successfully');
+          resolve();
+        };
+        script.onerror = () => {
+          this.loadPromise = null;
+          reject(new Error('فشل في تحميل Google Maps'));
+        };
+        document.head.appendChild(script);
+      });
+    })();
 
     return this.loadPromise;
   }
@@ -87,6 +95,7 @@ class GoogleMapsLoader {
   reset(): void {
     this.loadPromise = null;
     this.isLoaded = false;
+    this.cachedApiKey = null;
   }
 
   getMapId(): string {
