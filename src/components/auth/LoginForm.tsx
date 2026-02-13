@@ -11,8 +11,7 @@ import { Loader2, Building2, UserPlus } from 'lucide-react';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
 import { smartSignup, smartLogin } from '@/lib/smartAuth';
 import { loginFormSchema } from '@/lib/validationSchemas';
-import { useFacebookAuth } from '@/hooks/useFacebookAuth';
-import { secureGoogleSignIn } from '@/lib/secureOAuth';
+import { secureGoogleSignIn, secureFacebookSignIn } from '@/lib/secureOAuth';
 import { z } from 'zod';
 
 type LoginFormData = z.infer<typeof loginFormSchema>;
@@ -22,7 +21,6 @@ export function LoginForm() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { login: facebookLogin, isLoading: isFacebookLoading } = useFacebookAuth();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -117,15 +115,11 @@ export function LoginForm() {
   const handleGoogleLogin = async () => {
     try {
       const result = await secureGoogleSignIn('/auth/callback');
-      
-      if (!result.success) {
-        throw result.error;
-      }
+      if (!result.success) throw result.error;
     } catch (error) {
-      console.error('Google login error:', error);
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: "تعذر تسجيل الدخول بجوجل. تأكد من تفعيل Google OAuth في Supabase.",
+        description: "تعذر تسجيل الدخول بجوجل",
         variant: "destructive",
       });
     }
@@ -133,52 +127,12 @@ export function LoginForm() {
 
   const handleFacebookLogin = async () => {
     try {
-      const result = await facebookLogin();
-      
-      if (result.success && result.user && result.accessToken) {
-        // Sync with Supabase backend
-        try {
-          const response = await fetch(
-            'https://zrrffsjbfkphridqyais.supabase.co/functions/v1/facebook-auth-sync',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpycmZmc2piZmtwaHJpZHF5YWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0MzE1NzMsImV4cCI6MjA3MjAwNzU3M30.AwzY48mSUGeopBv5P6gzAPlipTbQasmXK8DR-L_Tm9A`,
-              },
-              body: JSON.stringify({
-                facebookId: result.user.id,
-                email: result.user.email,
-                name: result.user.name,
-                pictureUrl: result.user.picture?.data?.url,
-                accessToken: result.accessToken,
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            console.warn('Facebook sync warning:', await response.text());
-          }
-        } catch (syncError) {
-          console.warn('Facebook sync error (non-blocking):', syncError);
-        }
-
-        toast({
-          title: "تم تسجيل الدخول بنجاح",
-          description: `مرحباً ${result.user.name}`,
-        });
-        navigate('/dashboard');
-      } else {
-        toast({
-          title: "خطأ في تسجيل الدخول",
-          description: result.error || "تعذر تسجيل الدخول بفيسبوك",
-          variant: "destructive",
-        });
-      }
+      const result = await secureFacebookSignIn('/auth/callback');
+      if (!result.success) throw result.error;
     } catch {
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: "تعذر تسجيل الدخول بفيسبوك. تأكد من تفعيل Facebook OAuth.",
+        description: "تعذر تسجيل الدخول بفيسبوك",
         variant: "destructive",
       });
     }
@@ -204,11 +158,7 @@ export function LoginForm() {
                   <FormItem>
                     <FormLabel>البريد الإلكتروني</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="admin@uberfix.shop"
-                        {...field}
-                      />
+                      <Input type="email" placeholder="admin@uberfix.shop" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -222,11 +172,7 @@ export function LoginForm() {
                   <FormItem>
                     <FormLabel>كلمة المرور</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="كلمة المرور"
-                        {...field}
-                      />
+                      <Input type="password" placeholder="كلمة المرور" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -279,13 +225,9 @@ export function LoginForm() {
                 variant="outline"
                 onClick={handleFacebookLogin}
                 className="flex-1 gap-2"
-                disabled={isLoading || isSigningUp || isFacebookLoading}
+                disabled={isLoading || isSigningUp}
               >
-                {isFacebookLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <FaFacebook className="h-4 w-4 text-blue-600" />
-                )}
+                <FaFacebook className="h-4 w-4 text-blue-600" />
                 فيسبوك
               </Button>
             </div>
