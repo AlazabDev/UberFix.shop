@@ -1,120 +1,96 @@
 /**
- * Secure OAuth Helper for Custom Domains
- * Bypasses Lovable's auth-bridge on custom domains to prevent redirect vulnerabilities
+ * Secure OAuth Helper
+ * 
+ * يدعم:
+ * - Lovable domains (lovable.app, lovableproject.com, localhost)
+ * - Custom domains (uberfix.shop, alazab.com)
+ * 
+ * على custom domains يستخدم skipBrowserRedirect لتجنب auth-bridge
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Provider } from '@supabase/supabase-js';
 
-// Allowed OAuth provider hosts for security validation
 const ALLOWED_OAUTH_HOSTS = [
   'accounts.google.com',
   'www.facebook.com',
   'facebook.com',
   'github.com',
-  'zrrffsjbfkphridqyais.supabase.co', // Supabase project URL
+  'zrrffsjbfkphridqyais.supabase.co',
 ];
 
-// Lovable preview domains
 const LOVABLE_DOMAINS = ['lovable.app', 'lovableproject.com', 'localhost'];
 
-/**
- * Check if the app is running on a custom domain
- */
-export function isCustomDomain(): boolean {
+function isCustomDomain(): boolean {
   const hostname = window.location.hostname;
-  return !LOVABLE_DOMAINS.some(domain => hostname.includes(domain));
+  return !LOVABLE_DOMAINS.some(d => hostname.includes(d));
 }
 
-/**
- * Validate OAuth redirect URL to prevent open redirect attacks
- */
 function validateOAuthUrl(url: string): boolean {
   try {
-    const oauthUrl = new URL(url);
-    return ALLOWED_OAUTH_HOSTS.some(host => oauthUrl.hostname === host || oauthUrl.hostname.endsWith('.' + host));
+    const u = new URL(url);
+    return ALLOWED_OAUTH_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h));
   } catch {
     return false;
   }
 }
 
-/**
- * Get the appropriate redirect URL based on environment
- */
-export function getRedirectUrl(path: string = '/auth/callback'): string {
+function getRedirectUrl(path: string = '/auth/callback'): string {
   return `${window.location.origin}${path}`;
 }
 
-interface SecureOAuthOptions {
-  provider: Provider;
-  redirectTo?: string;
-  queryParams?: Record<string, string>;
-  scopes?: string;
-}
-
-interface SecureOAuthResult {
+interface OAuthResult {
   success: boolean;
   error?: Error;
 }
 
-/**
- * Securely sign in with OAuth provider
- * Handles custom domain detection and bypasses auth-bridge when necessary
- */
-export async function secureSignInWithOAuth(options: SecureOAuthOptions): Promise<SecureOAuthResult> {
-  const { provider, redirectTo = getRedirectUrl(), queryParams, scopes } = options;
+async function signInWithProvider(
+  provider: Provider,
+  redirectPath: string,
+  options?: { queryParams?: Record<string, string>; scopes?: string }
+): Promise<OAuthResult> {
+  const redirectTo = getRedirectUrl(redirectPath);
 
   try {
-    // Check if we're on a custom domain
-    const onCustomDomain = isCustomDomain();
-
-    if (onCustomDomain) {
-      // Bypass auth-bridge by getting OAuth URL directly
+    if (isCustomDomain()) {
+      // Custom domain: bypass auth-bridge
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo,
-          skipBrowserRedirect: true, // Prevents automatic redirect by auth-bridge
-          queryParams,
-          scopes,
+          skipBrowserRedirect: true,
+          queryParams: options?.queryParams,
+          scopes: options?.scopes,
         },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Validate OAuth URL before redirect (security: prevent open redirect)
       if (data?.url) {
         if (!validateOAuthUrl(data.url)) {
-          throw new Error('Invalid OAuth redirect URL - potential security risk');
+          throw new Error('Invalid OAuth redirect URL');
         }
-        
-        // Manual redirect to the validated OAuth URL
         window.location.href = data.url;
         return { success: true };
       }
 
-      throw new Error('No OAuth URL returned from provider');
+      throw new Error('No OAuth URL returned');
     } else {
-      // For Lovable domains, use the normal flow (auth-bridge handles it)
+      // Lovable domain: normal flow
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo,
-          queryParams,
-          scopes,
+          queryParams: options?.queryParams,
+          scopes: options?.scopes,
         },
       });
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
       return { success: true };
     }
   } catch (error) {
-    console.error('Secure OAuth error:', error);
+    console.error(`OAuth error (${provider}):`, error);
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown OAuth error'),
@@ -123,26 +99,19 @@ export async function secureSignInWithOAuth(options: SecureOAuthOptions): Promis
 }
 
 /**
- * Sign in with Google securely
+ * تسجيل دخول بـ Google
  */
-export async function secureGoogleSignIn(redirectPath: string = '/auth/callback'): Promise<SecureOAuthResult> {
-  return secureSignInWithOAuth({
-    provider: 'google',
-    redirectTo: getRedirectUrl(redirectPath),
-    queryParams: {
-      access_type: 'offline',
-      prompt: 'consent',
-    },
+export async function secureGoogleSignIn(redirectPath: string = '/auth/callback'): Promise<OAuthResult> {
+  return signInWithProvider('google', redirectPath, {
+    queryParams: { access_type: 'offline', prompt: 'consent' },
   });
 }
 
 /**
- * Sign in with Facebook via Supabase (backup for SDK issues)
+ * تسجيل دخول بـ Facebook عبر Supabase OAuth
  */
-export async function secureFacebookSignIn(redirectPath: string = '/auth/callback'): Promise<SecureOAuthResult> {
-  return secureSignInWithOAuth({
-    provider: 'facebook',
-    redirectTo: getRedirectUrl(redirectPath),
+export async function secureFacebookSignIn(redirectPath: string = '/auth/callback'): Promise<OAuthResult> {
+  return signInWithProvider('facebook', redirectPath, {
     scopes: 'email,public_profile',
   });
 }

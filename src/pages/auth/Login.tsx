@@ -10,14 +10,17 @@ import { Loader2, ArrowRight, Cog, Shield, Phone } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { PhoneOTPLogin } from "@/components/auth/PhoneOTPLogin";
-import { useFacebookAuth } from "@/hooks/useFacebookAuth";
-import { secureGoogleSignIn } from "@/lib/secureOAuth";
+import { secureGoogleSignIn, secureFacebookSignIn } from "@/lib/secureOAuth";
 import { detectUserRole } from "@/lib/roleRedirect";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * صفحة تسجيل الدخول الموحدة
- * تتحقق تلقائياً من وجود جلسة وتعيد التوجيه
+ * 
+ * التدفق:
+ * 1. Email/Password → signInWithPassword → onAuthStateChange يحدث AuthContext → useEffect يعيد التوجيه
+ * 2. Google → secureGoogleSignIn → redirect to /auth/callback → AuthCallback يتولى
+ * 3. Facebook → secureFacebookSignIn (via Supabase OAuth) → redirect to /auth/callback → AuthCallback يتولى
  */
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -27,57 +30,32 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { login: facebookLogin, isLoading: isFacebookLoading } = useFacebookAuth();
   const { user, isLoading: authLoading } = useAuth();
 
-  // ✅ سحب المستخدم تلقائياً إذا كان مسجل دخول بالفعل
+  // عند تغير حالة المصادقة (المستخدم أصبح مسجل) → توجيه ذكي
   useEffect(() => {
-    if (!authLoading && user && !isLoading) {
-      // المستخدم مسجل بالفعل - وجهه للداشبورد
-      const from = (location.state as any)?.from;
-      if (from && from !== '/login' && from !== '/register') {
-        navigate(from, { replace: true });
-      } else {
-        detectUserRole(user.id, user.email).then(roleInfo => {
-          navigate(roleInfo.redirectPath, { replace: true });
-        }).catch(() => {
-          navigate('/dashboard', { replace: true });
-        });
-      }
-    }
-  }, [authLoading, user, navigate, location.state, isLoading]);
+    if (authLoading || !user) return;
 
-  // التوجيه الذكي بعد تسجيل الدخول
-  const handleSuccessfulAuth = async (userId: string, userEmail?: string) => {
-    try {
-      const roleInfo = await detectUserRole(userId, userEmail);
-      
-      toast({
-        title: "تم تسجيل الدخول بنجاح",
-        description: "مرحباً بك في نظام إدارة الصيانة",
-      });
-
-      // تأخير بسيط لضمان تحديث الجلسة في AuthContext
-      setTimeout(() => {
-        navigate(roleInfo.redirectPath, { replace: true });
-      }, 100);
-    } catch (error) {
-      console.error('Role detection error:', error);
-      setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 100);
+    const from = (location.state as any)?.from;
+    if (from && from !== '/login' && from !== '/register') {
+      navigate(from, { replace: true });
+      return;
     }
-  };
+
+    // اكتشاف الدور والتوجيه
+    detectUserRole(user.id, user.email).then(roleInfo => {
+      navigate(roleInfo.redirectPath, { replace: true });
+    }).catch(() => {
+      navigate('/dashboard', { replace: true });
+    });
+  }, [authLoading, user, navigate, location.state]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
         toast({
@@ -87,9 +65,8 @@ export default function Login() {
             : error.message,
           variant: "destructive",
         });
-      } else if (data.user) {
-        await handleSuccessfulAuth(data.user.id, data.user.email);
       }
+      // Success: onAuthStateChange → AuthContext updates → useEffect above redirects
     } catch (error) {
       toast({
         title: "حدث خطأ",
@@ -105,57 +82,45 @@ export default function Login() {
     setIsLoading(true);
     try {
       const result = await secureGoogleSignIn('/auth/callback');
-
       if (!result.success) {
         toast({
           title: "خطأ في تسجيل الدخول",
           description: result.error?.message || "تعذر تسجيل الدخول بجوجل",
           variant: "destructive",
         });
+        setIsLoading(false);
       }
-      // OAuth callback سيتولى التوجيه
+      // Success: browser redirects to Google → callback → AuthCallback handles it
     } catch (error) {
       toast({
         title: "حدث خطأ",
         description: "حاول مرة أخرى لاحقاً",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
 
   const handleFacebookLogin = async () => {
+    setIsLoading(true);
     try {
-      const result = await facebookLogin();
-      
-      if (result.success && result.user) {
-        // Facebook SDK يعيد المستخدم مباشرة، نحتاج جلب الجلسة
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          await handleSuccessfulAuth(session.user.id, session.user.email);
-        } else {
-          // Fallback إذا لم نجد جلسة Supabase
-          toast({
-            title: "تم تسجيل الدخول بنجاح",
-            description: `مرحباً ${result.user.name}`,
-          });
-          navigate("/dashboard", { replace: true });
-        }
-      } else {
+      const result = await secureFacebookSignIn('/auth/callback');
+      if (!result.success) {
         toast({
           title: "خطأ في تسجيل الدخول",
-          description: result.error || "تعذر تسجيل الدخول بفيسبوك",
+          description: result.error?.message || "تعذر تسجيل الدخول بفيسبوك",
           variant: "destructive",
         });
+        setIsLoading(false);
       }
+      // Success: browser redirects to Facebook → callback → AuthCallback handles it
     } catch (error) {
       toast({
         title: "حدث خطأ",
         description: "حاول مرة أخرى لاحقاً",
         variant: "destructive",
       });
+      setIsLoading(false);
     }
   };
 
@@ -176,7 +141,7 @@ export default function Login() {
           <p className="text-muted-foreground mt-2">نظام إدارة طلبات الصيانة المتطور</p>
         </div>
 
-        {/* Login Card - موحد بدون role */}
+        {/* Login Card */}
         <Card className="bg-gradient-to-br from-primary/5 to-background border-2">
           <CardHeader>
             <div className="flex items-center justify-center mb-4">
@@ -269,13 +234,9 @@ export default function Login() {
                     variant="outline"
                     className="w-full"
                     onClick={handleFacebookLogin}
-                    disabled={isLoading || isFacebookLoading}
+                    disabled={isLoading}
                   >
-                    {isFacebookLoading ? (
-                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                    ) : (
-                      <FaFacebook className="ml-2 h-5 w-5 text-[#1877F2]" />
-                    )}
+                    <FaFacebook className="ml-2 h-5 w-5 text-[#1877F2]" />
                     تسجيل الدخول باستخدام Facebook
                   </Button>
 
@@ -301,7 +262,6 @@ export default function Login() {
                 </Link>
               </p>
               
-              {/* رابط التسجيل كفني */}
               <div className="pt-2 border-t">
                 <Button
                   type="button"

@@ -1,17 +1,22 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { getStoredFacebookSession, FacebookUserData } from '@/lib/facebookAuth';
+
+/**
+ * AuthContext - مصدر واحد للحقيقة لحالة المصادقة
+ * 
+ * يعتمد فقط على Supabase session (Google OAuth + Email/Password)
+ * Facebook يمر عبر facebook-auth-sync Edge Function لإنشاء Supabase session
+ */
 
 export interface AuthUser {
   id: string;
   email?: string;
   name?: string;
   avatarUrl?: string;
-  provider: 'supabase' | 'facebook';
-  supabaseUser?: User;
-  facebookUser?: FacebookUserData;
-  emailConfirmed?: boolean;
+  provider: 'google' | 'facebook' | 'email' | 'phone';
+  supabaseUser: User;
+  emailConfirmed: boolean;
 }
 
 interface AuthContextType {
@@ -24,98 +29,78 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function mapSessionToUser(session: Session): AuthUser {
+  const u = session.user;
+  const provider = u.app_metadata?.provider as string;
+  
+  let mappedProvider: AuthUser['provider'] = 'email';
+  if (provider === 'google') mappedProvider = 'google';
+  else if (provider === 'facebook') mappedProvider = 'facebook';
+  else if (provider === 'phone') mappedProvider = 'phone';
+
+  return {
+    id: u.id,
+    email: u.email,
+    name: u.user_metadata?.full_name || u.user_metadata?.name || u.email,
+    avatarUrl: u.user_metadata?.avatar_url || u.user_metadata?.picture,
+    provider: mappedProvider,
+    supabaseUser: u,
+    emailConfirmed: !!u.email_confirmed_at,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const mapSupabaseSession = useCallback((s: Session): AuthUser => ({
-    id: s.user.id,
-    email: s.user.email,
-    name: s.user.user_metadata?.full_name || s.user.email,
-    avatarUrl: s.user.user_metadata?.avatar_url,
-    provider: 'supabase',
-    supabaseUser: s.user,
-    emailConfirmed: !!s.user.email_confirmed_at,
-  }), []);
-
-  const mapFacebookUser = useCallback((fb: FacebookUserData): AuthUser => ({
-    id: fb.id,
-    email: fb.email,
-    name: fb.name,
-    avatarUrl: fb.picture?.data?.url,
-    provider: 'facebook',
-    facebookUser: fb,
-    emailConfirmed: true,
-  }), []);
 
   useEffect(() => {
     let isMounted = true;
 
     // 1. Set up auth state listener FIRST (Supabase best practice)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
+      (_event, newSession) => {
         if (!isMounted) return;
 
-        console.log('[Auth] State changed:', event, !!newSession?.user);
-
-        if (newSession?.user) {
+        if (newSession) {
           setSession(newSession);
-          setUser(mapSupabaseSession(newSession));
-          // ضمان أن isLoading يصبح false عند تسجيل دخول جديد
-          setIsLoading(false);
-        } else if (event === 'SIGNED_OUT') {
-          const fbSession = getStoredFacebookSession();
-          if (fbSession) {
-            setUser(mapFacebookUser(fbSession.user));
-          } else {
-            setUser(null);
-          }
+          setUser(mapSessionToUser(newSession));
+        } else {
           setSession(null);
-          setIsLoading(false);
+          setUser(null);
         }
+        setIsLoading(false);
       }
     );
 
     // 2. THEN check for existing session
-    const initializeAuth = async () => {
-      try {
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        if (!isMounted) return;
+    supabase.auth.getSession().then(({ data: { session: currentSession }, error }) => {
+      if (!isMounted) return;
 
-        if (error) {
-          console.error('Session error:', error.message);
-          if (error.message.includes('invalid') || error.message.includes('expired')) {
-            await supabase.auth.signOut();
-          }
+      if (error) {
+        console.error('[Auth] Session error:', error.message);
+        // Invalid/expired session - clean up
+        if (error.message.includes('invalid') || error.message.includes('expired')) {
+          supabase.auth.signOut();
         }
-
-        if (currentSession?.user) {
-          setSession(currentSession);
-          setUser(mapSupabaseSession(currentSession));
-        } else {
-          const fbSession = getStoredFacebookSession();
-          if (fbSession && isMounted) {
-            setUser(mapFacebookUser(fbSession.user));
-          }
-        }
-      } catch (error) {
-        console.error('Auth init error:', error);
-      } finally {
-        if (isMounted) setIsLoading(false);
       }
-    };
 
-    initializeAuth();
+      if (currentSession) {
+        setSession(currentSession);
+        setUser(mapSessionToUser(currentSession));
+      }
+      setIsLoading(false);
+    });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [mapSupabaseSession, mapFacebookUser]);
+  }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
+    // Clean up any legacy Facebook session data
     try { localStorage.removeItem('facebook_session'); } catch {}
     setUser(null);
     setSession(null);
