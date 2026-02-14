@@ -87,6 +87,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_secrets: {
+        Row: {
+          encrypted: boolean | null
+          key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          encrypted?: boolean | null
+          key: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          encrypted?: boolean | null
+          key?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           allow_edit_after_start: boolean | null

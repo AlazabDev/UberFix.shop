@@ -218,6 +218,18 @@ export function useWhatsAppTemplates(filters: TemplateFilters) {
     },
   });
 
+  // Send test message
+  const sendTestMutation = useMutation({
+    mutationFn: ({ id, phone, parameters }: { id: string; phone: string; parameters?: { header?: string[]; body?: string[] } }) =>
+      callTemplatesAPI('send-test', { id, phone, parameters }, {}),
+    onSuccess: () => {
+      toast.success('تم إرسال رسالة الاختبار بنجاح');
+    },
+    onError: (error: Error) => {
+      toast.error(`فشل الإرسال: ${error.message}`);
+    },
+  });
+
   return {
     templates: data?.templates || [],
     total: data?.total || 0,
@@ -243,10 +255,12 @@ export function useWhatsAppTemplates(filters: TemplateFilters) {
     submitToMeta: submitMutation.mutateAsync,
     syncFromMeta: syncMutation.mutateAsync,
     deleteTemplate: deleteMutation.mutateAsync,
+    sendTest: sendTestMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
     isSyncing: syncMutation.isPending,
     isDeleting: deleteMutation.isPending,
+    isSendingTest: sendTestMutation.isPending,
   };
 }

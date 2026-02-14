@@ -8,6 +8,7 @@ import { TemplatesTable } from '@/components/whatsapp/templates/TemplatesTable';
 import { TemplateEditor } from '@/components/whatsapp/templates/TemplateEditor';
 import { TemplateDetailsView } from '@/components/whatsapp/templates/TemplateDetailsView';
 import { TemplatePagination } from '@/components/whatsapp/templates/TemplatePagination';
+import { SendTestDialog } from '@/components/whatsapp/templates/SendTestDialog';
 import { WhatsAppSettingsModal } from '@/components/whatsapp/WhatsAppSettingsModal';
 import { 
   useWhatsAppTemplates, 
@@ -29,6 +30,7 @@ export default function WhatsAppTemplatesPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sendTestOpen, setSendTestOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<WATemplate | null>(null);
   const [templateEvents, setTemplateEvents] = useState<TemplateEvent[]>([]);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -45,11 +47,13 @@ export default function WhatsAppTemplatesPage() {
     submitToMeta,
     syncFromMeta,
     deleteTemplate,
+    sendTest,
     isCreating,
     isUpdating,
     isSubmitting,
     isSyncing,
     isDeleting,
+    isSendingTest,
   } = useWhatsAppTemplates(filters);
 
   const totalPages = Math.ceil(total / filters.limit);
@@ -101,12 +105,26 @@ export default function WhatsAppTemplatesPage() {
     setDetailsOpen(false);
   }, [deleteTemplate]);
 
+  const handleSendTest = useCallback((template: WATemplate) => {
+    setSelectedTemplate(template);
+    setSendTestOpen(true);
+  }, []);
+
+  const handleSendTestSubmit = useCallback(async (
+    templateId: string, 
+    phone: string, 
+    parameters?: { header?: string[]; body?: string[] }
+  ) => {
+    await sendTest({ id: templateId, phone, parameters });
+    setSendTestOpen(false);
+  }, [sendTest]);
+
   return (
     <PageContainer maxWidth="7xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">قوالب WhatsApp</h1>
+          <h1 className="text-2xl font-bold">WhatsApp Templates</h1>
           <p className="text-muted-foreground text-sm mt-1">
             إدارة قوالب الرسائل وإرسالها للموافقة من Meta
           </p>
@@ -130,11 +148,11 @@ export default function WhatsAppTemplatesPage() {
             ) : (
               <RefreshCw className="h-4 w-4 ml-2" />
             )}
-            مزامنة من Meta
+            Sync
           </Button>
           <Button onClick={handleCreate}>
             <Plus className="h-4 w-4 ml-2" />
-            إنشاء قالب
+            Create
           </Button>
         </div>
       </div>
@@ -153,6 +171,7 @@ export default function WhatsAppTemplatesPage() {
         onEdit={handleEdit}
         onSubmit={handleSubmit}
         onDelete={handleDelete}
+        onSendTest={handleSendTest}
       />
 
       {/* Pagination */}
@@ -186,6 +205,15 @@ export default function WhatsAppTemplatesPage() {
         onDelete={() => selectedTemplate && handleDelete(selectedTemplate)}
         isSubmitting={isSubmitting}
         isDeleting={isDeleting}
+      />
+
+      {/* Send Test Dialog */}
+      <SendTestDialog
+        open={sendTestOpen}
+        onOpenChange={setSendTestOpen}
+        template={selectedTemplate}
+        onSend={handleSendTestSubmit}
+        isSending={isSendingTest}
       />
 
       {/* Settings Modal */}
