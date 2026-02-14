@@ -33,11 +33,8 @@ import {
   Send, 
   RotateCcw, 
   Trash2,
-  PauseCircle 
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
-import { TemplateStatusBadge, TemplateQualityBadge } from './TemplateStatusBadge';
+import { TemplateStatusBadge } from './TemplateStatusBadge';
 import type { WATemplate, TemplateCategory } from '@/hooks/useWhatsAppTemplates';
 
 interface TemplatesTableProps {
@@ -47,19 +44,33 @@ interface TemplatesTableProps {
   onEdit: (template: WATemplate) => void;
   onSubmit: (template: WATemplate) => void;
   onDelete: (template: WATemplate) => void;
+  onSendTest: (template: WATemplate) => void;
 }
 
 const categoryLabels: Record<TemplateCategory, string> = {
-  utility: 'أداة مساعدة',
-  marketing: 'تسويق',
-  authentication: 'مصادقة',
+  utility: 'UTILITY',
+  marketing: 'MARKETING',
+  authentication: 'AUTHENTICATION',
 };
 
 const languageLabels: Record<string, string> = {
-  ar: 'العربية',
-  en: 'English',
-  en_US: 'English (US)',
+  ar: 'ar',
+  en: 'en',
+  en_US: 'en_US',
 };
+
+// Count params in template body
+function countParams(text: string | null | undefined): number {
+  if (!text) return 0;
+  const matches = text.match(/\{\{\d+\}\}/g);
+  return matches ? matches.length : 0;
+}
+
+// Truncate preview text
+function previewText(template: WATemplate): string {
+  const body = template.body_text || '';
+  return body.length > 60 ? body.slice(0, 60) + '...' : body;
+}
 
 export function TemplatesTable({
   templates,
@@ -68,6 +79,7 @@ export function TemplatesTable({
   onEdit,
   onSubmit,
   onDelete,
+  onSendTest,
 }: TemplatesTableProps) {
   const [deleteConfirm, setDeleteConfirm] = useState<WATemplate | null>(null);
 
@@ -77,25 +89,25 @@ export function TemplatesTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-right">الاسم</TableHead>
-              <TableHead className="text-right">الفئة</TableHead>
-              <TableHead className="text-right">اللغة</TableHead>
-              <TableHead className="text-right">الحالة</TableHead>
-              <TableHead className="text-right">الجودة</TableHead>
-              <TableHead className="text-right">آخر تحديث</TableHead>
-              <TableHead className="text-center w-20">إجراءات</TableHead>
+              <TableHead className="text-right">Name</TableHead>
+              <TableHead className="text-right">Status</TableHead>
+              <TableHead className="text-right">Category</TableHead>
+              <TableHead className="text-right">Language</TableHead>
+              <TableHead className="text-right">Preview</TableHead>
+              <TableHead className="text-center w-12"></TableHead>
+              <TableHead className="text-center w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {[...Array(5)].map((_, i) => (
               <TableRow key={i}>
-                <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-40" /></TableCell>
                 <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                <TableCell><Skeleton className="h-8 w-8 mx-auto" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-10" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-6 mx-auto" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-6 mx-auto" /></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -122,13 +134,13 @@ export function TemplatesTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="text-right font-semibold">الاسم</TableHead>
-              <TableHead className="text-right font-semibold">الفئة</TableHead>
-              <TableHead className="text-right font-semibold">اللغة</TableHead>
-              <TableHead className="text-right font-semibold">الحالة</TableHead>
-              <TableHead className="text-right font-semibold">الجودة</TableHead>
-              <TableHead className="text-right font-semibold">آخر تحديث</TableHead>
-              <TableHead className="text-center w-20 font-semibold">إجراءات</TableHead>
+              <TableHead className="text-right font-semibold">Name</TableHead>
+              <TableHead className="text-right font-semibold">Status</TableHead>
+              <TableHead className="text-right font-semibold">Category</TableHead>
+              <TableHead className="text-right font-semibold">Language</TableHead>
+              <TableHead className="text-right font-semibold">Preview</TableHead>
+              <TableHead className="text-center w-12"></TableHead>
+              <TableHead className="text-center w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -138,41 +150,61 @@ export function TemplatesTable({
                 className="hover:bg-muted/30 cursor-pointer"
                 onClick={() => onView(template)}
               >
-                <TableCell className="font-medium">
+                {/* Name + params + meta ID */}
+                <TableCell>
                   <div>
-                    <p className="font-mono text-sm">{template.name}</p>
-                    {template.meta_template_id && (
-                      <p className="text-xs text-muted-foreground">
-                        Meta ID: {template.meta_template_id.slice(0, 12)}...
-                      </p>
-                    )}
+                    <p className="font-semibold text-sm">{template.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {countParams(template.body_text)} params
+                      {template.meta_template_id && ` · ${template.meta_template_id.slice(0, 10)}...`}
+                    </p>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <span className="text-sm">
-                    {categoryLabels[template.category] || template.category}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">
-                    {languageLabels[template.language] || template.language}
-                  </span>
-                </TableCell>
+
+                {/* Status */}
                 <TableCell>
                   <TemplateStatusBadge 
                     status={template.status} 
                     reason={template.rejection_reason}
                   />
                 </TableCell>
+
+                {/* Category */}
                 <TableCell>
-                  <TemplateQualityBadge 
-                    quality={template.quality} 
-                    reason={template.quality_reason}
-                  />
+                  <span className="text-xs font-medium text-muted-foreground uppercase">
+                    {categoryLabels[template.category] || template.category}
+                  </span>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {format(new Date(template.updated_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+
+                {/* Language */}
+                <TableCell>
+                  <span className="text-sm">
+                    {languageLabels[template.language] || template.language}
+                  </span>
                 </TableCell>
+
+                {/* Preview */}
+                <TableCell className="max-w-[250px]">
+                  <p className="text-sm text-muted-foreground truncate" dir="rtl">
+                    {previewText(template)}
+                  </p>
+                </TableCell>
+
+                {/* Send Test */}
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={template.status !== 'approved'}
+                    onClick={() => onSendTest(template)}
+                    title="إرسال اختبار"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+
+                {/* Actions Menu */}
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -197,6 +229,13 @@ export function TemplatesTable({
                         <DropdownMenuItem onClick={() => onSubmit(template)}>
                           <Send className="h-4 w-4 ml-2" />
                           إرسال للموافقة
+                        </DropdownMenuItem>
+                      )}
+
+                      {template.status === 'approved' && (
+                        <DropdownMenuItem onClick={() => onSendTest(template)}>
+                          <Send className="h-4 w-4 ml-2" />
+                          إرسال اختبار
                         </DropdownMenuItem>
                       )}
 

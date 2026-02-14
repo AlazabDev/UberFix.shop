@@ -903,6 +903,147 @@ serve(async (req) => {
       }
 
       // =====================================================
+      // SEND TEST MESSAGE using approved template
+      // =====================================================
+      case "send-test": {
+        if (!["admin", "manager", "owner"].includes(userRole)) {
+          return new Response(JSON.stringify({ error: "Insufficient permissions" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const body = await req.json();
+        const { id, phone, parameters } = body;
+
+        if (!id || !phone) {
+          return new Response(JSON.stringify({ error: "Template ID and phone number are required" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Validate phone format
+        const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
+        if (!/^\+?\d{10,15}$/.test(cleanPhone)) {
+          return new Response(JSON.stringify({ error: "Invalid phone number format" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const { data: template } = await supabase
+          .from("wa_templates")
+          .select("*")
+          .eq("id", id)
+          .eq("tenant_id", tenantId)
+          .single();
+
+        if (!template) {
+          return new Response(JSON.stringify({ error: "Template not found" }), {
+            status: 404,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        if (template.status !== "approved") {
+          return new Response(JSON.stringify({ error: "Only approved templates can be sent" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const PHONE_NUMBER_ID = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+        if (!PHONE_NUMBER_ID) {
+          return new Response(JSON.stringify({ error: "WHATSAPP_PHONE_NUMBER_ID not configured" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Build template message payload
+        const templatePayload: any = {
+          messaging_product: "whatsapp",
+          to: cleanPhone.startsWith("+") ? cleanPhone.slice(1) : cleanPhone,
+          type: "template",
+          template: {
+            name: template.meta_template_name || template.name,
+            language: { code: template.language },
+          },
+        };
+
+        // Add components with parameters if provided
+        const componentParams: any[] = [];
+
+        // Header parameters
+        if (parameters?.header && parameters.header.length > 0) {
+          componentParams.push({
+            type: "header",
+            parameters: parameters.header.map((p: string) => ({ type: "text", text: p })),
+          });
+        }
+
+        // Body parameters
+        if (parameters?.body && parameters.body.length > 0) {
+          componentParams.push({
+            type: "body",
+            parameters: parameters.body.map((p: string) => ({ type: "text", text: p })),
+          });
+        }
+
+        if (componentParams.length > 0) {
+          templatePayload.template.components = componentParams;
+        }
+
+        console.log(`[${correlationId}] Sending test to ${cleanPhone}:`, JSON.stringify(templatePayload));
+
+        try {
+          const sendResponse = await fetch(
+            `${META_GRAPH_URL}/${PHONE_NUMBER_ID}/messages`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(templatePayload),
+            }
+          );
+
+          const sendResult = await sendResponse.json();
+          console.log(`[${correlationId}] Send result:`, JSON.stringify(sendResult));
+
+          if (!sendResponse.ok) {
+            return new Response(
+              JSON.stringify({ error: "Failed to send test message", details: sendResult.error }),
+              {
+                status: 400,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              }
+            );
+          }
+
+          await logEvent(supabase, id, tenantId, user.id, "test_sent", "user", { phone: cleanPhone, message_id: sendResult.messages?.[0]?.id }, correlationId);
+
+          return new Response(
+            JSON.stringify({ success: true, message_id: sendResult.messages?.[0]?.id }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        } catch (sendError) {
+          console.error(`[${correlationId}] Send error:`, sendError);
+          return new Response(
+            JSON.stringify({ error: "Network error sending message" }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+      }
+
+      // =====================================================
       // CHECK CONFIG - Verify if secrets are configured
       // =====================================================
       case "check-config": {
