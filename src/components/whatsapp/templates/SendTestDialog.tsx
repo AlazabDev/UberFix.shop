@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -39,11 +39,10 @@ export function SendTestDialog({ open, onOpenChange, template, onSend, isSending
     return matches ? matches.length : 0;
   }, [template?.header_content]);
 
-  // Initialize params when template changes
-  useState(() => {
+  useEffect(() => {
     setBodyParams(Array(bodyPlaceholderCount).fill(''));
     setHeaderParams(Array(headerPlaceholderCount).fill(''));
-  });
+  }, [bodyPlaceholderCount, headerPlaceholderCount]);
 
   if (!template) return null;
 
@@ -68,7 +67,7 @@ export function SendTestDialog({ open, onOpenChange, template, onSend, isSending
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg" dir="rtl">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col" dir="rtl">
         <DialogHeader>
           <DialogTitle>إرسال رسالة اختبار</DialogTitle>
           <DialogDescription>
@@ -76,7 +75,7 @@ export function SendTestDialog({ open, onOpenChange, template, onSend, isSending
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1 min-h-0 px-1">
           {/* Phone Number */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">

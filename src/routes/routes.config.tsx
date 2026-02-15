@@ -103,6 +103,9 @@ const MessageLogs = lazy(
 const WhatsAppTemplatesPage = lazy(
   () => import("@/pages/whatsapp/WhatsAppTemplatesPage")
 );
+const WhatsAppMessageLogsPage = lazy(
+  () => import("@/pages/whatsapp/WhatsAppMessageLogsPage")
+);
 
 // Projects
 const ProjectDetails = lazy(() => import("@/pages/projects/ProjectDetails"));
@@ -200,6 +203,7 @@ export const protectedRoutes = [
   { path: "/whatsapp", element: <WhatsAppMessages />, withLayout: true },
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
   { path: "/dashboard/whatsapp/templates", element: <WhatsAppTemplatesPage />, withLayout: true },
+  { path: "/dashboard/whatsapp/logs", element: <WhatsAppMessageLogsPage />, withLayout: true },
 
   // No layout
   { path: "/service-map", element: <ServiceMap />, withLayout: false },

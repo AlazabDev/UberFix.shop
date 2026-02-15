@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw, Loader2, Settings } from 'lucide-react';
+import { Plus, RefreshCw, Loader2, Settings, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { TemplateKPIs } from '@/components/whatsapp/templates/TemplateKPIs';
 import { TemplateFiltersBar } from '@/components/whatsapp/templates/TemplateFiltersBar';
@@ -18,6 +19,7 @@ import {
 } from '@/hooks/useWhatsAppTemplates';
 
 export default function WhatsAppTemplatesPage() {
+  const navigate = useNavigate();
   // Filters state
   const [filters, setFilters] = useState<TemplateFilters>({
     page: 1,
@@ -130,6 +132,14 @@ export default function WhatsAppTemplatesPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/dashboard/whatsapp/logs')}
+            title="سجل المراسلات"
+          >
+            <FileText className="h-4 w-4 ml-2" />
+            السجل
+          </Button>
           <Button 
             variant="outline" 
             size="icon"
