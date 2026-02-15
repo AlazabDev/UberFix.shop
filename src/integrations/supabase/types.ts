@@ -1861,6 +1861,98 @@ export type Database = {
           },
         ]
       }
+      maintenance_requests_archive: {
+        Row: {
+          actual_cost: number | null
+          assigned_to: string | null
+          completion_date: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          estimated_cost: number | null
+          id: string
+          is_deleted: boolean | null
+          primary_service_id: string | null
+          priority: string | null
+          scheduled_date: string | null
+          service_type: string | null
+          status: string | null
+          store_id: string | null
+          title: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          assigned_to?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          is_deleted?: boolean | null
+          primary_service_id?: string | null
+          priority?: string | null
+          scheduled_date?: string | null
+          service_type?: string | null
+          status?: string | null
+          store_id?: string | null
+          title: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          assigned_to?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          is_deleted?: boolean | null
+          primary_service_id?: string | null
+          priority?: string | null
+          scheduled_date?: string | null
+          service_type?: string | null
+          status?: string | null
+          store_id?: string | null
+          title?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_requests_archive_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      malls: {
+        Row: {
+          id: number
+          location: string | null
+          name: string
+          type: string | null
+        }
+        Insert: {
+          id?: number
+          location?: string | null
+          name: string
+          type?: string | null
+        }
+        Update: {
+          id?: number
+          location?: string | null
+          name?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
       media_files: {
         Row: {
           created_at: string | null
@@ -2767,6 +2859,42 @@ export type Database = {
           },
         ]
       }
+      rate_items: {
+        Row: {
+          after_hours_hourly: number | null
+          id: number
+          min_billable_hours: number | null
+          min_invoice: number | null
+          normal_hourly: number | null
+          notes: string | null
+          rate_card_id: string | null
+          trade_id: number | null
+          trip_charge: number | null
+        }
+        Insert: {
+          after_hours_hourly?: number | null
+          id?: number
+          min_billable_hours?: number | null
+          min_invoice?: number | null
+          normal_hourly?: number | null
+          notes?: string | null
+          rate_card_id?: string | null
+          trade_id?: number | null
+          trip_charge?: number | null
+        }
+        Update: {
+          after_hours_hourly?: number | null
+          id?: number
+          min_billable_hours?: number | null
+          min_invoice?: number | null
+          normal_hourly?: number | null
+          notes?: string | null
+          rate_card_id?: string | null
+          trade_id?: number | null
+          trip_charge?: number | null
+        }
+        Relationships: []
+      }
       request_approvals: {
         Row: {
           approval_type: string
@@ -3203,6 +3331,66 @@ export type Database = {
           name?: string
           name_ar?: string
           sort_order?: number | null
+        }
+        Relationships: []
+      }
+      stores: {
+        Row: {
+          area: number | null
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          email: string | null
+          id: string
+          is_deleted: boolean | null
+          location: string | null
+          map_url: string | null
+          name: string
+          opening_date: string | null
+          phone: string | null
+          region_id: string | null
+          status: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          area?: number | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          location?: string | null
+          map_url?: string | null
+          name: string
+          opening_date?: string | null
+          phone?: string | null
+          region_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          area?: number | null
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          location?: string | null
+          map_url?: string | null
+          name?: string
+          opening_date?: string | null
+          phone?: string | null
+          region_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: []
       }
