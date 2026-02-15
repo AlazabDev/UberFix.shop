@@ -49,6 +49,11 @@ const UserManagement = lazy(
 const CompanyBranchImport = lazy(
   () => import("@/pages/admin/CompanyBranchImport")
 );
+const DataImport = lazy(() => import("@/pages/admin/DataImport"));
+const StoresDirectory = lazy(() => import("@/pages/admin/StoresDirectory"));
+const MaintenanceArchive = lazy(() => import("@/pages/admin/MaintenanceArchive"));
+const RateCard = lazy(() => import("@/pages/admin/RateCard"));
+const MallsDirectory = lazy(() => import("@/pages/admin/MallsDirectory"));
 
 // Technicians
 const TechnicianRegistration = lazy(
@@ -182,6 +187,11 @@ export const protectedRoutes = [
   { path: "/projects/:id", element: <ProjectDetails />, withLayout: true },
   { path: "/admin/users", element: <UserManagement />, withLayout: true },
   { path: "/admin/company-branch-import", element: <CompanyBranchImport />, withLayout: true },
+  { path: "/admin/data-import", element: <DataImport />, withLayout: true },
+  { path: "/admin/stores", element: <StoresDirectory />, withLayout: true },
+  { path: "/admin/maintenance-archive", element: <MaintenanceArchive />, withLayout: true },
+  { path: "/admin/rate-card", element: <RateCard />, withLayout: true },
+  { path: "/admin/malls", element: <MallsDirectory />, withLayout: true },
   { path: "/admin/technician-approval", element: <TechnicianApprovalQueue />, withLayout: true },
   { path: "/admin/module-settings", element: <ModuleSettings />, withLayout: true },
   { path: "/users", element: <UsersPage />, withLayout: true },
