@@ -69,6 +69,7 @@ const allMenuItems = [
   { icon: UserCheck, label: "موافقات الفنيين", href: "/admin/technician-approval", moduleKey: "technician_approval" },
   { icon: Shield, label: "إعدادات المديولات", href: "/admin/module-settings", moduleKey: "module_settings" },
   { icon: MessageSquare, label: "قوالب الرسائل", href: "/dashboard/whatsapp/templates", moduleKey: "whatsapp_templates" },
+  { icon: MessageSquare, label: "سجل المراسلات", href: "/dashboard/whatsapp/logs", moduleKey: "whatsapp_logs" },
   
   // Technician specific
   { icon: Home, label: "لوحة الفني", href: "/technicians/dashboard", moduleKey: "technician_dashboard" },
