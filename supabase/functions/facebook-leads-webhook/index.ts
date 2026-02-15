@@ -6,25 +6,41 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-hub-signature-256",
 };
 
-// Verify Facebook webhook signature
-function verifySignature(payload: string, signature: string, appSecret: string): boolean {
+// Verify Facebook webhook signature using HMAC-SHA256
+async function verifySignature(payload: string, signature: string, appSecret: string): Promise<boolean> {
   if (!signature || !signature.startsWith('sha256=')) {
-    console.log('Missing or invalid signature format');
+    console.error('Missing or invalid signature format');
     return false;
   }
 
   try {
-    const key = new TextEncoder().encode(appSecret);
-    const data = new TextEncoder().encode(payload);
-    
-    // For now, we'll log the signature for debugging
-    // In production, implement proper HMAC-SHA256 verification
-    console.log('Signature received:', signature.substring(0, 20) + '...');
-    console.log('Payload length:', payload.length);
-    
-    // Skip signature verification for now (Meta sends valid signatures)
-    // TODO: Implement proper HMAC-SHA256 verification with Web Crypto API
-    return true;
+    const expectedSig = signature.replace('sha256=', '');
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(appSecret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signatureBuffer = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(payload)
+    );
+
+    const computedSig = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    // Constant-time comparison
+    if (expectedSig.length !== computedSig.length) return false;
+    let result = 0;
+    for (let i = 0; i < expectedSig.length; i++) {
+      result |= expectedSig.charCodeAt(i) ^ computedSig.charCodeAt(i);
+    }
+    return result === 0;
   } catch (error) {
     console.error('Signature verification error:', error);
     return false;
@@ -192,12 +208,17 @@ serve(async (req) => {
 
       // Verify signature
       const appSecret = Deno.env.get("FACEBOOK_APP_SECRET");
-      if (appSecret && !verifySignature(payload, signature, appSecret)) {
-        console.error("Invalid signature");
-        return new Response("Invalid signature", { 
-          status: 401,
-          headers: corsHeaders 
-        });
+      if (appSecret) {
+        const isValid = await verifySignature(payload, signature, appSecret);
+        if (!isValid) {
+          console.error("Invalid webhook signature - rejecting request");
+          return new Response(JSON.stringify({ error: "Invalid signature" }), { 
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else {
+        console.warn("FACEBOOK_APP_SECRET not configured - skipping signature verification");
       }
 
       // Parse the webhook payload
