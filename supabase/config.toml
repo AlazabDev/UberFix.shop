@@ -70,8 +70,8 @@ verify_jwt = false
 # Public access with rate limiting and origin validation inside function
 
 [functions.get-mapbox-token]
-verify_jwt = true
-# Changed from false - returns Mapbox token, requires authentication
+verify_jwt = false
+# Public access - returns public Mapbox token, protected by origin validation and rate limiting
 
 [functions.send-maintenance-notification]
 verify_jwt = true

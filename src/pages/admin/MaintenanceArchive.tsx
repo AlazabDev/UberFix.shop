@@ -17,7 +17,7 @@ export default function MaintenanceArchive() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("maintenance_requests_archive")
-        .select("*, stores(name)")
+        .select("*")
         .eq("is_deleted", false)
         .order("scheduled_date", { ascending: false })
         .limit(500);
@@ -29,8 +29,7 @@ export default function MaintenanceArchive() {
   const filtered = records.filter(
     (r: any) =>
       r.description?.toLowerCase().includes(search.toLowerCase()) ||
-      r.title?.toLowerCase().includes(search.toLowerCase()) ||
-      r.stores?.name?.toLowerCase().includes(search.toLowerCase())
+      r.title?.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalCost = records.reduce((s: number, r: any) => s + (r.actual_cost || 0), 0);
@@ -104,7 +103,7 @@ export default function MaintenanceArchive() {
                 <TableBody>
                   {filtered.slice(0, 100).map((r: any) => (
                     <TableRow key={r.id}>
-                      <TableCell className="font-medium whitespace-nowrap">{r.stores?.name || "-"}</TableCell>
+                      <TableCell className="font-medium whitespace-nowrap">{r.store_id?.substring(0, 8) || "-"}</TableCell>
                       <TableCell className="max-w-[350px] truncate">{r.description || r.title}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${priorityBadge(r.priority)}`}>

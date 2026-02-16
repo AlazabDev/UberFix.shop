@@ -23,7 +23,10 @@ import {
   UserCheck,
   Lock,
   MessageSquare,
-  ScrollText
+  ScrollText,
+  Store,
+  Archive,
+  Database
 } from "lucide-react";
 import { useModulePermissions } from "@/hooks/useModulePermissions";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
@@ -68,6 +71,11 @@ const allMenuItems = [
   { icon: UserCheck, label: "إدارة المستخدمين", href: "/admin/users", moduleKey: "admin_users" },
   { icon: UserCheck, label: "موافقات الفنيين", href: "/admin/technician-approval", moduleKey: "technician_approval" },
   { icon: Shield, label: "إعدادات المديولات", href: "/admin/module-settings", moduleKey: "module_settings" },
+  { icon: Store, label: "دليل المتاجر", href: "/admin/stores", moduleKey: "module_settings" },
+  { icon: Archive, label: "أرشيف الصيانة", href: "/admin/maintenance-archive", moduleKey: "module_settings" },
+  { icon: DollarSign, label: "بطاقة الأسعار", href: "/admin/rate-card", moduleKey: "module_settings" },
+  { icon: Building2, label: "دليل المولات", href: "/admin/malls", moduleKey: "module_settings" },
+  { icon: Database, label: "استيراد البيانات", href: "/admin/data-import", moduleKey: "module_settings" },
   { icon: MessageSquare, label: "قوالب الرسائل", href: "/dashboard/whatsapp/templates", moduleKey: "whatsapp_templates" },
   { icon: MessageSquare, label: "سجل المراسلات", href: "/dashboard/whatsapp/logs", moduleKey: "whatsapp_logs" },
   
