@@ -26,7 +26,7 @@ const BranchesMapbox = lazy(() => import("@/components/maps/BranchesMapbox"));
 const MapLoadingFallback = () => {
   const { t } = useTranslation();
   return (
-    <div className="w-full h-[500px] rounded-2xl bg-muted/50 flex items-center justify-center">
+    <div className="w-full h-[700px] rounded-2xl bg-muted/50 flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
         <p className="text-sm text-muted-foreground">{t('map.loading')}</p>
@@ -66,7 +66,7 @@ export const LandingPage = () => {
 
           <div className="max-w-6xl mx-auto">
             <Suspense fallback={<MapLoadingFallback />}>
-              <BranchesMapbox height="500px" showStats={true} initialMode="globe" />
+              <BranchesMapbox height="700px" showStats={true} initialMode="globe" />
             </Suspense>
           </div>
         </div>

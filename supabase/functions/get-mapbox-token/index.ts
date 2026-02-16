@@ -5,6 +5,7 @@ import { rateLimit } from '../_shared/rateLimiter.ts';
 // Allowed origins for additional validation
 const ALLOWED_ORIGINS = [
   'https://uberfix.shop',
+  'https://www.uberfix.shop',
   'https://uberfiix.lovable.app',
   'https://lovable.app',
   'https://lovableproject.com',
