@@ -33,6 +33,14 @@ export interface StatusTab {
   count?: number;
 }
 
+export interface RangeFilterDef {
+  key: string;
+  label: string;
+  type: "date" | "number";
+  placeholderFrom?: string;
+  placeholderTo?: string;
+}
+
 interface AdminDataTableProps<T> {
   data: T[];
   columns: ColumnDef<T>[];
@@ -47,6 +55,7 @@ interface AdminDataTableProps<T> {
   searchKeys?: string[];
   // Filters
   filters?: FilterDef[];
+  rangeFilters?: RangeFilterDef[];
   // Status tabs
   statusTabs?: StatusTab[];
   statusKey?: string;
@@ -73,6 +82,7 @@ export function AdminDataTable<T extends Record<string, any>>({
   searchPlaceholder = "بحث...",
   searchKeys = ["name", "title", "description"],
   filters = [],
+  rangeFilters = [],
   statusTabs = [],
   statusKey = "status",
   pageSize: defaultPageSize = 20,
@@ -89,6 +99,7 @@ export function AdminDataTable<T extends Record<string, any>>({
   const [showFilters, setShowFilters] = useState(false);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [rangeValues, setRangeValues] = useState<Record<string, { from: string; to: string }>>({});
 
   // ── Filter logic ──
   const filtered = useMemo(() => {
@@ -114,6 +125,20 @@ export function AdminDataTable<T extends Record<string, any>>({
       }
     }
 
+    // Range filters (date/number)
+    for (const [key, val] of Object.entries(rangeValues)) {
+      if (val.from || val.to) {
+        const rf = rangeFilters.find(r => r.key === key);
+        if (rf?.type === "number") {
+          if (val.from) result = result.filter(row => Number(row[key] ?? 0) >= Number(val.from));
+          if (val.to) result = result.filter(row => Number(row[key] ?? 0) <= Number(val.to));
+        } else if (rf?.type === "date") {
+          if (val.from) result = result.filter(row => row[key] && String(row[key]).slice(0, 10) >= val.from);
+          if (val.to) result = result.filter(row => row[key] && String(row[key]).slice(0, 10) <= val.to);
+        }
+      }
+    }
+
     // Sort
     if (sortKey) {
       result.sort((a, b) => {
@@ -125,7 +150,7 @@ export function AdminDataTable<T extends Record<string, any>>({
     }
 
     return result;
-  }, [data, search, activeTab, activeFilters, sortKey, sortDir, searchKeys, statusKey]);
+  }, [data, search, activeTab, activeFilters, rangeValues, sortKey, sortDir, searchKeys, statusKey, rangeFilters]);
 
   // ── Pagination ──
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -134,12 +159,15 @@ export function AdminDataTable<T extends Record<string, any>>({
   const fromRow = filtered.length === 0 ? 0 : (safeCurrentPage - 1) * pageSize + 1;
   const toRow = Math.min(safeCurrentPage * pageSize, filtered.length);
 
-  const hasActiveFilters = search || activeTab !== "__all__" || Object.values(activeFilters).some(v => v && v !== "__all__");
+  const hasActiveFilters = search || activeTab !== "__all__" 
+    || Object.values(activeFilters).some(v => v && v !== "__all__")
+    || Object.values(rangeValues).some(v => v.from || v.to);
 
   const clearAll = () => {
     setSearch("");
     setActiveTab("__all__");
     setActiveFilters({});
+    setRangeValues({});
     setPage(1);
   };
 
@@ -211,7 +239,7 @@ export function AdminDataTable<T extends Record<string, any>>({
                 className="pr-9 h-9"
               />
             </div>
-            {filters.length > 0 && (
+            {(filters.length > 0 || rangeFilters.length > 0) && (
               <Button
                 variant={showFilters ? "secondary" : "outline"}
                 size="sm"
@@ -231,7 +259,7 @@ export function AdminDataTable<T extends Record<string, any>>({
           </div>
 
           {/* Advanced filters */}
-          {showFilters && filters.length > 0 && (
+          {showFilters && (filters.length > 0 || rangeFilters.length > 0) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-2 border-t border-border/40">
               {filters.map((f) => (
                 <div key={f.key} className="space-y-1">
@@ -253,6 +281,40 @@ export function AdminDataTable<T extends Record<string, any>>({
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              ))}
+              {rangeFilters.map((rf) => (
+                <div key={rf.key} className="space-y-1 sm:col-span-2">
+                  <label className="text-xs font-medium text-muted-foreground">{rf.label}</label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type={rf.type === "date" ? "date" : "number"}
+                      placeholder={rf.placeholderFrom || "من"}
+                      value={rangeValues[rf.key]?.from || ""}
+                      onChange={(e) => {
+                        setRangeValues(prev => ({
+                          ...prev,
+                          [rf.key]: { ...prev[rf.key], from: e.target.value, to: prev[rf.key]?.to || "" }
+                        }));
+                        setPage(1);
+                      }}
+                      className="h-8 text-sm"
+                    />
+                    <span className="text-xs text-muted-foreground shrink-0">إلى</span>
+                    <Input
+                      type={rf.type === "date" ? "date" : "number"}
+                      placeholder={rf.placeholderTo || "إلى"}
+                      value={rangeValues[rf.key]?.to || ""}
+                      onChange={(e) => {
+                        setRangeValues(prev => ({
+                          ...prev,
+                          [rf.key]: { from: prev[rf.key]?.from || "", to: e.target.value }
+                        }));
+                        setPage(1);
+                      }}
+                      className="h-8 text-sm"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
