@@ -1,31 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AdminDataTable, type ColumnDef } from "@/components/admin/AdminDataTable";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign } from "lucide-react";
+import { exportTablePdf, exportTableCsv } from "@/lib/exportUtils";
 
 const TRADE_NAMES: Record<number, string> = {
-  1: "كهرباء عامة",
-  2: "سباكة",
-  3: "نجارة",
-  4: "ألمونيوم وزجاج",
-  5: "تكييف وتبريد",
-  6: "غسالات/ثلاجات",
-  7: "مولدات وUPS",
-  8: "أنظمة أمنية",
-  9: "أسقف معلقة",
-  10: "دهانات",
-  11: "أرضيات",
-  12: "حدادة",
-  13: "لافتات إعلانية",
-  14: "تشطيبات",
-  15: "أعمال مدنية",
-  16: "عزل مائي وحراري",
-  17: "أبواب أوتوماتيك",
-  18: "السلامة والحريق",
-  19: "هاند مان",
-  20: "صيانة وقائية",
+  1: "كهرباء عامة", 2: "سباكة", 3: "نجارة", 4: "ألمونيوم وزجاج",
+  5: "تكييف وتبريد", 6: "غسالات/ثلاجات", 7: "مولدات وUPS", 8: "أنظمة أمنية",
+  9: "أسقف معلقة", 10: "دهانات", 11: "أرضيات", 12: "حدادة",
+  13: "لافتات إعلانية", 14: "تشطيبات", 15: "أعمال مدنية", 16: "عزل مائي وحراري",
+  17: "أبواب أوتوماتيك", 18: "السلامة والحريق", 19: "هاند مان", 20: "صيانة وقائية",
 };
 
 export default function RateCard() {
@@ -38,60 +23,112 @@ export default function RateCard() {
     },
   });
 
-  return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-          <DollarSign className="h-8 w-8 text-primary" />
-          بطاقة الأسعار
-        </h1>
-        <p className="text-muted-foreground mt-1">أسعار الخدمات حسب التخصص</p>
-      </div>
+  const avgHourly = items.length
+    ? Math.round(items.reduce((s: number, i: any) => s + (i.normal_hourly || 0), 0) / items.length)
+    : 0;
 
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>#</TableHead>
-                    <TableHead>التخصص</TableHead>
-                    <TableHead>ملاحظات</TableHead>
-                    <TableHead className="text-center">سعر الساعة</TableHead>
-                    <TableHead className="text-center">بعد الدوام</TableHead>
-                    <TableHead className="text-center">أقل ساعات</TableHead>
-                    <TableHead className="text-center">رسم الانتقال</TableHead>
-                    <TableHead className="text-center">أقل فاتورة</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item: any) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-mono text-muted-foreground">{item.trade_id}</TableCell>
-                      <TableCell className="font-medium whitespace-nowrap">
-                        {TRADE_NAMES[item.trade_id] || `تخصص ${item.trade_id}`}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">{item.notes}</TableCell>
-                      <TableCell className="text-center font-mono font-bold text-primary">{item.normal_hourly} ج.م</TableCell>
-                      <TableCell className="text-center font-mono text-amber-600">{item.after_hours_hourly} ج.م</TableCell>
-                      <TableCell className="text-center">{item.min_billable_hours} ساعة</TableCell>
-                      <TableCell className="text-center font-mono">{item.trip_charge} ج.م</TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="secondary" className="font-mono">{item.min_invoice} ج.م</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+  const columns: ColumnDef<any>[] = [
+    {
+      key: "trade_id",
+      header: "التخصص",
+      sortable: true,
+      render: (row) => (
+        <div>
+          <p className="font-semibold text-sm">{TRADE_NAMES[row.trade_id] || `تخصص ${row.trade_id}`}</p>
+          <p className="text-xs text-muted-foreground font-mono">#{row.trade_id}</p>
+        </div>
+      ),
+    },
+    {
+      key: "notes",
+      header: "ملاحظات",
+      render: (row) => (
+        <span className="text-xs text-muted-foreground max-w-[180px] truncate block">
+          {row.notes || "-"}
+        </span>
+      ),
+    },
+    {
+      key: "normal_hourly",
+      header: "سعر الساعة",
+      sortable: true,
+      className: "text-center",
+      render: (row) => (
+        <span className="font-mono font-bold text-primary text-sm">{row.normal_hourly} ج.م</span>
+      ),
+    },
+    {
+      key: "after_hours_hourly",
+      header: "بعد الدوام",
+      sortable: true,
+      className: "text-center",
+      render: (row) => (
+        <span className="font-mono text-amber-600 text-sm">{row.after_hours_hourly} ج.م</span>
+      ),
+    },
+    {
+      key: "min_billable_hours",
+      header: "أقل ساعات",
+      className: "text-center",
+      render: (row) => <span className="text-sm">{row.min_billable_hours} ساعة</span>,
+    },
+    {
+      key: "trip_charge",
+      header: "رسم الانتقال",
+      className: "text-center",
+      render: (row) => <span className="font-mono text-sm">{row.trip_charge} ج.م</span>,
+    },
+    {
+      key: "min_invoice",
+      header: "أقل فاتورة",
+      className: "text-center",
+      render: (row) => (
+        <Badge variant="secondary" className="font-mono text-xs">{row.min_invoice} ج.م</Badge>
+      ),
+    },
+  ];
+
+  const stats = [
+    { label: "عدد التخصصات", value: items.length, color: "text-primary", icon: <DollarSign className="h-4 w-4 text-primary" /> },
+    { label: "متوسط سعر الساعة", value: `${avgHourly} ج.م`, color: "text-amber-600" },
+  ];
+
+  const handleExportPdf = (data: any[]) => {
+    const headers = ["التخصص", "سعر الساعة", "بعد الدوام", "أقل ساعات", "رسم الانتقال", "أقل فاتورة"];
+    const rows = data.map((i) => [
+      TRADE_NAMES[i.trade_id] || `#${i.trade_id}`,
+      `${i.normal_hourly} ج.م`, `${i.after_hours_hourly} ج.م`,
+      `${i.min_billable_hours}`, `${i.trip_charge} ج.م`, `${i.min_invoice} ج.م`,
+    ]);
+    exportTablePdf("بطاقة الأسعار", headers, rows, "rate-card.pdf");
+  };
+
+  const handleExportCsv = (data: any[]) => {
+    const headers = ["التخصص", "سعر الساعة", "بعد الدوام", "أقل ساعات", "رسم الانتقال", "أقل فاتورة", "ملاحظات"];
+    const rows = data.map((i) => [
+      TRADE_NAMES[i.trade_id] || `#${i.trade_id}`,
+      String(i.normal_hourly), String(i.after_hours_hourly),
+      String(i.min_billable_hours), String(i.trip_charge), String(i.min_invoice), i.notes || "",
+    ]);
+    exportTableCsv(headers, rows, "rate-card.csv");
+  };
+
+  return (
+    <div className="container mx-auto p-6">
+      <AdminDataTable
+        data={items}
+        columns={columns}
+        isLoading={isLoading}
+        title="بطاقة الأسعار"
+        subtitle="أسعار الخدمات حسب التخصص"
+        icon={<DollarSign className="h-5 w-5" />}
+        searchPlaceholder="بحث بالتخصص..."
+        searchKeys={["notes"]}
+        stats={stats}
+        onExportPdf={handleExportPdf}
+        onExportCsv={handleExportCsv}
+        pageSize={50}
+      />
     </div>
   );
 }
