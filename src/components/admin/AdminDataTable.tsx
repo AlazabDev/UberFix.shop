@@ -184,24 +184,24 @@ export function AdminDataTable<T extends Record<string, any>>({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          {icon && <div className="p-2.5 rounded-xl bg-primary/10 text-primary">{icon}</div>}
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          {icon && <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">{icon}</div>}
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{title}</h1>
             <p className="text-sm text-muted-foreground">{subtitle || `${data.length} سجل`}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {onExportPdf && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => onExportPdf(filtered)}>
-              <Download className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => onExportPdf(filtered)}>
+              <Download className="h-3.5 w-3.5" />
               PDF
             </Button>
           )}
           {onExportCsv && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => onExportCsv(filtered)}>
-              <Download className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => onExportCsv(filtered)}>
+              <Download className="h-3.5 w-3.5" />
               CSV
             </Button>
           )}
@@ -420,20 +420,20 @@ export function AdminDataTable<T extends Record<string, any>>({
 
         {/* Pagination footer */}
         {filtered.length > 0 && (
-          <div className="flex items-center justify-between border-t border-border/40 px-4 py-2.5 bg-muted/20 flex-wrap gap-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-border/40 px-3 sm:px-4 py-2.5 bg-muted/20 gap-2">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
               <span>{fromRow} - {toRow} من {filtered.length}</span>
-              <span className="text-border">|</span>
-              <span>صفحة {safeCurrentPage} من {totalPages}</span>
+              <span className="text-border hidden sm:inline">|</span>
+              <span className="hidden sm:inline">صفحة {safeCurrentPage} من {totalPages}</span>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 order-1 sm:order-2 flex-wrap justify-center">
               {/* Page size selector */}
               <Select
                 value={String(pageSize)}
                 onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}
               >
-                <SelectTrigger className="h-8 w-20 text-xs">
+                <SelectTrigger className="h-7 sm:h-8 w-16 sm:w-20 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -445,50 +445,54 @@ export function AdminDataTable<T extends Record<string, any>>({
 
               {/* Navigation buttons */}
               <Button
-                variant="outline" size="icon" className="h-8 w-8"
+                variant="outline" size="icon" className="h-7 w-7 sm:h-8 sm:w-8"
                 disabled={safeCurrentPage <= 1}
                 onClick={() => setPage(1)}
               >
-                <ChevronsRight className="h-3.5 w-3.5" />
+                <ChevronsRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
               <Button
-                variant="outline" size="icon" className="h-8 w-8"
+                variant="outline" size="icon" className="h-7 w-7 sm:h-8 sm:w-8"
                 disabled={safeCurrentPage <= 1}
                 onClick={() => setPage(p => Math.max(1, p - 1))}
               >
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
 
-              {/* Page number buttons */}
-              {getPageNumbers(safeCurrentPage, totalPages).map((p, i) =>
-                p === "..." ? (
-                  <span key={`e${i}`} className="px-1 text-muted-foreground text-xs">...</span>
-                ) : (
-                  <Button
-                    key={p}
-                    variant={p === safeCurrentPage ? "default" : "outline"}
-                    size="icon"
-                    className="h-8 w-8 text-xs"
-                    onClick={() => setPage(p as number)}
-                  >
-                    {p}
-                  </Button>
-                )
-              )}
+              {/* Page number buttons - hide on very small screens */}
+              <div className="hidden xs:flex items-center gap-1">
+                {getPageNumbers(safeCurrentPage, totalPages).map((p, i) =>
+                  p === "..." ? (
+                    <span key={`e${i}`} className="px-1 text-muted-foreground text-xs">...</span>
+                  ) : (
+                    <Button
+                      key={p}
+                      variant={p === safeCurrentPage ? "default" : "outline"}
+                      size="icon"
+                      className="h-7 w-7 sm:h-8 sm:w-8 text-xs"
+                      onClick={() => setPage(p as number)}
+                    >
+                      {p}
+                    </Button>
+                  )
+                )}
+              </div>
+              {/* Mobile: show current/total only */}
+              <span className="xs:hidden text-xs text-muted-foreground px-1">{safeCurrentPage}/{totalPages}</span>
 
               <Button
-                variant="outline" size="icon" className="h-8 w-8"
+                variant="outline" size="icon" className="h-7 w-7 sm:h-8 sm:w-8"
                 disabled={safeCurrentPage >= totalPages}
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               >
-                <ChevronLeft className="h-3.5 w-3.5" />
+                <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
               <Button
-                variant="outline" size="icon" className="h-8 w-8"
+                variant="outline" size="icon" className="h-7 w-7 sm:h-8 sm:w-8"
                 disabled={safeCurrentPage >= totalPages}
                 onClick={() => setPage(totalPages)}
               >
-                <ChevronsLeft className="h-3.5 w-3.5" />
+                <ChevronsLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
             </div>
           </div>
