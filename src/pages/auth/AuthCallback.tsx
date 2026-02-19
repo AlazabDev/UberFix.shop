@@ -39,6 +39,8 @@ const AuthCallback = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const handleCallback = async () => {
       try {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -58,25 +60,25 @@ const AuthCallback = () => {
           if (errorParam === 'access_denied' || errorCode === 'otp_expired') {
             errorMsg = 'انتهت صلاحية الرابط. يرجى طلب رابط جديد.';
           }
-          setError(errorMsg);
+          if (isMounted) setError(errorMsg);
           return;
         }
 
         // Recovery (password reset)
         if (type === 'recovery') {
-          setMessage('جاري تحضير صفحة إعادة تعيين كلمة المرور...');
+          if (isMounted) setMessage('جاري تحضير صفحة إعادة تعيين كلمة المرور...');
           if (tokenHash) {
             const { data, error: e } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
-            if (e) { setError(e.message); return; }
+            if (e) { if (isMounted) setError(e.message); return; }
             if (data?.session) { navigate('/auth/update-password', { replace: true }); return; }
           }
           if (accessToken && refreshToken) {
             const { error: e } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-            if (e) { setError('فشل في تفعيل الجلسة.'); return; }
+            if (e) { if (isMounted) setError('فشل في تفعيل الجلسة.'); return; }
             navigate('/auth/update-password', { replace: true });
             return;
           }
-          setError('رابط إعادة تعيين كلمة المرور غير صالح.');
+          if (isMounted) setError('رابط إعادة تعيين كلمة المرور غير صالح.');
           return;
         }
 
@@ -94,12 +96,12 @@ const AuthCallback = () => {
 
         // Email confirmation (signup)
         if (tokenHash && (type === 'signup' || type === 'email')) {
-          setMessage('جاري تأكيد البريد الإلكتروني...');
+          if (isMounted) setMessage('جاري تأكيد البريد الإلكتروني...');
           const { data, error: e } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
             type: type === 'signup' ? 'signup' : 'email',
           });
-          if (e) { setError(e.message); return; }
+          if (e) { if (isMounted) setError(e.message); return; }
           if (data?.session?.user) {
             await redirectByRole(data.session.user.id, data.session.user.email);
             return;
@@ -108,45 +110,60 @@ const AuthCallback = () => {
 
         // OAuth callback (Google, Facebook) - tokens in URL
         if (accessToken && refreshToken) {
-          setMessage('جاري تسجيل الدخول...');
+          if (isMounted) setMessage('جاري تسجيل الدخول...');
           const { data, error: e } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
-          if (e) { setError('فشل في تسجيل الدخول. حاول مرة أخرى.'); return; }
+          if (e) { if (isMounted) setError('فشل في تسجيل الدخول. حاول مرة أخرى.'); return; }
           if (data?.session?.user) {
             await redirectByRole(data.session.user.id, data.session.user.email);
             return;
           }
         }
 
-        // No tokens in URL - maybe Supabase already established session via PKCE
-        setMessage('جاري التحقق من الجلسة...');
+        // No tokens in URL - wait for PKCE/onAuthStateChange to establish session
+        if (isMounted) setMessage('جاري التحقق من الجلسة...');
         
-        // Wait briefly for onAuthStateChange to fire
-        await new Promise(r => setTimeout(r, 500));
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await redirectByRole(session.user.id, session.user.email);
-          return;
-        }
+        // Use onAuthStateChange listener instead of polling
+        const waitForSession = (): Promise<void> => {
+          return new Promise((resolve) => {
+            // Check immediately first
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              if (session?.user && isMounted) {
+                redirectByRole(session.user.id, session.user.email).then(resolve);
+                return;
+              }
+              
+              // Listen for session changes (PKCE flow completes async)
+              const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                if (!isMounted) { subscription.unsubscribe(); resolve(); return; }
+                if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) {
+                  subscription.unsubscribe();
+                  redirectByRole(session.user.id, session.user.email).then(resolve);
+                }
+              });
+              
+              // Timeout after 8 seconds
+              setTimeout(() => {
+                subscription.unsubscribe();
+                if (isMounted) setError('لم يتم العثور على معلومات المصادقة. يرجى المحاولة مرة أخرى.');
+                resolve();
+              }, 8000);
+            });
+          });
+        };
 
-        // Retry once more
-        await new Promise(r => setTimeout(r, 1500));
-        const { data: { session: retry } } = await supabase.auth.getSession();
-        if (retry?.user) {
-          await redirectByRole(retry.user.id, retry.user.email);
-          return;
-        }
-
-        setError('لم يتم العثور على معلومات المصادقة.');
+        await waitForSession();
       } catch (err) {
         console.error('Auth callback error:', err);
-        setError(err instanceof Error ? err.message : 'حدث خطأ أثناء المصادقة');
+        if (isMounted) setError(err instanceof Error ? err.message : 'حدث خطأ أثناء المصادقة');
       }
     };
 
     handleCallback();
+
+    return () => { isMounted = false; };
   }, [navigate, toast]);
 
   if (error) {
