@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import AppErrorBoundary from "@/components/error-boundaries/AppErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { UFBotWidget } from "@/components/ufbot/UFBotWidget";
 
 import "./index.css";
 
@@ -71,6 +72,7 @@ function AppContent() {
             ))}
           </Routes>
         </Suspense>
+        <UFBotWidget />
       </AuthProvider>
     </BrowserRouter>
   );

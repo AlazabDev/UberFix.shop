@@ -11,6 +11,7 @@ import { UISettings } from "@/components/settings/UISettings";
 import { IntegrationsSettings } from "@/components/settings/IntegrationsSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { LauncherSettings } from "@/components/settings/LauncherSettings";
+import { UFBotTrainingPanel } from "@/components/ufbot/UFBotTrainingPanel";
 import { 
   User, 
   Building2, 
@@ -121,6 +122,9 @@ export default function Settings() {
 
         <TabsContent value="integrations">
           <IntegrationsSettings />
+          <div className="mt-6">
+            <UFBotTrainingPanel />
+          </div>
         </TabsContent>
 
         <TabsContent value="security">
