@@ -62,7 +62,10 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.chatbot]
-verify_jwt = true
+verify_jwt = false
+
+[functions.ufbot]
+verify_jwt = false
 
 # HIGH PRIORITY: Map keys require auth to prevent abuse
 [functions.get-maps-key]
