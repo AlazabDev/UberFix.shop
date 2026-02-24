@@ -301,12 +301,45 @@ ${liveDataContext}`;
                 console.error('Insert error:', insertError);
                 toolResult = JSON.stringify({ success: false, error: `فشل في إنشاء الطلب: ${insertError.message}` });
               } else {
+                // Send WhatsApp notification to client
+                if (args.client_phone) {
+                  try {
+                    const serviceLabel = SERVICE_TYPE_LABELS[args.service_type || 'general'] || 'صيانة عامة';
+                    const whatsappMessage = `✅ تم استلام طلب الصيانة بنجاح!\n\n📋 رقم التتبع: ${trackingNumber}\n🔧 الخدمة: ${serviceLabel}\n📝 ${args.title}\n📍 ${args.location}\n\nسيتم التواصل معك قريباً لتحديد موعد الزيارة.\n\nشكراً لثقتك في UberFix 🏠`;
+
+                    const whatsappRes = await fetch(
+                      `${supabaseUrl}/functions/v1/send-whatsapp-meta`,
+                      {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${supabaseServiceKey}`,
+                        },
+                        body: JSON.stringify({
+                          to: args.client_phone,
+                          message: whatsappMessage,
+                          requestId: newRequest.id,
+                        }),
+                      }
+                    );
+                    const whatsappResult = await whatsappRes.json();
+                    if (whatsappResult.success) {
+                      console.log('✅ WhatsApp notification sent for request:', newRequest.id);
+                    } else {
+                      console.error('⚠️ WhatsApp notification failed:', whatsappResult.error);
+                    }
+                  } catch (waErr) {
+                    console.error('⚠️ WhatsApp notification error:', waErr);
+                  }
+                }
+
                 toolResult = JSON.stringify({
                   success: true,
                   request_id: newRequest.id,
                   tracking_number: trackingNumber,
                   title: newRequest.title,
                   status: 'pending',
+                  whatsapp_sent: !!args.client_phone,
                   message: `تم إنشاء طلب الصيانة بنجاح! رقم التتبع: ${trackingNumber}`
                 });
               }
