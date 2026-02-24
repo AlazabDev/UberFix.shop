@@ -47,18 +47,23 @@ serve(async (req) => {
     let userRole: string | null = null;
     const authHeader = req.headers.get('Authorization');
     if (authHeader?.startsWith('Bearer ')) {
-      const anonClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-        global: { headers: { Authorization: authHeader } }
-      });
-      const { data: claimsData } = await anonClient.auth.getClaims(authHeader.replace('Bearer ', ''));
-      if (claimsData?.claims?.sub) {
-        userId = claimsData.claims.sub as string;
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', userId)
-          .single();
-        userRole = profile?.role || 'customer';
+      const token = authHeader.replace('Bearer ', '');
+      // Skip if it's the anon key itself
+      const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+      if (token !== anonKey) {
+        const anonClient = createClient(supabaseUrl, anonKey, {
+          global: { headers: { Authorization: authHeader } }
+        });
+        const { data: { user } } = await anonClient.auth.getUser();
+        if (user) {
+          userId = user.id;
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+          userRole = profile?.role || 'customer';
+        }
       }
     }
 
