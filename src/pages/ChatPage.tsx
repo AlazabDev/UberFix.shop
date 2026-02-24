@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, Trash2 } from "lucide-react";
+import { Send, Bot, User, Trash2, ArrowRight, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
 interface Message {
@@ -31,6 +32,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -122,11 +124,37 @@ export default function ChatPage() {
     }]);
   };
 
+  const exportChat = () => {
+    const text = messages.map(m => {
+      const time = m.timestamp.toLocaleString('ar-EG');
+      const sender = m.role === 'user' ? '👤 أنت' : '🤖 UFBot';
+      return `[${time}] ${sender}:\n${m.content}\n`;
+    }).join('\n---\n\n');
+
+    const blob = new Blob([`محادثة UFBot - ${new Date().toLocaleDateString('ar-EG')}\n${'='.repeat(50)}\n\n${text}`], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ufbot-chat-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "تم التصدير", description: "تم تحميل المحادثة بنجاح" });
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-primary-foreground hover:bg-primary-foreground/20"
+            onClick={() => navigate(-1)}
+            aria-label="رجوع"
+          >
+            <ArrowRight className="h-5 w-5" />
+          </Button>
           <div className="bg-primary-foreground/20 rounded-full p-2">
             <Bot className="h-6 w-6" />
           </div>
@@ -135,9 +163,14 @@ export default function ChatPage() {
             <p className="text-xs opacity-80">المساعد الذكي لـ UberFix</p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20" onClick={clearChat}>
-          <Trash2 className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20" onClick={exportChat} title="تصدير المحادثة">
+            <Download className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20" onClick={clearChat} title="مسح المحادثة">
+            <Trash2 className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}

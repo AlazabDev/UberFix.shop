@@ -125,7 +125,7 @@ export function UFBotWidget() {
       <Button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg",
+          "fixed bottom-6 right-6 z-[9999] h-14 w-14 rounded-full shadow-lg",
           "bg-primary hover:bg-primary/90 text-primary-foreground",
           "transition-all duration-300 ease-in-out"
         )}
@@ -136,7 +136,7 @@ export function UFBotWidget() {
       </Button>
 
       {isOpen && (
-        <Card className="fixed bottom-24 right-6 z-40 w-80 sm:w-96 shadow-xl border flex flex-col" style={{ height: '480px' }}>
+        <Card className="fixed bottom-24 right-6 z-[9998] w-80 sm:w-96 shadow-xl border flex flex-col" style={{ height: '60vh', maxHeight: '480px' }}>
           <CardHeader className="bg-primary text-primary-foreground p-3 rounded-t-lg flex flex-row items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
               <Bot className="h-5 w-5" />
