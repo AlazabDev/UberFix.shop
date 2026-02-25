@@ -360,38 +360,6 @@
     <!-- التطبيق الرئيسي -->
     <script type="module" src="/src/main.tsx" defer></script>
     
-    <!-- Jotform Chat Widget - تحميل متأخر -->
-    <script>
-        // تحميل widget المحادثة بعد تفاعل المستخدم
-        function loadChatWidget() {
-            var script = document.createElement('script');
-            script.src = 'https://cdn.jotfor.ms/agent/embedjs/0194abdee59871f7b73e2eae35ed720e8ce0/embed.js';
-            script.async = true;
-            document.body.appendChild(script);
-        }
-        
-        // تحميل widget عند التمرير أو النقر
-        window.addEventListener('scroll', function() {
-            if (!window.chatWidgetLoaded) {
-                loadChatWidget();
-                window.chatWidgetLoaded = true;
-            }
-        }, { once: true });
-        
-        window.addEventListener('click', function() {
-            if (!window.chatWidgetLoaded) {
-                loadChatWidget();
-                window.chatWidgetLoaded = true;
-            }
-        }, { once: true });
-        
-        // تحميل تلقائي بعد 10 ثواني
-        setTimeout(function() {
-            if (!window.chatWidgetLoaded) {
-                loadChatWidget();
-                window.chatWidgetLoaded = true;
-            }
-        }, 10000);
-    </script>
+    <!-- UFBot is now handled by React component -->
 </body>
 </html>
