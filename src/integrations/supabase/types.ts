@@ -5655,32 +5655,47 @@ export type Database = {
       wa_conversations: {
         Row: {
           assigned_to: string | null
+          collected_data: Json | null
           contact_id: string
+          conversation_state: string
           created_at: string | null
+          current_request_id: string | null
           id: string
           last_message_at: string | null
+          messages_history: Json | null
           phone_number_id: string | null
           project_id: string
+          sender_name: string | null
           status: string | null
         }
         Insert: {
           assigned_to?: string | null
+          collected_data?: Json | null
           contact_id: string
+          conversation_state?: string
           created_at?: string | null
+          current_request_id?: string | null
           id?: string
           last_message_at?: string | null
+          messages_history?: Json | null
           phone_number_id?: string | null
           project_id: string
+          sender_name?: string | null
           status?: string | null
         }
         Update: {
           assigned_to?: string | null
+          collected_data?: Json | null
           contact_id?: string
+          conversation_state?: string
           created_at?: string | null
+          current_request_id?: string | null
           id?: string
           last_message_at?: string | null
+          messages_history?: Json | null
           phone_number_id?: string | null
           project_id?: string
+          sender_name?: string | null
           status?: string | null
         }
         Relationships: [
@@ -5689,6 +5704,27 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "wa_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_conversations_current_request_id_fkey"
+            columns: ["current_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_conversations_current_request_id_fkey"
+            columns: ["current_request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_conversations_current_request_id_fkey"
+            columns: ["current_request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
             referencedColumns: ["id"]
           },
           {

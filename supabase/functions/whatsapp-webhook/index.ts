@@ -2,22 +2,24 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /**
- * WhatsApp Webhook - UberFix
- * ==============================
- * نظام متكامل لاستقبال ومعالجة رسائل WhatsApp
+ * WhatsApp Webhook - UberFix (v2 - AI-Powered)
+ * ==============================================
+ * معالجة ذكية للرسائل الواردة باستخدام AI
  * 
- * الوظائف:
+ * الميزات:
  * 1. التحقق من webhook (GET)
- * 2. استقبال الرسائل والردود (POST)
- * 3. تحديث حالات التسليم
- * 4. الرد التلقائي الذكي
- * 5. ربط الرسائل بطلبات الصيانة
+ * 2. استقبال الرسائل ومعالجتها بالذكاء الاصطناعي
+ * 3. إنشاء طلبات صيانة تلقائياً عبر المحادثة
+ * 4. تحديث حالات التسليم
+ * 5. التعرف على العميل وربطه بطلباته
+ * 6. دعم الوسائط (صور/فيديو/صوت/مستندات)
  */
 
 const VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN');
 const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
 const FACEBOOK_SECRET = Deno.env.get('FACEBOOK_APP_SECRET');
 const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
+const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -26,321 +28,421 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// إنشاء Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-// ==========================================
-// قوالب الرسائل
-// ==========================================
-const MESSAGE_TEMPLATES = {
-  welcome: (name: string) => 
-    `مرحباً ${name}! 👋\n\nأهلاً بك في UberFix - خدمة الصيانة السريعة.\n\nكيف يمكننا مساعدتك اليوم?\n\n📋 أرسل "طلب" لفتح طلب صيانة جديد\n📍 أرسل "حالة" لمتابعة طلباتك\n📞 أرسل "تواصل" للتحدث مع فريق الدعم`,
-
-  request_received: (requestId: string, title: string) =>
-    `✅ *تم استلام طلبك بنجاح*\n\n📋 رقم الطلب: ${requestId.slice(0, 8)}\n📝 ${title}\n\n⏳ سيتم مراجعة طلبك وإبلاغك بالتحديثات.\n\nللمتابعة أرسل "حالة"`,
-
-  status_pending: (title: string) =>
-    `⏳ *طلب قيد الانتظار*\n\n📝 ${title}\n\nطلبك في قائمة الانتظار وسيتم معالجته قريباً.`,
-
-  status_assigned: (title: string, techName?: string) =>
-    `👷 *تم تعيين فني*\n\n📝 ${title}\n${techName ? `👤 الفني: ${techName}\n` : ''}\nسيتم التواصل معك لتحديد موعد الزيارة.`,
-
-  status_scheduled: (title: string, date?: string, time?: string) =>
-    `📅 *تم جدولة الموعد*\n\n📝 ${title}\n${date ? `📆 التاريخ: ${date}\n` : ''}${time ? `⏰ الوقت: ${time}\n` : ''}\nسيصلك إشعار قبل الموعد بساعة.`,
-
-  status_in_progress: (title: string) =>
-    `🔧 *جاري العمل*\n\n📝 ${title}\n\nالفني يعمل على حل المشكلة الآن.\nسيتم إعلامك عند الانتهاء.`,
-
-  status_completed: (title: string) =>
-    `✅ *تم إتمام الخدمة*\n\n📝 ${title}\n\n🎉 تم إتمام طلب الصيانة بنجاح!\n\n⭐ نرجو تقييم الخدمة من 1-5\nمثال: "تقييم 5"`,
-
-  status_cancelled: (title: string) =>
-    `❌ *تم إلغاء الطلب*\n\n📝 ${title}\n\nتم إلغاء طلب الصيانة.\nللمساعدة، أرسل "تواصل"`,
-
-  appointment_reminder: (title: string, time: string) =>
-    `⏰ *تذكير بموعد الصيانة*\n\n📝 ${title}\n⏰ الموعد: ${time}\n\nالفني في الطريق إليك!`,
-
-  rate_thanks: (rating: number) =>
-    `شكراً لتقييمك! ⭐ ${rating}/5\n\nنسعى دائماً لتقديم أفضل خدمة.\nشكراً لثقتك بـ UberFix!`,
-
-  help: () =>
-    `📚 *دليل المساعدة*\n\n📋 "طلب" - فتح طلب صيانة جديد\n📍 "حالة" - متابعة طلباتك\n⭐ "تقييم X" - تقييم الخدمة (1-5)\n📞 "تواصل" - التحدث مع الدعم\n❓ "مساعدة" - عرض هذا الدليل`,
-
-  default: () =>
-    `شكراً لتواصلك مع UberFix! 🔧\n\nللمساعدة، أرسل "مساعدة"\n\nأو قم بزيارة:\nhttps://uberfix.shop/quick-request`
+const SERVICE_TYPE_LABELS: Record<string, string> = {
+  plumbing: "سباكة", electrical: "كهرباء", ac: "تكييف",
+  painting: "دهانات", carpentry: "نجارة", cleaning: "تنظيف",
+  general: "صيانة عامة", appliance: "أجهزة منزلية",
+  pest_control: "مكافحة حشرات", landscaping: "حدائق"
 };
 
 // ==========================================
 // التحقق من توقيع Meta
 // ==========================================
 async function verifyWebhookSignature(req: Request, rawBody: string): Promise<boolean> {
-  if (!FACEBOOK_SECRET) {
-    console.warn('⚠️ FACEBOOK_SECRET not configured - signature verification disabled');
-    return true;
-  }
-
+  if (!FACEBOOK_SECRET) return true;
   const signature = req.headers.get('x-hub-signature-256');
-  if (!signature) {
-    console.error('❌ Missing x-hub-signature-256 header');
-    return false;
-  }
-
+  if (!signature) return false;
   try {
     const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(FACEBOOK_SECRET),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-    
+    const key = await crypto.subtle.importKey('raw', encoder.encode(FACEBOOK_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody));
     const hashArray = Array.from(new Uint8Array(signatureBuffer));
     const expectedSignature = 'sha256=' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    // مقارنة آمنة
     if (signature.length !== expectedSignature.length) return false;
-    
     let result = 0;
-    for (let i = 0; i < signature.length; i++) {
-      result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
-    }
-    
+    for (let i = 0; i < signature.length; i++) result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
     return result === 0;
-  } catch (error) {
-    console.error('Signature verification error:', error);
-    return false;
-  }
+  } catch { return false; }
 }
 
 // ==========================================
 // إرسال رسالة WhatsApp
 // ==========================================
 async function sendWhatsAppMessage(
-  to: string, 
-  message: string, 
-  options?: { 
-    buttons?: Array<{id: string, title: string}>,
-    requestId?: string 
-  }
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
-    console.error('❌ WhatsApp credentials not configured');
-    return { success: false, error: 'WhatsApp not configured' };
+  to: string, message: string, 
+  options?: { buttons?: Array<{id: string, title: string}>, requestId?: string }
+): Promise<{ success: boolean; messageId?: string }> {
+  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) return { success: false };
+
+  let formattedTo = to.replace(/\D/g, '');
+  if (formattedTo.startsWith('0')) formattedTo = '2' + formattedTo;
+  if (!formattedTo.startsWith('2')) formattedTo = '2' + formattedTo;
+
+  let body: Record<string, unknown> = {
+    messaging_product: 'whatsapp', to: formattedTo, type: 'text', text: { body: message }
+  };
+
+  if (options?.buttons?.length) {
+    body = {
+      messaging_product: 'whatsapp', to: formattedTo, type: 'interactive',
+      interactive: {
+        type: 'button', body: { text: message },
+        action: {
+          buttons: options.buttons.slice(0, 3).map(btn => ({
+            type: 'reply', reply: { id: btn.id, title: btn.title.slice(0, 20) }
+          }))
+        }
+      }
+    };
   }
 
   try {
-    // تنسيق الرقم
-    let formattedTo = to.replace(/\D/g, '');
-    if (formattedTo.startsWith('0')) {
-      formattedTo = '2' + formattedTo; // مصر
-    }
-    if (!formattedTo.startsWith('2')) {
-      formattedTo = '2' + formattedTo;
-    }
-
-    let body: Record<string, unknown> = {
-      messaging_product: 'whatsapp',
-      to: formattedTo,
-      type: 'text',
-      text: { body: message }
-    };
-
-    // إضافة أزرار تفاعلية إذا وجدت
-    if (options?.buttons && options.buttons.length > 0) {
-      body = {
-        messaging_product: 'whatsapp',
-        to: formattedTo,
-        type: 'interactive',
-        interactive: {
-          type: 'button',
-          body: { text: message },
-          action: {
-            buttons: options.buttons.slice(0, 3).map(btn => ({
-              type: 'reply',
-              reply: { id: btn.id, title: btn.title.slice(0, 20) }
-            }))
-          }
-        }
-      };
-    }
-
-    const response = await fetch(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      console.error('❌ WhatsApp API error:', result);
-      return { success: false, error: result.error?.message || 'Failed to send message' };
-    }
-
-    const messageId = result.messages?.[0]?.id;
-    console.log('✅ WhatsApp message sent:', messageId);
-
-    // حفظ في قاعدة البيانات
-    await supabase.from('message_logs').insert({
-      recipient: formattedTo,
-      message_content: message,
-      message_type: 'whatsapp',
-      provider: 'meta',
-      status: 'sent',
-      external_id: messageId,
-      request_id: options?.requestId,
-      sent_at: new Date().toISOString(),
-      metadata: { 
-        type: 'outgoing',
-        has_buttons: !!options?.buttons
-      }
+    const response = await fetch(`https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${WHATSAPP_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     });
-
+    const result = await response.json();
+    if (!response.ok) { console.error('❌ WhatsApp API error:', result); return { success: false }; }
+    
+    const messageId = result.messages?.[0]?.id;
+    await supabase.from('message_logs').insert({
+      recipient: formattedTo, message_content: message, message_type: 'whatsapp',
+      provider: 'meta', status: 'sent', external_id: messageId,
+      request_id: options?.requestId, sent_at: new Date().toISOString(),
+      metadata: { type: 'outgoing', has_buttons: !!options?.buttons }
+    });
     return { success: true, messageId };
-  } catch (error) {
-    console.error('❌ Send message error:', error);
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+  } catch (e) { console.error('❌ Send error:', e); return { success: false }; }
+}
+
+// ==========================================
+// إدارة سياق المحادثة
+// ==========================================
+async function getConversation(phone: string) {
+  const { data } = await supabase
+    .from('wa_conversations')
+    .select('*')
+    .eq('phone_number', phone)
+    .maybeSingle();
+  return data;
+}
+
+async function upsertConversation(phone: string, updates: Record<string, unknown>) {
+  const existing = await getConversation(phone);
+  if (existing) {
+    await supabase.from('wa_conversations')
+      .update({ ...updates, last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('phone_number', phone);
+  } else {
+    await supabase.from('wa_conversations')
+      .insert({ phone_number: phone, ...updates, last_message_at: new Date().toISOString() });
   }
 }
 
 // ==========================================
 // البحث عن طلبات العميل
 // ==========================================
-async function findCustomerRequests(phone: string): Promise<Array<{id: string, title: string, status: string}>> {
-  // تنظيف الرقم
+async function findCustomerRequests(phone: string) {
   const cleanPhone = phone.replace(/\D/g, '');
-  const phoneVariants = [
-    cleanPhone,
-    `+${cleanPhone}`,
-    `+2${cleanPhone}`,
+  const variants = [cleanPhone, `+${cleanPhone}`, `+2${cleanPhone}`,
     cleanPhone.startsWith('2') ? cleanPhone.slice(1) : cleanPhone,
     cleanPhone.startsWith('20') ? '0' + cleanPhone.slice(2) : cleanPhone
   ];
-
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('maintenance_requests')
-    .select('id, title, status, created_at')
-    .or(phoneVariants.map(p => `client_phone.ilike.%${p}%`).join(','))
+    .select('id, title, status, workflow_stage, priority, service_type, created_at, assigned_technician_id')
+    .or(variants.map(p => `client_phone.ilike.%${p}%`).join(','))
     .order('created_at', { ascending: false })
     .limit(5);
-
-  if (error) {
-    console.error('Error finding requests:', error);
-    return [];
-  }
-
   return data || [];
 }
 
 // ==========================================
-// معالجة الرسالة الواردة
+// AI Tools for WhatsApp
 // ==========================================
-async function processIncomingMessage(
-  from: string,
-  senderName: string,
-  messageContent: string,
-  messageType: string
-): Promise<void> {
-  const lowerContent = messageContent.toLowerCase().trim();
-
-  // تحليل الرسالة وتحديد الإجراء
-  if (messageType !== 'text') {
-    await sendWhatsAppMessage(from, MESSAGE_TEMPLATES.default());
-    return;
-  }
-
-  // أوامر خاصة
-  if (lowerContent.includes('مرحبا') || lowerContent.includes('السلام') || lowerContent === 'hi' || lowerContent === 'hello') {
-    await sendWhatsAppMessage(from, MESSAGE_TEMPLATES.welcome(senderName), {
-      buttons: [
-        { id: 'new_request', title: '📋 طلب جديد' },
-        { id: 'my_status', title: '📍 حالة طلبي' },
-        { id: 'contact', title: '📞 تواصل' }
-      ]
-    });
-    return;
-  }
-
-  if (lowerContent === 'طلب' || lowerContent === 'new_request' || lowerContent.includes('صيانة جديدة')) {
-    await sendWhatsAppMessage(from, 
-      `📋 *طلب صيانة جديد*\n\nلفتح طلب صيانة، يرجى:\n\n1️⃣ زيارة الرابط:\nhttps://uberfix.shop/quick-request\n\nأو\n\n2️⃣ أرسل وصفاً للمشكلة وسنفتح لك طلباً.\n\nمثال: "مشكلة في الكهرباء بالمطبخ"`
-    );
-    return;
-  }
-
-  if (lowerContent === 'حالة' || lowerContent === 'my_status' || lowerContent.includes('حالة طلب')) {
-    const requests = await findCustomerRequests(from);
-    
-    if (requests.length === 0) {
-      await sendWhatsAppMessage(from, 
-        `❌ لم نجد طلبات مرتبطة برقمك.\n\nللمساعدة، أرسل "تواصل"\nأو قم بفتح طلب جديد: "طلب"`
-      );
-      return;
-    }
-
-    const statusEmoji: Record<string, string> = {
-      pending: '⏳',
-      assigned: '👷',
-      in_progress: '🔧',
-      completed: '✅',
-      cancelled: '❌'
-    };
-
-    let statusMessage = `📋 *طلباتك الأخيرة:*\n\n`;
-    requests.forEach((req, idx) => {
-      statusMessage += `${idx + 1}. ${statusEmoji[req.status] || '📝'} ${req.title}\n   الحالة: ${req.status}\n\n`;
-    });
-
-    await sendWhatsAppMessage(from, statusMessage);
-    return;
-  }
-
-  if (lowerContent.includes('تقييم')) {
-    const ratingMatch = lowerContent.match(/تقييم\s*(\d)/);
-    if (ratingMatch) {
-      const rating = parseInt(ratingMatch[1]);
-      if (rating >= 1 && rating <= 5) {
-        // حفظ التقييم
-        const requests = await findCustomerRequests(from);
-        if (requests.length > 0) {
-          const latestCompleted = requests.find(r => r.status === 'completed');
-          if (latestCompleted) {
-            await supabase
-              .from('maintenance_requests')
-              .update({ rating })
-              .eq('id', latestCompleted.id);
-          }
-        }
-        await sendWhatsAppMessage(from, MESSAGE_TEMPLATES.rate_thanks(rating));
-        return;
+const AI_TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "create_maintenance_request",
+      description: "إنشاء طلب صيانة جديد بعد جمع كل البيانات من العميل عبر واتساب",
+      parameters: {
+        type: "object",
+        properties: {
+          client_name: { type: "string", description: "اسم العميل" },
+          client_phone: { type: "string", description: "رقم هاتف العميل" },
+          location: { type: "string", description: "عنوان الموقع" },
+          service_type: { type: "string", enum: Object.keys(SERVICE_TYPE_LABELS) },
+          title: { type: "string", description: "عنوان مختصر للمشكلة" },
+          description: { type: "string", description: "وصف تفصيلي للمشكلة" },
+          priority: { type: "string", enum: ["low", "medium", "high"] }
+        },
+        required: ["client_name", "client_phone", "location", "title", "description"],
+        additionalProperties: false
       }
     }
-    await sendWhatsAppMessage(from, `⭐ للتقييم، أرسل "تقييم" متبوعاً برقم من 1 إلى 5\nمثال: تقييم 5`);
-    return;
+  },
+  {
+    type: "function",
+    function: {
+      name: "check_request_status",
+      description: "البحث عن حالة طلبات صيانة للعميل",
+      parameters: {
+        type: "object",
+        properties: { phone: { type: "string" } },
+        required: ["phone"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "rate_service",
+      description: "تسجيل تقييم العميل للخدمة (1-5 نجوم)",
+      parameters: {
+        type: "object",
+        properties: {
+          phone: { type: "string" },
+          rating: { type: "number", description: "التقييم من 1 إلى 5" },
+          comment: { type: "string", description: "تعليق العميل (اختياري)" }
+        },
+        required: ["phone", "rating"],
+        additionalProperties: false
+      }
+    }
+  }
+];
+
+// ==========================================
+// تنفيذ أدوات AI
+// ==========================================
+async function executeTool(name: string, args: Record<string, unknown>, senderPhone: string): Promise<string> {
+  if (name === 'create_maintenance_request') {
+    try {
+      const { data: company } = await supabase.from('companies').select('id').order('created_at').limit(1).maybeSingle();
+      const { data: branch } = await supabase.from('branches').select('id').eq('company_id', company!.id).order('created_at').limit(1).maybeSingle();
+      
+      if (!company?.id || !branch?.id) return JSON.stringify({ success: false, error: 'لم يتم العثور على بيانات الشركة' });
+
+      const trackingNumber = `UF-${Date.now().toString(36).toUpperCase()}`;
+      const { data: newReq, error } = await supabase
+        .from('maintenance_requests')
+        .insert({
+          company_id: company.id, branch_id: branch.id,
+          title: args.title as string, description: args.description as string,
+          client_name: args.client_name as string, client_phone: args.client_phone as string || senderPhone,
+          location: args.location as string, service_type: args.service_type as string || 'general',
+          priority: args.priority as string || 'medium', status: 'Open', workflow_stage: 'submitted',
+          channel: 'whatsapp',
+        })
+        .select('id, title').single();
+
+      if (error) return JSON.stringify({ success: false, error: error.message });
+
+      // Update conversation state
+      await upsertConversation(senderPhone, {
+        conversation_state: 'idle', current_request_id: newReq.id, collected_data: '{}'
+      });
+
+      // Send notification via the notification system
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/send-maintenance-notification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` },
+          body: JSON.stringify({ request_id: newReq.id, event_type: 'request_created', new_stage: 'submitted', send_whatsapp: true, send_email: true })
+        });
+      } catch (e) { console.error('Notification error:', e); }
+
+      return JSON.stringify({
+        success: true, request_id: newReq.id, tracking_number: trackingNumber,
+        title: newReq.title, message: `تم إنشاء الطلب بنجاح! رقم التتبع: ${trackingNumber}`
+      });
+    } catch (e) { return JSON.stringify({ success: false, error: 'خطأ في إنشاء الطلب' }); }
   }
 
-  if (lowerContent === 'تواصل' || lowerContent === 'contact' || lowerContent.includes('دعم')) {
-    await sendWhatsAppMessage(from, 
-      `📞 *فريق الدعم*\n\n📱 اتصل: 01234567890\n📧 البريد: support@uberfix.shop\n\nساعات العمل:\n🕐 السبت - الخميس\n⏰ 9 صباحاً - 9 مساءً\n\nأو اترك رسالتك هنا وسنرد عليك قريباً.`
-    );
-    return;
+  if (name === 'check_request_status') {
+    const phone = (args.phone as string) || senderPhone;
+    const requests = await findCustomerRequests(phone);
+    if (!requests.length) return JSON.stringify({ success: true, results: [], message: 'لا توجد طلبات' });
+    
+    const statusMap: Record<string, string> = {
+      'Open': 'مفتوح', 'In Progress': 'قيد التنفيذ', 'Completed': 'مكتمل',
+      'Closed': 'مغلق', 'Cancelled': 'ملغي'
+    };
+    return JSON.stringify({
+      success: true,
+      results: requests.map(r => ({
+        id: r.id.slice(0, 8), title: r.title,
+        status: statusMap[r.status] || r.status,
+        stage: r.workflow_stage, priority: r.priority,
+        service: SERVICE_TYPE_LABELS[r.service_type || ''] || r.service_type,
+        date: r.created_at
+      }))
+    });
   }
 
-  if (lowerContent === 'مساعدة' || lowerContent === 'help' || lowerContent === '?') {
-    await sendWhatsAppMessage(from, MESSAGE_TEMPLATES.help());
-    return;
+  if (name === 'rate_service') {
+    const phone = (args.phone as string) || senderPhone;
+    const rating = args.rating as number;
+    if (rating < 1 || rating > 5) return JSON.stringify({ success: false, error: 'التقييم يجب أن يكون بين 1 و 5' });
+    
+    const requests = await findCustomerRequests(phone);
+    const completed = requests.find(r => r.status === 'Completed');
+    if (completed) {
+      await supabase.from('maintenance_requests').update({ rating }).eq('id', completed.id);
+      return JSON.stringify({ success: true, message: `تم تسجيل التقييم ${rating}/5 بنجاح` });
+    }
+    return JSON.stringify({ success: false, error: 'لا يوجد طلب مكتمل لتقييمه' });
   }
 
-  // رسالة افتراضية
-  await sendWhatsAppMessage(from, MESSAGE_TEMPLATES.default());
+  return JSON.stringify({ success: false, error: 'أداة غير معروفة' });
+}
+
+// ==========================================
+// معالجة الرسالة بالذكاء الاصطناعي
+// ==========================================
+async function processWithAI(
+  from: string, senderName: string, content: string, messageType: string, mediaId?: string
+): Promise<string> {
+  if (!LOVABLE_API_KEY) {
+    // Fallback to basic responses
+    return `مرحباً ${senderName}! 👋\n\nشكراً لتواصلك مع UberFix.\n\nللأسف خدمة المحادثة الذكية غير متاحة حالياً.\n\nيمكنك تقديم طلب صيانة عبر:\nhttps://uberfix.shop/quick-request`;
+  }
+
+  // Get conversation context
+  const conversation = await getConversation(from);
+  const history = (conversation?.messages_history as Array<{role: string, content: string}>) || [];
+
+  // Get customer's existing requests for context
+  const existingRequests = await findCustomerRequests(from);
+  let requestsContext = '';
+  if (existingRequests.length > 0) {
+    const statusMap: Record<string, string> = { 'Open': 'مفتوح', 'In Progress': 'قيد التنفيذ', 'Completed': 'مكتمل', 'Closed': 'مغلق' };
+    requestsContext = `\n## طلبات العميل الحالية:\n` + existingRequests.map(r => 
+      `- ${r.title} | الحالة: ${statusMap[r.status] || r.status} | الأولوية: ${r.priority || 'عادية'}`
+    ).join('\n');
+  }
+
+  // Media context
+  let mediaContext = '';
+  if (messageType === 'image') mediaContext = '\n[العميل أرسل صورة للمشكلة]';
+  else if (messageType === 'video') mediaContext = '\n[العميل أرسل فيديو للمشكلة]';
+  else if (messageType === 'audio') mediaContext = '\n[العميل أرسل رسالة صوتية]';
+  else if (messageType === 'document') mediaContext = '\n[العميل أرسل مستند]';
+  else if (messageType === 'location') mediaContext = '\n[العميل أرسل موقعه الجغرافي]';
+
+  const servicesList = Object.entries(SERVICE_TYPE_LABELS).map(([k, v]) => `${k}: ${v}`).join(', ');
+
+  const systemPrompt = `أنت مساعد UberFix عبر واتساب - متخصص في خدمات الصيانة.
+
+## تعليماتك:
+- أنت تتحدث مع العميل عبر واتساب مباشرة
+- أجب بالعربية بأسلوب مهني وودود ومختصر
+- رقم هاتف العميل الحالي: ${from}
+- اسم العميل: ${senderName}
+${requestsContext}
+${mediaContext}
+
+## إنشاء طلبات الصيانة:
+عندما يطلب العميل خدمة صيانة أو يصف مشكلة:
+1. اسأل عن نوع المشكلة إذا لم يوضحها
+2. اسأل عن وصف تفصيلي للمشكلة
+3. تأكد من اسم العميل (يمكنك استخدام "${senderName}" كاسم افتراضي)
+4. رقم الهاتف متوفر تلقائياً: ${from}
+5. اسأل عن العنوان/الموقع
+6. بعد جمع كل البيانات اسأل عن التأكيد ثم أنشئ الطلب
+
+لا تطلب كل البيانات دفعة واحدة - سؤال أو اثنين في كل رسالة.
+أنواع الخدمات: ${servicesList}
+
+## متابعة الطلبات:
+إذا سأل العميل عن حالة طلبه، استخدم أداة check_request_status
+
+## التقييم:
+إذا أراد العميل تقييم الخدمة، استخدم أداة rate_service
+
+## ملاحظات:
+- إذا أرسل العميل صورة أو فيديو، اعتبرها توضيحاً للمشكلة واستمر بجمع باقي البيانات
+- كن مختصراً - هذا واتساب وليس بريد إلكتروني
+- استخدم الإيموجي باعتدال`;
+
+  // Build messages from history + current
+  const aiMessages: Array<{role: string, content: string}> = [
+    { role: 'system', content: systemPrompt },
+    ...history.slice(-12), // آخر 12 رسالة
+    { role: 'user', content: content }
+  ];
+
+  try {
+    // First call - check for tool use
+    const firstRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'google/gemini-3-flash-preview',
+        messages: aiMessages, tools: AI_TOOLS, stream: false,
+      }),
+    });
+
+    if (!firstRes.ok) {
+      console.error('AI API error:', firstRes.status);
+      return `شكراً لتواصلك مع UberFix! 🔧\n\nنعتذر عن التأخير، يمكنك تقديم طلب صيانة عبر:\nhttps://uberfix.shop/quick-request`;
+    }
+
+    const firstResult = await firstRes.json();
+    const choice = firstResult.choices?.[0];
+
+    let aiResponse = '';
+
+    // Handle tool calls
+    if (choice?.finish_reason === 'tool_calls' || choice?.message?.tool_calls?.length) {
+      const toolCalls = choice.message.tool_calls;
+      const toolResults: any[] = [];
+
+      for (const tc of toolCalls) {
+        const args = JSON.parse(tc.function.arguments);
+        // Inject sender phone if missing
+        if (!args.client_phone) args.client_phone = from;
+        if (!args.phone) args.phone = from;
+        
+        const result = await executeTool(tc.function.name, args, from);
+        toolResults.push({ role: 'tool', tool_call_id: tc.id, content: result });
+      }
+
+      // Second call for natural response
+      const secondRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'google/gemini-3-flash-preview',
+          messages: [...aiMessages, choice.message, ...toolResults],
+          stream: false,
+        }),
+      });
+
+      if (secondRes.ok) {
+        const secondResult = await secondRes.json();
+        aiResponse = secondResult.choices?.[0]?.message?.content || 'تم تنفيذ طلبك بنجاح!';
+      } else {
+        aiResponse = 'تم تنفيذ طلبك. سنتواصل معك قريباً!';
+      }
+    } else {
+      aiResponse = choice?.message?.content || 'شكراً لتواصلك! كيف يمكنني مساعدتك؟';
+    }
+
+    // Update conversation history
+    const updatedHistory = [
+      ...history.slice(-12),
+      { role: 'user', content },
+      { role: 'assistant', content: aiResponse }
+    ];
+
+    await upsertConversation(from, {
+      sender_name: senderName,
+      messages_history: updatedHistory,
+      conversation_state: 'active'
+    });
+
+    return aiResponse;
+
+  } catch (error) {
+    console.error('AI processing error:', error);
+    return `مرحباً ${senderName}! شكراً لتواصلك مع UberFix 🔧\n\nيمكنك تقديم طلب صيانة عبر:\nhttps://uberfix.shop/quick-request`;
+  }
 }
 
 // ==========================================
@@ -349,205 +451,110 @@ async function processIncomingMessage(
 serve(async (req) => {
   const url = new URL(req.url);
 
-  // CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // ==========================================
   // GET: Webhook Verification
-  // ==========================================
   if (req.method === 'GET') {
     const mode = url.searchParams.get('hub.mode');
     const token = url.searchParams.get('hub.verify_token');
     const challenge = url.searchParams.get('hub.challenge');
 
-    console.log('🔐 Webhook verification request:', { 
-      mode, 
-      receivedToken: token,
-      hasStoredToken: !!VERIFY_TOKEN,
-      storedTokenLength: VERIFY_TOKEN?.length || 0,
-      challenge: challenge?.substring(0, 20) + '...'
-    });
-
-    // للتطوير: إذا لم يكن الـ token محدداً، نقبل أي token
     if (!VERIFY_TOKEN) {
-      console.warn('⚠️ WHATSAPP_VERIFY_TOKEN not set - accepting any token for development');
       if (mode === 'subscribe' && challenge) {
-        console.log('✅ Webhook verified (dev mode)!');
-        return new Response(challenge, { 
-          status: 200,
-          headers: { 'Content-Type': 'text/plain', ...corsHeaders }
-        });
+        return new Response(challenge, { status: 200, headers: { 'Content-Type': 'text/plain', ...corsHeaders } });
       }
     }
-
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('✅ Webhook verified successfully!');
-      return new Response(challenge, { 
-        status: 200,
-        headers: { 'Content-Type': 'text/plain', ...corsHeaders }
-      });
+      console.log('✅ Webhook verified!');
+      return new Response(challenge, { status: 200, headers: { 'Content-Type': 'text/plain', ...corsHeaders } });
     }
-
-    console.error('❌ Verification failed:', {
-      modeMatch: mode === 'subscribe',
-      tokenMatch: token === VERIFY_TOKEN,
-      receivedTokenLength: token?.length || 0
-    });
-    return new Response(JSON.stringify({ 
-      error: 'Verification failed',
-      hint: 'Check WHATSAPP_VERIFY_TOKEN matches your Meta dashboard setting'
-    }), { 
-      status: 403,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders }
-    });
+    return new Response(JSON.stringify({ error: 'Verification failed' }), { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   }
 
-  // ==========================================
   // POST: Receive Messages & Status Updates
-  // ==========================================
   if (req.method === 'POST') {
     try {
       const rawBody = await req.text();
-      
-      // Verify signature
       const isValid = await verifyWebhookSignature(req, rawBody);
-      if (!isValid) {
-        console.error('❌ Invalid signature');
-        return new Response('Unauthorized', { status: 401, headers: corsHeaders });
-      }
+      if (!isValid) return new Response('Unauthorized', { status: 401, headers: corsHeaders });
 
       const body = JSON.parse(rawBody);
-      console.log('📨 Webhook received:', JSON.stringify(body, null, 2));
-
       if (body.object !== 'whatsapp_business_account') {
         return new Response('Not WhatsApp', { status: 400, headers: corsHeaders });
       }
 
-      // Process entries
       for (const entry of body.entry || []) {
         for (const change of entry.changes || []) {
           if (change.field !== 'messages') continue;
-
           const value = change.value;
-          const messages = value.messages || [];
-          const statuses = value.statuses || [];
-          const contacts = value.contacts || [];
 
           // ========== Process Messages ==========
-          for (const message of messages) {
+          for (const message of value.messages || []) {
             const from = message.from;
             const messageId = message.id;
             const messageType = message.type;
             const timestamp = message.timestamp;
-
-            const contact = contacts.find((c: {wa_id: string}) => c.wa_id === from);
+            const contact = (value.contacts || []).find((c: {wa_id: string}) => c.wa_id === from);
             const senderName = contact?.profile?.name || 'عميل';
 
-            console.log(`📩 Message from ${senderName} (${from}):`, message);
+            console.log(`📩 Message from ${senderName} (${from}): type=${messageType}`);
 
             // Extract content
             let content = '';
             let mediaId = null;
-
             switch (messageType) {
-              case 'text':
-                content = message.text?.body || '';
-                break;
-              case 'image':
-                content = message.image?.caption || '[صورة]';
-                mediaId = message.image?.id;
-                break;
-              case 'document':
-                content = message.document?.caption || '[مستند]';
-                mediaId = message.document?.id;
-                break;
-              case 'audio':
-                content = '[رسالة صوتية]';
-                mediaId = message.audio?.id;
-                break;
-              case 'video':
-                content = message.video?.caption || '[فيديو]';
-                mediaId = message.video?.id;
-                break;
-              case 'location':
-                content = `[موقع: ${message.location?.latitude}, ${message.location?.longitude}]`;
-                break;
+              case 'text': content = message.text?.body || ''; break;
+              case 'image': content = message.image?.caption || 'أرسلت صورة للمشكلة'; mediaId = message.image?.id; break;
+              case 'document': content = message.document?.caption || 'أرسلت مستند'; mediaId = message.document?.id; break;
+              case 'audio': content = 'أرسلت رسالة صوتية'; mediaId = message.audio?.id; break;
+              case 'video': content = message.video?.caption || 'أرسلت فيديو للمشكلة'; mediaId = message.video?.id; break;
+              case 'location': content = `موقعي: ${message.location?.latitude}, ${message.location?.longitude}`; break;
               case 'interactive':
-                if (message.interactive?.type === 'button_reply') {
-                  content = message.interactive.button_reply?.id || '';
-                } else if (message.interactive?.type === 'list_reply') {
-                  content = message.interactive.list_reply?.id || '';
-                }
+                if (message.interactive?.type === 'button_reply') content = message.interactive.button_reply?.title || message.interactive.button_reply?.id || '';
+                else if (message.interactive?.type === 'list_reply') content = message.interactive.list_reply?.title || message.interactive.list_reply?.id || '';
                 break;
-              default:
-                content = `[${messageType}]`;
+              default: content = `[${messageType}]`;
             }
 
-            // Save to database
+            // Save incoming message
             await supabase.from('message_logs').insert({
-              external_id: messageId,
-              recipient: from,
-              message_content: content,
-              message_type: 'whatsapp',
-              provider: 'meta',
+              external_id: messageId, recipient: from,
+              message_content: content, message_type: 'whatsapp', provider: 'meta',
               status: 'received',
-              metadata: {
-                sender_name: senderName,
-                message_type: messageType,
-                media_id: mediaId,
-                timestamp,
-                type: 'incoming'
-              }
+              metadata: { sender_name: senderName, message_type: messageType, media_id: mediaId, timestamp, type: 'incoming' }
             });
 
-            // Process and respond
-            await processIncomingMessage(from, senderName, content, messageType);
+            // Process with AI and respond
+            const aiResponse = await processWithAI(from, senderName, content, messageType, mediaId);
+            
+            // Get the active request ID for linking
+            const conv = await getConversation(from);
+            await sendWhatsAppMessage(from, aiResponse, { requestId: conv?.current_request_id });
           }
 
           // ========== Process Status Updates ==========
-          for (const status of statuses) {
-            const messageId = status.id;
+          for (const status of value.statuses || []) {
             const statusType = status.status;
-            const recipientId = status.recipient_id;
-            const timestamp = status.timestamp;
+            const msgId = status.id;
+            const ts = status.timestamp;
 
-            console.log(`📊 Status update: ${messageId} -> ${statusType}`);
-
-            // Get existing record
-            const { data: existing } = await supabase
-              .from('message_logs')
-              .select('metadata')
-              .eq('external_id', messageId)
-              .single();
-
+            const { data: existing } = await supabase.from('message_logs').select('metadata').eq('external_id', msgId).single();
             const currentMeta = (existing?.metadata as Record<string, unknown>) || {};
 
-            // Update status
             const updateData: Record<string, unknown> = {
               status: statusType,
-              metadata: {
-                ...currentMeta,
-                [`${statusType}_at`]: timestamp,
-                last_status: statusType
-              }
+              metadata: { ...currentMeta, [`${statusType}_at`]: ts, last_status: statusType }
             };
+            if (statusType === 'delivered') updateData.delivered_at = new Date(parseInt(ts) * 1000).toISOString();
 
-            if (statusType === 'delivered') {
-              updateData.delivered_at = new Date(parseInt(timestamp) * 1000).toISOString();
-            }
-
-            await supabase
-              .from('message_logs')
-              .update(updateData)
-              .eq('external_id', messageId);
+            await supabase.from('message_logs').update(updateData).eq('external_id', msgId);
           }
         }
       }
 
       return new Response('EVENT_RECEIVED', { status: 200, headers: corsHeaders });
-
     } catch (error) {
       console.error('❌ Webhook error:', error);
       return new Response('EVENT_RECEIVED', { status: 200, headers: corsHeaders });
@@ -556,8 +563,3 @@ serve(async (req) => {
 
   return new Response('Method not allowed', { status: 405 });
 });
-
-// ==========================================
-// Export للاستخدام من وظائف أخرى
-// ==========================================
-export { sendWhatsAppMessage, MESSAGE_TEMPLATES };
