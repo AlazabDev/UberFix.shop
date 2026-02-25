@@ -5135,6 +5135,13 @@ export type Database = {
             foreignKeyName: "technician_withdrawals_processed_by_fkey"
             columns: ["processed_by"]
             isOneToOne: false
+            referencedRelation: "profiles_names_only"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_withdrawals_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
             referencedRelation: "profiles_public_safe"
             referencedColumns: ["id"]
           },
@@ -6620,6 +6627,38 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles_names_only: {
+        Row: {
+          company_id: string | null
+          full_name: string | null
+          id: string | null
+          name: string | null
+          role: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
+          role?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
           role?: string | null
         }
         Relationships: [
