@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, FileText, Settings, Package, CheckSquare, FileBarChart, Archive, AlertCircle, Clock } from "lucide-react";
+import { ArrowRight, FileText, Settings, Package, CheckSquare, FileBarChart, Archive, AlertCircle, Clock, MessageCircle } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { MaintenanceRequestDetails } from "@/components/maintenance/MaintenanceRequestDetails";
 import { RequestWorkflowControls } from "@/components/maintenance/RequestWorkflowControls";
@@ -21,7 +21,7 @@ import { ar } from "date-fns/locale";
 export default function RequestDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { requests, loading, updateRequest } = useMaintenanceRequests();
+  const { requests, loading, updateRequest, refetch } = useMaintenanceRequests();
   const [activeTab, setActiveTab] = useState("overview");
   const [lifecycleEvents, setLifecycleEvents] = useState<any[]>([]);
   const request = useMemo(() => {
@@ -174,8 +174,18 @@ export default function RequestDetails() {
                 requestData={request}
               />
             </div>
-            <div>
-              <RequestWorkflowControls request={request} />
+            <div className="space-y-4">
+              <RequestWorkflowControls request={request} onUpdate={refetch} />
+              {request.assigned_vendor_id && (
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
+                  onClick={() => navigate(`/inbox`)}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  فتح محادثة مع الفني
+                </Button>
+              )}
             </div>
           </div>
         </TabsContent>
@@ -227,7 +237,7 @@ export default function RequestDetails() {
 
         <TabsContent value="controls" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <RequestWorkflowControls request={request} />
+            <RequestWorkflowControls request={request} onUpdate={refetch} />
             
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">إجراءات إضافية</h3>

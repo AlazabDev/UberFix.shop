@@ -50,18 +50,13 @@ const items = [
   },
   {
     icon: Mail,
-    label: "صندوق البريد",
+    label: "الدردشة",
     href: "/inbox"
   },
   {
     icon: Users,
     label: "الموردين والفنيين",
     href: "/vendors"
-  },
-  {
-    icon: BarChart3,
-    label: "التقارير والإحصائيات",
-    href: "/reports"
   },
   {
     icon: Building2,
@@ -79,40 +74,35 @@ const items = [
     href: "/invoices"
   },
   {
+    icon: FileText,
+    label: "العقود",
+    href: "/contracts"
+  },
+  {
     icon: MapPin,
     label: "خريطة الخدمات",
     href: "/service-map"
   },
   {
-    icon: FileText,
-    label: "التوثيق",
-    href: "/documentation"
+    icon: BarChart3,
+    label: "التقارير",
+    href: "/reports"
+  },
+  {
+    icon: Clock,
+    label: "لوحة SLA",
+    href: "/reports/sla"
+  },
+  {
+    icon: Activity,
+    label: "مراقب الإنتاج",
+    href: "/production-monitor"
   },
   {
     icon: Settings,
     label: "الإعدادات",
     href: "/settings"
   },
-  {
-    icon: PlayCircle,
-    label: "اختبار النظام",
-    href: "/testing"
-  },
-  {
-    icon: BarChart3,
-    label: "تقرير الإنتاج",
-    href: "/production-report"
-  },
-  {
-    icon: Clock,
-    label: "لوحة SLA",
-    href: "/sla-dashboard"
-  },
-  {
-    icon: Activity,
-    label: "مراقب الإنتاج",
-    href: "/production-monitor"
-  }
 ];
 
 export function AppSidebar() {
