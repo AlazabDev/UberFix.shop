@@ -1,24 +1,36 @@
 {
-  "name": "UberFix.shop",
+  "name": "UberFix - نظام إدارة الصيانة",
   "short_name": "UberFix",
   "description": "نظام إدارة طلبات الصيانة المحمول المتكامل",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f5f5",
-  "theme_color": "#12007d",
+  "background_color": "#0b1e36",
+  "theme_color": "#0b1e36",
   "orientation": "any",
   "scope": "/",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
     {
-      "src": "https://al-azab.co/uberfix-icon.gif",
+      "src": "/logo/mainicon.png",
       "sizes": "512x512",
-      "type": "image/gif",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "https://al-azab.co/favicon.ico",
+      "src": "/logo/mainicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo/uberfix-icon.gif",
+      "sizes": "192x192",
+      "type": "image/gif",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
       "sizes": "48x48 32x32 16x16",
       "type": "image/x-icon"
     }
@@ -26,9 +38,9 @@
   "categories": ["business", "productivity", "utilities"],
   "screenshots": [
     {
-      "src": "https://al-azab.co/uberfix-icon.gif",
+      "src": "/logo/mainicon.png",
       "sizes": "512x512",
-      "type": "image/gif",
+      "type": "image/png",
       "form_factor": "wide"
     }
   ],
@@ -40,7 +52,7 @@
       "url": "/requests",
       "icons": [
         {
-          "src": "https://al-azab.co/uberfix-icon.gif",
+          "src": "/logo/mainicon.png",
           "sizes": "96x96"
         }
       ]
@@ -52,7 +64,7 @@
       "url": "/dashboard",
       "icons": [
         {
-          "src": "https://al-azab.co/uberfix-icon.gif",
+          "src": "/logo/mainicon.png",
           "sizes": "96x96"
         }
       ]
