@@ -4,8 +4,8 @@ import { CapacitorConfig } from '@capacitor/cli';
 const isProduction = process.env.NODE_ENV === 'production';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.c6adaf510eef43e8bf45d65ac7ebe1aa',
-  appName: 'UberFix - صيانة المباني',
+  appId: 'shop.uberfix.app',
+  appName: 'UberFix',
   webDir: 'dist',
   
   // Server configuration - only for development
@@ -55,10 +55,6 @@ const config: CapacitorConfig = {
     captureInput: true,
     webContentsDebuggingEnabled: !isProduction,
     backgroundColor: '#0b1e36',
-    buildOptions: {
-      keystorePath: 'android/app/release.keystore',
-      keystoreAlias: 'uberfix',
-    }
   },
   
   // iOS specific settings
