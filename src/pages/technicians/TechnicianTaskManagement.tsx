@@ -39,10 +39,33 @@ export default function TechnicianTaskManagement() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // جلب technician_id الصحيح عبر technician_profiles → technicians
+      const { data: profile } = await supabase
+        .from('technician_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: technician } = await supabase
+        .from('technicians')
+        .select('id')
+        .eq('technician_profile_id', profile.id)
+        .maybeSingle();
+
+      if (!technician) {
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("technician_tasks")
         .select("*")
-        .eq("technician_id", user.id)
+        .eq("technician_id", technician.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

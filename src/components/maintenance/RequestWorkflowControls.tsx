@@ -3,13 +3,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -21,7 +14,6 @@ import { Clock, Wrench } from "lucide-react";
 import { MaintenanceRequest } from "@/hooks/useMaintenanceRequests";
 import { 
   WORKFLOW_STAGES, 
-  getAllStagesArray, 
   getNextStages,
   type WorkflowStage 
 } from "@/constants/workflowStages";
@@ -40,7 +32,6 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
   const { toast } = useToast();
 
   const currentStageConfig = WORKFLOW_STAGES[selectedStage];
-  const allStages = getAllStagesArray();
   const nextStages = getNextStages(selectedStage);
 
   const updateWorkflowStage = async (newStage: WorkflowStage) => {
@@ -85,11 +76,7 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
     }
   };
 
-  const handleStageChange = (value: string) => {
-    const newStage = value as WorkflowStage;
-    setSelectedStage(newStage);
-    updateWorkflowStage(newStage);
-  };
+
 
   const Icon = currentStageConfig?.icon || Clock;
 
@@ -121,54 +108,38 @@ export function RequestWorkflowControls({ request, onUpdate }: RequestWorkflowCo
           )}
         </div>
 
-        {/* تغيير المرحلة */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">تغيير المرحلة</label>
-          <Select
-            value={selectedStage}
-            onValueChange={handleStageChange}
-            disabled={loading}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر المرحلة" />
-            </SelectTrigger>
-            <SelectContent>
-              {allStages.map((stage) => {
-                const StageIcon = stage.icon;
-                return (
-                  <SelectItem key={stage.key} value={stage.key}>
-                    <div className="flex items-center gap-2">
-                      <StageIcon className="h-4 w-4" />
-                      {stage.label}
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* إجراءات سريعة - المراحل التالية المحتملة */}
+        {/* تغيير المرحلة - فقط المراحل التالية المسموحة */}
         {nextStages.length > 0 && (
           <div className="space-y-2">
-            <label className="text-sm font-medium">الانتقال السريع</label>
+            <label className="text-sm font-medium">الانتقال إلى المرحلة التالية</label>
             <div className="flex flex-wrap gap-2">
-              {nextStages.map((stage) => (
-                <Button
-                  key={stage.key}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedStage(stage.key);
-                    updateWorkflowStage(stage.key);
-                  }}
-                  disabled={loading}
-                  className={cn("border", stage.textColor)}
-                >
-                  {stage.label}
-                </Button>
-              ))}
+              {nextStages.map((stage) => {
+                const StageIcon = stage.icon;
+                return (
+                  <Button
+                    key={stage.key}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedStage(stage.key);
+                      updateWorkflowStage(stage.key);
+                    }}
+                    disabled={loading}
+                    className={cn("border gap-2", stage.textColor)}
+                  >
+                    <StageIcon className="h-4 w-4" />
+                    {stage.label}
+                  </Button>
+                );
+              })}
             </div>
+          </div>
+        )}
+
+        {/* رسالة عند عدم وجود انتقالات */}
+        {nextStages.length === 0 && (
+          <div className="p-3 bg-muted rounded-lg text-center">
+            <p className="text-sm text-muted-foreground">لا توجد مراحل تالية متاحة - الطلب في مرحلته النهائية</p>
           </div>
         )}
 

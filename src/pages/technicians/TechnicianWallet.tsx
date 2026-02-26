@@ -47,15 +47,28 @@ export default function TechnicianWallet() {
         return;
       }
 
-      // Get technician_id
+      // جلب technician_id الصحيح عبر technician_profiles → technicians
+      const { data: profile } = await supabase
+        .from('technician_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        toast({ title: "خطأ", description: "لم يتم العثور على ملف تسجيل الفني", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
       const { data: techData } = await supabase
         .from('technicians')
         .select('id')
-        .eq('id', user.id)
-        .single();
+        .eq('technician_profile_id', profile.id)
+        .maybeSingle();
 
       if (!techData) {
         toast({ title: "خطأ", description: "لم يتم العثور على حساب الفني", variant: "destructive" });
+        setLoading(false);
         return;
       }
 
@@ -69,7 +82,6 @@ export default function TechnicianWallet() {
       let walletData = data;
 
       if (error && error.code === 'PGRST116') {
-        // Create wallet if doesn't exist
         const { data: newWallet } = await supabase
           .from('technician_wallet')
           .insert({ technician_id: techData.id })
@@ -92,11 +104,19 @@ export default function TechnicianWallet() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const { data: profile } = await supabase
+        .from('technician_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!profile) return;
+
       const { data: techData } = await supabase
         .from('technicians')
         .select('id')
-        .eq('id', user.id)
-        .single();
+        .eq('technician_profile_id', profile.id)
+        .maybeSingle();
 
       if (!techData) return;
 

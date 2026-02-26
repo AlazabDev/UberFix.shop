@@ -48,14 +48,22 @@ export default function TechnicianEarnings() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get technician ID
+      // جلب technician_id الصحيح عبر technician_profiles → technicians
+      const { data: profile } = await supabase
+        .from('technician_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!profile) { setLoading(false); return; }
+
       const { data: techData } = await supabase
         .from('technicians')
         .select('id')
-        .eq('id', user.id)
-        .single();
+        .eq('technician_profile_id', profile.id)
+        .maybeSingle();
 
-      if (!techData) return;
+      if (!techData) { setLoading(false); return; }
 
       // Fetch daily stats (last 30 days)
       const thirtyDaysAgo = new Date();

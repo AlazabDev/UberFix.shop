@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, FileText, Settings, Package, CheckSquare, FileBarChart, Archive, AlertCircle } from "lucide-react";
+import { ArrowRight, FileText, Settings, Package, CheckSquare, FileBarChart, Archive, AlertCircle, Clock } from "lucide-react";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { MaintenanceRequestDetails } from "@/components/maintenance/MaintenanceRequestDetails";
 import { RequestWorkflowControls } from "@/components/maintenance/RequestWorkflowControls";
@@ -14,13 +14,16 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AppFooter } from "@/components/shared/AppFooter";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
 
 export default function RequestDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { requests, loading, updateRequest } = useMaintenanceRequests();
   const [activeTab, setActiveTab] = useState("overview");
-
+  const [lifecycleEvents, setLifecycleEvents] = useState<any[]>([]);
   const request = useMemo(() => {
     if (!id || requests.length === 0) return null;
     return requests.find(r => r.id === id) || null;
@@ -160,14 +163,7 @@ export default function RequestDetails() {
         </TabsContent>
 
         <TabsContent value="lifecycle" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>دورة الحياة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">تم إزالة هذه الميزة مؤقتاً</p>
-            </CardContent>
-          </Card>
+          <LifecycleTab requestId={request.id} />
         </TabsContent>
 
         <TabsContent value="workflow" className="space-y-4">
@@ -262,5 +258,101 @@ export default function RequestDetails() {
 
       <AppFooter />
     </div>
+  );
+}
+
+/** مكون عرض سجل دورة حياة الطلب */
+function LifecycleTab({ requestId }: { requestId: string }) {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLifecycle = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('request_lifecycle')
+          .select('*')
+          .eq('request_id', requestId)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        setEvents(data || []);
+      } catch (err) {
+        console.error('Error fetching lifecycle:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLifecycle();
+  }, [requestId]);
+
+  if (loading) {
+    return (
+      <Card className="p-8 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+      </Card>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <Card className="p-8 text-center">
+        <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">لا توجد أحداث مسجلة بعد في دورة حياة هذا الطلب</p>
+      </Card>
+    );
+  }
+
+  const getEventLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      status_change: 'تغيير الحالة',
+      assignment: 'تعيين',
+      note: 'ملاحظة',
+      escalation: 'تصعيد',
+    };
+    return labels[type] || type;
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          سجل دورة الحياة ({events.length} حدث)
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="relative">
+          {events.map((event, index) => (
+            <div key={event.id} className="flex gap-4 relative pb-6">
+              {index < events.length - 1 && (
+                <div className="absolute right-[15px] top-[32px] w-[2px] h-[calc(100%)] bg-border" />
+              )}
+              <div className="relative z-10 flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="outline" className="text-xs">
+                    {getEventLabel(event.update_type)}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(event.created_at), "dd MMM yyyy - HH:mm", { locale: ar })}
+                  </span>
+                </div>
+                {event.update_notes && (
+                  <p className="text-sm text-foreground">{event.update_notes}</p>
+                )}
+                {event.status && (
+                  <p className="text-xs text-muted-foreground mt-1">المرحلة: {event.status}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
