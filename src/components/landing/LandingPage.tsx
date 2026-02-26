@@ -19,8 +19,8 @@ import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useDirection } from "@/hooks/useDirection";
 
-// Lazy load the map component to prevent blocking initial render
-const BranchesMapbox = lazy(() => import("@/components/maps/BranchesMapbox"));
+// Lazy load the map component - using Google Maps
+const BranchesGoogleMap = lazy(() => import("@/components/maps/BranchesGoogleMap"));
 
 // Loading fallback for map
 const MapLoadingFallback = () => {
@@ -66,7 +66,7 @@ export const LandingPage = () => {
 
           <div className="max-w-6xl mx-auto">
             <Suspense fallback={<MapLoadingFallback />}>
-              <BranchesMapbox height="700px" showStats={true} initialMode="globe" />
+              <BranchesGoogleMap height="700px" showStats={true} />
             </Suspense>
           </div>
         </div>

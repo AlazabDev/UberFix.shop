@@ -98,7 +98,7 @@ const TechnicianApprovalQueue = lazy(
 );
 
 // Messages
-const Inbox = lazy(() => import("@/pages/messages/Inbox"));
+const Inbox = lazy(() => import("@/pages/messages/ChatPage"));
 const WhatsAppMessages = lazy(
   () => import("@/pages/messages/WhatsAppMessages")
 );

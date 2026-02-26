@@ -535,6 +535,126 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversations: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          id: string
+          last_message_at: string | null
+          request_id: string | null
+          status: string
+          technician_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          id?: string
+          last_message_at?: string | null
+          request_id?: string | null
+          status?: string
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          id?: string
+          last_message_at?: string | null
+          request_id?: string | null
+          status?: string
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "technician_assigned_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "vw_maintenance_requests_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversations_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversations_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversations_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          file_url: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          message_type: string
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          file_url?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          message_type?: string
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          file_url?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          message_type?: string
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           id: number
