@@ -44,7 +44,7 @@ const CompletedServices = lazy(() => import("@/pages/CompletedServices"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const WhatsAppStatusPage = lazy(() => import("@/pages/messages/WhatsAppStatusPage"));
 const ServiceMap = lazy(() => import("@/pages/maintenance/ServiceMap"));
-const ChatPage = lazy(() => import("@/pages/ChatPage"));
+const ChatPage = lazy(() => import("@/pages/messages/ChatPage"));
 
 // Technician pages
 const TechnicianRegistration = lazy(() => import("@/pages/technicians/TechnicianRegistration"));
