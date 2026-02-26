@@ -116,6 +116,7 @@ export default function CreateMaintenanceRequest() {
           category_id: data.category_id,
           estimated_cost: total,
           status: "Open",
+          workflow_stage: "submitted",
           created_by: user.id,
           client_name: data.use_temp_contact ? data.contact_name : undefined,
           client_phone: data.use_temp_contact ? data.contact_phone : undefined,

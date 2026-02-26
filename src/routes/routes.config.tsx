@@ -218,5 +218,5 @@ export const protectedRoutes = [
   // No layout
   { path: "/service-map", element: <ServiceMap />, withLayout: false },
   { path: "/emergency-service/:technicianId", element: <EmergencyService />, withLayout: false },
-  { path: "/inbox", element: <Inbox />, withLayout: false }
+  { path: "/inbox", element: <Inbox />, withLayout: true }
 ];

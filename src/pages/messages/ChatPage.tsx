@@ -143,12 +143,16 @@ const ChatPage = () => {
                   </Button>
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {getOtherPartyIcon(conversations.find(c => c.id === selectedConversationId)!)}
+                      {conversations.find(c => c.id === selectedConversationId) 
+                        ? getOtherPartyIcon(conversations.find(c => c.id === selectedConversationId)!) 
+                        : <User className="h-4 w-4" />}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium text-sm">
-                      {getOtherPartyName(conversations.find(c => c.id === selectedConversationId)!)}
+                      {conversations.find(c => c.id === selectedConversationId) 
+                        ? getOtherPartyName(conversations.find(c => c.id === selectedConversationId)!)
+                        : 'محادثة'}
                     </p>
                     <p className="text-xs text-muted-foreground">متصل</p>
                   </div>

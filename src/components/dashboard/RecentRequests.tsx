@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, MapPin, Clock, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
+import { useNavigate } from "react-router-dom";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending: { label: "معلق", className: "bg-warning text-warning-foreground" },
@@ -22,8 +23,9 @@ const priorityConfig = {
 };
 
 export const RecentRequests = () => {
+  const navigate = useNavigate();
   const { requests, loading, error } = useMaintenanceRequests();
-  const recentRequests = requests.slice(0, 3); // عرض آخر 3 طلبات فقط
+  const recentRequests = requests.slice(0, 3);
 
   if (loading) {
     return (
@@ -60,7 +62,7 @@ export const RecentRequests = () => {
     <Card className="card-elegant">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold">طلبات الصيانة الأخيرة</CardTitle>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/requests')}>
           عرض الكل
         </Button>
       </CardHeader>
@@ -76,10 +78,10 @@ export const RecentRequests = () => {
                 <p className="text-sm text-primary font-medium">#{request.id.slice(0, 8)}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className={cn("text-xs", priorityConfig[request.priority].className)}>
-                  {priorityConfig[request.priority].label}
+                <Badge className={cn("text-xs", priorityConfig[request.priority as keyof typeof priorityConfig]?.className || "bg-muted text-muted-foreground")}>
+                  {priorityConfig[request.priority as keyof typeof priorityConfig]?.label || "غير محدد"}
                 </Badge>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => navigate(`/requests/${request.id}`)}>
                   <Eye className="h-4 w-4" />
                 </Button>
               </div>
