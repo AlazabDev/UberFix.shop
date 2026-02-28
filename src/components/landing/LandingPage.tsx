@@ -19,8 +19,8 @@ import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useDirection } from "@/hooks/useDirection";
 
-// Lazy load the map component - using Google Maps
-const BranchesGoogleMap = lazy(() => import("@/components/maps/BranchesGoogleMap"));
+// Lazy load the Mapbox globe map for promotional display
+const GlobalMap = lazy(() => import("@/components/GlobalMap"));
 
 // Loading fallback for map
 const MapLoadingFallback = () => {
@@ -49,28 +49,10 @@ export const LandingPage = () => {
       {/* شريط الخدمات السريع أسفل الهيرو مباشرة */}
       <HeroServicesBar />
 
-      {/* قسم مستقل للخريطة */}
-      <section className="py-12 md:py-16 bg-muted/30">
-        <div className="container mx-auto px-4 space-y-6">
-          <div className="max-w-2xl mx-auto text-center space-y-2">
-            <p className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              {t('map.title')}
-            </p>
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">
-              {t('map.subtitle')}{" "}
-              <span className="bg-gradient-to-l from-primary to-secondary bg-clip-text text-transparent">
-                {t('map.highlight')}
-              </span>
-            </h2>
-          </div>
-
-          <div className="max-w-6xl mx-auto">
-            <Suspense fallback={<MapLoadingFallback />}>
-              <BranchesGoogleMap height="700px" showStats={true} />
-            </Suspense>
-          </div>
-        </div>
-      </section>
+      {/* قسم الخريطة الترويجية - Globe */}
+      <Suspense fallback={<MapLoadingFallback />}>
+        <GlobalMap />
+      </Suspense>
 
       {/* باقي أقسام صفحة الهبوط */}
       <ServicesSection />
