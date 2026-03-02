@@ -204,3 +204,7 @@ verify_jwt = true
 [functions.whatsapp-templates-webhook]
 verify_jwt = false
 # Meta webhook for template status updates - validates x-hub-signature-256 internally
+
+[functions.whatsapp-flow]
+verify_jwt = false
+# WhatsApp Flow data exchange endpoint - uses RSA/AES encryption internally
