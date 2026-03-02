@@ -101,7 +101,11 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
 
       if (error) throw error;
 
-      if (data?.success && data?.session) {
+      if (!data?.success) {
+        throw new Error(data?.error || "رمز التحقق غير صحيح");
+      }
+
+      if (data.session) {
         // Set session from verified OTP
         await supabase.auth.setSession({
           access_token: data.session.access_token,
@@ -114,7 +118,12 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
         });
         navigate("/dashboard");
       } else {
-        throw new Error(data?.error || "رمز التحقق غير صحيح");
+        // OTP verified but no session - redirect to login
+        toast({
+          title: "تم التحقق",
+          description: data.message || "تم التحقق بنجاح. يرجى تسجيل الدخول.",
+        });
+        navigate("/login");
       }
     } catch (error: any) {
       toast({
