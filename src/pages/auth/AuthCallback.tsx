@@ -1,265 +1,151 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { detectUserRole } from '@/lib/roleRedirect';
 
-type AuthType = 'signup' | 'recovery' | 'magiclink' | 'email_change' | 'invite' | 'email' | null;
-
 /**
- * OAuth Callback Handler - نقطة واحدة لاستقبال جميع callbacks
+ * OAuth Callback Handler
  * 
- * التدفق:
- * 1. Parse URL params
- * 2. Handle specific type (recovery, email_change, magiclink, signup)
- * 3. For OAuth (Google/Facebook): wait for session → detect role → redirect
+ * التدفق المبسط:
+ * 1. Supabase client يعالج tokens من URL تلقائياً
+ * 2. AuthContext يستقبل الجلسة عبر onAuthStateChange
+ * 3. نحن فقط ننتظر AuthContext.user ثم نوجه حسب الدور
+ * 
+ * الحالات الخاصة (recovery, email_change, magiclink, signup):
+ * - تُعالج يدوياً قبل الانتظار
  */
 const AuthCallback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isLoading: authLoading } = useAuth();
   const [message, setMessage] = useState('جاري معالجة طلب المصادقة...');
   const [error, setError] = useState<string | null>(null);
-  const [processed, setProcessed] = useState(false);
+  const handledRef = useRef(false);
+  const specialHandledRef = useRef(false);
 
-  const redirectByRole = async (userId: string, userEmail?: string) => {
-    try {
-      setMessage('جاري تحديد صلاحياتك...');
-      const roleInfo = await detectUserRole(userId, userEmail);
-      
-      toast({
-        title: "تم تسجيل الدخول بنجاح",
-        description: roleInfo.isNewUser ? "مرحباً بك! يرجى اختيار نوع حسابك" : "مرحباً بك في UberFix",
-      });
-      
-      // تأخير بسيط للتأكد من تخزين الجلسة
-      setTimeout(() => {
-        navigate(roleInfo.redirectPath, { replace: true });
-      }, 500);
-      
-      return true;
-    } catch (error) {
-      console.error('Error in redirectByRole:', error);
-      navigate('/dashboard', { replace: true });
-      return false;
-    }
-  };
-
+  // ✅ Step 1: Handle special auth types (recovery, email_change, etc.)
   useEffect(() => {
-    let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
-    let subscription: { unsubscribe: () => void } | null = null;
+    if (specialHandledRef.current) return;
 
-    const handleCallback = async () => {
-      // منع المعالجة المكررة
-      if (processed) return;
-      
-      try {
-        // قراءة الباراميترات من URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const queryParams = new URLSearchParams(window.location.search);
-        
-        const accessToken = hashParams.get('access_token') || queryParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
-        const type = (hashParams.get('type') || queryParams.get('type')) as AuthType;
-        const tokenHash = hashParams.get('token_hash') || queryParams.get('token_hash');
-        const errorParam = hashParams.get('error') || queryParams.get('error');
-        const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
-        const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
+    const handleSpecialTypes = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const queryParams = new URLSearchParams(window.location.search);
 
-        console.log('🔍 Auth Callback Params:', { 
-          type, 
-          hasAccessToken: !!accessToken,
-          hasRefreshToken: !!refreshToken,
-          hasTokenHash: !!tokenHash,
-          error: errorParam
-        });
+      const type = hashParams.get('type') || queryParams.get('type');
+      const tokenHash = hashParams.get('token_hash') || queryParams.get('token_hash');
+      const errorParam = hashParams.get('error') || queryParams.get('error');
+      const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
+      const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
 
-        // Handle errors
-        if (errorParam) {
-          let errorMsg = decodeURIComponent(errorDescription || errorParam);
-          if (errorParam === 'access_denied' || errorCode === 'otp_expired') {
-            errorMsg = 'انتهت صلاحية الرابط. يرجى طلب رابط جديد.';
-          }
-          if (isMounted) {
-            setError(errorMsg);
-            setProcessed(true);
-          }
-          return;
+      console.log('🔍 Auth Callback:', { type, hasTokenHash: !!tokenHash, error: errorParam });
+
+      // Handle errors from OAuth provider
+      if (errorParam) {
+        specialHandledRef.current = true;
+        let errorMsg = decodeURIComponent(errorDescription || errorParam);
+        if (errorParam === 'access_denied' || errorCode === 'otp_expired') {
+          errorMsg = 'انتهت صلاحية الرابط. يرجى طلب رابط جديد.';
         }
+        setError(errorMsg);
+        return;
+      }
 
-        // ✅ 1. OAuth callback (Google, Facebook) - أولوية قصوى
-        if (accessToken && refreshToken) {
-          setMessage('جاري تسجيل الدخول باستخدام OAuth...');
-          console.log('🔄 Setting OAuth session...');
-          
-          const { data, error: e } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          
-          if (e) {
-            console.error('❌ OAuth setSession error:', e);
-            if (isMounted) {
-              setError('فشل في تسجيل الدخول. حاول مرة أخرى.');
-              setProcessed(true);
-            }
-            return;
-          }
-          
-          if (data?.session?.user) {
-            console.log('✅ OAuth session set successfully for user:', data.session.user.id);
-            setProcessed(true);
-            await redirectByRole(data.session.user.id, data.session.user.email);
-            return;
-          }
-        }
+      // Recovery (password reset)
+      if (type === 'recovery') {
+        specialHandledRef.current = true;
+        setMessage('جاري تحضير صفحة إعادة تعيين كلمة المرور...');
 
-        // ✅ 2. Recovery (password reset)
-        if (type === 'recovery') {
-          if (isMounted) setMessage('جاري تحضير صفحة إعادة تعيين كلمة المرور...');
-          
-          if (tokenHash) {
-            const { data, error: e } = await supabase.auth.verifyOtp({ 
-              token_hash: tokenHash, 
-              type: 'recovery' 
-            });
-            if (e) { 
-              if (isMounted) setError(e.message); 
-              setProcessed(true);
-              return; 
-            }
-            if (data?.session) { 
-              setProcessed(true);
-              navigate('/auth/update-password', { replace: true }); 
-              return; 
-            }
-          }
-          
-          if (accessToken && refreshToken) {
-            const { error: e } = await supabase.auth.setSession({ 
-              access_token: accessToken, 
-              refresh_token: refreshToken 
-            });
-            if (e) { 
-              if (isMounted) setError('فشل في تفعيل الجلسة.'); 
-              setProcessed(true);
-              return; 
-            }
-            setProcessed(true);
-            navigate('/auth/update-password', { replace: true });
-            return;
-          }
-          
-          if (isMounted) setError('رابط إعادة تعيين كلمة المرور غير صالح.');
-          setProcessed(true);
-          return;
-        }
-
-        // ✅ 3. Email change
-        if (type === 'email_change') {
-          setProcessed(true);
-          navigate(`/auth/verify-email-change${window.location.hash}${window.location.search}`, { replace: true });
-          return;
-        }
-
-        // ✅ 4. Magic link
-        if (type === 'magiclink') {
-          setProcessed(true);
-          navigate(`/auth/magic${window.location.hash}${window.location.search}`, { replace: true });
-          return;
-        }
-
-        // ✅ 5. Email confirmation (signup)
-        if (tokenHash && (type === 'signup' || type === 'email')) {
-          if (isMounted) setMessage('جاري تأكيد البريد الإلكتروني...');
-          
+        if (tokenHash) {
           const { data, error: e } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
-            type: type === 'signup' ? 'signup' : 'email',
+            type: 'recovery',
           });
-          
-          if (e) { 
-            if (isMounted) setError(e.message); 
-            setProcessed(true);
-            return; 
-          }
-          
-          if (data?.session?.user) {
-            setProcessed(true);
-            await redirectByRole(data.session.user.id, data.session.user.email);
-            return;
-          }
+          if (e) { setError(e.message); return; }
+          if (data?.session) { navigate('/auth/update-password', { replace: true }); return; }
         }
 
-        // ✅ 6. No tokens in URL - wait for PKCE/onAuthStateChange
-        setMessage('جاري التحقق من الجلسة...');
-        console.log('🔄 No tokens in URL, waiting for session...');
+        // Fallback: let Supabase auto-detect handle it, wait for session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) { navigate('/auth/update-password', { replace: true }); return; }
 
-        // التحقق المبدئي من الجلسة
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        
-        if (initialSession?.user) {
-          console.log('✅ Found existing session:', initialSession.user.id);
-          setProcessed(true);
-          await redirectByRole(initialSession.user.id, initialSession.user.email);
-          return;
-        }
+        setError('رابط إعادة تعيين كلمة المرور غير صالح.');
+        return;
+      }
 
-        // انتظار الجلسة عبر onAuthStateChange
-        await new Promise<void>((resolve) => {
-          // Set timeout for session establishment
-          timeoutId = setTimeout(() => {
-            if (isMounted) {
-              console.log('⏰ Session timeout reached');
-              setError('لم يتم العثور على معلومات المصادقة. يرجى المحاولة مرة أخرى.');
-              setProcessed(true);
-            }
-            if (subscription) subscription.unsubscribe();
-            resolve();
-          }, 10000); // 10 seconds timeout
+      // Email change
+      if (type === 'email_change') {
+        specialHandledRef.current = true;
+        navigate(`/auth/verify-email-change${window.location.hash}${window.location.search}`, { replace: true });
+        return;
+      }
 
-          // Listen for auth state changes
-          const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log('📡 Auth state changed:', event, session?.user?.id);
-            
-            if (!isMounted) {
-              if (subscription) subscription.unsubscribe();
-              clearTimeout(timeoutId);
-              resolve();
-              return;
-            }
-            
-            if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) {
-              console.log('✅ Session established via event:', event);
-              clearTimeout(timeoutId);
-              if (subscription) subscription.unsubscribe();
-              setProcessed(true);
-              redirectByRole(session.user.id, session.user.email).then(() => resolve());
-            }
-          });
-          
-          subscription = sub;
+      // Magic link
+      if (type === 'magiclink') {
+        specialHandledRef.current = true;
+        navigate(`/auth/magic${window.location.hash}${window.location.search}`, { replace: true });
+        return;
+      }
+
+      // Email confirmation (signup)
+      if (tokenHash && (type === 'signup' || type === 'email')) {
+        specialHandledRef.current = true;
+        setMessage('جاري تأكيد البريد الإلكتروني...');
+
+        const { data, error: e } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: type === 'signup' ? 'signup' : 'email',
         });
 
-      } catch (err) {
-        console.error('❌ Auth callback error:', err);
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : 'حدث خطأ أثناء المصادقة');
-          setProcessed(true);
-        }
+        if (e) { setError(e.message); return; }
+        // Session will be picked up by AuthContext → Step 2 handles redirect
+        return;
       }
+
+      // OAuth flow (Google/Facebook) - tokens in URL are auto-processed by Supabase client
+      // No special handling needed, Step 2 will handle redirect when AuthContext gets the user
     };
 
-    handleCallback();
+    handleSpecialTypes().catch((err) => {
+      console.error('❌ Auth callback error:', err);
+      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء المصادقة');
+    });
+  }, [navigate]);
 
-    return () => { 
-      isMounted = false; 
-      if (timeoutId) clearTimeout(timeoutId);
-      if (subscription) subscription.unsubscribe();
-    };
-  }, [navigate, toast, processed]);
+  // ✅ Step 2: When AuthContext has a user, redirect by role
+  useEffect(() => {
+    if (handledRef.current || authLoading || !user) return;
+    handledRef.current = true;
+
+    setMessage('جاري تحديد صلاحياتك...');
+
+    detectUserRole(user.id, user.email)
+      .then((roleInfo) => {
+        toast({
+          title: 'تم تسجيل الدخول بنجاح',
+          description: roleInfo.isNewUser
+            ? 'مرحباً بك! يرجى اختيار نوع حسابك'
+            : 'مرحباً بك في UberFix',
+        });
+        navigate(roleInfo.redirectPath, { replace: true });
+      })
+      .catch(() => {
+        navigate('/dashboard', { replace: true });
+      });
+  }, [authLoading, user, navigate, toast]);
+
+  // ✅ Step 3: Timeout - if no user after 15 seconds, show error
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!handledRef.current && !specialHandledRef.current) {
+        setError('لم يتم العثور على معلومات المصادقة. يرجى المحاولة مرة أخرى.');
+      }
+    }, 15000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   if (error) {
     return (
