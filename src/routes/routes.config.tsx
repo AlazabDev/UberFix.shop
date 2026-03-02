@@ -13,7 +13,7 @@ const RequestLifecycleJourney = lazy(
   () => import("@/pages/maintenance/RequestLifecycleJourney")
 );
 const ServiceRequest = lazy(() => import("@/pages/maintenance/ServiceRequest"));
-const ServiceMap = lazy(() => import("@/pages/maintenance/ServiceMap"));
+// ServiceMap is in publicRoutes only
 const EmergencyService = lazy(
   () => import("@/pages/maintenance/EmergencyService")
 );
@@ -56,9 +56,7 @@ const RateCard = lazy(() => import("@/pages/admin/RateCard"));
 const MallsDirectory = lazy(() => import("@/pages/admin/MallsDirectory"));
 
 // Technicians
-const TechnicianRegistration = lazy(
-  () => import("@/pages/technicians/TechnicianRegistration")
-);
+// TechnicianRegistration is in publicRoutes
 const TechnicianVerification = lazy(
   () => import("@/pages/technicians/TechnicianVerification")
 );
@@ -197,8 +195,7 @@ export const protectedRoutes = [
   { path: "/users", element: <UsersPage />, withLayout: true },
   { path: "/admin-control-center", element: <AdminControlCenter />, withLayout: true },
 
-  // Technicians Module
-  { path: "/technicians/register", element: <TechnicianRegistration />, withLayout: true },
+  // Technicians Module (register is public - see publicRoutes)
   { path: "/technicians/verification", element: <TechnicianVerification />, withLayout: true },
   { path: "/technicians/agreement", element: <TechnicianAgreement />, withLayout: true },
   { path: "/technicians/training", element: <TechnicianTraining />, withLayout: true },
@@ -215,8 +212,7 @@ export const protectedRoutes = [
   { path: "/dashboard/whatsapp/templates", element: <WhatsAppTemplatesPage />, withLayout: true },
   { path: "/dashboard/whatsapp/logs", element: <WhatsAppMessageLogsPage />, withLayout: true },
 
-  // No layout
-  { path: "/service-map", element: <ServiceMap />, withLayout: false },
+  // No layout (service-map is public - see publicRoutes)
   { path: "/emergency-service/:technicianId", element: <EmergencyService />, withLayout: false },
   { path: "/inbox", element: <Inbox />, withLayout: true }
 ];

@@ -8,9 +8,8 @@ const corsHeaders = {
 // Rate limiting storage (in-memory for edge function instance)
 const verifyAttempts = new Map<string, { count: number; firstAttempt: number }>();
 
-// Rate limit: 5 attempts per phone per 5 minutes
 const MAX_VERIFY_ATTEMPTS = 5;
-const VERIFY_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+const VERIFY_WINDOW_MS = 5 * 60 * 1000;
 
 function checkRateLimit(phone: string): { allowed: boolean; remainingTime?: number } {
   const now = Date.now();
@@ -22,19 +21,16 @@ function checkRateLimit(phone: string): { allowed: boolean; remainingTime?: numb
     return { allowed: true };
   }
 
-  // Reset if window has passed
   if (now - attempts.firstAttempt > VERIFY_WINDOW_MS) {
     verifyAttempts.set(key, { count: 1, firstAttempt: now });
     return { allowed: true };
   }
 
-  // Check if limit exceeded
   if (attempts.count >= MAX_VERIFY_ATTEMPTS) {
     const remainingTime = Math.ceil((VERIFY_WINDOW_MS - (now - attempts.firstAttempt)) / 1000);
     return { allowed: false, remainingTime };
   }
 
-  // Increment count
   attempts.count++;
   verifyAttempts.set(key, attempts);
   return { allowed: true };
@@ -52,10 +48,9 @@ Deno.serve(async (req) => {
       throw new Error('Phone and OTP are required');
     }
 
-    // Check rate limit BEFORE attempting verification
+    // Check rate limit
     const rateCheck = checkRateLimit(phone);
     if (!rateCheck.allowed) {
-      console.log(`⚠️ Rate limit exceeded for phone: ${phone.slice(0, 6)}***`);
       return new Response(
         JSON.stringify({
           success: false,
@@ -68,13 +63,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Find valid OTP
-    const { data: otpRecord, error: otpError } = await supabaseClient
+    const { data: otpRecord, error: otpError } = await supabaseAdmin
       .from('otp_verifications')
       .select('*')
       .eq('phone', phone)
@@ -102,20 +97,169 @@ Deno.serve(async (req) => {
     }
 
     // Mark OTP as verified
-    await supabaseClient
+    await supabaseAdmin
       .from('otp_verifications')
       .update({ verified: true, verified_at: new Date().toISOString() })
       .eq('id', otpRecord.id);
 
-    console.log('✅ OTP verified successfully for:', phone.slice(0, 6) + '***');
+    console.log('✅ OTP verified for:', phone.slice(0, 6) + '***');
+
+    // ====== Create or find user and generate session ======
+    
+    // Generate a pseudo-email from the phone number for Supabase auth
+    const cleanPhone = phone.replace(/\+/g, '');
+    const phoneEmail = `phone_${cleanPhone}@uberfix.local`;
+    const tempPassword = crypto.randomUUID(); // Secure random password
+
+    // Try to find existing user by phone email
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    let userId: string | null = null;
+
+    if (existingUsers?.users) {
+      const existingUser = existingUsers.users.find(
+        (u) => u.email === phoneEmail || u.phone === phone
+      );
+      if (existingUser) {
+        userId = existingUser.id;
+      }
+    }
+
+    if (!userId) {
+      // Create new user
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: phoneEmail,
+        phone: phone,
+        password: tempPassword,
+        email_confirm: true,
+        phone_confirm: true,
+        user_metadata: {
+          full_name: `مستخدم ${phone.slice(-4)}`,
+          phone: phone,
+          role: 'customer',
+          auth_method: 'phone_otp',
+        },
+      });
+
+      if (createError) {
+        console.error('❌ Error creating user:', createError);
+        throw new Error('فشل في إنشاء الحساب');
+      }
+
+      userId = newUser.user.id;
+      console.log('✅ New user created for phone:', phone.slice(0, 6) + '***');
+    }
+
+    // Generate a magic link token to create a session
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: phoneEmail,
+    });
+
+    if (sessionError || !sessionData) {
+      console.error('❌ Error generating session link:', sessionError);
+      
+      // Fallback: sign in with password
+      // Update password first
+      await supabaseAdmin.auth.admin.updateUser(userId, { password: tempPassword });
+      
+      // Sign in with the temp password using anon key client
+      const supabaseAnon = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      );
+      
+      const { data: signInData, error: signInError } = await supabaseAnon.auth.signInWithPassword({
+        email: phoneEmail,
+        password: tempPassword,
+      });
+
+      if (signInError || !signInData.session) {
+        console.error('❌ Fallback sign-in failed:', signInError);
+        // Return success without session - user verified but can't create session
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: 'تم التحقق بنجاح. يرجى تسجيل الدخول.',
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'تم التحقق وتسجيل الدخول بنجاح',
+          session: {
+            access_token: signInData.session.access_token,
+            refresh_token: signInData.session.refresh_token,
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use the generated link to verify and get a session
+    if (sessionData.properties?.hashed_token) {
+      const supabaseAnon = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      );
+
+      const { data: verifyData, error: verifyError } = await supabaseAnon.auth.verifyOtp({
+        token_hash: sessionData.properties.hashed_token,
+        type: 'magiclink',
+      });
+
+      if (!verifyError && verifyData?.session) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: 'تم التحقق وتسجيل الدخول بنجاح',
+            session: {
+              access_token: verifyData.session.access_token,
+              refresh_token: verifyData.session.refresh_token,
+            },
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // If all else fails, use password fallback
+    await supabaseAdmin.auth.admin.updateUser(userId, { password: tempPassword });
+    
+    const supabaseAnon = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+    
+    const { data: fallbackData, error: fallbackError } = await supabaseAnon.auth.signInWithPassword({
+      email: phoneEmail,
+      password: tempPassword,
+    });
+
+    if (fallbackError || !fallbackData.session) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'تم التحقق بنجاح. يرجى تسجيل الدخول.',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'تم التحقق بنجاح',
+        message: 'تم التحقق وتسجيل الدخول بنجاح',
+        session: {
+          access_token: fallbackData.session.access_token,
+          refresh_token: fallbackData.session.refresh_token,
+        },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+
   } catch (error) {
     console.error('Error in verify-otp:', error);
     return new Response(
