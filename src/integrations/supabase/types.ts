@@ -54,6 +54,13 @@ export type Database = {
             foreignKeyName: "annual_grand_winners_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_grand_winners_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -593,6 +600,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversations_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -1483,6 +1497,13 @@ export type Database = {
             foreignKeyName: "hall_of_excellence_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hall_of_excellence_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -1937,6 +1958,13 @@ export type Database = {
             foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
             columns: ["assigned_technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -1966,6 +1994,13 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "maintenance_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_contracts_safe"
             referencedColumns: ["id"]
           },
           {
@@ -2404,6 +2439,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monthly_excellence_awards_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -3163,6 +3205,13 @@ export type Database = {
             foreignKeyName: "fk_review_technician"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_review_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -3178,6 +3227,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -3633,6 +3689,13 @@ export type Database = {
             foreignKeyName: "fk_badge_technician"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_badge_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -3648,6 +3711,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_badges_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -3711,6 +3781,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_coverage_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -3883,6 +3960,13 @@ export type Database = {
             foreignKeyName: "technician_daily_stats_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_daily_stats_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -4008,6 +4092,13 @@ export type Database = {
             foreignKeyName: "fk_level_technician"
             columns: ["technician_id"]
             isOneToOne: true
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_level_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -4023,6 +4114,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_levels_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -4066,6 +4164,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_location_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -4163,6 +4268,13 @@ export type Database = {
             foreignKeyName: "technician_monthly_bonuses_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_monthly_bonuses_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -4239,6 +4351,13 @@ export type Database = {
             foreignKeyName: "fk_perf_technician"
             columns: ["technician_id"]
             isOneToOne: true
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_perf_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -4254,6 +4373,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_performance_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -4558,6 +4684,13 @@ export type Database = {
             foreignKeyName: "technician_services_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_services_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -4616,6 +4749,13 @@ export type Database = {
             foreignKeyName: "fk_skill_technician"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_skill_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -4631,6 +4771,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_skill_tests_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -4749,6 +4896,13 @@ export type Database = {
             foreignKeyName: "fk_task_technician"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_task_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -4785,6 +4939,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_tasks_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -4938,6 +5099,13 @@ export type Database = {
             foreignKeyName: "technician_training_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_training_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -5020,6 +5188,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_transactions_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -5151,6 +5326,13 @@ export type Database = {
             foreignKeyName: "fk_wallet_technician"
             columns: ["technician_id"]
             isOneToOne: true
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_wallet_technician"
+            columns: ["technician_id"]
+            isOneToOne: true
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -5166,6 +5348,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: true
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_wallet_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: true
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -5242,6 +5431,13 @@ export type Database = {
             foreignKeyName: "fk_withdrawal_technician"
             columns: ["technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_withdrawal_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -5292,6 +5488,13 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_withdrawals_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
             referencedColumns: ["id"]
           },
           {
@@ -6392,6 +6595,153 @@ export type Database = {
       }
     }
     Views: {
+      app_settings_admin_safe: {
+        Row: {
+          allow_edit_after_start: boolean | null
+          allow_self_registration: boolean | null
+          allow_technician_quotes: boolean | null
+          app_logo_url: string | null
+          app_name: string | null
+          auto_backup_enabled: boolean | null
+          background_color: string | null
+          backup_frequency: string | null
+          company_address: string | null
+          company_email: string | null
+          company_phone: string | null
+          created_at: string | null
+          custom_css: string | null
+          default_currency: string | null
+          default_language: string | null
+          enable_2fa: boolean | null
+          enable_email_notifications: boolean | null
+          enable_in_app_notifications: boolean | null
+          enable_reminders: boolean | null
+          enable_sms_notifications: boolean | null
+          enable_technician_rating: boolean | null
+          erpnext_enabled: boolean | null
+          erpnext_url: string | null
+          google_maps_enabled: boolean | null
+          id: string | null
+          lock_sensitive_settings: boolean | null
+          map_style: string | null
+          max_execution_time: number | null
+          notification_templates: Json | null
+          notification_types: Json | null
+          order_stages: Json | null
+          primary_color: string | null
+          require_manager_approval: boolean | null
+          secondary_color: string | null
+          session_timeout: number | null
+          show_footer: boolean | null
+          show_technicians_on_map: boolean | null
+          smtp_from_email: string | null
+          smtp_host: string | null
+          smtp_port: number | null
+          smtp_username: string | null
+          technician_statuses: Json | null
+          theme_mode: string | null
+          timezone: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          allow_edit_after_start?: boolean | null
+          allow_self_registration?: boolean | null
+          allow_technician_quotes?: boolean | null
+          app_logo_url?: string | null
+          app_name?: string | null
+          auto_backup_enabled?: boolean | null
+          background_color?: string | null
+          backup_frequency?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_phone?: string | null
+          created_at?: string | null
+          custom_css?: string | null
+          default_currency?: string | null
+          default_language?: string | null
+          enable_2fa?: boolean | null
+          enable_email_notifications?: boolean | null
+          enable_in_app_notifications?: boolean | null
+          enable_reminders?: boolean | null
+          enable_sms_notifications?: boolean | null
+          enable_technician_rating?: boolean | null
+          erpnext_enabled?: boolean | null
+          erpnext_url?: string | null
+          google_maps_enabled?: boolean | null
+          id?: string | null
+          lock_sensitive_settings?: boolean | null
+          map_style?: string | null
+          max_execution_time?: number | null
+          notification_templates?: Json | null
+          notification_types?: Json | null
+          order_stages?: Json | null
+          primary_color?: string | null
+          require_manager_approval?: boolean | null
+          secondary_color?: string | null
+          session_timeout?: number | null
+          show_footer?: boolean | null
+          show_technicians_on_map?: boolean | null
+          smtp_from_email?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_username?: string | null
+          technician_statuses?: Json | null
+          theme_mode?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          allow_edit_after_start?: boolean | null
+          allow_self_registration?: boolean | null
+          allow_technician_quotes?: boolean | null
+          app_logo_url?: string | null
+          app_name?: string | null
+          auto_backup_enabled?: boolean | null
+          background_color?: string | null
+          backup_frequency?: string | null
+          company_address?: string | null
+          company_email?: string | null
+          company_phone?: string | null
+          created_at?: string | null
+          custom_css?: string | null
+          default_currency?: string | null
+          default_language?: string | null
+          enable_2fa?: boolean | null
+          enable_email_notifications?: boolean | null
+          enable_in_app_notifications?: boolean | null
+          enable_reminders?: boolean | null
+          enable_sms_notifications?: boolean | null
+          enable_technician_rating?: boolean | null
+          erpnext_enabled?: boolean | null
+          erpnext_url?: string | null
+          google_maps_enabled?: boolean | null
+          id?: string | null
+          lock_sensitive_settings?: boolean | null
+          map_style?: string | null
+          max_execution_time?: number | null
+          notification_templates?: Json | null
+          notification_types?: Json | null
+          order_stages?: Json | null
+          primary_color?: string | null
+          require_manager_approval?: boolean | null
+          secondary_color?: string | null
+          session_timeout?: number | null
+          show_footer?: boolean | null
+          show_technicians_on_map?: boolean | null
+          smtp_from_email?: string | null
+          smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_username?: string | null
+          technician_statuses?: Json | null
+          theme_mode?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       app_settings_public_safe: {
         Row: {
           app_logo_url: string | null
@@ -6745,6 +7095,128 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_contracts_safe: {
+        Row: {
+          auto_renew: boolean | null
+          billing_type:
+            | Database["public"]["Enums"]["contract_billing_type"]
+            | null
+          branch_id: string | null
+          client_email: string | null
+          client_name: string | null
+          client_phone: string | null
+          company_id: string | null
+          contract_number: string | null
+          contract_value: number | null
+          covered_services: string[] | null
+          created_at: string | null
+          created_by: string | null
+          discount_percentage: number | null
+          end_date: string | null
+          excluded_services: string[] | null
+          id: string | null
+          includes_parts: boolean | null
+          max_requests: number | null
+          property_id: string | null
+          sla_resolution_hours: number | null
+          sla_response_hours: number | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["contract_status"] | null
+          title: string | null
+          updated_at: string | null
+          used_requests: number | null
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          billing_type?:
+            | Database["public"]["Enums"]["contract_billing_type"]
+            | null
+          branch_id?: string | null
+          client_email?: never
+          client_name?: never
+          client_phone?: never
+          company_id?: string | null
+          contract_number?: string | null
+          contract_value?: number | null
+          covered_services?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          discount_percentage?: number | null
+          end_date?: string | null
+          excluded_services?: string[] | null
+          id?: string | null
+          includes_parts?: boolean | null
+          max_requests?: number | null
+          property_id?: string | null
+          sla_resolution_hours?: number | null
+          sla_response_hours?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["contract_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          used_requests?: number | null
+        }
+        Update: {
+          auto_renew?: boolean | null
+          billing_type?:
+            | Database["public"]["Enums"]["contract_billing_type"]
+            | null
+          branch_id?: string | null
+          client_email?: never
+          client_name?: never
+          client_phone?: never
+          company_id?: string | null
+          contract_number?: string | null
+          contract_value?: number | null
+          covered_services?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          discount_percentage?: number | null
+          end_date?: string | null
+          excluded_services?: string[] | null
+          id?: string | null
+          includes_parts?: boolean | null
+          max_requests?: number | null
+          property_id?: string | null
+          sla_resolution_hours?: number | null
+          sla_response_hours?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["contract_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          used_requests?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_contracts_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_stats_daily: {
         Row: {
           count: number | null
@@ -6971,6 +7443,13 @@ export type Database = {
             foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
             columns: ["assigned_technician_id"]
             isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
             referencedRelation: "technicians_public"
             referencedColumns: ["id"]
           },
@@ -7077,12 +7556,49 @@ export type Database = {
           level: string | null
           location_updated_at: string | null
           name: string | null
-          phone: string | null
           rating: number | null
           service_area_radius: number | null
           specialization: string | null
           status: string | null
           total_reviews: number | null
+        }
+        Insert: {
+          available_from?: string | null
+          available_to?: string | null
+          bio?: string | null
+          current_latitude?: number | null
+          current_longitude?: number | null
+          hourly_rate?: number | null
+          icon_url?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          level?: string | null
+          location_updated_at?: string | null
+          name?: string | null
+          rating?: number | null
+          service_area_radius?: number | null
+          specialization?: string | null
+          status?: string | null
+          total_reviews?: number | null
+        }
+        Update: {
+          available_from?: string | null
+          available_to?: string | null
+          bio?: string | null
+          current_latitude?: number | null
+          current_longitude?: number | null
+          hourly_rate?: number | null
+          icon_url?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          level?: string | null
+          location_updated_at?: string | null
+          name?: string | null
+          rating?: number | null
+          service_area_radius?: number | null
+          specialization?: string | null
+          status?: string | null
+          total_reviews?: number | null
         }
         Relationships: []
       }
@@ -7576,6 +8092,16 @@ export type Database = {
           smtp_username: string
         }[]
       }
+      get_smtp_settings_secure: {
+        Args: never
+        Returns: {
+          smtp_from_email: string
+          smtp_host: string
+          smtp_password: string
+          smtp_port: number
+          smtp_username: string
+        }[]
+      }
       get_table_row_counts: {
         Args: never
         Returns: {
@@ -7586,29 +8112,6 @@ export type Database = {
       get_technician_id_for_user: {
         Args: { p_user_id: string }
         Returns: string
-      }
-      get_technicians_for_map: {
-        Args: never
-        Returns: {
-          available_from: string
-          available_to: string
-          bio: string
-          current_latitude: number
-          current_longitude: number
-          hourly_rate: number
-          icon_url: string
-          id: string
-          is_verified: boolean
-          level: string
-          location_updated_at: string
-          name: string
-          phone: string
-          rating: number
-          service_area_radius: number
-          specialization: string
-          status: string
-          total_reviews: number
-        }[]
       }
       get_user_tenant: { Args: never; Returns: string }
       get_vendor_appointments: {

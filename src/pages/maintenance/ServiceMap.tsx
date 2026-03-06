@@ -163,7 +163,6 @@ export default function ServiceMap() {
     sessionStorage.setItem('selectedTechnician', JSON.stringify({
       id: technician.id,
       name: technician.name || 'فني',
-      phone: technician.phone || '',
       specialization: technician.specialization || 'general',
       rating: technician.rating || 0,
       total_reviews: technician.total_reviews || 0,
@@ -319,7 +318,6 @@ export default function ServiceMap() {
                 status={techStatus}
                 availableIn={techStatus === "soon" ? 40 : undefined}
                 onRequestService={() => handleRequestService(tech)}
-                onCall={tech.phone ? () => window.open(`tel:${tech.phone}`) : undefined}
               />
             );
             infoWindow.setContent(div);

@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 export interface Technician {
   id: string;
   name: string;
-  phone?: string | null;
   email?: string | null;
   specialization: string;
   profile_image?: string | null;
