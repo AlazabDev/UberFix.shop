@@ -21,7 +21,6 @@ export interface TechnicianMapData {
   is_verified: boolean;
   icon_url: string | null;
   level: string;
-  phone: string | null;
 }
 
 export interface BranchMapData {
