@@ -112,6 +112,9 @@ const WhatsAppMessageLogsPage = lazy(
 const WhatsAppMaintenanceFormPage = lazy(
   () => import("@/pages/whatsapp/WhatsAppMaintenanceFormPage")
 );
+const WhatsAppFlowManager = lazy(
+  () => import("@/pages/whatsapp/WhatsAppFlowManager")
+);
 const NotificationCenterPage = lazy(
   () => import("@/pages/notifications/NotificationCenterPage")
 );
@@ -219,6 +222,7 @@ export const protectedRoutes = [
   { path: "/message-logs", element: <MessageLogs />, withLayout: true },
   { path: "/dashboard/whatsapp/templates", element: <WhatsAppTemplatesPage />, withLayout: true },
   { path: "/dashboard/whatsapp/logs", element: <WhatsAppMessageLogsPage />, withLayout: true },
+  { path: "/dashboard/whatsapp/flow-manager", element: <WhatsAppFlowManager />, withLayout: true },
 
   // No layout (service-map is public - see publicRoutes)
   { path: "/emergency-service/:technicianId", element: <EmergencyService />, withLayout: false },
