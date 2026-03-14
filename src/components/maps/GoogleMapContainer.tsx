@@ -18,14 +18,14 @@ interface GoogleMapContainerProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   markers?: MapMarker[];
-  onMapLoad?: (map: google.maps.Map) => void;
-  onMarkerClick?: (marker: MapMarker, mapMarker: google.maps.marker.AdvancedMarkerElement) => void;
+  onMapLoad?: (map: any) => void;
+  onMarkerClick?: (marker: MapMarker, mapMarker: any) => void;
   onMapClick?: (lat: number, lng: number) => void;
   height?: string;
   className?: string;
   interactive?: boolean;
   showCurrentLocation?: boolean;
-  mapStyle?: google.maps.MapTypeStyle[];
+  mapStyle?: any[];
 }
 
 export const GoogleMapContainer = ({
