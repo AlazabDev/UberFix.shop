@@ -68,7 +68,7 @@ export const GoogleMapContainer = ({
           throw new Error('Google Maps failed to initialize');
         }
 
-        const mapOptions: google.maps.MapOptions = {
+        const mapOptions: any = {
           center,
           zoom,
           mapId: getGoogleMapsId(),
