@@ -137,6 +137,9 @@ const UsersPage = lazy(() => import("@/pages/UsersPage"));
 // Module Settings (Owner only)
 const ModuleSettings = lazy(() => import("@/pages/admin/ModuleSettings"));
 
+// Gateway
+const MaintenanceGateway = lazy(() => import("@/pages/gateway/MaintenanceGateway"));
+
 // Maintenance Module Pages
 const CreateMaintenanceRequest = lazy(() => import("@/pages/maintenance/CreateMaintenanceRequest"));
 const MaintenanceOverview = lazy(() => import("@/pages/maintenance/MaintenanceOverview"));
