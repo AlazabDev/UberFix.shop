@@ -20,6 +20,11 @@ const defaultItems: LauncherItem[] = [
   { id: "7", label: "الموردين", icon: "Users", url: "/vendors", color: "bg-cyan-100 text-cyan-600 dark:bg-cyan-900/40 dark:text-cyan-400", isExternal: false },
   { id: "8", label: "التقارير", icon: "BarChart3", url: "/reports", color: "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400", isExternal: false },
   { id: "9", label: "الإعدادات", icon: "Settings", url: "/settings", color: "bg-slate-100 text-slate-600 dark:bg-slate-900/40 dark:text-slate-400", isExternal: false },
+  { id: "10", label: "رسائل واتساب", icon: "MessageCircle", url: "/whatsapp", color: "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400", isExternal: false },
+  { id: "11", label: "قوالب واتساب", icon: "FileText", url: "/dashboard/whatsapp/templates", color: "bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400", isExternal: false },
+  { id: "12", label: "سجل الرسائل", icon: "ScrollText", url: "/dashboard/whatsapp/logs", color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400", isExternal: false },
+  { id: "13", label: "تدفقات واتساب", icon: "Workflow", url: "/dashboard/whatsapp/flow-manager", color: "bg-lime-100 text-lime-600 dark:bg-lime-900/40 dark:text-lime-400", isExternal: false },
+  { id: "14", label: "بوابة الطلبات", icon: "Network", url: "/dashboard/gateway", color: "bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400", isExternal: false },
 ];
 
 interface AppLauncherStore {
