@@ -226,6 +226,7 @@ export const protectedRoutes = [
   { path: "/dashboard/whatsapp/templates", element: <WhatsAppTemplatesPage />, withLayout: true },
   { path: "/dashboard/whatsapp/logs", element: <WhatsAppMessageLogsPage />, withLayout: true },
   { path: "/dashboard/whatsapp/flow-manager", element: <WhatsAppFlowManager />, withLayout: true },
+  { path: "/dashboard/gateway", element: <MaintenanceGateway />, withLayout: true },
 
   // No layout (service-map is public - see publicRoutes)
   { path: "/emergency-service/:technicianId", element: <EmergencyService />, withLayout: false },
