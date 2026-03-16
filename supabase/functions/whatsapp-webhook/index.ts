@@ -312,7 +312,7 @@ async function processWithAI(
   const existingRequests = await findCustomerRequests(from);
   let requestsContext = '';
   if (existingRequests.length > 0) {
-    const statusMap: Record<string, string> = { 'Open': 'مفتوح', 'In Progress': 'قيد التنفيذ', 'Completed': 'مكتمل', 'Closed': 'مغلق' };
+    const statusMap: Record<string, string> = { 'Open': 'مفتوح', 'Assigned': 'تم التعيين', 'In Progress': 'قيد التنفيذ', 'InProgress': 'قيد التنفيذ', 'On Hold': 'معلق', 'Completed': 'مكتمل', 'Rejected': 'مرفوض', 'Closed': 'مغلق' };
     requestsContext = `\n## طلبات العميل الحالية:\n` + existingRequests.map(r => 
       `- ${r.title} | الحالة: ${statusMap[r.status] || r.status} | الأولوية: ${r.priority || 'عادية'}`
     ).join('\n');
