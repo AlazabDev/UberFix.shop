@@ -1,10 +1,12 @@
 /**
  * ثوابت حالات طلبات الصيانة
  * توحيد القيم بين قاعدة البيانات وواجهة المستخدم
+ * 
+ * DB enum mr_status: Open | Assigned | InProgress | In Progress | Waiting | On Hold | Completed | Rejected | Closed | Cancelled
  */
 
 // حالات قاعدة البيانات (mr_status enum)
-export type DatabaseStatus = 'Open' | 'In Progress' | 'Completed' | 'Closed' | 'Cancelled';
+export type DatabaseStatus = 'Open' | 'Assigned' | 'In Progress' | 'InProgress' | 'Waiting' | 'On Hold' | 'Completed' | 'Rejected' | 'Closed' | 'Cancelled';
 
 // مراحل سير العمل
 export type WorkflowStage = 
@@ -12,23 +14,47 @@ export type WorkflowStage =
   | 'scheduled' | 'in_progress' | 'inspection' | 'waiting_parts'
   | 'completed' | 'billed' | 'paid' | 'closed' | 'on_hold' | 'cancelled';
 
-// خريطة الحالات من قاعدة البيانات إلى العرض
+// خريطة الحالات من قاعدة البيانات إلى العرض (تدعم جميع قيم الـ enum)
 export const STATUS_MAP: Record<string, { label: string; color: string; bgColor: string }> = {
-  // حالات قاعدة البيانات الأساسية
   'Open': { 
     label: 'مفتوح', 
     color: 'text-warning',
     bgColor: 'bg-warning/10 border-warning/20'
+  },
+  'Assigned': { 
+    label: 'تم التعيين', 
+    color: 'text-primary',
+    bgColor: 'bg-primary/10 border-primary/20'
   },
   'In Progress': { 
     label: 'قيد التنفيذ', 
     color: 'text-info',
     bgColor: 'bg-info/10 border-info/20'
   },
+  'InProgress': { 
+    label: 'قيد التنفيذ', 
+    color: 'text-info',
+    bgColor: 'bg-info/10 border-info/20'
+  },
+  'On Hold': { 
+    label: 'معلق', 
+    color: 'text-warning',
+    bgColor: 'bg-warning/10 border-warning/20'
+  },
+  'Waiting': { 
+    label: 'معلق', 
+    color: 'text-warning',
+    bgColor: 'bg-warning/10 border-warning/20'
+  },
   'Completed': { 
     label: 'مكتمل', 
     color: 'text-success',
     bgColor: 'bg-success/10 border-success/20'
+  },
+  'Rejected': { 
+    label: 'مرفوض', 
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/10 border-destructive/20'
   },
   'Closed': { 
     label: 'مغلق', 
@@ -60,12 +86,15 @@ export const WORKFLOW_STAGE_MAP: Record<string, { label: string; color: string; 
   'cancelled': { label: 'ملغي', color: 'text-destructive', bgColor: 'bg-destructive/10 border-destructive/20' },
 };
 
-// الحالات المتاحة للفلترة (باستخدام قيم قاعدة البيانات)
+// الحالات المتاحة للفلترة (باستخدام قيم قاعدة البيانات الفعلية)
 export const FILTER_STATUS_OPTIONS = [
   { value: 'all', label: 'كل الحالات' },
   { value: 'Open', label: 'مفتوح' },
+  { value: 'Assigned', label: 'تم التعيين' },
   { value: 'In Progress', label: 'قيد التنفيذ' },
+  { value: 'On Hold', label: 'معلق' },
   { value: 'Completed', label: 'مكتمل' },
+  { value: 'Rejected', label: 'مرفوض' },
   { value: 'Closed', label: 'مغلق' },
   { value: 'Cancelled', label: 'ملغي' },
 ];
@@ -112,7 +141,6 @@ export const SERVICE_TYPE_MAP: Record<string, string> = {
   'painting': 'طلاء',
   'carpentry': 'نجارة',
   'other': 'أخرى',
-  // أيضاً دعم القيم العربية المباشرة
   'سباكة': 'سباكة',
   'كهرباء': 'كهرباء',
   'تكييف': 'تكييف',

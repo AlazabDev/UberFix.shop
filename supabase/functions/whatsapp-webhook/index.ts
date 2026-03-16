@@ -260,7 +260,8 @@ async function executeTool(name: string, args: Record<string, unknown>, senderPh
     if (!requests.length) return JSON.stringify({ success: true, results: [], message: 'لا توجد طلبات' });
     
     const statusMap: Record<string, string> = {
-      'Open': 'مفتوح', 'In Progress': 'قيد التنفيذ', 'Completed': 'مكتمل',
+      'Open': 'مفتوح', 'Assigned': 'تم التعيين', 'In Progress': 'قيد التنفيذ', 'InProgress': 'قيد التنفيذ',
+      'On Hold': 'معلق', 'Waiting': 'معلق', 'Completed': 'مكتمل', 'Rejected': 'مرفوض',
       'Closed': 'مغلق', 'Cancelled': 'ملغي'
     };
     return JSON.stringify({
@@ -311,7 +312,7 @@ async function processWithAI(
   const existingRequests = await findCustomerRequests(from);
   let requestsContext = '';
   if (existingRequests.length > 0) {
-    const statusMap: Record<string, string> = { 'Open': 'مفتوح', 'In Progress': 'قيد التنفيذ', 'Completed': 'مكتمل', 'Closed': 'مغلق' };
+    const statusMap: Record<string, string> = { 'Open': 'مفتوح', 'Assigned': 'تم التعيين', 'In Progress': 'قيد التنفيذ', 'InProgress': 'قيد التنفيذ', 'On Hold': 'معلق', 'Completed': 'مكتمل', 'Rejected': 'مرفوض', 'Closed': 'مغلق' };
     requestsContext = `\n## طلبات العميل الحالية:\n` + existingRequests.map(r => 
       `- ${r.title} | الحالة: ${statusMap[r.status] || r.status} | الأولوية: ${r.priority || 'عادية'}`
     ).join('\n');

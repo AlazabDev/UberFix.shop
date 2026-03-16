@@ -11,12 +11,15 @@ import {
   Archive,
   XCircle,
   Pause,
+  ShieldX,
   type LucideIcon,
 } from "lucide-react";
 
 /**
  * تعريف موحد لمراحل سير العمل
- * يستخدم في جميع مكونات دورة حياة طلب الصيانة
+ * 
+ * DB enum mr_status: Open | Assigned | InProgress | In Progress | Waiting | On Hold | Completed | Rejected | Closed | Cancelled
+ * الكود يستخدم: Open, Assigned, In Progress, On Hold, Completed, Rejected, Closed, Cancelled
  */
 
 export type WorkflowStage =
@@ -33,7 +36,8 @@ export type WorkflowStage =
   | 'paid'
   | 'closed'
   | 'cancelled'
-  | 'on_hold';
+  | 'on_hold'
+  | 'rejected';
 
 export interface WorkflowStageConfig {
   key: WorkflowStage;
@@ -46,7 +50,7 @@ export interface WorkflowStageConfig {
   textColor: string;
   actions: string[];
   nextStages: WorkflowStage[];
-  status: string; // الحالة المقابلة في DB
+  status: string; // الحالة المقابلة في DB (mr_status enum)
 }
 
 /**
@@ -68,6 +72,7 @@ export const HAPPY_PATH_STAGES: WorkflowStage[] = [
 
 /**
  * تكوين جميع مراحل سير العمل
+ * status يجب أن يطابق قيم mr_status enum في DB
  */
 export const WORKFLOW_STAGES: Record<WorkflowStage, WorkflowStageConfig> = {
   draft: {
@@ -120,7 +125,7 @@ export const WORKFLOW_STAGES: Record<WorkflowStage, WorkflowStageConfig> = {
     textColor: 'text-purple-600',
     actions: ['جدولة موعد', 'إعادة تعيين', 'تعليق'],
     nextStages: ['scheduled', 'acknowledged', 'on_hold'],
-    status: 'In Progress',
+    status: 'Assigned',
   },
   scheduled: {
     key: 'scheduled',
@@ -133,7 +138,7 @@ export const WORKFLOW_STAGES: Record<WorkflowStage, WorkflowStageConfig> = {
     textColor: 'text-indigo-600',
     actions: ['بدء العمل', 'إعادة الجدولة', 'تعليق'],
     nextStages: ['in_progress', 'scheduled', 'on_hold'],
-    status: 'In Progress',
+    status: 'Assigned',
   },
   in_progress: {
     key: 'in_progress',
@@ -158,7 +163,7 @@ export const WORKFLOW_STAGES: Record<WorkflowStage, WorkflowStageConfig> = {
     bgColor: 'bg-orange-500',
     textColor: 'text-orange-600',
     actions: ['اعتماد', 'إعادة العمل', 'رفض'],
-    nextStages: ['completed', 'in_progress', 'cancelled'],
+    nextStages: ['completed', 'in_progress', 'rejected'],
     status: 'In Progress',
   },
   waiting_parts: {
@@ -252,6 +257,19 @@ export const WORKFLOW_STAGES: Record<WorkflowStage, WorkflowStageConfig> = {
     nextStages: ['in_progress', 'scheduled', 'cancelled'],
     status: 'On Hold',
   },
+  rejected: {
+    key: 'rejected',
+    label: 'مرفوض',
+    labelEn: 'Rejected',
+    description: 'تم رفض الطلب أو نتيجة الفحص',
+    icon: ShieldX,
+    color: 'hsl(0, 72%, 51%)',
+    bgColor: 'bg-red-600',
+    textColor: 'text-red-700',
+    actions: ['إعادة الفتح'],
+    nextStages: ['in_progress', 'cancelled'],
+    status: 'Rejected',
+  },
 };
 
 /**
@@ -303,15 +321,20 @@ export const getNextStages = (currentStage: WorkflowStage): WorkflowStageConfig[
 
 /**
  * تحويل الحالة القديمة إلى مرحلة سير العمل
+ * يدعم جميع قيم mr_status enum بما فيها القديمة
  */
 export const statusToWorkflowStage = (status: string): WorkflowStage => {
   const statusMap: Record<string, WorkflowStage> = {
     'Open': 'submitted',
+    'Assigned': 'assigned',
     'In Progress': 'in_progress',
+    'InProgress': 'in_progress',
+    'On Hold': 'on_hold',
+    'Waiting': 'on_hold',
     'Completed': 'completed',
+    'Rejected': 'rejected',
     'Closed': 'closed',
     'Cancelled': 'cancelled',
-    'On Hold': 'on_hold',
   };
   return statusMap[status] || 'draft';
 };

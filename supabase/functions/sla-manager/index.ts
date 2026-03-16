@@ -53,7 +53,7 @@ const checkSLAViolations = async () => {
   const { data: requests, error } = await supabase
     .from('maintenance_requests')
     .select('id, title, priority, status, workflow_stage, created_by, sla_accept_due, sla_arrive_due, sla_complete_due, created_at')
-    .in('status', ['Open', 'Assigned', 'InProgress'])
+    .in('status', ['Open', 'Assigned', 'In Progress', 'InProgress'])
     .not('workflow_stage', 'in', '(completed,closed,cancelled)');
 
   if (error) {
@@ -129,7 +129,7 @@ const checkSLAViolations = async () => {
       const timeDiff = completeDue.getTime() - now.getTime();
       const hoursRemaining = Math.floor(timeDiff / 3600000);
 
-      if (hoursRemaining > 0 && hoursRemaining <= 2 && request.status === 'InProgress') {
+      if (hoursRemaining > 0 && hoursRemaining <= 2 && (request.status === 'In Progress' || request.status === 'InProgress')) {
         warnings.push({
           request_id: request.id,
           request_title: request.title,
@@ -140,7 +140,7 @@ const checkSLAViolations = async () => {
         });
       }
       
-      if (hoursRemaining < 0 && request.status === 'InProgress') {
+      if (hoursRemaining < 0 && (request.status === 'In Progress' || request.status === 'InProgress')) {
         violations.push({
           request_id: request.id,
           request_title: request.title,
