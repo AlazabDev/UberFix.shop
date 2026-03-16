@@ -2,20 +2,16 @@
  * ثوابت حالات طلبات الصيانة
  * توحيد القيم بين قاعدة البيانات وواجهة المستخدم
  * 
+ * المصدر الوحيد للحقيقة: src/types/maintenance.ts (MrStatus)
  * DB enum mr_status: Open | Assigned | InProgress | In Progress | Waiting | On Hold | Completed | Rejected | Closed | Cancelled
  */
+import type { MrStatus, StatusDisplayConfig } from "@/types/maintenance";
 
-// حالات قاعدة البيانات (mr_status enum)
-export type DatabaseStatus = 'Open' | 'Assigned' | 'In Progress' | 'InProgress' | 'Waiting' | 'On Hold' | 'Completed' | 'Rejected' | 'Closed' | 'Cancelled';
-
-// مراحل سير العمل
-export type WorkflowStage = 
-  | 'draft' | 'submitted' | 'acknowledged' | 'assigned' 
-  | 'scheduled' | 'in_progress' | 'inspection' | 'waiting_parts'
-  | 'completed' | 'billed' | 'paid' | 'closed' | 'on_hold' | 'cancelled';
+// Re-export WorkflowStage from workflowStages for backward compat
+export type { WorkflowStage } from "@/constants/workflowStages";
 
 // خريطة الحالات من قاعدة البيانات إلى العرض (تدعم جميع قيم الـ enum)
-export const STATUS_MAP: Record<string, { label: string; color: string; bgColor: string }> = {
+export const STATUS_MAP: Record<string, StatusDisplayConfig> = {
   'Open': { 
     label: 'مفتوح', 
     color: 'text-warning',
@@ -69,7 +65,7 @@ export const STATUS_MAP: Record<string, { label: string; color: string; bgColor:
 };
 
 // خريطة مراحل سير العمل
-export const WORKFLOW_STAGE_MAP: Record<string, { label: string; color: string; bgColor: string }> = {
+export const WORKFLOW_STAGE_MAP: Record<string, StatusDisplayConfig> = {
   'draft': { label: 'مسودة', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-muted' },
   'submitted': { label: 'مُقدم', color: 'text-warning', bgColor: 'bg-warning/10 border-warning/20' },
   'acknowledged': { label: 'تم الاستلام', color: 'text-info', bgColor: 'bg-info/10 border-info/20' },
@@ -87,7 +83,7 @@ export const WORKFLOW_STAGE_MAP: Record<string, { label: string; color: string; 
 };
 
 // الحالات المتاحة للفلترة (باستخدام قيم قاعدة البيانات الفعلية)
-export const FILTER_STATUS_OPTIONS = [
+export const FILTER_STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'all', label: 'كل الحالات' },
   { value: 'Open', label: 'مفتوح' },
   { value: 'Assigned', label: 'تم التعيين' },
@@ -100,7 +96,7 @@ export const FILTER_STATUS_OPTIONS = [
 ];
 
 // الأولويات
-export const PRIORITY_MAP: Record<string, { label: string; color: string; bgColor: string }> = {
+export const PRIORITY_MAP: Record<string, StatusDisplayConfig> = {
   'low': { 
     label: 'منخفضة', 
     color: 'text-muted-foreground',
@@ -123,7 +119,7 @@ export const PRIORITY_MAP: Record<string, { label: string; color: string; bgColo
   },
 };
 
-export const FILTER_PRIORITY_OPTIONS = [
+export const FILTER_PRIORITY_OPTIONS: { value: string; label: string }[] = [
   { value: 'all', label: 'كل الأولويات' },
   { value: 'low', label: 'منخفضة' },
   { value: 'medium', label: 'متوسطة' },
@@ -152,7 +148,7 @@ export const SERVICE_TYPE_MAP: Record<string, string> = {
 };
 
 // دالة للحصول على بيانات الحالة
-export function getStatusConfig(status: string | null | undefined) {
+export function getStatusConfig(status: string | null | undefined): StatusDisplayConfig {
   if (!status) return STATUS_MAP['Open'];
   return STATUS_MAP[status] || { 
     label: status, 
@@ -162,7 +158,7 @@ export function getStatusConfig(status: string | null | undefined) {
 }
 
 // دالة للحصول على بيانات مرحلة سير العمل
-export function getWorkflowStageConfig(stage: string | null | undefined) {
+export function getWorkflowStageConfig(stage: string | null | undefined): StatusDisplayConfig {
   if (!stage) return WORKFLOW_STAGE_MAP['draft'];
   return WORKFLOW_STAGE_MAP[stage] || { 
     label: stage, 
@@ -172,7 +168,7 @@ export function getWorkflowStageConfig(stage: string | null | undefined) {
 }
 
 // دالة للحصول على بيانات الأولوية
-export function getPriorityConfig(priority: string | null | undefined) {
+export function getPriorityConfig(priority: string | null | undefined): StatusDisplayConfig {
   if (!priority) return PRIORITY_MAP['medium'];
   return PRIORITY_MAP[priority] || PRIORITY_MAP['medium'];
 }
