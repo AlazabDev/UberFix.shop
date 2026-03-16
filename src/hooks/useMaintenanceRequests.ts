@@ -2,42 +2,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { type WorkflowStage, WORKFLOW_STAGES } from "@/constants/workflowStages";
+import type { MaintenanceRequest, MaintenanceRequestInsert, MrStatus } from "@/types/maintenance";
 
-// إعادة تصدير النوع للتوافق مع الكود الحالي
+// إعادة تصدير الأنواع للتوافق مع الكود الحالي
 export type { WorkflowStage } from "@/constants/workflowStages";
-
-// Based on actual database schema
-export interface MaintenanceRequest {
-  id: string;
-  company_id: string;
-  branch_id: string;
-  asset_id?: string;
-  category_id?: string;
-  subcategory_id?: string;
-  opened_by_role?: string;
-  channel?: string;
-  title: string;
-  description?: string;
-  priority?: string;
-  sla_deadline?: string;
-  status: string;
-  created_at: string;
-  created_by?: string;
-  client_name?: string;
-  client_phone?: string;
-  client_email?: string;
-  location?: string;
-  service_type?: string;
-  estimated_cost?: number;
-  actual_cost?: number;
-  rating?: number;
-  workflow_stage?: string;
-  sla_due_date?: string;
-  assigned_vendor_id?: string;
-  vendor_notes?: string;
-  archived_at?: string;
-  updated_at?: string;
-}
+export type { MaintenanceRequest } from "@/types/maintenance";
 
 export function useMaintenanceRequests() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
@@ -57,14 +26,13 @@ export function useMaintenanceRequests() {
         return;
       }
 
-      // استعلام واحد محسّن بدون تكرار
       const { data, error } = await supabase
         .from('maintenance_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      setRequests((data as MaintenanceRequest[]) || []);
     } catch (err) {
       console.error('Error fetching requests:', err);
       setError(err as Error);
@@ -78,14 +46,13 @@ export function useMaintenanceRequests() {
     }
   };
 
-  const createRequest = async (requestData: any) => {
+  const createRequest = async (requestData: Partial<MaintenanceRequestInsert>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error("يجب تسجيل الدخول أولاً");
       }
       
-      // جلب company_id و branch_id من profile المستخدم
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('company_id')
@@ -96,7 +63,6 @@ export function useMaintenanceRequests() {
         throw new Error("حدث خطأ في جلب بيانات المستخدم. يرجى تسجيل الخروج والدخول مرة أخرى.");
       }
       
-      // جلب أول فرع للشركة
       const { data: branch, error: branchError } = await supabase
         .from('branches')
         .select('id')
@@ -108,14 +74,16 @@ export function useMaintenanceRequests() {
         throw new Error("حدث خطأ في جلب بيانات الفرع. يرجى تسجيل الخروج والدخول مرة أخرى.");
       }
       
-      // إنشاء الطلب مع المرحلة الافتراضية
       const initialStage: WorkflowStage = 'submitted';
+      const initialStatus = WORKFLOW_STAGES[initialStage].status as MrStatus;
+
       const { data, error } = await supabase
         .from('maintenance_requests')
         .insert({
           ...requestData,
+          title: requestData.title || 'طلب صيانة جديد',
           created_by: user.id,
-          status: WORKFLOW_STAGES[initialStage].status,
+          status: initialStatus,
           workflow_stage: initialStage,
           company_id: profile.company_id,
           branch_id: branch.id
@@ -178,24 +146,26 @@ export function useMaintenanceRequests() {
         throw new Error("يجب تسجيل الدخول أولاً");
       }
 
-      // جلب البيانات القديمة للمقارنة
       const { data: oldData } = await supabase
         .from('maintenance_requests')
         .select('status, workflow_stage, client_phone')
         .eq('id', id)
         .maybeSingle();
 
+      // Build DB-safe update object
+      const dbUpdates: Record<string, unknown> = { ...updates };
+
       // تحديث status إذا تم تغيير workflow_stage
       if (updates.workflow_stage) {
         const stage = updates.workflow_stage as WorkflowStage;
         if (WORKFLOW_STAGES[stage]) {
-          updates.status = WORKFLOW_STAGES[stage].status as any;
+          dbUpdates.status = WORKFLOW_STAGES[stage].status as MrStatus;
         }
       }
 
       const { data, error } = await supabase
         .from('maintenance_requests')
-        .update(updates as any)
+        .update(dbUpdates as MaintenanceRequest)
         .eq('id', id)
         .select()
         .maybeSingle();
@@ -205,12 +175,12 @@ export function useMaintenanceRequests() {
       // إرسال إشعار عند تغيير الحالة أو المرحلة
       try {
         if (oldData) {
-          if (updates.status && updates.status !== oldData.status) {
+          if (dbUpdates.status && dbUpdates.status !== oldData.status) {
             await supabase.functions.invoke('send-maintenance-notification', {
               body: {
                 request_id: id,
                 old_status: oldData.status,
-                new_status: updates.status,
+                new_status: dbUpdates.status,
                 event_type: 'status_changed',
               }
             });
@@ -227,9 +197,8 @@ export function useMaintenanceRequests() {
             });
 
             // إرسال رسالة WhatsApp للعميل عند تغيير المرحلة
-            if (data.client_phone) {
+            if (data?.client_phone) {
               const stage = updates.workflow_stage as WorkflowStage;
-              const stageConfig = WORKFLOW_STAGES[stage];
               let message = '';
               
               switch (stage) {
@@ -341,7 +310,6 @@ export function useMaintenanceRequests() {
   useEffect(() => {
     fetchRequests();
 
-    // إضافة realtime subscription
     const channel = supabase
       .channel('maintenance-requests-changes')
       .on('postgres_changes', 

@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { MaintenanceRequest } from "./useMaintenanceRequests";
+import type { MaintenanceRequest, MrStatus } from "@/types/maintenance";
+
+// Re-export for backward compat
+export type { MaintenanceRequest } from "@/types/maintenance";
 
 interface UsePaginatedRequestsOptions {
   pageSize?: number;
@@ -55,26 +58,24 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
         return;
       }
 
-      // حساب offset
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      // بناء الاستعلام مع الفلاتر
       let query = supabase
         .from('maintenance_requests')
         .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
         .range(from, to);
 
-      // تطبيق الفلاتر مع استخدام indexes
+      // تطبيق الفلاتر باستخدام الأنواع الصحيحة
       if (filters.status) {
-        query = query.eq('status', filters.status as any); // uses idx_maintenance_requests_status
+        query = query.eq('status', filters.status as MrStatus);
       }
       if (filters.priority) {
-        query = query.eq('priority', filters.priority as any); // uses idx_maintenance_requests_priority
+        query = query.eq('priority', filters.priority);
       }
       if (filters.workflow_stage) {
-        query = query.eq('workflow_stage', filters.workflow_stage as any); // uses idx_maintenance_requests_workflow_stage
+        query = query.eq('workflow_stage', filters.workflow_stage);
       }
       if (filters.search) {
         query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
@@ -87,7 +88,7 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
       const totalCount = count || 0;
       const totalPages = Math.ceil(totalCount / pageSize);
 
-      setRequests(data || []);
+      setRequests((data as MaintenanceRequest[]) || []);
       setPagination({
         currentPage: page,
         pageSize,
@@ -135,21 +136,17 @@ export function usePaginatedRequests(options: UsePaginatedRequestsOptions = {}) 
   useEffect(() => {
     fetchRequests(initialPage);
 
-    // Real-time subscription للتحديثات
     const channel = supabase
       .channel('maintenance-requests-paginated')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'maintenance_requests' },
-        (payload) => {
-          console.warn('🔄 Maintenance requests changed:', payload.eventType);
-          // إعادة جلب الصفحة الحالية للحصول على آخر تحديث
+        () => {
           fetchRequests(pagination.currentPage);
         }
       )
       .subscribe();
 
     return () => {
-      console.warn('🧹 Cleaning up paginated requests subscription');
       channel.unsubscribe().then(() => {
         supabase.removeChannel(channel);
       });
