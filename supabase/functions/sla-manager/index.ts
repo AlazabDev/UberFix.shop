@@ -53,7 +53,7 @@ const checkSLAViolations = async () => {
   const { data: requests, error } = await supabase
     .from('maintenance_requests')
     .select('id, title, priority, status, workflow_stage, created_by, sla_accept_due, sla_arrive_due, sla_complete_due, created_at')
-    .in('status', ['Open', 'Assigned', 'InProgress'])
+    .in('status', ['Open', 'Assigned', 'In Progress', 'InProgress'])
     .not('workflow_stage', 'in', '(completed,closed,cancelled)');
 
   if (error) {

@@ -46,8 +46,13 @@ export function MaintenanceRequestActions({ request }: MaintenanceRequestActions
       if (request.created_by) {
         const statusMessages: Record<string, string> = {
           'Open': 'طلبك مفتوح',
+          'Assigned': 'تم تعيين فني لطلبك',
+          'In Progress': 'جاري العمل على طلبك',
           'InProgress': 'جاري العمل على طلبك',
+          'On Hold': 'طلبك معلق حالياً',
           'Completed': 'تم إكمال طلبك',
+          'Rejected': 'تم رفض طلبك',
+          'Closed': 'تم إغلاق طلبك',
           'Cancelled': 'تم إلغاء طلبك'
         };
 
