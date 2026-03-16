@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { type WorkflowStage, WORKFLOW_STAGES } from "@/constants/workflowStages";
-import type { MaintenanceRequest, MaintenanceRequestInsert, MrStatus } from "@/types/maintenance";
+import type { MaintenanceRequest, MaintenanceRequestInsert, MaintenanceRequestUpdate, MrStatus } from "@/types/maintenance";
 
 // إعادة تصدير الأنواع للتوافق مع الكود الحالي
 export type { WorkflowStage } from "@/constants/workflowStages";

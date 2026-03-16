@@ -92,7 +92,8 @@ export function useCachedQuery<T>({
 
       // Fallback to direct database query (RLS will handle security)
       // Using type assertion here because table name is validated at compile time via PublicTableName
-      let query = supabase.from(table).select(select);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (supabase as any).from(table).select(select);
 
       // Apply sanitized filters
       Object.entries(filters).forEach(([key, value]) => {

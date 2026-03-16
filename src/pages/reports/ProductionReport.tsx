@@ -59,12 +59,12 @@ export default function ProductionReport() {
   const { projects } = useProjects();
   
   const stats = useMemo(() => ({
-    pendingRequests: requests.filter(r => r.status === 'pending').length,
+    pendingRequests: requests.filter(r => r.status === 'Open').length,
     todayRequests: requests.filter(r => {
       const today = new Date().toDateString();
       return new Date(r.created_at).toDateString() === today;
     }).length,
-    completedRequests: requests.filter(r => r.status === 'completed').length,
+    completedRequests: requests.filter(r => r.status === 'Completed').length,
     totalRequests: requests.length,
     thisMonthRequests: requests.filter(r => {
       const thisMonth = new Date().getMonth();

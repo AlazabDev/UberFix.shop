@@ -39,10 +39,10 @@ export function MaintenanceStats() {
     const thisYear = now.getFullYear();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const pending = requests.filter(r => r.status === 'pending').length;
-    const inProgress = requests.filter(r => r.status === 'in_progress').length;
-    const completed = requests.filter(r => r.status === 'completed').length;
-    const cancelled = requests.filter(r => r.status === 'cancelled').length;
+    const pending = requests.filter(r => r.status === 'Open').length;
+    const inProgress = requests.filter(r => r.status === 'In Progress' || r.status === 'InProgress').length;
+    const completed = requests.filter(r => r.status === 'Completed').length;
+    const cancelled = requests.filter(r => r.status === 'Cancelled').length;
     const highPriority = requests.filter(r => r.priority === 'high').length;
 
     const thisMonthRequests = requests.filter(r => {
