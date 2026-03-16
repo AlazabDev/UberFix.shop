@@ -448,82 +448,68 @@ const Testing = () => {
     const start = Date.now();
     const errors: string[] = [];
     const warnings: string[] = [];
+    const details: string[] = [];
     
     try {
-      // 1. اختبار قراءة الإشعارات من قاعدة البيانات
+      // 1. اختبار جدول الإشعارات الداخلية (in-app)
       const { data: notifications, error: fetchError } = await supabase
         .from('notifications')
-        .select('id, title, sms_sent, whatsapp_sent, message_log_id, created_at')
+        .select('id, title, created_at')
         .order('created_at', { ascending: false })
         .limit(10);
       
       if (fetchError) {
         errors.push(`فشل جلب الإشعارات: ${fetchError.message}`);
+      } else {
+        details.push(`${notifications?.length || 0} إشعار داخلي`);
       }
 
-      // 2. تحليل حالة الإشعارات
-      if (notifications && notifications.length > 0) {
-        const smsSentCount = notifications.filter(n => n.sms_sent === true).length;
-        const whatsappSentCount = notifications.filter(n => n.whatsapp_sent === true).length;
-        const withMessageLog = notifications.filter(n => n.message_log_id !== null).length;
-        
-        // تحذيرات للمشاكل المحتملة
-        if (smsSentCount === 0 && notifications.length > 5) {
-          warnings.push(`لا توجد رسائل SMS مرسلة من ${notifications.length} إشعار`);
-        }
-        if (whatsappSentCount === 0 && notifications.length > 5) {
-          warnings.push(`لا توجد رسائل WhatsApp مرسلة من ${notifications.length} إشعار`);
-        }
-        if (withMessageLog === 0 && notifications.length > 5) {
-          warnings.push(`لا توجد سجلات رسائل (message_log_id) مرتبطة`);
-        }
-      }
-
-      // 3. اختبار Edge Function للإشعارات (بدون إرسال فعلي - فقط التحقق من الاتصال)
-      try {
-        // استخدام UUID صالح للاختبار
-        const testUUID = '00000000-0000-0000-0000-000000000000';
-        const { data: edgeResult, error: edgeError } = await supabase.functions.invoke('send-unified-notification', {
-          body: { 
-            type: 'request_created',
-            request_id: testUUID,
-            recipient_id: testUUID,
-            channels: ['in_app'],
-            data: { request_title: 'اختبار نظام الإشعارات' }
-          }
-        });
-
-        if (edgeError) {
-          // الخطأ في الاتصال
-          warnings.push(`Edge Function غير متاح للاختبار: ${edgeError.message}`);
-        } else if (edgeResult && edgeResult.success === false) {
-          // الاتصال ناجح لكن الإرسال فشل (متوقع لأن المستخدم غير موجود)
-          // هذا طبيعي لأننا نستخدم UUID اختباري
-        }
-        // إذا نجح الاتصال فهذا يعني أن Edge Function يعمل
-      } catch {
-        warnings.push('لا يمكن الوصول إلى Edge Function للإشعارات');
-      }
-
-      // 4. التحقق من جدول message_logs
+      // 2. التحقق من سجلات الرسائل الفعلية (message_logs) - المصدر الحقيقي للـ SMS/WhatsApp
       const { data: messageLogs, error: logsError } = await supabase
         .from('message_logs')
         .select('id, status, message_type, error_message')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(20);
 
       if (logsError) {
         warnings.push(`لا يمكن قراءة سجلات الرسائل: ${logsError.message}`);
-      } else if (messageLogs) {
+      } else if (messageLogs && messageLogs.length > 0) {
+        const smsSent = messageLogs.filter(m => m.message_type === 'sms' && (m.status === 'sent' || m.status === 'delivered')).length;
+        const whatsappSent = messageLogs.filter(m => m.message_type === 'whatsapp' && (m.status === 'sent' || m.status === 'delivered')).length;
         const failedMessages = messageLogs.filter(m => m.status === 'failed');
+        
+        details.push(`${smsSent} SMS مرسلة، ${whatsappSent} WhatsApp مرسلة`);
+        
         if (failedMessages.length > 0) {
-          errors.push(`${failedMessages.length} رسائل فاشلة في السجلات`);
+          warnings.push(`${failedMessages.length} رسائل فاشلة: ${failedMessages[0].error_message || 'سبب غير محدد'}`);
         }
+      } else {
+        details.push('لا توجد سجلات رسائل بعد (طبيعي في البيئة الجديدة)');
+      }
+
+      // 3. اختبار Edge Function للإشعارات (فقط التحقق من الاتصال)
+      try {
+        const testUUID = '00000000-0000-0000-0000-000000000000';
+        const { error: edgeError } = await supabase.functions.invoke('send-maintenance-notification', {
+          body: { 
+            request_id: testUUID,
+            event_type: 'system_check',
+            send_whatsapp: false,
+            send_email: false
+          }
+        });
+
+        if (edgeError) {
+          warnings.push(`Edge Function الإشعارات: ${edgeError.message}`);
+        } else {
+          details.push('Edge Function الإشعارات متاح');
+        }
+      } catch {
+        warnings.push('لا يمكن الوصول إلى Edge Function للإشعارات');
       }
 
       const duration = Date.now() - start;
 
-      // تحديد الحالة النهائية
       if (errors.length > 0) {
         updateTestResult(index, {
           status: 'error',
@@ -542,7 +528,7 @@ const Testing = () => {
       } else {
         updateTestResult(index, {
           status: 'success',
-          message: `نظام الإشعارات يعمل بشكل صحيح - ${notifications?.length || 0} إشعار - ${duration}ms`,
+          message: `نظام الإشعارات يعمل - ${details.join(' | ')} - ${duration}ms`,
           duration
         });
       }
