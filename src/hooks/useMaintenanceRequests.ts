@@ -172,12 +172,12 @@ export function useMaintenanceRequests() {
       // إرسال إشعار عند تغيير الحالة أو المرحلة
       try {
         if (oldData) {
-          if (dbUpdates.status && dbUpdates.status !== oldData.status) {
+          if (updates.status && updates.status !== oldData.status) {
             await supabase.functions.invoke('send-maintenance-notification', {
               body: {
                 request_id: id,
                 old_status: oldData.status,
-                new_status: dbUpdates.status,
+                new_status: updates.status,
                 event_type: 'status_changed',
               }
             });
