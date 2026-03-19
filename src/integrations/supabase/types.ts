@@ -73,6 +73,75 @@ export type Database = {
           },
         ]
       }
+      api_consumers: {
+        Row: {
+          allowed_origins: string[] | null
+          api_key: string
+          branch_id: string | null
+          channel: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          metadata: Json | null
+          name: string
+          rate_limit_per_minute: number
+          total_requests: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_origins?: string[] | null
+          api_key?: string
+          branch_id?: string | null
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          metadata?: Json | null
+          name: string
+          rate_limit_per_minute?: number
+          total_requests?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_origins?: string[] | null
+          api_key?: string
+          branch_id?: string | null
+          channel?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          metadata?: Json | null
+          name?: string
+          rate_limit_per_minute?: number
+          total_requests?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_consumers_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_consumers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_gateway_logs: {
         Row: {
           client_ip: unknown
@@ -7429,38 +7498,43 @@ export type Database = {
       }
       profiles_minimal_public: {
         Row: {
-          company_id: string | null
-          created_at: string | null
-          full_name: string | null
           id: string | null
+          name: string | null
           role: string | null
         }
         Insert: {
-          company_id?: string | null
-          created_at?: string | null
-          full_name?: string | null
           id?: string | null
+          name?: string | null
           role?: string | null
         }
         Update: {
-          company_id?: string | null
-          created_at?: string | null
-          full_name?: string | null
           id?: string | null
+          name?: string | null
           role?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles_names_only: {
         Row: {
+          full_name: string | null
+          id: string | null
+          name: string | null
+        }
+        Insert: {
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
+        }
+        Update: {
+          full_name?: string | null
+          id?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      profiles_public_safe: {
+        Row: {
+          avatar_url: string | null
           company_id: string | null
           full_name: string | null
           id: string | null
@@ -7468,6 +7542,7 @@ export type Database = {
           role: string | null
         }
         Insert: {
+          avatar_url?: string | null
           company_id?: string | null
           full_name?: string | null
           id?: string | null
@@ -7475,45 +7550,11 @@ export type Database = {
           role?: string | null
         }
         Update: {
+          avatar_url?: string | null
           company_id?: string | null
           full_name?: string | null
           id?: string | null
           name?: string | null
-          role?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles_public_safe: {
-        Row: {
-          avatar_url: string | null
-          company_id: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          role: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          company_id?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          role?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          company_id?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
           role?: string | null
         }
         Relationships: [
@@ -7530,29 +7571,35 @@ export type Database = {
         Row: {
           avatar_url: string | null
           company_id: string | null
+          created_at: string | null
+          email: string | null
           full_name: string | null
           id: string | null
           name: string | null
-          position: string | null
           role: string | null
+          updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           company_id?: string | null
+          created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string | null
           name?: string | null
-          position?: string | null
           role?: string | null
+          updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           company_id?: string | null
+          created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string | null
           name?: string | null
-          position?: string | null
           role?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
