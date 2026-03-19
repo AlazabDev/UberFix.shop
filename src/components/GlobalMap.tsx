@@ -154,9 +154,8 @@ const GlobalMap = () => {
         .addTo(map.current!);
     });
 
-    spinGlobe();
-
     return () => {
+      clearInterval(spinInterval);
       map.current?.remove();
     };
   }, [branches, mapboxToken, tokenLoaded]);
