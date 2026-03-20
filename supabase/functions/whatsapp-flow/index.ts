@@ -340,6 +340,51 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
+    // data_exchange → تتبع طلب (Tracking Flow)
+    // ==========================================
+    if (action === 'data_exchange' && (data as Record<string, unknown>).flow_action === 'track_request') {
+      const requestNumber = (data as Record<string, unknown>).request_number as string;
+      console.log('🔍 Tracking request:', requestNumber);
+
+      if (!requestNumber || requestNumber.trim().length < 3) {
+        const errorResp = {
+          version,
+          screen: 'TRACK_INPUT',
+          data: { error_message: 'يرجى إدخال رقم طلب صحيح' },
+        };
+        const encrypted = await encryptResponse(errorResp, aesKeyBuffer, initialVectorBuffer);
+        return new Response(encrypted, { headers: { 'Content-Type': 'text/plain' } });
+      }
+
+      const result = await trackRequest(requestNumber);
+
+      if (!result) {
+        const errorResp = {
+          version,
+          screen: 'TRACK_INPUT',
+          data: { error_message: `لم يتم العثور على طلب برقم: ${requestNumber.trim()}` },
+        };
+        const encrypted = await encryptResponse(errorResp, aesKeyBuffer, initialVectorBuffer);
+        return new Response(encrypted, { headers: { 'Content-Type': 'text/plain' } });
+      }
+
+      const successResp = {
+        version,
+        screen: 'TRACK_RESULT',
+        data: {
+          extension_message_response: {
+            params: {
+              flow_token,
+              ...result,
+            },
+          },
+        },
+      };
+      const encrypted = await encryptResponse(successResp, aesKeyBuffer, initialVectorBuffer);
+      return new Response(encrypted, { headers: { 'Content-Type': 'text/plain' } });
+    }
+
+    // ==========================================
     // data_exchange → استلام بيانات النموذج وإنشاء طلب
     // ==========================================
     if (action === 'data_exchange') {
