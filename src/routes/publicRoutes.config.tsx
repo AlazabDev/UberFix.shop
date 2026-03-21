@@ -46,6 +46,7 @@ const WhatsAppStatusPage = lazy(() => import("@/pages/messages/WhatsAppStatusPag
 const ServiceMap = lazy(() => import("@/pages/maintenance/ServiceMap"));
 const ChatPage = lazy(() => import("@/pages/messages/ChatPage"));
 const PublicMaintenanceForm = lazy(() => import("@/pages/whatsapp/WhatsAppMaintenanceFormPage"));
+const UberFixRequestForm = lazy(() => import("@/pages/public/UberFixRequestForm"));
 
 // Technician pages
 const TechnicianRegistration = lazy(() => import("@/pages/technicians/TechnicianRegistration"));
@@ -100,6 +101,7 @@ export const publicRoutes = [
   { path: "/service-map", element: <ServiceMap /> },
   { path: "/chat", element: <ChatPage /> },
   { path: "/maintenance-request", element: <PublicMaintenanceForm /> },
+  { path: "/uf", element: <UberFixRequestForm /> },
   { path: "/technicians/register", element: <TechnicianRegistration /> },
   { path: "/technicians/registration/wizard", element: <TechnicianRegistrationWizard /> },
   { path: "/technicians/registration/thank-you", element: <RegistrationThankYou /> },
