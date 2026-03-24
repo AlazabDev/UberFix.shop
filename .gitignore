@@ -47,3 +47,7 @@ android/app/release.keystore
 *.jks
 keystore-passwords.txt
 secure-backups/
+*.keystore
+*.jks
+android/app/release.keystore
+android/release.keystore
