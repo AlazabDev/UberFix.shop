@@ -35,8 +35,8 @@
 
 ### المتطلبات الأساسية
 ```bash
-Node.js >= 18
-pnpm >= 8
+Node.js >= 20
+npm >= 10
 Supabase CLI
 ```
 
