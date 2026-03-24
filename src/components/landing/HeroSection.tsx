@@ -257,7 +257,7 @@ export const HeroSection = () => {
         {/* Main Title */}
         <div className="max-w-5xl mx-auto mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[fadeInUp_0.6s_ease-out_both]">
-255:             <span className="text-white block mb-2">{t('hero.titleLine1')}</span>
+             <span className="text-white block mb-2">{t('hero.titleLine1')}</span>
             <RotatingText
               texts={rotatingTexts}
               className="text-[#f5bf23] font-bold"
