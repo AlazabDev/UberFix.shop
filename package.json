@@ -139,7 +139,11 @@
     "archiver-utils": "5.0.2",
     "zip-stream": "5.0.2",
     "rimraf": "5.0.5",
-    "workbox-build": "7.1.0"
+    "workbox-build": "7.1.0",
+    "serialize-javascript": "7.0.3"
+  },
+  "overrides": {
+    "serialize-javascript": "7.0.3"
   },
   "optionalDependencies": {
     "@swc/core": "^1.15.3",
