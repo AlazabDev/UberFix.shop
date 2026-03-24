@@ -16,7 +16,8 @@ export const Footer = () => {
     support: [
       { label: t('footer.faq'), href: "/faq" },
       { label: t('footer.userGuide'), href: "/user-guide" },
-      { label: t('footer.contactUs'), href: "/book-consultation" }
+      { label: t('footer.contactUs'), href: "/book-consultation" },
+      { label: t('footer.betaTest'), href: "/beta-test" }
     ],
     company: [
       { label: t('footer.aboutCompany'), href: "/about" },

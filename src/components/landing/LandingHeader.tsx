@@ -18,6 +18,7 @@ export const LandingHeader = () => {
     { to: "/gallery", label: t('nav.gallery') },
     { to: "/blog", label: t('nav.blog') },
     { to: "/uf", label: t('nav.quickRequest') },
+    { to: "/beta-test", label: t('nav.betaTest') },
   ];
 
   return (
