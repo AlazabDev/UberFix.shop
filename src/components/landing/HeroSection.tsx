@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Calendar, Wrench } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDirection } from "@/hooks/useDirection";
+import { RotatingText } from "./RotatingText";
 
 // Animated particles with mouse interaction
 const ParticleCanvas = () => {
@@ -227,6 +228,10 @@ export const HeroSection = () => {
   const { isRTL } = useDirection();
   const isTextVisible = useSmoothReveal(600);
 
+  const rotatingTexts = useMemo(() => {
+    return t('hero.rotatingTexts', { defaultValue: 'حلول ذكية,خدمة احترافية,راحة بال,جودة مضمونة' }).split(',');
+  }, [t]);
+
   const scrollToContent = useCallback(() => {
     window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
   }, []);
@@ -252,14 +257,12 @@ export const HeroSection = () => {
         {/* Main Title */}
         <div className="max-w-5xl mx-auto mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight animate-[fadeInUp_0.6s_ease-out_both]">
-            <span className="text-white block mb-2">{t('hero.titleLine1')}</span>
-            <span 
-              className={`text-[#d4a017] transition-all duration-700 ease-out ${
-                isTextVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
-            >
-              {t('hero.titleLine2')}
-            </span>
+255:             <span className="text-white block mb-2">{t('hero.titleLine1')}</span>
+            <RotatingText
+              texts={rotatingTexts}
+              className="text-[#f5bf23] font-bold"
+              interval={3000}
+            />
           </h1>
         </div>
 
