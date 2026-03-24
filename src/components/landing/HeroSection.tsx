@@ -228,6 +228,10 @@ export const HeroSection = () => {
   const { isRTL } = useDirection();
   const isTextVisible = useSmoothReveal(600);
 
+  const rotatingTexts = useMemo(() => {
+    return t('hero.rotatingTexts', { defaultValue: 'حلول ذكية,خدمة احترافية,راحة بال,جودة مضمونة' }).split(',');
+  }, [t]);
+
   const scrollToContent = useCallback(() => {
     window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
   }, []);
