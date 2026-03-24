@@ -104,6 +104,7 @@ export const publicRoutes = [
   { path: "/chat", element: <ChatPage /> },
   { path: "/maintenance-request", element: <PublicMaintenanceForm /> },
   { path: "/uf", element: <UberFixRequestForm /> },
+  { path: "/beta-test", element: <BetaTest /> },
   { path: "/technicians/register", element: <TechnicianRegistration /> },
   { path: "/technicians/registration/wizard", element: <TechnicianRegistrationWizard /> },
   { path: "/technicians/registration/thank-you", element: <RegistrationThankYou /> },
