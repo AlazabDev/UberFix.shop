@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Calendar, Wrench } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDirection } from "@/hooks/useDirection";
+import { RotatingText } from "./RotatingText";
 
 // Animated particles with mouse interaction
 const ParticleCanvas = () => {
