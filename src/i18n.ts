@@ -50,6 +50,21 @@ i18n
           contracts: 'العقود',
           vendors: 'الموردين',
           messages: 'الرسائل',
+          // Navigation
+          'nav.home': 'الرئيسية',
+          'nav.about': 'من نحن',
+          'nav.services': 'خدماتنا',
+          'nav.projects': 'المشاريع',
+          'nav.gallery': 'المعرض',
+          'nav.blog': 'المدونة',
+          'nav.quickRequest': 'طلب سريع',
+          'nav.login': 'تسجيل الدخول',
+          'nav.register': 'إنشاء حساب',
+          'nav.openMenu': 'فتح القائمة',
+          // Footer
+          'footer.smartSystem': 'نظام إدارة الصيانة الذكي',
+          // Map
+          'map.loading': 'جاري تحميل الخريطة...',
           // Hero Section
           'hero.badge': '🔧 خبراء الصيانة المعتمدين',
           'hero.titleLine1': 'نحول مشاكل الصيانة إلى',
