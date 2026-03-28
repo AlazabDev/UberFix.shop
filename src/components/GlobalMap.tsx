@@ -3,21 +3,22 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { getMapboxToken } from '@/lib/mapboxLoader';
+import { useBranchLocations } from '@/hooks/useBranchLocations';
 
-interface BranchLocation {
-  name: string;
-  latitude: number;
-  longitude: number;
-  url?: string;
-}
+const escapeHtml = (str: string): string => {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+};
 
 const GlobalMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [branches, setBranches] = useState<BranchLocation[]>([]);
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
   const [tokenLoaded, setTokenLoaded] = useState(false);
   const [mapboxToken, setMapboxToken] = useState<string>('');
+
+  const { branches, loading: branchesLoading } = useBranchLocations();
 
   // جلب المفتاح من Edge Function
   useEffect(() => {
@@ -37,30 +38,17 @@ const GlobalMap = () => {
     fetchToken();
   }, []);
 
-  const mapError = !tokenLoaded && !mapboxToken
-    ? (runtimeError || 'جاري تحميل الخريطة...')
-    : runtimeError;
+  const isReady = tokenLoaded && mapboxToken && !branchesLoading;
 
-  useEffect(() => {
-    fetch('/data/branch_locations.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to load branch locations');
-        }
-        return response.json();
-      })
-      .then((data) => setBranches(data))
-      .catch((error) => {
-        console.error('Error loading branch locations:', error);
-        setRuntimeError('تعذر تحميل مواقع الفروع حاليًا.');
-      });
-  }, []);
+  const mapError = !isReady && !runtimeError
+    ? 'جاري تحميل الخريطة...'
+    : runtimeError;
 
   useEffect(() => {
     if (!mapContainer.current || branches.length === 0 || !mapboxToken || !tokenLoaded) return;
 
     mapboxgl.accessToken = mapboxToken;
-    
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/standard',
@@ -75,9 +63,7 @@ const GlobalMap = () => {
     });
 
     map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
+      new mapboxgl.NavigationControl({ visualizePitch: true }),
       'top-right'
     );
 
@@ -89,7 +75,7 @@ const GlobalMap = () => {
         'high-color': 'rgb(50, 50, 70)',
         'horizon-blend': 0.4,
         'space-color': 'rgb(10, 10, 20)',
-        'star-intensity': 0.6
+        'star-intensity': 0.6,
       });
     });
 
@@ -103,7 +89,6 @@ const GlobalMap = () => {
     map.current.on('mouseup', () => { userInteracting = false; });
     map.current.on('touchend', () => { userInteracting = false; });
 
-    // Use an interval instead of moveend→easeTo loop to avoid infinite recursion
     const spinInterval = setInterval(() => {
       if (!map.current) return;
       const zoom = map.current.getZoom();
@@ -120,36 +105,40 @@ const GlobalMap = () => {
 
     // Add markers for branches
     branches.forEach((branch) => {
+      const lat = parseFloat(branch.latitude || '');
+      const lng = parseFloat(branch.longitude || '');
+      if (isNaN(lat) || isNaN(lng)) return;
+
       const el = document.createElement('div');
       el.className = 'custom-marker';
       el.style.width = '40px';
       el.style.height = '40px';
-      el.style.backgroundImage = 'url(/icons/branch-icon.png)';
+      el.style.backgroundImage = `url(${branch.icon || '/icons/branch-icon.png'})`;
       el.style.backgroundSize = 'contain';
       el.style.backgroundRepeat = 'no-repeat';
       el.style.cursor = 'pointer';
       el.style.transition = 'transform 0.3s ease';
-      
+
       el.addEventListener('mouseenter', () => {
         el.style.transform = 'scale(1.3) translateY(-5px)';
       });
-      
       el.addEventListener('mouseleave', () => {
         el.style.transform = 'scale(1) translateY(0)';
       });
 
-      const popup = new mapboxgl.Popup({ 
+      const safeName = escapeHtml(branch.branch_name || branch.branch || '');
+      const popup = new mapboxgl.Popup({
         offset: 25,
         closeButton: false,
-        className: 'custom-popup'
+        className: 'custom-popup',
       }).setHTML(`
         <div style="padding: 8px; text-align: center; direction: rtl;">
-          <strong style="color: #f59e0b; font-size: 14px;">${branch.name}</strong>
+          <strong style="color: #f5bf23; font-size: 14px;">${safeName}</strong>
         </div>
       `);
 
       new mapboxgl.Marker(el)
-        .setLngLat([branch.longitude, branch.latitude])
+        .setLngLat([lng, lat])
         .setPopup(popup)
         .addTo(map.current!);
     });
@@ -164,7 +153,6 @@ const GlobalMap = () => {
     <section className="relative py-20 bg-background overflow-hidden" style={{ backgroundColor: '#f4f4f4' }}>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ffffff22] to-transparent pointer-events-none" />
 
-      
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12 animate-fade-in" dir="rtl">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
