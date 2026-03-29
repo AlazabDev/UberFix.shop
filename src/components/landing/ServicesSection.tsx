@@ -9,9 +9,18 @@ import {
   Building2, 
   ArrowLeft,
   CheckCircle,
-  MessageCircle
+  MessageCircle,
+  FileText,
+  ChevronDown
 } from "lucide-react";
 import { openWhatsApp } from "@/config/whatsapp";
+import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const ServicesSection = () => {
   const services = [
