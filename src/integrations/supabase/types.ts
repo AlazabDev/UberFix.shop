@@ -8228,6 +8228,10 @@ export type Database = {
           vendor_name: string
         }[]
       }
+      generate_unified_serial: {
+        Args: { prefix: string; seq_name: string }
+        Returns: string
+      }
       get_appointment_contact_info: {
         Args: { appointment_id: string }
         Returns: {
