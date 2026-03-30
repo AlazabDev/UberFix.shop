@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, X, Loader2 } from 'lucide-react';
-import { loadGoogleMaps } from '@/lib/googleMapsLoader';
+import { loadGoogleMaps, getGoogleMapsId } from '@/lib/googleMapsLoader';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -119,10 +119,11 @@ export const GooglePlacesAutocomplete: React.FC<GooglePlacesAutocompleteProps> =
           setMapLoading(true);
           const defaultCenter = { lat: 30.0444, lng: 31.2357 }; // Cairo
 
+          const mapId = getGoogleMapsId();
           mapInstanceRef.current = new google.maps.Map(mapRef.current, {
             center: defaultCenter,
             zoom: 12,
-            mapId: 'b41c60a3f8e58bdb15b2c668',
+            ...(mapId ? { mapId } : {}),
             disableDefaultUI: false,
             zoomControl: true,
             mapTypeControl: false,

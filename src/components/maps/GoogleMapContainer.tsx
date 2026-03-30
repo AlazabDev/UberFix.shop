@@ -68,17 +68,17 @@ export const GoogleMapContainer = ({
           throw new Error('Google Maps failed to initialize');
         }
 
+        const mapId = getGoogleMapsId();
         const mapOptions: any = {
           center,
           zoom,
-          mapId: getGoogleMapsId(),
+          ...(mapId ? { mapId } : {}),
           disableDefaultUI: !interactive,
           zoomControl: interactive,
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: interactive,
           gestureHandling: interactive ? 'greedy' : 'none',
-          styles: mapStyle,
         };
 
         mapInstanceRef.current = new google.maps.Map(mapRef.current, mapOptions);

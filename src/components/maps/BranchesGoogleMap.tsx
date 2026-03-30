@@ -77,26 +77,16 @@ export const BranchesGoogleMap: React.FC<BranchesGoogleMapProps> = ({
 
         await new Promise(r => setTimeout(r, 200));
 
+        const mapId = getGoogleMapsId();
         const map = new google.maps.Map(mapRef.current, {
           center: { lat: 30.0444, lng: 31.2357 },
           zoom: 6,
-          mapId: getGoogleMapsId(),
+          ...(mapId ? { mapId } : {}),
           mapTypeControl: false,
           fullscreenControl: true,
           streetViewControl: false,
           zoomControl: true,
           gestureHandling: 'greedy',
-          styles: [
-            { elementType: 'geometry', stylers: [{ color: '#0b1e36' }] },
-            { elementType: 'labels.text.fill', stylers: [{ color: '#8ec3f7' }] },
-            { elementType: 'labels.text.stroke', stylers: [{ color: '#0b1e36' }] },
-            { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0d2b4e' }] },
-            { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1a4b8c' }] },
-            { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#0b1e36' }] },
-            { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-            { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-            { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#1a4b8c' }] },
-          ],
         });
 
         mapInstanceRef.current = map;
