@@ -1,37 +1,40 @@
 // supabase/functions/slack-webhook/index.ts
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
-import { SlackClient } from '../../../src/lib/slack/slackClient.ts';
 
-const SLACK_WEBHOOK = Deno.env.get('SLACK_WEBHOOK_URL');
-const SLACK_SIGNING_SECRET = Deno.env.get('SLACK_SIGNING_SECRET');
-
-const slackClient = new SlackClient(SLACK_WEBHOOK, SLACK_SIGNING_SECRET);
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { SlackCallbackManager } from "../../../src/lib/slack/callbackManager.ts";
 
 serve(async (req) => {
-  if (req.method !== 'POST') return new Response('Not allowed', { status: 405 });
-
-  const timestamp = req.headers.get('X-Slack-Request-Timestamp') || '';
-  const signature = req.headers.get('X-Slack-Signature') || '';
   const body = await req.text();
+  const payload = JSON.parse(body);
 
-  // معالجة الـ webhook
-  const result = await slackClient.handleWebhook(timestamp, signature, body);
+  // معالجة actions
+  if (payload.type === 'block_actions') {
+    const action = payload.actions[0];
+    const callbackId = payload.view?.id || payload.callback_id;
 
-  if (!result.success) {
-    return new Response(JSON.stringify(result), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    // استخراج الـ Callback ID من action_id
+    const cbIdMatch = action.action_id.match(/(approve|reject)_([a-f0-9-]+)/);
+    if (cbIdMatch) {
+      const [_, actionType, extractedCallbackId] = cbIdMatch;
+
+      // معالجة الـ Callback
+      const result = await SlackCallbackManager.executeCallback(
+        extractedCallbackId,
+        async (callback) => {
+          return {
+            action: actionType,
+            userId: payload.user.id,
+            timestamp: new Date().toISOString(),
+          };
+        }
+      );
+
+      return new Response(
+        JSON.stringify({ ok: result.success }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
   }
 
-  // معالجة الـ events
-  if (result.type === 'url_verification') {
-    return new Response(JSON.stringify({ challenge: result.data.challenge }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  return new Response(JSON.stringify({ ok: true }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return new Response(JSON.stringify({ ok: true }), { status: 200 });
 });
