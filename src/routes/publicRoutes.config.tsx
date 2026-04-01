@@ -50,6 +50,7 @@ const PublicMaintenanceForm = lazy(() => import("@/pages/whatsapp/WhatsAppMainte
 const UberFixRequestForm = lazy(() => import("@/pages/public/UberFixRequestForm"));
 const QuoteRequestForm = lazy(() => import("@/pages/public/QuoteRequestForm"));
 const BetaTest = lazy(() => import("@/pages/public/BetaTest"));
+const SiteMap = lazy(() => import("@/pages/public/SiteMap"));
 
 // Technician pages
 const TechnicianRegistration = lazy(() => import("@/pages/technicians/TechnicianRegistration"));
@@ -107,6 +108,7 @@ export const publicRoutes = [
   { path: "/uf", element: <UberFixRequestForm /> },
   { path: "/quote", element: <QuoteRequestForm /> },
   { path: "/beta-test", element: <BetaTest /> },
+  { path: "/sitemap", element: <SiteMap /> },
   { path: "/technicians/register", element: <TechnicianRegistration /> },
   { path: "/technicians/registration/wizard", element: <TechnicianRegistrationWizard /> },
   { path: "/technicians/registration/thank-you", element: <RegistrationThankYou /> },
