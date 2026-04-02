@@ -80,39 +80,39 @@ export default function TrackOrder() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [phoneResults, setPhoneResults] = useState<RequestData[]>([]);
   const { toast } = useToast();
 
-  const fetchByIdOrNumber = async (query: string) => {
-    // Try by UUID first
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (uuidRegex.test(query)) {
-      const { data, error } = await supabase
-        .from('maintenance_requests')
-        .select('*')
-        .eq('id', query)
-        .single();
-      return { data, error };
-    }
-    
-    // Try by request_number
+  const fetchByQuery = async (query: string) => {
+    // Use public RPC that supports UUID, request_number, and phone lookup
     const { data, error } = await supabase
-      .from('maintenance_requests')
-      .select('*')
-      .eq('request_number', query.toUpperCase())
-      .single();
-    return { data, error };
+      .rpc('public_track_request', { query_text: query.trim() });
+    
+    if (error) return { data: null, error };
+    if (!data || data.length === 0) {
+      return { data: null, error: { code: 'PGRST116', message: 'Not found' } as any };
+    }
+    // If single result, return it; if multiple (phone search), return array
+    return { data: data.length === 1 ? data[0] : data, error: null };
   };
 
   const loadRequest = async (id: string) => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await fetchByIdOrNumber(id);
+      const { data, error: fetchError } = await fetchByQuery(id);
       if (fetchError) {
         setError(fetchError.code === 'PGRST116' ? 'لم يتم العثور على الطلب' : 'حدث خطأ في تحميل البيانات');
         return;
       }
-      setRequest(data);
+      // If array (phone search), take first
+      if (Array.isArray(data)) {
+        setRequest(data[0]);
+        setPhoneResults(data.length > 1 ? data : []);
+      } else {
+        setRequest(data);
+        setPhoneResults([]);
+      }
     } catch {
       setError('حدث خطأ غير متوقع');
     } finally {
@@ -140,11 +140,17 @@ export default function TrackOrder() {
     if (!searchQuery.trim()) return;
     setSearching(true);
     try {
-      const { data, error } = await fetchByIdOrNumber(searchQuery.trim());
+      const { data, error } = await fetchByQuery(searchQuery.trim());
       if (error || !data) {
-        toast({ title: 'لم يتم العثور على الطلب', description: 'تأكد من رقم الطلب وحاول مرة أخرى', variant: 'destructive' });
+        toast({ title: 'لم يتم العثور على الطلب', description: 'تأكد من رقم الطلب أو رقم الهاتف وحاول مرة أخرى', variant: 'destructive' });
       } else {
-        setRequest(data);
+        if (Array.isArray(data)) {
+          setRequest(data[0]);
+          setPhoneResults(data.length > 1 ? data : []);
+        } else {
+          setRequest(data);
+          setPhoneResults([]);
+        }
         setError(null);
       }
     } catch {
@@ -190,14 +196,14 @@ export default function TrackOrder() {
               <Search className="h-8 w-8 text-primary" />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">تتبع طلبك</h1>
-            <p className="text-muted-foreground">أدخل رقم الطلب لمعرفة حالته</p>
+            <p className="text-muted-foreground">أدخل رقم الطلب أو رقم الهاتف لمعرفة حالته</p>
           </div>
 
           <Card className="border-2 border-primary/10">
             <CardContent className="pt-6">
               <div className="flex gap-2">
                 <Input
-                  placeholder="MR-26-01016"
+                  placeholder="MR-26-01016 أو 01012345678"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -209,7 +215,7 @@ export default function TrackOrder() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-3 text-center">
-                مثال: MR-26-01016 أو UUID الطلب
+                أدخل رقم الطلب (MR-26-XXXXX) أو رقم الهاتف
               </p>
             </CardContent>
           </Card>
@@ -254,7 +260,7 @@ export default function TrackOrder() {
             
             <div className="flex gap-2 mb-4">
               <Input
-                placeholder="أدخل رقم الطلب"
+                placeholder="رقم الطلب أو رقم الهاتف"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -309,6 +315,32 @@ export default function TrackOrder() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+        {/* ─── Phone Results Selector ─── */}
+        {phoneResults.length > 1 && (
+          <Card className="border-0 shadow-lg">
+            <CardContent className="pt-4 pb-3">
+              <h3 className="font-bold text-sm mb-3 text-muted-foreground">طلبات مرتبطة بنفس الرقم:</h3>
+              <div className="space-y-2">
+                {phoneResults.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => setRequest(r)}
+                    className={`w-full text-right p-3 rounded-lg border transition-all ${
+                      request?.id === r.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-xs">{r.status}</Badge>
+                      <span className="font-mono font-bold text-sm">{r.request_number}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{r.title || r.service_type}</p>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* ─── Request Number Hero Card ─── */}
         <Card className="overflow-hidden border-0 shadow-lg">
           <div className="bg-gradient-to-l from-primary/10 to-primary/5 p-5">
