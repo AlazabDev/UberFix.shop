@@ -80,6 +80,7 @@ export default function TrackOrder() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [phoneResults, setPhoneResults] = useState<RequestData[]>([]);
   const { toast } = useToast();
 
   const fetchByQuery = async (query: string) => {
