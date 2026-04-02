@@ -315,6 +315,32 @@ export default function TrackOrder() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+        {/* ─── Phone Results Selector ─── */}
+        {phoneResults.length > 1 && (
+          <Card className="border-0 shadow-lg">
+            <CardContent className="pt-4 pb-3">
+              <h3 className="font-bold text-sm mb-3 text-muted-foreground">طلبات مرتبطة بنفس الرقم:</h3>
+              <div className="space-y-2">
+                {phoneResults.map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => setRequest(r)}
+                    className={`w-full text-right p-3 rounded-lg border transition-all ${
+                      request?.id === r.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-xs">{r.status}</Badge>
+                      <span className="font-mono font-bold text-sm">{r.request_number}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{r.title || r.service_type}</p>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* ─── Request Number Hero Card ─── */}
         <Card className="overflow-hidden border-0 shadow-lg">
           <div className="bg-gradient-to-l from-primary/10 to-primary/5 p-5">
