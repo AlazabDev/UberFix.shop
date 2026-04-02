@@ -140,11 +140,17 @@ export default function TrackOrder() {
     if (!searchQuery.trim()) return;
     setSearching(true);
     try {
-      const { data, error } = await fetchByIdOrNumber(searchQuery.trim());
+      const { data, error } = await fetchByQuery(searchQuery.trim());
       if (error || !data) {
-        toast({ title: 'لم يتم العثور على الطلب', description: 'تأكد من رقم الطلب وحاول مرة أخرى', variant: 'destructive' });
+        toast({ title: 'لم يتم العثور على الطلب', description: 'تأكد من رقم الطلب أو رقم الهاتف وحاول مرة أخرى', variant: 'destructive' });
       } else {
-        setRequest(data);
+        if (Array.isArray(data)) {
+          setRequest(data[0]);
+          setPhoneResults(data.length > 1 ? data : []);
+        } else {
+          setRequest(data);
+          setPhoneResults([]);
+        }
         setError(null);
       }
     } catch {
