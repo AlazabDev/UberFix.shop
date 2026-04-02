@@ -260,7 +260,7 @@ export default function TrackOrder() {
             
             <div className="flex gap-2 mb-4">
               <Input
-                placeholder="أدخل رقم الطلب"
+                placeholder="رقم الطلب أو رقم الهاتف"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
