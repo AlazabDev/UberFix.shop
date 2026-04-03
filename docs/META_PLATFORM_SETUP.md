@@ -62,7 +62,7 @@ https://id-preview--c6adaf51-0eef-43e8-bf45-d65ac7ebe1aa.lovable.app/auth/callba
 
 #### Deauthorize Callback URL:
 ```
-https://uberfiix.lovable.app/auth/deauthorize
+https://uberfix.shop/auth/deauthorize
 ```
 
 #### Data Deletion Request URL:
