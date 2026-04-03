@@ -1,11 +1,15 @@
 /**
  * خدمة CRUD لطلبات الصيانة
  * العمليات الأساسية: إنشاء، تحديث، حذف، جلب
+ * 
+ * ملاحظة: الإشعارات تتم تلقائياً عبر DB triggers:
+ * - trg_auto_notify_status_change → يستدعي send-maintenance-notification (WhatsApp + Email)
+ * - trigger_notify_customer_on_status_change → إشعار داخلي في التطبيق
+ * لا حاجة لاستدعاء الإشعارات يدوياً من الكود
  */
 import { supabase } from "@/integrations/supabase/client";
 import { WORKFLOW_STAGES, type WorkflowStage } from "@/constants/workflowStages";
 import type { MaintenanceRequest, MaintenanceRequestInsert, MrStatus } from "@/types/maintenance";
-import { notifyRequestCreated, notifyStatusChanged } from "./maintenanceNotifications";
 
 /** جلب جميع الطلبات مع pagination لتجنب حد 1000 صف */
 export async function fetchAllRequests(page = 0, pageSize = 500): Promise<MaintenanceRequest[]> {
@@ -87,8 +91,8 @@ export async function createMaintenanceRequest(
 
   if (error) throw error;
 
-  // إشعارات في الخلفية
-  notifyRequestCreated(data.id, data.client_phone);
+  // الإشعارات تتم تلقائياً عبر DB trigger (trg_auto_notify_status_change)
+  // عند تغيير الحالة لاحقاً. الإشعار الأول يتم عبر maintenance-gateway للطلبات العامة.
 
   return data as MaintenanceRequest;
 }
@@ -124,17 +128,7 @@ export async function updateMaintenanceRequest(
 
   if (error) throw error;
 
-  // إشعارات في الخلفية
-  if (oldData) {
-    notifyStatusChanged(
-      id,
-      oldData.status,
-      updates.status || null,
-      oldData.workflow_stage,
-      updates.workflow_stage || null,
-      data?.client_phone
-    );
-  }
+  // الإشعارات تتم تلقائياً عبر DB trigger عند تغيير status أو workflow_stage
 
   return data as MaintenanceRequest;
 }
