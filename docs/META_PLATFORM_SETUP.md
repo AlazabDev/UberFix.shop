@@ -67,7 +67,7 @@ https://uberfix.shop/auth/deauthorize
 
 #### Data Deletion Request URL:
 ```
-https://uberfiix.lovable.app/data-deletion
+https://uberfix.shop/data-deletion
 ```
 
 ### الخطوة 3: إعدادات Client OAuth
