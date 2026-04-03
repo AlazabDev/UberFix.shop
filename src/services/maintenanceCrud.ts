@@ -91,8 +91,8 @@ export async function createMaintenanceRequest(
 
   if (error) throw error;
 
-  // إشعارات في الخلفية
-  notifyRequestCreated(data.id, data.client_phone);
+  // الإشعارات تتم تلقائياً عبر DB trigger (trg_auto_notify_status_change)
+  // عند تغيير الحالة لاحقاً. الإشعار الأول يتم عبر maintenance-gateway للطلبات العامة.
 
   return data as MaintenanceRequest;
 }
