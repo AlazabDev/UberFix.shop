@@ -55,7 +55,7 @@
 #### Valid OAuth Redirect URIs (أضف كل هذه الروابط):
 
 ```
-https://uberfiix.lovable.app/auth/callback
+https://uberfix.shop/auth/callback
 https://zrrffsjbfkphridqyais.supabase.co/auth/v1/callback
 https://id-preview--c6adaf51-0eef-43e8-bf45-d65ac7ebe1aa.lovable.app/auth/callback
 ```
