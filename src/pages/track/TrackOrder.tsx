@@ -379,7 +379,7 @@ export default function TrackOrder() {
             </div>
 
             {/* ─── Quick Info Grid ─── */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className={`grid ${request.branch_name ? 'grid-cols-3' : 'grid-cols-2'} gap-3`}>
               <div className="bg-background/60 backdrop-blur rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">{serviceIcon}</span>
@@ -396,6 +396,15 @@ export default function TrackOrder() {
                 </div>
                 <p className="text-xs text-muted-foreground">تاريخ الإنشاء</p>
               </div>
+              {request.branch_name && (
+                <div className="bg-background/60 backdrop-blur rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-semibold text-foreground">{request.branch_name}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">الفرع</p>
+                </div>
+              )}
             </div>
 
             {/* SLA Timer */}
