@@ -303,18 +303,43 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
-    // INIT → إرسال البيانات الأولية (الفروع من قاعدة البيانات)
+    // INIT → إرسال البيانات الأولية
     // ==========================================
     if (action === 'INIT') {
-      console.log('🚀 INIT: Fetching branches from database...');
+      console.log('🚀 INIT: Fetching dynamic data...');
       const branches = await fetchBranches();
       console.log(`📋 Found ${branches.length} branches`);
 
+      const serviceTypes = [
+        { id: 'plumbing', title: 'سباكة' },
+        { id: 'electrical', title: 'كهرباء' },
+        { id: 'ac', title: 'تكييف وتبريد' },
+        { id: 'carpentry', title: 'نجارة' },
+        { id: 'painting', title: 'دهانات' },
+        { id: 'cleaning', title: 'تنظيف' },
+        { id: 'appliances', title: 'أجهزة منزلية' },
+        { id: 'glass', title: 'زجاج ومرايا' },
+        { id: 'pest_control', title: 'مكافحة حشرات' },
+        { id: 'general', title: 'صيانة عامة' },
+      ];
+
+      const priorities = [
+        { id: 'urgent', title: '🔴 عاجل' },
+        { id: 'medium', title: '🟡 متوسط' },
+        { id: 'normal', title: '🟢 عادي' },
+      ];
+
       const response = {
         version,
-        screen: 'SELECT_BRANCH',
+        screen: 'APPOINTMENT',
         data: {
-          branches,
+          department: serviceTypes,
+          location: branches,
+          is_location_enabled: true,
+          date: priorities,
+          is_date_enabled: true,
+          time: [] as Array<{ id: string; title: string }>,
+          is_time_enabled: false,
         },
       };
       const encrypted = await encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
@@ -322,17 +347,43 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
-    // navigate → عند اختيار الفرع والانتقال للنموذج
+    // data_exchange triggers (dropdown selections)
     // ==========================================
-    if (action === 'navigate' && screen === 'SELECT_BRANCH') {
-      const branchId = data.branch_id as string;
-      const branchInfo = await getBranchName(branchId);
-      
+    if (action === 'data_exchange' && data.trigger) {
+      const trigger = data.trigger as string;
+      console.log('🔄 Trigger:', trigger);
+
+      // Re-fetch dynamic data for consistency
+      const branches = await fetchBranches();
+      const serviceTypes = [
+        { id: 'plumbing', title: 'سباكة' },
+        { id: 'electrical', title: 'كهرباء' },
+        { id: 'ac', title: 'تكييف وتبريد' },
+        { id: 'carpentry', title: 'نجارة' },
+        { id: 'painting', title: 'دهانات' },
+        { id: 'cleaning', title: 'تنظيف' },
+        { id: 'appliances', title: 'أجهزة منزلية' },
+        { id: 'glass', title: 'زجاج ومرايا' },
+        { id: 'pest_control', title: 'مكافحة حشرات' },
+        { id: 'general', title: 'صيانة عامة' },
+      ];
+      const priorities = [
+        { id: 'urgent', title: '🔴 عاجل' },
+        { id: 'medium', title: '🟡 متوسط' },
+        { id: 'normal', title: '🟢 عادي' },
+      ];
+
       const response = {
         version,
-        screen: 'REQUEST_FORM',
+        screen: 'APPOINTMENT',
         data: {
-          branch_name: branchInfo?.name || 'غير محدد',
+          department: serviceTypes,
+          location: branches,
+          is_location_enabled: true,
+          date: priorities,
+          is_date_enabled: true,
+          time: [] as Array<{ id: string; title: string }>,
+          is_time_enabled: false,
         },
       };
       const encrypted = await encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
@@ -385,24 +436,67 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
-    // data_exchange → استلام بيانات النموذج وإنشاء طلب
+    // data_exchange from DETAILS → بناء ملخص وعرض SUMMARY
+    // ==========================================
+    if (action === 'data_exchange' && screen === 'DETAILS') {
+      const serviceLabels: Record<string, string> = {
+        plumbing: 'سباكة', electrical: 'كهرباء', ac: 'تكييف وتبريد',
+        carpentry: 'نجارة', painting: 'دهانات', cleaning: 'تنظيف',
+        appliances: 'أجهزة منزلية', glass: 'زجاج ومرايا',
+        pest_control: 'مكافحة حشرات', general: 'صيانة عامة',
+      };
+      const priorityLabels: Record<string, string> = {
+        urgent: '🔴 عاجل', medium: '🟡 متوسط', normal: '🟢 عادي',
+      };
+
+      const dept = data.department as string;
+      const loc = data.location as string;
+      const prio = data.date as string;
+
+      // Get branch name
+      let branchLabel = 'غير محدد';
+      if (loc) {
+        const info = await getBranchName(loc);
+        if (info) branchLabel = info.name;
+      }
+
+      const appointmentText = `نوع الخدمة: ${serviceLabels[dept] || dept}\nالفرع: ${branchLabel}\nالأولوية: ${priorityLabels[prio] || prio}`;
+      const detailsText = `الاسم: ${data.name || ''}\nالهاتف: ${data.phone || ''}\n${data.email ? 'البريد: ' + data.email + '\n' : ''}\n${data.more_details || ''}`;
+
+      const response = {
+        version,
+        screen: 'SUMMARY',
+        data: {
+          appointment: appointmentText,
+          details: detailsText,
+          department: dept,
+          location: loc,
+          date: prio,
+          time: (data.time as string) || '',
+          name: (data.name as string) || '',
+          email: (data.email as string) || '',
+          phone: (data.phone as string) || '',
+          more_details: (data.more_details as string) || '',
+        },
+      };
+      const encrypted = await encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
+      return new Response(encrypted, { headers: { 'Content-Type': 'text/plain' } });
+    }
+
+    // ==========================================
+    // data_exchange from SUMMARY → إنشاء طلب الصيانة
     // ==========================================
     if (action === 'data_exchange') {
       const supabase = getSupabase();
 
-      const {
-        requester_name,
-        maintenance_type,
-        branch_id,
-        priority,
-        description,
-      } = data as {
-        requester_name: string;
-        maintenance_type: string;
-        branch_id: string;
-        priority: string;
-        description: string;
-      };
+      // Map from template field names to internal names
+      const maintenance_type = (data.department as string) || 'general';
+      const branch_id = data.location as string;
+      const priority = (data.date as string) || 'normal';
+      const requester_name = (data.name as string) || 'عميل واتساب';
+      const client_phone = data.phone as string;
+      const client_email = data.email as string;
+      const description = (data.more_details as string) || '';
 
       console.log('📋 Flow data:', { requester_name, maintenance_type, branch_id, priority });
 
@@ -422,7 +516,7 @@ Deno.serve(async (req) => {
         if (!fallbackBranch) {
           const errorResp = {
             version,
-            screen: 'REQUEST_FORM',
+            screen: 'DETAILS',
             data: { error_message: 'خطأ في النظام. يرجى المحاولة لاحقاً.' },
           };
           const encrypted = await encryptResponse(errorResp, aesKeyBuffer, initialVectorBuffer);
@@ -450,7 +544,7 @@ Deno.serve(async (req) => {
         console.error('❌ No company found');
         const errorResp = {
           version,
-          screen: 'REQUEST_FORM',
+          screen: 'DETAILS',
           data: { error_message: 'خطأ في النظام. يرجى المحاولة لاحقاً.' },
         };
         const encrypted = await encryptResponse(errorResp, aesKeyBuffer, initialVectorBuffer);
@@ -462,8 +556,10 @@ Deno.serve(async (req) => {
         .from('maintenance_requests')
         .insert({
           title: `${maintenance_type} - ${finalBranchName}`,
-          description: description,
+          description: description || null,
           client_name: requester_name,
+          client_phone: client_phone || null,
+          client_email: client_email || null,
           service_type: maintenance_type,
           location: finalBranchName,
           priority: mapPriority(priority),
@@ -480,7 +576,7 @@ Deno.serve(async (req) => {
         console.error('❌ Insert error:', insertError);
         const errorResp = {
           version,
-          screen: 'REQUEST_FORM',
+          screen: 'DETAILS',
           data: { error_message: 'فشل في إرسال الطلب. يرجى المحاولة مرة أخرى.' },
         };
         const encrypted = await encryptResponse(errorResp, aesKeyBuffer, initialVectorBuffer);
