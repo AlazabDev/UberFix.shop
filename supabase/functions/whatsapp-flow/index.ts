@@ -440,24 +440,19 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
-    // data_exchange → استلام بيانات النموذج وإنشاء طلب
+    // data_exchange → استلام بيانات SUMMARY وإنشاء طلب
     // ==========================================
     if (action === 'data_exchange') {
       const supabase = getSupabase();
 
-      const {
-        requester_name,
-        maintenance_type,
-        branch_id,
-        priority,
-        description,
-      } = data as {
-        requester_name: string;
-        maintenance_type: string;
-        branch_id: string;
-        priority: string;
-        description: string;
-      };
+      // Map from template field names to internal names
+      const maintenance_type = (data.department as string) || 'general';
+      const branch_id = data.location as string;
+      const priority = (data.date as string) || 'normal';
+      const requester_name = (data.name as string) || 'عميل واتساب';
+      const client_phone = data.phone as string;
+      const client_email = data.email as string;
+      const description = (data.more_details as string) || '';
 
       console.log('📋 Flow data:', { requester_name, maintenance_type, branch_id, priority });
 
