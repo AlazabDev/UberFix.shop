@@ -303,18 +303,43 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
-    // INIT → إرسال البيانات الأولية (الفروع من قاعدة البيانات)
+    // INIT → إرسال البيانات الأولية
     // ==========================================
     if (action === 'INIT') {
-      console.log('🚀 INIT: Fetching branches from database...');
+      console.log('🚀 INIT: Fetching dynamic data...');
       const branches = await fetchBranches();
       console.log(`📋 Found ${branches.length} branches`);
 
+      const serviceTypes = [
+        { id: 'plumbing', title: 'سباكة' },
+        { id: 'electrical', title: 'كهرباء' },
+        { id: 'ac', title: 'تكييف وتبريد' },
+        { id: 'carpentry', title: 'نجارة' },
+        { id: 'painting', title: 'دهانات' },
+        { id: 'cleaning', title: 'تنظيف' },
+        { id: 'appliances', title: 'أجهزة منزلية' },
+        { id: 'glass', title: 'زجاج ومرايا' },
+        { id: 'pest_control', title: 'مكافحة حشرات' },
+        { id: 'general', title: 'صيانة عامة' },
+      ];
+
+      const priorities = [
+        { id: 'urgent', title: '🔴 عاجل' },
+        { id: 'medium', title: '🟡 متوسط' },
+        { id: 'normal', title: '🟢 عادي' },
+      ];
+
       const response = {
         version,
-        screen: 'SELECT_BRANCH',
+        screen: 'APPOINTMENT',
         data: {
-          branches,
+          department: serviceTypes,
+          location: branches,
+          is_location_enabled: true,
+          date: priorities,
+          is_date_enabled: true,
+          time: [] as Array<{ id: string; title: string }>,
+          is_time_enabled: false,
         },
       };
       const encrypted = await encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
@@ -322,17 +347,47 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
-    // navigate → عند اختيار الفرع والانتقال للنموذج
+    // data_exchange triggers (dropdown selections)
     // ==========================================
-    if (action === 'navigate' && screen === 'SELECT_BRANCH') {
-      const branchId = data.branch_id as string;
-      const branchInfo = await getBranchName(branchId);
-      
+    if (action === 'data_exchange' && data.trigger) {
+      const trigger = data.trigger as string;
+      console.log('🔄 Trigger:', trigger);
+
+      // Re-fetch dynamic data for consistency
+      const branches = await fetchBranches();
+      const serviceTypes = [
+        { id: 'plumbing', title: 'سباكة' },
+        { id: 'electrical', title: 'كهرباء' },
+        { id: 'ac', title: 'تكييف وتبريد' },
+        { id: 'carpentry', title: 'نجارة' },
+        { id: 'painting', title: 'دهانات' },
+        { id: 'cleaning', title: 'تنظيف' },
+        { id: 'appliances', title: 'أجهزة منزلية' },
+        { id: 'glass', title: 'زجاج ومرايا' },
+        { id: 'pest_control', title: 'مكافحة حشرات' },
+        { id: 'general', title: 'صيانة عامة' },
+      ];
+      const priorities = [
+        { id: 'urgent', title: '🔴 عاجل' },
+        { id: 'medium', title: '🟡 متوسط' },
+        { id: 'normal', title: '🟢 عادي' },
+      ];
+
       const response = {
         version,
-        screen: 'REQUEST_FORM',
+        screen: 'APPOINTMENT',
         data: {
-          branch_name: branchInfo?.name || 'غير محدد',
+          department: serviceTypes,
+          location: branches,
+          is_location_enabled: true,
+          date: priorities,
+          is_date_enabled: true,
+          time: [] as Array<{ id: string; title: string }>,
+          is_time_enabled: false,
+        },
+      };
+      const encrypted = await encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
+      return new Response(encrypted, { headers: { 'Content-Type': 'text/plain' } });
         },
       };
       const encrypted = await encryptResponse(response, aesKeyBuffer, initialVectorBuffer);
