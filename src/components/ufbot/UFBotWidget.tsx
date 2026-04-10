@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Bot, User, Maximize2 } from "lucide-react";
+import { MessageCircle, X, Send, Mic, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -18,18 +17,29 @@ interface Message {
 
 const UFBOT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ufbot`;
 
+const QUICK_ACTIONS = [
+  "ما هي خدمات الشركة؟",
+  "أريد عرض سعر تشطيب",
+  "ما هي أسعار التشطيب؟",
+  "ما هي فروع الشركة؟",
+];
+
+type TabType = 'text' | 'voice';
+
 export function UFBotWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('text');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'مرحباً! أنا **UFBot** 🤖 مساعدك الذكي لمنصة UberFix.\n\nكيف يمكنني مساعدتك اليوم؟',
+      content: 'مرحباً! أنا عزبوت 👋\nكيف يمكنني مساعدتك؟',
       role: 'assistant',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -92,10 +102,11 @@ export function UFBotWidget() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    const message = input.trim();
+  const sendMessage = async (text?: string) => {
+    const message = (text || input).trim();
+    if (!message || isLoading) return;
 
+    setShowQuickActions(false);
     const userMsg: Message = {
       id: Date.now().toString(),
       content: message,
@@ -122,58 +133,98 @@ export function UFBotWidget() {
 
   return (
     <>
+      {/* FAB Button */}
       <Button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "fixed bottom-6 right-6 z-[9999] h-14 w-14 rounded-full shadow-lg",
-          "bg-primary hover:bg-primary/90 text-primary-foreground",
+          "bg-[#f5bf23] hover:bg-[#e0ad1c] text-[#111]",
           "transition-all duration-300 ease-in-out"
         )}
         size="icon"
-        aria-label="UFBot"
+        aria-label="عزبوت"
       >
         {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </Button>
 
       {isOpen && (
-        <Card className="fixed bottom-24 right-6 z-[9998] w-80 sm:w-96 shadow-xl border flex flex-col" style={{ height: '60vh', maxHeight: '480px' }}>
-          <CardHeader className="bg-primary text-primary-foreground p-3 rounded-t-lg flex flex-row items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Bot className="h-5 w-5" />
-              UFBot
-            </CardTitle>
+        <div
+          className="fixed bottom-24 right-6 z-[9998] w-[340px] sm:w-[380px] rounded-2xl shadow-2xl border border-border bg-background flex flex-col overflow-hidden"
+          style={{ height: '520px', maxHeight: '75vh' }}
+          dir="rtl"
+        >
+          {/* Header */}
+          <div className="bg-[#f5bf23] text-[#111] px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#111] text-[#f5bf23] rounded-full h-10 w-10 flex items-center justify-center text-lg font-bold">
+                عز
+              </div>
+              <div>
+                <h3 className="font-bold text-sm">عزبوت (AzaBot)</h3>
+                <p className="text-xs opacity-75">المساعد الذكي - متصل الآن</p>
+              </div>
+            </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-primary-foreground hover:bg-primary-foreground/20"
+              className="h-8 w-8 text-[#111] hover:bg-[#111]/10"
               onClick={() => { setIsOpen(false); navigate('/chat'); }}
               title="فتح المحادثة الكاملة"
             >
               <Maximize2 className="h-4 w-4" />
             </Button>
-          </CardHeader>
+          </div>
 
-          <CardContent className="p-0 flex flex-col flex-1 overflow-hidden">
-            <ScrollArea className="flex-1 p-3">
-              <div className="space-y-3">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={cn(
-                      "flex items-start gap-2",
-                      message.role === 'user' ? "justify-end" : "justify-start"
-                    )}
-                  >
-                    {message.role === 'assistant' && (
-                      <div className="bg-primary text-primary-foreground rounded-full p-1 mt-0.5 shrink-0">
-                        <Bot className="h-3.5 w-3.5" />
+          {/* Tabs */}
+          <div className="flex border-b border-border bg-muted/30">
+            <button
+              onClick={() => setActiveTab('text')}
+              className={cn(
+                "flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-1.5 transition-colors",
+                activeTab === 'text'
+                  ? "text-[#111] border-b-2 border-[#f5bf23] bg-background"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              محادثة نصية
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('voice');
+                toast({ title: "محادثة صوتية", description: "ستكون متاحة قريباً!" });
+              }}
+              className={cn(
+                "flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-1.5 transition-colors",
+                activeTab === 'voice'
+                  ? "text-[#111] border-b-2 border-[#f5bf23] bg-background"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Mic className="h-3.5 w-3.5" />
+              محادثة صوتية
+            </button>
+          </div>
+
+          {/* Messages */}
+          <ScrollArea className="flex-1">
+            <div className="p-4 space-y-3">
+              {messages.map((message) => (
+                <div key={message.id} className={cn("flex", message.role === 'user' ? "justify-start" : "justify-center flex-col items-center")}>
+                  {message.role === 'assistant' && message.id === '1' ? (
+                    <div className="text-center py-4">
+                      <div className="bg-[#f5bf23]/10 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-3">
+                        <MessageCircle className="h-8 w-8 text-[#f5bf23]" />
                       </div>
-                    )}
+                      <p className="font-bold text-base mb-1">مرحباً! أنا عزبوت 👋</p>
+                      <p className="text-sm text-muted-foreground">كيف يمكنني مساعدتك؟</p>
+                    </div>
+                  ) : (
                     <div className={cn(
-                      "max-w-[80%] rounded-lg p-2.5 text-sm",
+                      "max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm",
                       message.role === 'user'
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
+                        ? "bg-[#f5bf23] text-[#111] self-start"
+                        : "bg-muted self-end"
                     )}>
                       {message.role === 'assistant' ? (
                         <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>ul]:m-0 [&>ol]:m-0">
@@ -181,48 +232,64 @@ export function UFBotWidget() {
                         </div>
                       ) : message.content}
                     </div>
-                    {message.role === 'user' && (
-                      <div className="bg-primary text-primary-foreground rounded-full p-1 mt-0.5 shrink-0">
-                        <User className="h-3.5 w-3.5" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-                  <div className="flex items-start gap-2">
-                    <div className="bg-primary text-primary-foreground rounded-full p-1">
-                      <Bot className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="bg-muted rounded-lg p-2.5 text-sm">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div ref={messagesEndRef} />
-            </ScrollArea>
+                  )}
+                </div>
+              ))}
 
-            <div className="p-3 border-t">
-              <div className="flex gap-2">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                  placeholder="اكتب رسالتك..."
-                  className="flex-1 text-sm"
-                  disabled={isLoading}
-                />
-                <Button onClick={sendMessage} disabled={!input.trim() || isLoading} size="icon" className="shrink-0">
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Quick Actions */}
+              {showQuickActions && messages.length <= 1 && (
+                <div className="flex flex-wrap gap-2 justify-center pt-2">
+                  {QUICK_ACTIONS.map((action, i) => (
+                    <button
+                      key={i}
+                      onClick={() => sendMessage(action)}
+                      className="border border-[#f5bf23]/50 text-sm rounded-full px-3.5 py-1.5 hover:bg-[#f5bf23]/10 transition-colors text-foreground"
+                    >
+                      {action}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Loading */}
+              {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
+                <div className="flex justify-end">
+                  <div className="bg-muted rounded-xl px-3.5 py-2.5">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-[#f5bf23] rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-[#f5bf23] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                      <div className="w-2 h-2 bg-[#f5bf23] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          </CardContent>
-        </Card>
+          </ScrollArea>
+
+          {/* Input */}
+          <div className="p-3 border-t border-border">
+            <div className="flex gap-2 items-center">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                placeholder="اكتب رسالتك..."
+                className="flex-1 text-sm rounded-full border-muted-foreground/20 bg-muted/30"
+                disabled={isLoading}
+              />
+              <Button
+                onClick={() => sendMessage()}
+                disabled={!input.trim() || isLoading}
+                size="icon"
+                className="shrink-0 rounded-full bg-[#f5bf23] hover:bg-[#e0ad1c] text-[#111] h-9 w-9"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center mt-1.5">مدعوم بالذكاء الاصطناعي - قد يخطئ أحياناً</p>
+          </div>
+        </div>
       )}
     </>
   );

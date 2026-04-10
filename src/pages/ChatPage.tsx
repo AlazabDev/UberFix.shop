@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, Trash2, ArrowRight, Download } from "lucide-react";
+import { Send, Mic, Trash2, ArrowRight, Download, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -18,17 +17,28 @@ interface Message {
 
 const UFBOT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ufbot`;
 
+const QUICK_ACTIONS = [
+  "ما هي خدمات الشركة؟",
+  "أريد عرض سعر تشطيب",
+  "ما هي أسعار التشطيب؟",
+  "ما هي فروع الشركة؟",
+];
+
+type TabType = 'text' | 'voice';
+
 export default function ChatPage() {
+  const [activeTab, setActiveTab] = useState<TabType>('text');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'مرحباً! أنا **UFBot** 🤖 مساعدك الذكي لمنصة UberFix.\n\nيمكنني مساعدتك في:\n- 📋 الاستعلام عن طلبات الصيانة\n- 📊 عرض الإحصائيات\n- ❓ الإجابة عن أسئلتك\n- 🔧 شرح خدماتنا\n\nكيف يمكنني مساعدتك؟',
+      content: 'مرحباً! أنا عزبوت 👋\nكيف يمكنني مساعدتك؟',
       role: 'assistant',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -93,10 +103,11 @@ export default function ChatPage() {
     }
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    const message = input.trim();
+  const sendMessage = async (text?: string) => {
+    const message = (text || input).trim();
+    if (!message || isLoading) return;
 
+    setShowQuickActions(false);
     const userMsg: Message = { id: Date.now().toString(), content: message, role: 'user', timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
@@ -118,24 +129,25 @@ export default function ChatPage() {
   const clearChat = () => {
     setMessages([{
       id: '1',
-      content: 'مرحباً! أنا **UFBot** 🤖 كيف يمكنني مساعدتك؟',
+      content: 'مرحباً! أنا عزبوت 👋\nكيف يمكنني مساعدتك؟',
       role: 'assistant',
       timestamp: new Date()
     }]);
+    setShowQuickActions(true);
   };
 
   const exportChat = () => {
     const text = messages.map(m => {
       const time = m.timestamp.toLocaleString('ar-EG');
-      const sender = m.role === 'user' ? '👤 أنت' : '🤖 UFBot';
+      const sender = m.role === 'user' ? '👤 أنت' : '🤖 عزبوت';
       return `[${time}] ${sender}:\n${m.content}\n`;
     }).join('\n---\n\n');
 
-    const blob = new Blob([`محادثة UFBot - ${new Date().toLocaleDateString('ar-EG')}\n${'='.repeat(50)}\n\n${text}`], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([`محادثة عزبوت (AzaBot) - ${new Date().toLocaleDateString('ar-EG')}\n${'='.repeat(50)}\n\n${text}`], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ufbot-chat-${Date.now()}.txt`;
+    a.download = `azabot-chat-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: "تم التصدير", description: "تم تحميل المحادثة بنجاح" });
@@ -144,76 +156,124 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between shadow-md">
+      <div className="bg-[#f5bf23] text-[#111] p-4 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="icon"
-            className="text-primary-foreground hover:bg-primary-foreground/20"
+            className="text-[#111] hover:bg-[#111]/10"
             onClick={() => navigate(-1)}
             aria-label="رجوع"
           >
             <ArrowRight className="h-5 w-5" />
           </Button>
-          <div className="bg-primary-foreground/20 rounded-full p-2">
-            <Bot className="h-6 w-6" />
+          <div className="bg-[#111] text-[#f5bf23] rounded-full h-10 w-10 flex items-center justify-center text-lg font-bold">
+            عز
           </div>
           <div>
-            <h1 className="text-lg font-bold">UFBot</h1>
-            <p className="text-xs opacity-80">المساعد الذكي لـ UberFix</p>
+            <h1 className="text-lg font-bold">عزبوت (AzaBot)</h1>
+            <p className="text-xs opacity-75">المساعد الذكي - متصل الآن</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20" onClick={exportChat} title="تصدير المحادثة">
+          <Button variant="ghost" size="icon" className="text-[#111] hover:bg-[#111]/10" onClick={exportChat} title="تصدير المحادثة">
             <Download className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/20" onClick={clearChat} title="مسح المحادثة">
+          <Button variant="ghost" size="icon" className="text-[#111] hover:bg-[#111]/10" onClick={clearChat} title="مسح المحادثة">
             <Trash2 className="h-5 w-5" />
           </Button>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-border bg-muted/30">
+        <button
+          onClick={() => setActiveTab('text')}
+          className={cn(
+            "flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors",
+            activeTab === 'text'
+              ? "text-[#111] dark:text-foreground border-b-2 border-[#f5bf23] bg-background"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <MessageCircle className="h-4 w-4" />
+          محادثة نصية
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('voice');
+            toast({ title: "محادثة صوتية", description: "ستكون متاحة قريباً!" });
+          }}
+          className={cn(
+            "flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors",
+            activeTab === 'voice'
+              ? "text-[#111] dark:text-foreground border-b-2 border-[#f5bf23] bg-background"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Mic className="h-4 w-4" />
+          محادثة صوتية
+        </button>
       </div>
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="max-w-3xl mx-auto space-y-4">
           {messages.map((message) => (
-            <div key={message.id} className={cn("flex items-start gap-3", message.role === 'user' ? "justify-end" : "justify-start")}>
-              {message.role === 'assistant' && (
-                <div className="bg-primary text-primary-foreground rounded-full p-2 mt-0.5 shrink-0">
-                  <Bot className="h-4 w-4" />
-                </div>
-              )}
-              <Card className={cn(
-                "max-w-[75%] p-4 shadow-sm",
-                message.role === 'user'
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card"
-              )}>
-                {message.role === 'assistant' ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>ul]:my-1 [&>ol]:my-1">
-                    <ReactMarkdown>{message.content}</ReactMarkdown>
+            <div key={message.id}>
+              {message.role === 'assistant' && message.id === '1' ? (
+                <div className="text-center py-8">
+                  <div className="bg-[#f5bf23]/10 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="h-10 w-10 text-[#f5bf23]" />
                   </div>
-                ) : (
-                  <p className="text-sm">{message.content}</p>
-                )}
-              </Card>
-              {message.role === 'user' && (
-                <div className="bg-primary text-primary-foreground rounded-full p-2 mt-0.5 shrink-0">
-                  <User className="h-4 w-4" />
+                  <p className="font-bold text-xl mb-2">مرحباً! أنا عزبوت 👋</p>
+                  <p className="text-muted-foreground">كيف يمكنني مساعدتك؟</p>
+                </div>
+              ) : (
+                <div className={cn("flex", message.role === 'user' ? "justify-start" : "justify-end")}>
+                  <div className={cn(
+                    "max-w-[75%] rounded-2xl px-4 py-3 shadow-sm",
+                    message.role === 'user'
+                      ? "bg-[#f5bf23] text-[#111]"
+                      : "bg-muted"
+                  )}>
+                    {message.role === 'assistant' ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>ul]:my-1 [&>ol]:my-1">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-sm">{message.content}</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           ))}
+
+          {/* Quick Actions */}
+          {showQuickActions && messages.length <= 1 && (
+            <div className="flex flex-wrap gap-2 justify-center pt-2">
+              {QUICK_ACTIONS.map((action, i) => (
+                <button
+                  key={i}
+                  onClick={() => sendMessage(action)}
+                  className="border border-[#f5bf23]/50 text-sm rounded-full px-4 py-2 hover:bg-[#f5bf23]/10 transition-colors"
+                >
+                  {action}
+                </button>
+              ))}
+            </div>
+          )}
+
           {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-            <div className="flex items-start gap-3">
-              <div className="bg-primary text-primary-foreground rounded-full p-2"><Bot className="h-4 w-4" /></div>
-              <Card className="p-4 bg-card shadow-sm">
+            <div className="flex justify-end">
+              <div className="bg-muted rounded-2xl px-4 py-3 shadow-sm">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <div className="w-2 h-2 bg-[#f5bf23] rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-[#f5bf23] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                  <div className="w-2 h-2 bg-[#f5bf23] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                 </div>
-              </Card>
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -222,20 +282,26 @@ export default function ChatPage() {
 
       {/* Input */}
       <div className="border-t bg-background p-4">
-        <div className="max-w-3xl mx-auto flex gap-3">
+        <div className="max-w-3xl mx-auto flex gap-3 items-center">
           <Input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-            placeholder="اكتب رسالتك هنا..."
-            className="flex-1"
+            placeholder="اكتب رسالتك..."
+            className="flex-1 rounded-full border-muted-foreground/20 bg-muted/30"
             disabled={isLoading}
           />
-          <Button onClick={sendMessage} disabled={!input.trim() || isLoading} size="icon">
+          <Button
+            onClick={() => sendMessage()}
+            disabled={!input.trim() || isLoading}
+            size="icon"
+            className="rounded-full bg-[#f5bf23] hover:bg-[#e0ad1c] text-[#111] h-10 w-10"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground text-center mt-2">مدعوم بالذكاء الاصطناعي - قد يخطئ أحياناً</p>
       </div>
     </div>
   );
