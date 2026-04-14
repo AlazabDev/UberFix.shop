@@ -144,7 +144,7 @@ function errorResponse(message: string, messageAr: string, status: number, extra
 
 async function authenticateApiKey(
   req: Request,
-  supabaseAdmin: ReturnType<typeof createClient>
+  supabaseAdmin: any
 ): Promise<{ consumer: ApiConsumer | null; error: Response | null }> {
   const apiKey = req.headers.get('x-api-key') || req.headers.get('authorization')?.replace('Bearer ', '');
   
@@ -201,7 +201,7 @@ async function authenticateApiKey(
 // ─── Request Processing ─────────────────────────────────────────────
 
 async function resolveCompanyBranch(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   body: GatewayRequest,
   consumer: ApiConsumer | null
 ): Promise<{ companyId: string; branchId: string; error: Response | null }> {
@@ -267,7 +267,7 @@ async function resolveCompanyBranch(
 }
 
 async function uploadImages(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   requestId: string,
   images: string[]
 ): Promise<number> {
@@ -290,7 +290,7 @@ async function uploadImages(
 }
 
 async function sendNotifications(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   requestId: string,
   _requestNumber: string,
   _clientPhone: string,

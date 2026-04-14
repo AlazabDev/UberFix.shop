@@ -55,7 +55,7 @@ async function importPrivateKey(pem: string): Promise<CryptoKey> {
 
   return await subtle.importKey(
     "pkcs8",
-    keyData.buffer,
+    new Uint8Array(keyData).buffer as ArrayBuffer,
     { name: "RSA-OAEP", hash: "SHA-256" },
     false,
     ["decrypt"]
@@ -84,7 +84,7 @@ async function decryptRequest(
     aesKeyBuffer = await subtle.decrypt(
       { name: "RSA-OAEP" },
       privateKey,
-      base64ToUint8Array(encrypted_aes_key).buffer
+      new Uint8Array(base64ToUint8Array(encrypted_aes_key)).buffer as ArrayBuffer
     );
   } catch (error) {
     console.error("RSA decrypt failed:", error);
@@ -113,7 +113,7 @@ async function decryptRequest(
   const decryptedData = await subtle.decrypt(
     { name: "AES-GCM", iv: initialVectorBuffer },
     aesKey,
-    flowDataBuffer.buffer
+    new Uint8Array(flowDataBuffer).buffer as ArrayBuffer
   );
 
   const decryptedJSONString = new TextDecoder().decode(decryptedData);

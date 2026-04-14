@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
       
       // Fallback: sign in with password
       // Update password first
-      await supabaseAdmin.auth.admin.updateUser(userId, { password: tempPassword });
+      await (supabaseAdmin.auth.admin as any).updateUser(userId, { password: tempPassword });
       
       // Sign in with the temp password using anon key client
       const supabaseAnon = createClient(
@@ -226,7 +226,7 @@ Deno.serve(async (req) => {
     }
 
     // If all else fails, use password fallback
-    await supabaseAdmin.auth.admin.updateUser(userId, { password: tempPassword });
+    await (supabaseAdmin.auth.admin as any).updateUser(userId, { password: tempPassword });
     
     const supabaseAnon = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
