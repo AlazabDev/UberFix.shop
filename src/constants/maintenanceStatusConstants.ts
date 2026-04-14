@@ -64,23 +64,16 @@ export const STATUS_MAP: Record<string, StatusDisplayConfig> = {
   },
 };
 
-// خريطة مراحل سير العمل
-export const WORKFLOW_STAGE_MAP: Record<string, StatusDisplayConfig> = {
-  'draft': { label: 'مسودة', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-muted' },
-  'submitted': { label: 'مُقدم', color: 'text-warning', bgColor: 'bg-warning/10 border-warning/20' },
-  'acknowledged': { label: 'تم الاستلام', color: 'text-info', bgColor: 'bg-info/10 border-info/20' },
-  'assigned': { label: 'تم التعيين', color: 'text-primary', bgColor: 'bg-primary/10 border-primary/20' },
-  'scheduled': { label: 'مجدول', color: 'text-info', bgColor: 'bg-info/10 border-info/20' },
-  'in_progress': { label: 'قيد التنفيذ', color: 'text-info', bgColor: 'bg-info/10 border-info/20' },
-  'inspection': { label: 'تحت الفحص', color: 'text-warning', bgColor: 'bg-warning/10 border-warning/20' },
-  'waiting_parts': { label: 'بانتظار قطع غيار', color: 'text-warning', bgColor: 'bg-warning/10 border-warning/20' },
-  'completed': { label: 'مكتمل', color: 'text-success', bgColor: 'bg-success/10 border-success/20' },
-  'billed': { label: 'تم إصدار فاتورة', color: 'text-success', bgColor: 'bg-success/10 border-success/20' },
-  'paid': { label: 'مدفوع', color: 'text-success', bgColor: 'bg-success/10 border-success/20' },
-  'closed': { label: 'مغلق', color: 'text-muted-foreground', bgColor: 'bg-muted/50 border-muted' },
-  'on_hold': { label: 'معلق', color: 'text-warning', bgColor: 'bg-warning/10 border-warning/20' },
-  'cancelled': { label: 'ملغي', color: 'text-destructive', bgColor: 'bg-destructive/10 border-destructive/20' },
-};
+// خريطة مراحل سير العمل - مشتقة من المصدر الوحيد workflowStages.ts
+// يُستخدم فقط في RequestStatusBadge للتوافق مع StatusDisplayConfig
+import { WORKFLOW_STAGES as WF_STAGES } from "@/constants/workflowStages";
+
+export const WORKFLOW_STAGE_MAP: Record<string, StatusDisplayConfig> = Object.fromEntries(
+  Object.entries(WF_STAGES).map(([key, config]) => [
+    key,
+    { label: config.label, color: config.textColor, bgColor: `${config.bgColor.replace('bg-', 'bg-')}/10 border-${config.bgColor.replace('bg-', '')}/20` }
+  ])
+);
 
 // الحالات المتاحة للفلترة (باستخدام قيم قاعدة البيانات الفعلية)
 export const FILTER_STATUS_OPTIONS: { value: string; label: string }[] = [

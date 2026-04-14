@@ -1,16 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Database } from "lucide-react";
 import { 
-  FileText, 
-  ClipboardCheck, 
-  CheckCircle, 
-  Wrench, 
-  Database,
-  BarChart3,
-  FileSpreadsheet,
-  Calculator,
-  Package
-} from "lucide-react";
+  WORKFLOW_STAGES, 
+  HAPPY_PATH_STAGES, 
+  getStageIndex,
+  getProgressPercentage,
+  type WorkflowStage 
+} from "@/constants/workflowStages";
 
 interface WorkflowDiagramProps {
   currentStage?: string;
@@ -18,24 +15,13 @@ interface WorkflowDiagramProps {
 }
 
 export function WorkflowDiagram({ currentStage, requestData }: WorkflowDiagramProps) {
-  const stages = [
-    { key: 'submitted', label: 'تسجيل الطلب', icon: FileText, color: 'bg-blue-500' },
-    { key: 'acknowledged', label: 'مراجعة الطلب', icon: ClipboardCheck, color: 'bg-purple-500' },
-    { key: 'approved', label: 'الموافقة والتحديد', icon: CheckCircle, color: 'bg-green-500' },
-    { key: 'preparation', label: 'إعداد التجهيز', icon: Package, color: 'bg-orange-500' },
-    { key: 'in_progress', label: 'إجراء العمل', icon: Wrench, color: 'bg-yellow-500' },
-    { key: 'inspection', label: 'فحص وتقييم', icon: Database, color: 'bg-teal-500' },
-    { key: 'analysis', label: 'تحليل البيانات', icon: BarChart3, color: 'bg-indigo-500' },
-    { key: 'reporting', label: 'إعداد التقرير', icon: FileSpreadsheet, color: 'bg-pink-500' },
-    { key: 'billed', label: 'الفوترة', icon: Calculator, color: 'bg-red-500' },
-    { key: 'completed', label: 'مكتمل', icon: CheckCircle, color: 'bg-emerald-500' }
-  ];
-
-  const getCurrentStageIndex = () => {
-    return stages.findIndex(s => s.key === currentStage);
-  };
-
-  const currentIndex = getCurrentStageIndex();
+  const validStage = (currentStage && currentStage in WORKFLOW_STAGES) 
+    ? currentStage as WorkflowStage 
+    : 'draft';
+  
+  const currentIndex = getStageIndex(validStage);
+  const progress = getProgressPercentage(validStage);
+  const currentConfig = WORKFLOW_STAGES[validStage];
 
   return (
     <Card>
@@ -43,22 +29,26 @@ export function WorkflowDiagram({ currentStage, requestData }: WorkflowDiagramPr
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
           مخطط سير العمل
+          <Badge variant="outline" className="mr-auto text-xs">
+            {progress}%
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {/* Workflow Stages */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {stages.map((stage, index) => {
+          {/* Workflow Stages - Happy Path */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {HAPPY_PATH_STAGES.map((stageKey, index) => {
+              const stage = WORKFLOW_STAGES[stageKey];
               const Icon = stage.icon;
               const isCompleted = index < currentIndex;
-              const isCurrent = index === currentIndex;
+              const isCurrent = stageKey === validStage;
               const isPending = index > currentIndex;
 
               return (
                 <div
-                  key={stage.key}
-                  className={`relative p-4 rounded-lg border-2 transition-all ${
+                  key={stageKey}
+                  className={`relative p-3 rounded-lg border-2 transition-all ${
                     isCompleted
                       ? 'border-success bg-success/10'
                       : isCurrent
@@ -68,47 +58,59 @@ export function WorkflowDiagram({ currentStage, requestData }: WorkflowDiagramPr
                 >
                   <div className="flex flex-col items-center gap-2">
                     <div
-                      className={`p-3 rounded-full ${
+                      className={`p-2.5 rounded-full ${
                         isCompleted
                           ? 'bg-success text-success-foreground'
                           : isCurrent
-                          ? stage.color + ' text-white'
+                          ? `${stage.bgColor} text-white`
                           : 'bg-muted text-muted-foreground'
                       }`}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-4 w-4" />
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-medium">{stage.label}</p>
+                      <p className="text-xs font-medium leading-tight">{stage.label}</p>
                       {isCurrent && (
-                        <Badge variant="default" className="mt-1">
-                          المرحلة الحالية
+                        <Badge variant="default" className="mt-1 text-[10px] px-1.5">
+                          الحالية
                         </Badge>
                       )}
                     </div>
                   </div>
-                  
-                  {/* Connection Line */}
-                  {index < stages.length - 1 && (
-                    <div
-                      className={`hidden lg:block absolute top-1/2 left-full w-4 h-0.5 ${
-                        isCompleted ? 'bg-success' : 'bg-muted'
-                      }`}
-                    />
-                  )}
                 </div>
               );
             })}
           </div>
 
+          {/* Non-happy-path stages indicator */}
+          {!HAPPY_PATH_STAGES.includes(validStage) && (
+            <div className={`p-3 rounded-lg border-2 border-primary bg-primary/10`}>
+              <div className="flex items-center gap-3">
+                {(() => {
+                  const Icon = currentConfig.icon;
+                  return <Icon className="h-5 w-5" />;
+                })()}
+                <div>
+                  <p className="font-medium text-sm">{currentConfig.label}</p>
+                  <p className="text-xs text-muted-foreground">{currentConfig.description}</p>
+                </div>
+                <Badge variant="secondary" className="mr-auto">{currentConfig.labelEn}</Badge>
+              </div>
+            </div>
+          )}
+
           {/* Current Stage Info */}
           {currentStage && (
-            <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-              <h4 className="font-semibold mb-2">معلومات المرحلة الحالية</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+              <h4 className="font-semibold mb-2 text-sm">معلومات المرحلة الحالية</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-muted-foreground">الحالة:</span>
-                  <span className="font-medium mr-2">{stages[currentIndex]?.label}</span>
+                  <span className="font-medium mr-2">{currentConfig.label}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">حالة DB:</span>
+                  <span className="font-medium mr-2">{currentConfig.status}</span>
                 </div>
                 {requestData?.updated_at && (
                   <div>
