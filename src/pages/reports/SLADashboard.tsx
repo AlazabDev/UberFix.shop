@@ -52,7 +52,7 @@ export default function SLADashboard() {
         let isAtRisk = false;
 
         // فحص موعد القبول
-        if (req.sla_accept_due && req.workflow_stage === 'SUBMITTED') {
+        if (req.sla_accept_due && req.workflow_stage === 'submitted') {
           const due = new Date(req.sla_accept_due);
           const diff = due.getTime() - now.getTime();
           const hours = diff / (1000 * 60 * 60);
@@ -74,7 +74,7 @@ export default function SLADashboard() {
         }
 
         // فحص موعد الوصول
-        if (req.sla_arrive_due && req.workflow_stage === 'ASSIGNED') {
+        if (req.sla_arrive_due && req.workflow_stage === 'assigned') {
           const due = new Date(req.sla_arrive_due);
           const diff = due.getTime() - now.getTime();
           const hours = diff / (1000 * 60 * 60);

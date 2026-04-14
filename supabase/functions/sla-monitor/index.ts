@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       const violations = [];
       
       // فحص تجاوز موعد القبول
-      if (task.sla_accept_due && new Date(task.sla_accept_due) < now && task.workflow_stage === 'SUBMITTED') {
+      if (task.sla_accept_due && new Date(task.sla_accept_due) < now && task.workflow_stage === 'submitted') {
         violations.push({
           type: 'accept',
           due: task.sla_accept_due,
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       }
 
       // فحص تجاوز موعد الوصول
-      if (task.sla_arrive_due && new Date(task.sla_arrive_due) < now && task.workflow_stage === 'ASSIGNED') {
+      if (task.sla_arrive_due && new Date(task.sla_arrive_due) < now && task.workflow_stage === 'assigned') {
         violations.push({
           type: 'arrive',
           due: task.sla_arrive_due,
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       }
 
       // فحص تجاوز موعد الإنجاز
-      if (task.sla_complete_due && new Date(task.sla_complete_due) < now && task.workflow_stage !== 'COMPLETED') {
+      if (task.sla_complete_due && new Date(task.sla_complete_due) < now && task.workflow_stage !== 'completed') {
         violations.push({
           type: 'complete',
           due: task.sla_complete_due,

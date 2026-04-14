@@ -62,9 +62,9 @@ export default function EmergencyService() {
       const requestData: any = {
         title: `صيانة طارئة - ${technicianData?.specialization || 'خدمة'}`,
         description: data.description,
-        status: 'pending',
+        status: 'Open',
         priority: data.priority,
-        workflow_stage: 'SUBMITTED',
+        workflow_stage: 'submitted',
         client_name: data.name,
         client_phone: data.phone,
         location: data.address,
