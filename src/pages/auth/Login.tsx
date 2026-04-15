@@ -249,12 +249,12 @@ export default function Login() {
                   <Button 
                     type="button" 
                     variant="outline" 
-                    className="w-full" 
+                    className="w-full border-[#25D366]/30 hover:bg-[#25D366]/5" 
                     onClick={() => setLoginMethod("phone")}
                     disabled={isLoading}
                   >
-                    <Phone className="ml-2 h-5 w-5" />
-                    تسجيل الدخول برقم الهاتف
+                    <MessageCircle className="ml-2 h-5 w-5 text-[#25D366]" />
+                    تسجيل الدخول عبر واتساب
                   </Button>
                 </div>
               </>
