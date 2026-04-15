@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Phone, ArrowRight, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, MessageCircle, Mail } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface PhoneOTPLoginProps {
@@ -21,22 +21,14 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
   const { toast } = useToast();
 
   const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
     const digits = value.replace(/\D/g, "");
-    
-    // Format Egyptian phone number
-    if (digits.startsWith("20")) {
-      return `+${digits}`;
-    } else if (digits.startsWith("0")) {
-      return `+2${digits}`;
-    } else if (digits.length === 10) {
-      return `+20${digits}`;
-    }
+    if (digits.startsWith("20")) return `+${digits}`;
+    if (digits.startsWith("0")) return `+2${digits}`;
+    if (digits.length === 10) return `+20${digits}`;
     return `+20${digits}`;
   };
 
   const validatePhone = (phoneNumber: string) => {
-    // Egyptian phone number validation
     const egyptianPhoneRegex = /^\+20(10|11|12|15)\d{8}$/;
     return egyptianPhoneRegex.test(phoneNumber);
   };
@@ -56,7 +48,7 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-otp", {
-        body: { phone: formattedPhone },
+        body: { phone: formattedPhone, channel: "whatsapp" },
       });
 
       if (error) throw error;
@@ -65,7 +57,7 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
         setStep("otp");
         toast({
           title: "تم الإرسال",
-          description: "تم إرسال رمز التحقق إلى هاتفك",
+          description: "تم إرسال رمز التحقق عبر واتساب",
         });
       } else {
         throw new Error(data?.error || "فشل إرسال رمز التحقق");
@@ -106,7 +98,6 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
       }
 
       if (data.session) {
-        // Set session from verified OTP
         await supabase.auth.setSession({
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
@@ -118,7 +109,6 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
         });
         navigate("/dashboard");
       } else {
-        // OTP verified but no session - redirect to login
         toast({
           title: "تم التحقق",
           description: data.message || "تم التحقق بنجاح. يرجى تسجيل الدخول.",
@@ -138,20 +128,19 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
 
   if (step === "otp") {
     return (
-      <div className="space-y-4">
-        <div className="text-center mb-4">
+      <div className="space-y-6">
+        <div className="text-center space-y-2">
+          <div className="w-14 h-14 bg-[#25D366]/10 rounded-full flex items-center justify-center mx-auto">
+            <MessageCircle className="h-7 w-7 text-[#25D366]" />
+          </div>
           <p className="text-sm text-muted-foreground">
-            أدخل رمز التحقق المرسل إلى
+            أدخل رمز التحقق المرسل عبر واتساب إلى
           </p>
-          <p className="font-medium" dir="ltr">{formatPhoneNumber(phone)}</p>
+          <p className="font-semibold text-foreground" dir="ltr">{formatPhoneNumber(phone)}</p>
         </div>
         
         <div className="flex justify-center">
-          <InputOTP
-            maxLength={6}
-            value={otp}
-            onChange={setOtp}
-          >
+          <InputOTP maxLength={6} value={otp} onChange={setOtp}>
             <InputOTPGroup dir="ltr">
               <InputOTPSlot index={0} />
               <InputOTPSlot index={1} />
@@ -165,19 +154,13 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
 
         <Button
           onClick={handleVerifyOTP}
-          className="w-full"
+          className="w-full bg-[#25D366] hover:bg-[#1da851] text-white"
           disabled={isLoading || otp.length !== 6}
         >
           {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              جاري التحقق...
-            </>
+            <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري التحقق...</>
           ) : (
-            <>
-              تأكيد
-              <ArrowRight className="mr-2 h-4 w-4" />
-            </>
+            "تأكيد رمز التحقق"
           )}
         </Button>
 
@@ -186,7 +169,7 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
             type="button"
             variant="outline"
             className="flex-1"
-            onClick={() => setStep("phone")}
+            onClick={() => { setStep("phone"); setOtp(""); }}
             disabled={isLoading}
           >
             <ArrowLeft className="ml-2 h-4 w-4" />
@@ -203,64 +186,75 @@ export function PhoneOTPLogin({ onBack }: PhoneOTPLoginProps) {
           </Button>
         </div>
 
-        <Button
-          type="button"
-          variant="link"
-          className="w-full"
-          onClick={onBack}
-        >
-          العودة لتسجيل الدخول بالإيميل
+        <Button type="button" variant="link" className="w-full" onClick={onBack}>
+          <Mail className="ml-2 h-4 w-4" />
+          تسجيل الدخول بالبريد الإلكتروني
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* WhatsApp Header */}
+      <div className="text-center space-y-3">
+        <h3 className="text-xl font-bold text-foreground">تسجيل الدخول عبر واتساب</h3>
+        <div className="w-14 h-14 bg-[#25D366]/10 rounded-full flex items-center justify-center mx-auto">
+          <MessageCircle className="h-7 w-7 text-[#25D366]" />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          أدخل رقم هاتفك وسنرسل لك رمز تحقق عبر واتساب
+        </p>
+      </div>
+
+      {/* Phone Input */}
       <div className="space-y-2">
-        <Label htmlFor="phone">رقم الهاتف</Label>
-        <div className="relative">
-          <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Label htmlFor="phone" className="text-right block">رقم الهاتف</Label>
+        <div className="flex gap-2" dir="ltr">
+          <div className="flex items-center justify-center px-3 bg-muted rounded-md border text-sm font-medium min-w-[60px]">
+            +20
+          </div>
           <Input
             id="phone"
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="01xxxxxxxxx"
-            className="pr-10"
+            placeholder="5XXXXXXXX"
+            className="flex-1"
             dir="ltr"
           />
         </div>
-        <p className="text-xs text-muted-foreground">
-          أدخل رقم هاتفك المصري لاستلام رمز التحقق
-        </p>
       </div>
 
       <Button
         onClick={handleSendOTP}
-        className="w-full"
+        className="w-full bg-[#25D366] hover:bg-[#1da851] text-white h-12 text-base"
         disabled={isLoading || !phone}
       >
         {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            جاري الإرسال...
-          </>
+          <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإرسال...</>
         ) : (
-          <>
-            إرسال رمز التحقق
-            <ArrowRight className="mr-2 h-4 w-4" />
-          </>
+          <><MessageCircle className="ml-2 h-5 w-5" />إرسال رمز التحقق</>
         )}
       </Button>
 
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">أو</span>
+        </div>
+      </div>
+
       <Button
         type="button"
-        variant="link"
+        variant="outline"
         className="w-full"
         onClick={onBack}
       >
-        العودة لتسجيل الدخول بالإيميل
+        <Mail className="ml-2 h-4 w-4" />
+        تسجيل الدخول بالبريد الإلكتروني
       </Button>
     </div>
   );
