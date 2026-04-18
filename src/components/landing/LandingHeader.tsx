@@ -67,7 +67,7 @@ export const LandingHeader = () => {
       {/* Mobile Menu */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 touch-target tap-highlight-none">
+          <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 text-white hover:bg-white/10 touch-target tap-highlight-none">
             <Menu className="h-5 w-5" />
             <span className="sr-only">{t('nav.openMenu')}</span>
           </Button>
