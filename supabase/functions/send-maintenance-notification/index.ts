@@ -337,6 +337,9 @@ interface MetaTemplateMapping {
   name: string;
   language: string;
   bodyParams: string[]; // ordered values for {{1}}, {{2}}, ...
+  buttonUrlParam?: string; // for URL buttons with dynamic suffix
+  flowToken?: string; // for FLOW buttons
+  flowActionData?: Record<string, any>;
 }
 
 const buildTemplateForStatus = (
