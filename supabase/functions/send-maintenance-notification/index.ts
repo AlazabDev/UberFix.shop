@@ -743,12 +743,21 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (channel === 'whatsapp' && template.whatsapp && request.client_phone) {
         const whatsappMessage = replaceVariables(template.whatsapp.template, variables);
+        const templateMapping = buildTemplateForStatus(notificationStatus, {
+          customer_name: customerName,
+          order_id: shortOrderId,
+          technician_name: body.technician_name,
+          date: scheduled_date,
+          time: scheduled_time,
+          track_url: trackUrl,
+        });
         const whatsappResult = await sendWhatsApp(
           supabase,
           request.client_phone,
           whatsappMessage,
           request_id,
-          notificationStatus
+          notificationStatus,
+          templateMapping
         );
         results.push({ channel: 'whatsapp', ...whatsappResult });
 
