@@ -173,14 +173,24 @@ const GlobalMap = () => {
         <div className="relative rounded-2xl overflow-hidden shadow-elevated animate-scale-in" style={{ height: '600px' }}>
           <div ref={mapContainer} className="absolute inset-0" />
 
-          {mapError ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-              <p className="text-base font-medium text-muted-foreground" dir="rtl">
+          {mapError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+              <p className="text-base font-medium text-destructive" dir="rtl">
                 {mapError}
               </p>
             </div>
-          ) : (
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-card/90 backdrop-blur-sm px-6 py-3 rounded-full border border-border shadow-lg" dir="rtl">
+          )}
+
+          {showLoadingOverlay && (
+            <div className="absolute inset-0 flex items-center justify-center bg-primary-dark/40 backdrop-blur-sm z-10">
+              <p className="text-base font-medium text-white" dir="rtl">
+                جاري تحميل الخريطة...
+              </p>
+            </div>
+          )}
+
+          {!mapError && !showLoadingOverlay && (
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-card/90 backdrop-blur-sm px-6 py-3 rounded-full border border-border shadow-lg z-10" dir="rtl">
               <p className="text-sm text-foreground font-medium">
                 🌍 {branches.length} موقع نشط • <span className="text-primary">خدمة 24/7</span>
               </p>
