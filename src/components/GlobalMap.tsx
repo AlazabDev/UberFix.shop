@@ -38,25 +38,31 @@ const GlobalMap = () => {
     fetchToken();
   }, []);
 
-  const isReady = tokenLoaded && mapboxToken && !branchesLoading;
+  const isReady = tokenLoaded && !!mapboxToken && !branchesLoading;
 
-  const mapError = !isReady && !runtimeError
-    ? 'جاري تحميل الخريطة...'
-    : runtimeError;
+  const mapError = runtimeError;
+  const showLoadingOverlay = !isReady && !runtimeError;
 
   useEffect(() => {
     if (!mapContainer.current || branches.length === 0 || !mapboxToken || !tokenLoaded) return;
+    if (map.current) return; // prevent re-init
 
-    mapboxgl.accessToken = mapboxToken;
+    try {
+      mapboxgl.accessToken = mapboxToken;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/standard',
-      projection: { name: 'globe' },
-      zoom: 1.5,
-      center: [30, 20],
-      pitch: 0,
-    });
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/satellite-streets-v12',
+        projection: { name: 'globe' },
+        zoom: 1.5,
+        center: [30, 20],
+        pitch: 0,
+      });
+    } catch (err) {
+      console.error('Mapbox init failed:', err);
+      setRuntimeError('تعذر تهيئة الخريطة.');
+      return;
+    }
 
     map.current.on('error', () => {
       setRuntimeError('حدث خطأ أثناء تحميل الخريطة. يرجى المحاولة لاحقًا.');
