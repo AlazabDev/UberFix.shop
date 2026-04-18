@@ -383,14 +383,21 @@ const buildTemplateForStatus = (
       // إعادة استخدام requests كإشعار تقدم
       return { name: 'requests', language: 'ar', bodyParams: [vars.customer_name, vars.order_id] };
     case 'completed':
-      // azord (ar): {{1}} name, {{2}} order
-      return { name: 'azord', language: 'ar', bodyParams: [vars.customer_name, vars.order_id] };
+      // azord (ar): header ثابت "تم توصيل الطلب", body {{1}} name {{2}} order, URL button {{1}}=path
+      return {
+        name: 'azord',
+        language: 'ar',
+        bodyParams: [vars.customer_name, vars.order_id],
+        buttonUrlParam: `track/${vars.order_id}`,
+      };
     case 'closed':
-      // azfed (ar) feedback: {{1}}..{{4}}
+      // azfed (ar) feedback FLOW
       return {
         name: 'azfed',
         language: 'ar',
         bodyParams: ['UberFix', 'خدماتنا', 'استبيان', 'الزيارة'],
+        flowToken: `feedback_${vars.order_id}`,
+        flowActionData: { request_id: vars.order_id },
       };
     default:
       return null;
