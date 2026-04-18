@@ -14,10 +14,10 @@ const TEMPLATES = [
     language: "ar",
     category: "UTILITY",
     components: [
-      { type: "HEADER", format: "TEXT", text: "تم استلام طلب الصيانة ✅" },
+      { type: "HEADER", format: "TEXT", text: "تم استلام طلب الصيانة" },
       {
         type: "BODY",
-        text: "مرحبًا {{1}}،\nتم استلام طلب الصيانة الخاص بك بنجاح.\nرقم الطلب: {{2}}\nسنتواصل معك قريبًا لتحديد موعد الزيارة.",
+        text: "مرحبًا {{1}}،\nتم استلام طلب الصيانة الخاص بك بنجاح ✅\nرقم الطلب: {{2}}\nسنتواصل معك قريبًا لتحديد موعد الزيارة.",
         example: { body_text: [["محمد", "MR-26-01040"]] }
       },
       { type: "FOOTER", text: "UberFix - خدمات الصيانة الاحترافية" },
@@ -34,10 +34,10 @@ const TEMPLATES = [
     language: "ar",
     category: "UTILITY",
     components: [
-      { type: "HEADER", format: "TEXT", text: "تم تعيين فني لطلبك 👨‍🔧" },
+      { type: "HEADER", format: "TEXT", text: "تم تعيين فني لطلبك" },
       {
         type: "BODY",
-        text: "مرحبًا {{1}}،\nتم تعيين الفني {{2}} للعمل على طلب الصيانة رقم {{3}}.\nسيتواصل معك لتأكيد موعد الزيارة.",
+        text: "مرحبًا {{1}}،\nتم تعيين الفني {{2}} للعمل على طلب الصيانة رقم {{3}} 👨‍🔧\nسيتواصل معك لتأكيد موعد الزيارة.",
         example: { body_text: [["محمد", "أحمد علي", "MR-26-01040"]] }
       },
       { type: "FOOTER", text: "UberFix" },
@@ -54,10 +54,10 @@ const TEMPLATES = [
     language: "ar",
     category: "UTILITY",
     components: [
-      { type: "HEADER", format: "TEXT", text: "بدأ تنفيذ الصيانة 🛠️" },
+      { type: "HEADER", format: "TEXT", text: "بدأ تنفيذ الصيانة" },
       {
         type: "BODY",
-        text: "مرحبًا {{1}}،\nبدأ الفني تنفيذ أعمال الصيانة لطلبك رقم {{2}}.\nسنبلغك فور الانتهاء.",
+        text: "مرحبًا {{1}}،\nبدأ الفني تنفيذ أعمال الصيانة لطلبك رقم {{2}} 🛠️\nسنبلغك فور الانتهاء.",
         example: { body_text: [["محمد", "MR-26-01040"]] }
       },
       { type: "FOOTER", text: "UberFix" },
@@ -74,10 +74,10 @@ const TEMPLATES = [
     language: "ar",
     category: "UTILITY",
     components: [
-      { type: "HEADER", format: "TEXT", text: "اكتملت أعمال الصيانة ✅" },
+      { type: "HEADER", format: "TEXT", text: "اكتملت أعمال الصيانة" },
       {
         type: "BODY",
-        text: "مرحبًا {{1}}،\nتم الانتهاء من أعمال الصيانة لطلبك رقم {{2}} بنجاح.\nيرجى مراجعة الأعمال واعتماد إغلاق الطلب.",
+        text: "مرحبًا {{1}}،\nتم الانتهاء من أعمال الصيانة لطلبك رقم {{2}} بنجاح ✅\nيرجى مراجعة الأعمال واعتماد إغلاق الطلب.",
         example: { body_text: [["محمد", "MR-26-01040"]] }
       },
       { type: "FOOTER", text: "UberFix - شكرًا لثقتك" },
@@ -94,10 +94,10 @@ const TEMPLATES = [
     language: "ar",
     category: "UTILITY",
     components: [
-      { type: "HEADER", format: "TEXT", text: "تم استلام الدفع 💳" },
+      { type: "HEADER", format: "TEXT", text: "تم استلام الدفع" },
       {
         type: "BODY",
-        text: "مرحبًا {{1}}،\nتم استلام دفعة قيمتها {{2}} ج.م لفاتورة طلب الصيانة رقم {{3}}.\nشكرًا لتعاملك مع UberFix.",
+        text: "مرحبًا {{1}}،\nتم استلام دفعة قيمتها {{2}} ج.م لفاتورة طلب الصيانة رقم {{3}} 💳\nشكرًا لتعاملك مع UberFix.",
         example: { body_text: [["محمد", "500", "MR-26-01040"]] }
       },
       { type: "FOOTER", text: "UberFix" },
