@@ -738,6 +738,7 @@ const handler = async (req: Request): Promise<Response> => {
           date: scheduled_date,
           time: scheduled_time,
           track_url: trackUrl,
+          address: request.location || request.city || 'موقعك',
         });
         const whatsappResult = await sendWhatsApp(
           supabase,
