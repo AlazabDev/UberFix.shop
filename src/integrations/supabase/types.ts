@@ -8417,6 +8417,23 @@ export type Database = {
           total_reviews: number
         }[]
       }
+      get_requests_by_phone: {
+        Args: { search_phone: string }
+        Returns: {
+          client_name: string
+          client_phone: string
+          created_at: string
+          id: string
+          location: string
+          priority: string
+          request_number: string
+          service_type: string
+          status: string
+          title: string
+          updated_at: string
+          workflow_stage: string
+        }[]
+      }
       get_safe_app_settings: {
         Args: never
         Returns: {
