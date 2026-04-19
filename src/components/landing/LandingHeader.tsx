@@ -73,11 +73,12 @@ export const LandingHeader = () => {
         className="absolute top-0 left-0 h-[25px] w-px pointer-events-none"
       />
       <header
+        data-scrolled={scrolled}
         className={cn(
-          "fixed top-0 inset-x-0 z-50 transition-all duration-300 safe-area-inset standalone-header tap-highlight-none",
+          "group/header fixed top-0 inset-x-0 z-50 transition-all duration-300 safe-area-inset standalone-header tap-highlight-none",
           scrolled
             ? "bg-primary-dark/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.5)]"
-            : "bg-gradient-to-b from-primary-dark/40 to-transparent border-b border-transparent backdrop-blur-[2px]"
+            : "bg-white/85 backdrop-blur-xl border-b border-black/5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.15)]"
         )}
       >
       <div className="container mx-auto h-16 lg:h-[72px] px-4 sm:px-6 flex items-center justify-between gap-3">
@@ -87,9 +88,9 @@ export const LandingHeader = () => {
             size="md"
             showSubtitle
             subtitle={t('footer.smartSystem')}
-            darkBg
+            darkBg={scrolled}
             animated
-            glow
+            glow={scrolled}
           />
         </div>
 
@@ -104,13 +105,18 @@ export const LandingHeader = () => {
                 className={cn(
                   "relative px-3 py-2 text-[13px] font-medium rounded-md transition-colors whitespace-nowrap",
                   active
-                    ? "text-secondary"
-                    : "text-white/75 hover:text-white"
+                    ? scrolled ? "text-secondary" : "text-primary-dark"
+                    : scrolled
+                      ? "text-white/75 hover:text-white"
+                      : "text-primary-dark/70 hover:text-primary-dark"
                 )}
               >
                 {item.label}
                 {active && (
-                  <span className="absolute left-3 right-3 -bottom-0.5 h-0.5 bg-secondary rounded-full" />
+                  <span className={cn(
+                    "absolute left-3 right-3 -bottom-0.5 h-0.5 rounded-full",
+                    scrolled ? "bg-secondary" : "bg-primary-dark"
+                  )} />
                 )}
               </Link>
             );
@@ -121,13 +127,21 @@ export const LandingHeader = () => {
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <LanguageSwitcher />
 
-          <div className="hidden sm:block h-6 w-px bg-white/15 mx-1" aria-hidden />
+          <div className={cn(
+            "hidden sm:block h-6 w-px mx-1",
+            scrolled ? "bg-white/15" : "bg-black/10"
+          )} aria-hidden />
 
           <Link to="/role-selection" className="hidden sm:block">
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 px-3 text-[13px] font-medium text-white/85 hover:text-white hover:bg-white/10"
+              className={cn(
+                "h-9 px-3 text-[13px] font-medium",
+                scrolled
+                  ? "text-white/85 hover:text-white hover:bg-white/10"
+                  : "text-primary-dark/85 hover:text-primary-dark hover:bg-primary-dark/5"
+              )}
             >
               <LogIn className="h-3.5 w-3.5 ltr:mr-1.5 rtl:ml-1.5" />
               {t('nav.login')}
@@ -150,7 +164,12 @@ export const LandingHeader = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden h-9 w-9 ltr:ml-1 rtl:mr-1 text-white hover:bg-white/10 touch-target"
+                className={cn(
+                  "lg:hidden h-9 w-9 ltr:ml-1 rtl:mr-1 touch-target",
+                  scrolled
+                    ? "text-white hover:bg-white/10"
+                    : "text-primary-dark hover:bg-primary-dark/5"
+                )}
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">{t('nav.openMenu')}</span>
