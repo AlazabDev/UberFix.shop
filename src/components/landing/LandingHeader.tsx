@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogIn, UserPlus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
@@ -11,15 +11,44 @@ import { cn } from "@/lib/utils";
 export const LandingHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const location = useLocation();
 
-  // Track scroll position to switch header background
+  // Detect scroll using both IntersectionObserver (works in iframes/preview)
+  // and a scroll listener as fallback. Triggers when user has scrolled past ~24px.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const checkScroll = () => {
+      const y =
+        window.scrollY ||
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop ||
+        0;
+      setScrolled(y > 24);
+    };
+
+    checkScroll();
+
+    // Sentinel-based detection (most reliable)
+    let observer: IntersectionObserver | null = null;
+    if (sentinelRef.current && "IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        ([entry]) => setScrolled(!entry.isIntersecting),
+        { threshold: 0, rootMargin: "0px" }
+      );
+      observer.observe(sentinelRef.current);
+    }
+
+    // Fallback scroll listeners on multiple targets
+    window.addEventListener("scroll", checkScroll, { passive: true });
+    document.addEventListener("scroll", checkScroll, { passive: true });
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("scroll", checkScroll);
+      document.removeEventListener("scroll", checkScroll);
+    };
   }, []);
 
   const navItems = [
