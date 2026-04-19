@@ -94,6 +94,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Phone is REQUIRED for ALL submission modes (QR + Direct)
+    if (sanitizedPhone.length < 8) {
+      return new Response(
+        JSON.stringify({ error: 'Phone number is required', message_ar: 'رقم الهاتف مطلوب (8 أرقام على الأقل) لمتابعة طلبك' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''

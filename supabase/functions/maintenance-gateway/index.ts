@@ -364,6 +364,9 @@ Deno.serve(async (req) => {
 
     // ─── Normalize & Sanitize ────────────────────────────────────
     const clientPhone = sanitizePhone(body.client_phone);
+    if (!clientPhone || clientPhone.length < 8) {
+      return errorResponse('client_phone is required (min 8 digits)', 'رقم الهاتف مطلوب (8 أرقام على الأقل)', 400);
+    }
     const clientEmail = body.client_email?.trim().toLowerCase().slice(0, 100) || '';
     const serviceType = normalizeServiceType(body.service_type);
     const priority = normalizePriority(body.priority);
