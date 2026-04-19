@@ -103,6 +103,12 @@ export function PublicQuickRequestForm({ property, locale }: PublicQuickRequestF
       return;
     }
 
+    const cleanedPhone = phone.replace(/[^0-9+]/g, '');
+    if (cleanedPhone.length < 8) {
+      toast.error(isArabic ? "رقم الهاتف مطلوب (8 أرقام على الأقل)" : "Phone number is required (min 8 digits)");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -306,11 +312,12 @@ export function PublicQuickRequestForm({ property, locale }: PublicQuickRequestF
           />
         </div>
 
-        {/* Step 4: Phone (Optional for tracking) */}
+        {/* Step 4: Phone (REQUIRED for tracking) */}
         <div className="space-y-2">
           <Label className="text-base font-semibold flex items-center gap-2">
-            <span className="bg-muted text-muted-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">4</span>
+            <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">4</span>
             {t.phone}
+            <span className="text-destructive">*</span>
           </Label>
           <Input
             type="tel"
@@ -320,13 +327,17 @@ export function PublicQuickRequestForm({ property, locale }: PublicQuickRequestF
             className="h-12"
             dir="ltr"
             maxLength={15}
+            required
           />
+          <p className="text-xs text-muted-foreground">
+            {isArabic ? "مطلوب لمتابعة طلبك والتواصل معك" : "Required to follow up your request"}
+          </p>
         </div>
 
         {/* Submit Button */}
         <Button
           onClick={handleSubmit}
-          disabled={loading || !selectedService}
+          disabled={loading || !selectedService || phone.replace(/[^0-9+]/g, '').length < 8}
           className="w-full h-14 text-lg font-bold shadow-lg"
           size="lg"
         >
