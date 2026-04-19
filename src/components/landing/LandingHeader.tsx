@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogIn, UserPlus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
@@ -11,15 +11,44 @@ import { cn } from "@/lib/utils";
 export const LandingHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const location = useLocation();
 
-  // Track scroll position to switch header background
+  // Detect scroll using both IntersectionObserver (works in iframes/preview)
+  // and a scroll listener as fallback. Triggers when user has scrolled past ~24px.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const checkScroll = () => {
+      const y =
+        window.scrollY ||
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop ||
+        0;
+      setScrolled(y > 24);
+    };
+
+    checkScroll();
+
+    // Sentinel-based detection (most reliable)
+    let observer: IntersectionObserver | null = null;
+    if (sentinelRef.current && "IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        ([entry]) => setScrolled(!entry.isIntersecting),
+        { threshold: 0, rootMargin: "0px" }
+      );
+      observer.observe(sentinelRef.current);
+    }
+
+    // Fallback scroll listeners on multiple targets
+    window.addEventListener("scroll", checkScroll, { passive: true });
+    document.addEventListener("scroll", checkScroll, { passive: true });
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("scroll", checkScroll);
+      document.removeEventListener("scroll", checkScroll);
+    };
   }, []);
 
   const navItems = [
@@ -36,14 +65,21 @@ export const LandingHeader = () => {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-300 safe-area-inset standalone-header tap-highlight-none",
-        scrolled
-          ? "bg-primary-dark/85 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.4)]"
-          : "bg-transparent border-b border-transparent"
-      )}
-    >
+    <>
+      {/* Sentinel: visible at top, hidden once scrolled — drives header style */}
+      <div
+        ref={sentinelRef}
+        aria-hidden
+        className="absolute top-0 left-0 h-[25px] w-px pointer-events-none"
+      />
+      <header
+        className={cn(
+          "fixed top-0 inset-x-0 z-50 transition-all duration-300 safe-area-inset standalone-header tap-highlight-none",
+          scrolled
+            ? "bg-primary-dark/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.5)]"
+            : "bg-gradient-to-b from-primary-dark/40 to-transparent border-b border-transparent backdrop-blur-[2px]"
+        )}
+      >
       <div className="container mx-auto h-16 lg:h-[72px] px-4 sm:px-6 flex items-center justify-between gap-3">
         {/* Logo */}
         <div className="flex items-center min-w-0 shrink-0">
@@ -178,6 +214,7 @@ export const LandingHeader = () => {
           </Sheet>
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 };
