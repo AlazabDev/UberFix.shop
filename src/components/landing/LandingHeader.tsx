@@ -65,14 +65,21 @@ export const LandingHeader = () => {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-300 safe-area-inset standalone-header tap-highlight-none",
-        scrolled
-          ? "bg-primary-dark/85 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.4)]"
-          : "bg-transparent border-b border-transparent"
-      )}
-    >
+    <>
+      {/* Sentinel: visible at top, hidden once scrolled — drives header style */}
+      <div
+        ref={sentinelRef}
+        aria-hidden
+        className="absolute top-0 left-0 h-[25px] w-px pointer-events-none"
+      />
+      <header
+        className={cn(
+          "fixed top-0 inset-x-0 z-50 transition-all duration-300 safe-area-inset standalone-header tap-highlight-none",
+          scrolled
+            ? "bg-primary-dark/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.5)]"
+            : "bg-gradient-to-b from-primary-dark/40 to-transparent border-b border-transparent backdrop-blur-[2px]"
+        )}
+      >
       <div className="container mx-auto h-16 lg:h-[72px] px-4 sm:px-6 flex items-center justify-between gap-3">
         {/* Logo */}
         <div className="flex items-center min-w-0 shrink-0">
