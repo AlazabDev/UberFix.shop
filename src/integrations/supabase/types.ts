@@ -2275,6 +2275,7 @@ export type Database = {
           updated_at: string | null
           vendor_notes: string | null
           version: number
+          workflow_stage: string | null
           workflow_stage_v2: Database["public"]["Enums"]["workflow_stage_t"]
         }
         Insert: {
@@ -2324,6 +2325,7 @@ export type Database = {
           updated_at?: string | null
           vendor_notes?: string | null
           version?: number
+          workflow_stage?: string | null
           workflow_stage_v2?: Database["public"]["Enums"]["workflow_stage_t"]
         }
         Update: {
@@ -2373,6 +2375,7 @@ export type Database = {
           updated_at?: string | null
           vendor_notes?: string | null
           version?: number
+          workflow_stage?: string | null
           workflow_stage_v2?: Database["public"]["Enums"]["workflow_stage_t"]
         }
         Relationships: [
