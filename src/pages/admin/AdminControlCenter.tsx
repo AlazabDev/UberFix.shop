@@ -152,6 +152,11 @@ export default function AdminControlCenter() {
             </Card>
           </TabsContent>
 
+          {/* API Keys */}
+          <TabsContent value="apikeys" className="mt-6">
+            <ApiKeysManagement />
+          </TabsContent>
+
           {/* System Settings */}
           <TabsContent value="settings" className="mt-6">
             <Card>
