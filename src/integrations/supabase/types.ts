@@ -1437,6 +1437,45 @@ export type Database = {
         }
         Relationships: []
       }
+      domain_events: {
+        Row: {
+          actor_id: string | null
+          actor_role: string | null
+          aggregate_id: string
+          aggregate_type: string
+          causation_id: string | null
+          correlation_id: string | null
+          event_payload: Json
+          event_type: string
+          id: string
+          occurred_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string | null
+          aggregate_id: string
+          aggregate_type: string
+          causation_id?: string | null
+          correlation_id?: string | null
+          event_payload?: Json
+          event_type: string
+          id?: string
+          occurred_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string | null
+          aggregate_id?: string
+          aggregate_type?: string
+          causation_id?: string | null
+          correlation_id?: string | null
+          event_payload?: Json
+          event_type?: string
+          id?: string
+          occurred_at?: string
+        }
+        Relationships: []
+      }
       error_logs: {
         Row: {
           count: number | null
@@ -2054,6 +2093,9 @@ export type Database = {
           property_id: string | null
           rating: number | null
           request_number: string | null
+          request_status_derived:
+            | Database["public"]["Enums"]["request_status_canonical"]
+            | null
           service_type: string | null
           sla_accept_due: string | null
           sla_arrive_due: string | null
@@ -2067,6 +2109,7 @@ export type Database = {
           vendor_notes: string | null
           version: number
           workflow_stage: string | null
+          workflow_stage_v2: Database["public"]["Enums"]["workflow_stage_t"]
         }
         Insert: {
           actual_cost?: number | null
@@ -2100,6 +2143,9 @@ export type Database = {
           property_id?: string | null
           rating?: number | null
           request_number?: string | null
+          request_status_derived?:
+            | Database["public"]["Enums"]["request_status_canonical"]
+            | null
           service_type?: string | null
           sla_accept_due?: string | null
           sla_arrive_due?: string | null
@@ -2113,6 +2159,7 @@ export type Database = {
           vendor_notes?: string | null
           version?: number
           workflow_stage?: string | null
+          workflow_stage_v2?: Database["public"]["Enums"]["workflow_stage_t"]
         }
         Update: {
           actual_cost?: number | null
@@ -2146,6 +2193,9 @@ export type Database = {
           property_id?: string | null
           rating?: number | null
           request_number?: string | null
+          request_status_derived?:
+            | Database["public"]["Enums"]["request_status_canonical"]
+            | null
           service_type?: string | null
           sla_accept_due?: string | null
           sla_arrive_due?: string | null
@@ -2159,6 +2209,7 @@ export type Database = {
           vendor_notes?: string | null
           version?: number
           workflow_stage?: string | null
+          workflow_stage_v2?: Database["public"]["Enums"]["workflow_stage_t"]
         }
         Relationships: [
           {
@@ -2854,6 +2905,130 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      outbound_message_events: {
+        Row: {
+          event_type: string
+          id: string
+          message_id: string
+          occurred_at: string
+          provider_payload: Json | null
+          status: Database["public"]["Enums"]["message_status_t"] | null
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          message_id: string
+          occurred_at?: string
+          provider_payload?: Json | null
+          status?: Database["public"]["Enums"]["message_status_t"] | null
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          message_id?: string
+          occurred_at?: string
+          provider_payload?: Json | null
+          status?: Database["public"]["Enums"]["message_status_t"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_message_events_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "outbound_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outbound_messages: {
+        Row: {
+          body: string | null
+          channel: Database["public"]["Enums"]["message_channel_t"]
+          created_at: string
+          delivered_at: string | null
+          failed_at: string | null
+          id: string
+          last_error: string | null
+          max_retries: number
+          next_retry_at: string | null
+          provider: string | null
+          provider_message_id: string | null
+          read_at: string | null
+          recipient: string
+          related_aggregate_id: string | null
+          related_aggregate_type: string | null
+          retry_count: number
+          scheduled_at: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["message_status_t"]
+          template_key: string | null
+          template_lang: string | null
+          template_variables: Json
+          triggered_by_event_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          channel: Database["public"]["Enums"]["message_channel_t"]
+          created_at?: string
+          delivered_at?: string | null
+          failed_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_retries?: number
+          next_retry_at?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient: string
+          related_aggregate_id?: string | null
+          related_aggregate_type?: string | null
+          retry_count?: number
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["message_status_t"]
+          template_key?: string | null
+          template_lang?: string | null
+          template_variables?: Json
+          triggered_by_event_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          channel?: Database["public"]["Enums"]["message_channel_t"]
+          created_at?: string
+          delivered_at?: string | null
+          failed_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_retries?: number
+          next_retry_at?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient?: string
+          related_aggregate_id?: string | null
+          related_aggregate_type?: string | null
+          retry_count?: number
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["message_status_t"]
+          template_key?: string | null
+          template_lang?: string | null
+          template_variables?: Json
+          triggered_by_event_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_messages_triggered_by_event_id_fkey"
+            columns: ["triggered_by_event_id"]
+            isOneToOne: false
+            referencedRelation: "domain_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pending_technician_registrations: {
         Row: {
@@ -6631,6 +6806,53 @@ export type Database = {
         }
         Relationships: []
       }
+      wa_stage_template_map: {
+        Row: {
+          created_at: string
+          fallback_template_key: string | null
+          id: string
+          is_active: boolean
+          language: string
+          priority: number
+          stage: Database["public"]["Enums"]["workflow_stage_t"]
+          template_id: string | null
+          template_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fallback_template_key?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string
+          priority?: number
+          stage: Database["public"]["Enums"]["workflow_stage_t"]
+          template_id?: string | null
+          template_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fallback_template_key?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string
+          priority?: number
+          stage?: Database["public"]["Enums"]["workflow_stage_t"]
+          template_id?: string | null
+          template_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wa_stage_template_map_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "wa_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wa_template_events: {
         Row: {
           actor_id: string | null
@@ -6931,6 +7153,36 @@ export type Database = {
           status?: string | null
           updated_at?: string
           wa_message_id?: string | null
+        }
+        Relationships: []
+      }
+      workflow_transitions: {
+        Row: {
+          created_at: string
+          from_stage: Database["public"]["Enums"]["workflow_stage_t"]
+          guard_fn: string | null
+          id: string
+          is_active: boolean
+          required_role: string | null
+          to_stage: Database["public"]["Enums"]["workflow_stage_t"]
+        }
+        Insert: {
+          created_at?: string
+          from_stage: Database["public"]["Enums"]["workflow_stage_t"]
+          guard_fn?: string | null
+          id?: string
+          is_active?: boolean
+          required_role?: string | null
+          to_stage: Database["public"]["Enums"]["workflow_stage_t"]
+        }
+        Update: {
+          created_at?: string
+          from_stage?: Database["public"]["Enums"]["workflow_stage_t"]
+          guard_fn?: string | null
+          id?: string
+          is_active?: boolean
+          required_role?: string | null
+          to_stage?: Database["public"]["Enums"]["workflow_stage_t"]
         }
         Relationships: []
       }
@@ -8356,6 +8608,29 @@ export type Database = {
           vendor_name: string
         }[]
       }
+      fn_derived_request_status: {
+        Args: { p_stage: Database["public"]["Enums"]["workflow_stage_t"] }
+        Returns: Database["public"]["Enums"]["request_status_canonical"]
+      }
+      fn_enqueue_whatsapp_for_stage: {
+        Args: {
+          p_recipient: string
+          p_request_id: string
+          p_stage: Database["public"]["Enums"]["workflow_stage_t"]
+          p_variables?: Json
+        }
+        Returns: string
+      }
+      fn_transition_request_stage: {
+        Args: {
+          p_actor?: string
+          p_metadata?: Json
+          p_reason?: string
+          p_request_id: string
+          p_to_stage: Database["public"]["Enums"]["workflow_stage_t"]
+        }
+        Returns: Database["public"]["Enums"]["workflow_stage_t"]
+      }
       generate_unified_serial: {
         Args: { prefix: string; seq_name: string }
         Returns: string
@@ -8716,6 +8991,16 @@ export type Database = {
         | "reopened"
         | "canceled"
         | "rejected"
+      message_channel_t: "whatsapp" | "sms" | "email" | "push" | "in_app"
+      message_status_t:
+        | "queued"
+        | "sending"
+        | "sent"
+        | "delivered"
+        | "read"
+        | "failed"
+        | "rejected"
+        | "expired"
       mr_status:
         | "Open"
         | "Assigned"
@@ -8729,6 +9014,12 @@ export type Database = {
         | "On Hold"
       priority_level: "low" | "medium" | "high"
       provider_type_t: "internal_team" | "external_vendor"
+      request_status_canonical:
+        | "open"
+        | "active"
+        | "blocked"
+        | "done"
+        | "terminal"
       request_status_t:
         | "draft"
         | "awaiting_vendor"
@@ -8771,6 +9062,22 @@ export type Database = {
         | "Paused"
         | "Completed"
         | "Cancelled"
+      workflow_stage_t:
+        | "draft"
+        | "submitted"
+        | "triaged"
+        | "assigned"
+        | "scheduled"
+        | "in_progress"
+        | "inspection"
+        | "waiting_parts"
+        | "on_hold"
+        | "completed"
+        | "billed"
+        | "paid"
+        | "closed"
+        | "cancelled"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -8977,6 +9284,17 @@ export const Constants = {
         "canceled",
         "rejected",
       ],
+      message_channel_t: ["whatsapp", "sms", "email", "push", "in_app"],
+      message_status_t: [
+        "queued",
+        "sending",
+        "sent",
+        "delivered",
+        "read",
+        "failed",
+        "rejected",
+        "expired",
+      ],
       mr_status: [
         "Open",
         "Assigned",
@@ -8991,6 +9309,13 @@ export const Constants = {
       ],
       priority_level: ["low", "medium", "high"],
       provider_type_t: ["internal_team", "external_vendor"],
+      request_status_canonical: [
+        "open",
+        "active",
+        "blocked",
+        "done",
+        "terminal",
+      ],
       request_status_t: [
         "draft",
         "awaiting_vendor",
@@ -9037,6 +9362,23 @@ export const Constants = {
         "Paused",
         "Completed",
         "Cancelled",
+      ],
+      workflow_stage_t: [
+        "draft",
+        "submitted",
+        "triaged",
+        "assigned",
+        "scheduled",
+        "in_progress",
+        "inspection",
+        "waiting_parts",
+        "on_hold",
+        "completed",
+        "billed",
+        "paid",
+        "closed",
+        "cancelled",
+        "rejected",
       ],
     },
   },
