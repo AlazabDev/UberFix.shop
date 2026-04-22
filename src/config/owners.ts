@@ -113,7 +113,9 @@ export const OPERATIONAL_ROLES: AppRole[] = ['staff', 'technician', 'dispatcher'
  */
 export function isAuthorizedOwner(email: string | null | undefined): boolean {
   if (!email) return false;
-  return AUTHORIZED_OWNER_EMAILS.includes(email.toLowerCase());
+  const normalized = email.toLowerCase().trim();
+  if (AUTHORIZED_OWNER_EMAILS.includes(normalized)) return true;
+  return AUTHORIZED_OWNER_DOMAINS.some(domain => normalized.endsWith(domain.toLowerCase()));
 }
 
 /**
