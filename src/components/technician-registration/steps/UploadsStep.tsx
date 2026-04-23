@@ -58,9 +58,16 @@ export function UploadsStep({ data, onNext, onBack, onSaveAndExit }: UploadsStep
     setUploadProgress({ ...uploadProgress, [index]: 0 });
 
     try {
+      // Must be authenticated — RLS requires the file path to start with auth.uid()
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('يجب تسجيل الدخول أولاً قبل رفع المستندات');
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${documentType}-${Date.now()}.${fileExt}`;
-      const filePath = `technician-documents/${fileName}`;
+      // Path MUST begin with the user's id so storage RLS ownership check passes
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError, data: uploadData } = await supabase.storage
         .from('technician-registration-docs')
