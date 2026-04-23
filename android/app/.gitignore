@@ -1,6 +1,0 @@
-/build/*
-!/build/.npmkeep
-signing.properties
-*.jks
-*.keystore
-google-services.json
