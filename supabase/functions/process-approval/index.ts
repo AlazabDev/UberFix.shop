@@ -252,13 +252,17 @@ function generateHtmlResponse(
 
   const color = colors[type];
 
+  // العنوان فقط يمر عبر التهريب — رسالة المحتوى تحتوي وسوماً مقصودة (<p>) وقد
+  // تم تنظيف القيم الديناميكية داخلها مسبقاً عبر escapeHtml.
+  const safeTitle = escapeHtml(title);
+
   return `
     <!DOCTYPE html>
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${title}</title>
+      <title>${safeTitle}</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
