@@ -10,6 +10,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * تنظيف نص قبل إدراجه داخل HTML لمنع XSS.
+ * يهرّب الأحرف الخمسة المعتمدة في معيار OWASP.
+ */
+function escapeHtml(input: unknown): string {
+  const str = input == null ? "" : String(input);
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -188,8 +202,8 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", approval.request_id);
 
     const successMessage = action === "approve"
-      ? `✅ تمت الموافقة بنجاح على طلب الصيانة: ${approval.maintenance_requests.title}`
-      : `❌ تم رفض طلب الصيانة: ${approval.maintenance_requests.title}`;
+      ? `✅ تمت الموافقة بنجاح على طلب الصيانة: ${escapeHtml(approval.maintenance_requests?.title)}`
+      : `❌ تم رفض طلب الصيانة: ${escapeHtml(approval.maintenance_requests?.title)}`;
 
     const nextStepMessage = action === "approve"
       ? allApprovals?.every((a) => a.status === "approved")
@@ -213,7 +227,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       generateHtmlResponse(
         "خطأ",
-        `❌ حدث خطأ أثناء معالجة الطلب: ${error.message}`,
+        `❌ حدث خطأ أثناء معالجة الطلب: ${escapeHtml(error?.message)}`,
         "error"
       ),
       {
@@ -238,13 +252,17 @@ function generateHtmlResponse(
 
   const color = colors[type];
 
+  // العنوان فقط يمر عبر التهريب — رسالة المحتوى تحتوي وسوماً مقصودة (<p>) وقد
+  // تم تنظيف القيم الديناميكية داخلها مسبقاً عبر escapeHtml.
+  const safeTitle = escapeHtml(title);
+
   return `
     <!DOCTYPE html>
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${title}</title>
+      <title>${safeTitle}</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -316,7 +334,7 @@ function generateHtmlResponse(
     <body>
       <div class="container">
         <div class="header">
-          <h1>${title}</h1>
+          <h1>${safeTitle}</h1>
         </div>
         <div class="content">
           <div class="message">
