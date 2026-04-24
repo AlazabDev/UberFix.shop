@@ -10,6 +10,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * تنظيف نص قبل إدراجه داخل HTML لمنع XSS.
+ * يهرّب الأحرف الخمسة المعتمدة في معيار OWASP.
+ */
+function escapeHtml(input: unknown): string {
+  const str = input == null ? "" : String(input);
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
