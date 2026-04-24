@@ -334,7 +334,7 @@ function generateHtmlResponse(
     <body>
       <div class="container">
         <div class="header">
-          <h1>${title}</h1>
+          <h1>${safeTitle}</h1>
         </div>
         <div class="content">
           <div class="message">
