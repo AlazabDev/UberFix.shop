@@ -343,11 +343,19 @@ const MaintenanceGateway = () => {
               <pre className="bg-muted rounded-lg p-4 text-xs overflow-x-auto text-foreground" dir="ltr">
                 {examplePayload}
               </pre>
+              <pre className="mt-3 bg-muted rounded-lg p-4 text-xs overflow-x-auto text-foreground" dir="ltr">
+{`curl -X POST "${gatewayUrl}" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '${examplePayload}'`}
+              </pre>
               <div className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <p><strong className="text-foreground">channel</strong> (مطلوب): {Object.keys(CHANNEL_CONFIG).join(', ')}</p>
                 <p><strong className="text-foreground">client_name</strong> (مطلوب): اسم العميل</p>
                 <p><strong className="text-foreground">service_type</strong>: plumbing, electrical, ac, carpentry, metalwork, painting, cleaning, other</p>
                 <p><strong className="text-foreground">priority</strong>: high, medium, low</p>
+                <p><strong className="text-foreground">التوثيق الخارجي</strong>: استخدم <code dir="ltr">x-api-key</code> فقط للتكاملات الخارجية.</p>
+                <p><strong className="text-foreground">التوثيق الداخلي</strong>: استخدام <code dir="ltr">supabase.functions.invoke</code> أو <code dir="ltr">Authorization: Bearer {'{anon_or_user_jwt}'}</code>.</p>
               </div>
             </CardContent>
           </Card>
