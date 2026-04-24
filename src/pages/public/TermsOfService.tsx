@@ -31,7 +31,7 @@ export default function TermsOfService() {
         
         <div className="space-y-8 text-muted-foreground">
           <section>
-            <p className="text-sm text-muted-foreground mb-4">آخر تحديث: {new Date().toLocaleDateString('ar-SA')}</p>
+            <p className="text-sm text-muted-foreground mb-4">آخر تحديث: {new Date().toLocaleDateString('ar-EG')}</p>
             <p className="leading-relaxed">
               مرحباً بك في UberFix.shop. باستخدامك لمنصتنا، فإنك توافق على الالتزام بالشروط والأحكام التالية. يرجى قراءتها بعناية قبل استخدام خدماتنا.
             </p>

@@ -716,7 +716,7 @@ export function QuickRequestForm({ property, locale }: QuickRequestFormProps) {
                       </div>
                       <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/30">
                         <span className="font-mono">{request.id.slice(0, 8)}</span>
-                        <span>{new Date(request.created_at).toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}</span>
+                        <span>{new Date(request.created_at).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}</span>
                       </div>
                     </div>
                   ))}
