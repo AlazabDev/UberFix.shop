@@ -99,9 +99,31 @@ export default function APIDocumentation() {
             <div className="bg-muted p-4 rounded-lg">
               <p className="font-semibold mb-2">Required Headers:</p>
               <pre className="text-sm overflow-x-auto m-0">
-{`Authorization: Bearer {access_token}
+{`External maintenance-gateway calls:
+x-api-key: {api_key}
+Content-Type: application/json
+
+Internal app calls:
+Authorization: Bearer {access_token_or_anon_key}
 apikey: {anon_key}
 Content-Type: application/json`}
+              </pre>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg mt-4">
+              <p className="font-semibold mb-2">maintenance-gateway Example</p>
+              <pre className="text-sm overflow-x-auto m-0">
+{`curl -X POST "https://zrrffsjbfkphridqyais.supabase.co/functions/v1/maintenance-gateway" \\
+  -H "x-api-key: {api_key}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "channel": "api",
+    "client_name": "أحمد محمد",
+    "client_phone": "01004006620",
+    "service_type": "electrical",
+    "description": "اختبار كامل لدورة حياة طلب الصيانة",
+    "priority": "high"
+  }'`}
               </pre>
             </div>
 
