@@ -235,7 +235,7 @@ export function useTechnicianRegistration() {
       if (documents && documents.length > 0 && profileId) {
         const uploadedDocs: Array<{
           technician_id: string;
-          document_type: string;
+          document_type: TechnicianDocument["document_type"];
           file_url: string;
           file_name: string;
           file_size?: number;
