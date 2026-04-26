@@ -145,7 +145,6 @@ async function attemptDelivery(delivery: DeliveryRow, endpoint: string, secret: 
       })
       .eq('id', delivery.id);
 
-    await sb.rpc('noop').catch(() => null); // placeholder
     await sb
       .from('api_webhook_subscriptions')
       .update({
