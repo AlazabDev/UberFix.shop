@@ -61,11 +61,15 @@ const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> =
     status: 'received',
     channels: ['whatsapp', 'email'],
     whatsapp: {
-      template: `✅ تم استلام طلب الصيانة بنجاح
-رقم الطلب: {{order_id}}
-📋 {{title}}
-يمكنك متابعة حالة الطلب من هنا 👇
-{{track_url}}`,
+      template: `مرحباً {{customer_name}} 👋
+
+تم استلام طلبك في نظام *UberFix* بنجاح ✅
+سيتم الرد عليك في أقرب وقت إذا كان لديك أي أسئلة أو استفسارات.
+
+📌 رقم الطلب: *{{order_id}}*
+🔗 رابط المتابعة: {{track_url}}
+
+يسرّني مساعدتك دائماً 🌟`,
       buttonText: 'تتبّع الطلب',
     },
     email: {
@@ -82,10 +86,15 @@ const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> =
     status: 'reviewed',
     channels: ['whatsapp', 'email'],
     whatsapp: {
-      template: `📝 تمت مراجعة طلب الصيانة
-رقم الطلب: {{order_id}}
-جارٍ تجهيز التفاصيل اللازمة وسيتم التواصل معك قريباً.
-{{track_url}}`,
+      template: `مرحباً {{customer_name}} 👋
+
+تمت مراجعة طلبك في *UberFix* 📝
+جارٍ تجهيز التفاصيل اللازمة وسيتم التواصل معك قريباً لتحديد الفني المناسب.
+
+📌 رقم الطلب: *{{order_id}}*
+🔗 رابط المتابعة: {{track_url}}
+
+يسرّني مساعدتك دائماً 🌟`,
       buttonText: 'عرض الحالة',
     },
     email: {
@@ -100,11 +109,16 @@ const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> =
     status: 'scheduled',
     channels: ['whatsapp', 'email'],
     whatsapp: {
-      template: `🗓 تم تحديد موعد الصيانة
-رقم الطلب: {{order_id}}
-📅 {{date}} — ⏰ {{time}}
-لمراجعة التفاصيل أو تغيير الموعد:
-{{track_url}}`,
+      template: `مرحباً {{customer_name}} 👋
+
+تم تحديد موعد زيارة الفني لطلبك 🗓
+📅 التاريخ: *{{date}}*
+⏰ الوقت: *{{time}}*
+
+📌 رقم الطلب: *{{order_id}}*
+🔗 لمراجعة التفاصيل أو تغيير الموعد: {{track_url}}
+
+يسرّني مساعدتك دائماً 🌟`,
       buttonText: 'إدارة الموعد',
     },
     email: {
@@ -120,10 +134,15 @@ const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> =
     status: 'on_the_way',
     channels: ['whatsapp'],
     whatsapp: {
-      template: `🚚 الفني في الطريق إليك الآن!
-رقم الطلب: {{order_id}}
-يمكنك متابعة الحالة لحظة بلحظة:
-{{track_url}}`,
+      template: `مرحباً {{customer_name}} 👋
+
+الفني في الطريق إليك الآن 🚚
+يمكنك متابعة الحالة لحظة بلحظة من خلال الرابط أدناه.
+
+📌 رقم الطلب: *{{order_id}}*
+🔗 رابط المتابعة: {{track_url}}
+
+يسرّني مساعدتك دائماً 🌟`,
       buttonText: 'تتبّع الفني',
     },
   },
@@ -132,10 +151,15 @@ const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> =
     status: 'in_progress',
     channels: ['whatsapp'],
     whatsapp: {
-      template: `🛠 بدأ تنفيذ أعمال الصيانة
-رقم الطلب: {{order_id}}
-في حال احتجت أي تواصل أثناء التنفيذ:
-{{track_url}}`,
+      template: `مرحباً {{customer_name}} 👋
+
+بدأ تنفيذ أعمال الصيانة الخاصة بطلبك 🛠
+الفني يعمل الآن على حل المشكلة. في حال احتجت التواصل في أي وقت، استخدم الرابط أدناه.
+
+📌 رقم الطلب: *{{order_id}}*
+🔗 رابط المتابعة: {{track_url}}
+
+يسرّني مساعدتك دائماً 🌟`,
       buttonText: 'التواصل مع الفني',
     },
   },
@@ -144,10 +168,15 @@ const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> =
     status: 'completed',
     channels: ['whatsapp', 'email'],
     whatsapp: {
-      template: `✅ تم الانتهاء من أعمال الصيانة
-رقم الطلب: {{order_id}}
-يرجى مراجعة الأعمال واعتماد الإغلاق ⭐
-{{track_url}}`,
+      template: `مرحباً {{customer_name}} 👋
+
+تم الانتهاء من أعمال الصيانة بنجاح ✅
+يرجى مراجعة الأعمال واعتماد الإغلاق من خلال الرابط أدناه ⭐
+
+📌 رقم الطلب: *{{order_id}}*
+🔗 رابط المتابعة: {{track_url}}
+
+يسرّني مساعدتك دائماً 🌟`,
       buttonText: 'اعتماد الإغلاق',
     },
     email: {
@@ -163,11 +192,15 @@ const NOTIFICATION_TEMPLATES: Record<NotificationStatus, NotificationTemplate> =
     status: 'closed',
     channels: ['whatsapp', 'email'],
     whatsapp: {
-      template: `🏁 تم إغلاق طلب الصيانة بنجاح
-رقم الطلب: {{order_id}}
-نشكرك على ثقتك في UberFix 🙏
-نتطلع لخدمتك دائماً
-{{track_url}}`,
+      template: `مرحباً {{customer_name}} 👋
+
+تم إغلاق طلب الصيانة بنجاح 🏁
+نشكرك على ثقتك في *UberFix* 🙏 ونتطلع لخدمتك دائماً.
+
+📌 رقم الطلب: *{{order_id}}*
+🔗 لتقييم الخدمة: {{track_url}}
+
+يسرّني مساعدتك دائماً 🌟`,
       buttonText: 'تقييم الخدمة',
     },
     email: {
