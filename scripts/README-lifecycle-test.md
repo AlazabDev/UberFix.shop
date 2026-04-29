@@ -17,6 +17,14 @@ SUPABASE_SERVICE_ROLE_KEY="<service-role-key-من-Supabase-dashboard>" \
   node scripts/test-system-lifecycle.mjs
 ```
 
+أو لاختبار **طلب موجود بالفعل** من الـ terminal:
+
+```bash
+chmod +x scripts/test-lifecycle-request.sh
+SUPABASE_SERVICE_ROLE_KEY="<service-role-key-من-Supabase-dashboard>" \
+  scripts/test-lifecycle-request.sh <REQUEST_ID>
+```
+
 > ⚠️ **مطلوب Service Role Key** لأن السكربت ينشئ شركة وفرع وطلب يتجاوز RLS.
 > احصل عليه من: Supabase Dashboard → Settings → API → `service_role` (secret).
 
