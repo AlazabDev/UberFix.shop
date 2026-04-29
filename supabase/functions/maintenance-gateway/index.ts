@@ -494,6 +494,7 @@ Deno.serve(async (req) => {
       service_type: serviceType,
       status: 'Open',
       workflow_stage: 'submitted',
+      workflow_stage_v2: 'submitted',
       channel: consumer ? `api:${consumer.name}` : body.channel,
       priority,
       client_name: clientName,
