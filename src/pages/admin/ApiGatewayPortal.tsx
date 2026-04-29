@@ -3,7 +3,8 @@ import { ConsumersPanel } from '@/components/api-gateway/ConsumersPanel';
 import { WebhooksPanel } from '@/components/api-gateway/WebhooksPanel';
 import { GatewayLogsPanel } from '@/components/api-gateway/GatewayLogsPanel';
 import { IntegrationDocsPanel } from '@/components/api-gateway/IntegrationDocsPanel';
-import { Network, KeyRound, Webhook, ScrollText, BookOpen } from 'lucide-react';
+import { OpenApiPanel } from '@/components/api-gateway/OpenApiPanel';
+import { Network, KeyRound, Webhook, ScrollText, BookOpen, FileJson } from 'lucide-react';
 
 export default function ApiGatewayPortal() {
   return (
@@ -21,7 +22,7 @@ export default function ApiGatewayPortal() {
       </header>
 
       <Tabs defaultValue="consumers" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="consumers" className="gap-2">
             <KeyRound className="h-4 w-4" />المستهلكون
           </TabsTrigger>
@@ -30,6 +31,9 @@ export default function ApiGatewayPortal() {
           </TabsTrigger>
           <TabsTrigger value="logs" className="gap-2">
             <ScrollText className="h-4 w-4" />السجل
+          </TabsTrigger>
+          <TabsTrigger value="openapi" className="gap-2">
+            <FileJson className="h-4 w-4" />OpenAPI
           </TabsTrigger>
           <TabsTrigger value="docs" className="gap-2">
             <BookOpen className="h-4 w-4" />الدليل
@@ -44,6 +48,9 @@ export default function ApiGatewayPortal() {
         </TabsContent>
         <TabsContent value="logs" className="mt-4">
           <GatewayLogsPanel />
+        </TabsContent>
+        <TabsContent value="openapi" className="mt-4">
+          <OpenApiPanel />
         </TabsContent>
         <TabsContent value="docs" className="mt-4">
           <IntegrationDocsPanel />
