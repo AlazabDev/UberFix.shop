@@ -244,6 +244,13 @@ const buildTrackUrl = (orderId: string): string => {
   return `${baseUrl}/track/${orderId}`;
 };
 
+const buildInvoiceUrl = (orderId: string): string => {
+  const baseUrl = Deno.env.get('PUBLIC_SITE_URL') || 'https://uberfix.shop';
+  return `${baseUrl}/track/${orderId}/invoice`;
+};
+
+const buildCallLink = (): string => 'tel:+15557285727';
+
 const replaceVariables = (template: string, vars: Record<string, string>): string => {
   let result = template;
   Object.entries(vars).forEach(([key, value]) => {
