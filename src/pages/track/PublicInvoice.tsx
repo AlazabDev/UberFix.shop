@@ -187,7 +187,7 @@ export default function PublicInvoice() {
     if (!invoice || !request) return;
     const url = `${window.location.origin}/track/${request.id}/invoice`;
     const message = `📄 فاتورة UberFix\n\nرقم الفاتورة: ${invoice.invoice_number}\nرقم الطلب: ${request.request_number}\nالمبلغ: ${invoice.amount} ${invoice.currency}\nالحالة: ${STATUS_CONFIG[invoice.status]?.label || invoice.status}\n\n🔗 ${url}`;
-    openWhatsApp({ message, phone: invoice.customer_phone });
+    openWhatsApp(message);
   };
 
   const handlePrint = () => window.print();
