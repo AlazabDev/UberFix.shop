@@ -344,7 +344,29 @@ export default function PublicInvoice() {
 
       {/* Invoice Document */}
       <div className="max-w-3xl mx-auto">
-        <div ref={invoiceRef} className="bg-white text-gray-900 p-8 rounded-lg shadow-lg" style={{ fontFamily: 'Cairo, sans-serif' }}>
+        <div ref={invoiceRef} className="bg-white text-gray-900 p-8 rounded-lg shadow-lg relative overflow-hidden" style={{ fontFamily: 'Cairo, sans-serif' }}>
+          {/* Paid stamp overlay */}
+          {invoice.status === 'paid' && (
+            <div
+              className="absolute pointer-events-none select-none"
+              style={{
+                top: '38%',
+                right: '50%',
+                transform: 'translate(50%,-50%) rotate(-22deg)',
+                border: '6px solid #16a34a',
+                color: '#16a34a',
+                padding: '12px 36px',
+                fontSize: '54px',
+                fontWeight: 900,
+                letterSpacing: '4px',
+                opacity: 0.18,
+                borderRadius: '12px',
+                zIndex: 10,
+              }}
+            >
+              مدفوعة ✓ PAID
+            </div>
+          )}
           {/* Header */}
           <div className="flex justify-between items-start border-b-2 pb-6 mb-6" style={{ borderColor: '#030957' }}>
             <div>
