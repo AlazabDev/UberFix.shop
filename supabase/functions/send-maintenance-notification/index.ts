@@ -876,15 +876,43 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Build variables
     const trackUrl = buildTrackUrl(request_id);
+    const invoiceUrl = buildInvoiceUrl(request_id);
     const shortOrderId = request.request_number || request_id.substring(0, 8).toUpperCase();
     const customerName = request.client_name || 'عميلنا العزيز';
+
+    // Resolve technician info if assigned
+    let technicianName = body.technician_name || 'سيتم التعيين قريباً';
+    let technicianPhone = '+1-555-728-5727';
+    if (request.assigned_technician_id) {
+      const { data: tech } = await supabase
+        .from('technician_profiles')
+        .select('full_name, phone')
+        .eq('id', request.assigned_technician_id)
+        .maybeSingle();
+      if (tech) {
+        technicianName = tech.full_name || technicianName;
+        technicianPhone = tech.phone || technicianPhone;
+      }
+    }
+
+    const cost = request.actual_cost || request.estimated_cost || 0;
+    const createdDate = new Date(request.created_at).toLocaleDateString('ar-EG', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+
     const variables: Record<string, string> = {
       customer_name: customerName,
       order_id: shortOrderId,
       track_url: trackUrl,
+      invoice_url: invoiceUrl,
       date: scheduled_date || '',
       time: scheduled_time || '',
       title: request.title || 'طلب صيانة',
+      technician_name: technicianName,
+      technician_phone: technicianPhone,
+      cost: String(cost),
+      created_date: createdDate,
+      address: request.location || 'موقعك المسجل',
     };
 
     // Status labels for messages
