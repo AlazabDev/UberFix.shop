@@ -248,7 +248,7 @@ function EndpointCard({ op, serverUrl, sharedAuth }: { op: Op; serverUrl: string
 
 export function OpenApiPanel() {
   const { toast } = useToast();
-  const [serverUrl, setServerUrl] = useState(openApiSpec.servers[0].url);
+  const [serverUrl, setServerUrl] = useState<string>(openApiSpec.servers[0].url);
   const [apiKey, setApiKey] = useState('');
   const [bearer, setBearer] = useState('');
 
