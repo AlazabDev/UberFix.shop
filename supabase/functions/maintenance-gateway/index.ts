@@ -37,6 +37,15 @@ type Channel =
 
 interface GatewayRequest {
   channel: Channel;
+  // Optional action — defaults to 'create_request' for backward compatibility.
+  // Supported actions: 'create_request' | 'transition_stage' | 'get_status' | 'cancel' | 'add_note'
+  action?: 'create_request' | 'transition_stage' | 'get_status' | 'cancel' | 'add_note';
+  // Used by transition_stage / get_status / cancel / add_note
+  request_id?: string;
+  request_number?: string;
+  to_stage?: string;
+  reason?: string;
+  note?: string;
   client_name: string;
   client_phone?: string;
   client_email?: string;
