@@ -15,6 +15,8 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { openWhatsApp } from '@/config/whatsapp';
 import { useToast } from '@/hooks/use-toast';
+import { PublicShell } from '@/components/layout/PublicShell';
+import { RatingDialog } from '@/components/track/RatingDialog';
 
 interface RequestData {
   id: string;
@@ -81,6 +83,7 @@ export default function TrackOrder() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [phoneResults, setPhoneResults] = useState<RequestData[]>([]);
+  const [ratingOpen, setRatingOpen] = useState(false);
   const { toast } = useToast();
 
   const fetchByQuery = async (query: string) => {
@@ -189,8 +192,8 @@ export default function TrackOrder() {
   // ─── Search-only mode (no orderId) ───
   if (!orderId && !request) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background" dir="rtl">
-        <div className="max-w-lg mx-auto px-4 pt-16 pb-8">
+      <PublicShell subtitle="تتبع الطلبات" maxWidth="lg">
+        <div className="pt-8">
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
               <Search className="h-8 w-8 text-primary" />
@@ -219,38 +222,31 @@ export default function TrackOrder() {
               </p>
             </CardContent>
           </Card>
-
-          <div className="text-center mt-8">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
-              <Home className="h-4 w-4" />
-              العودة للرئيسية
-            </Link>
-          </div>
         </div>
-      </div>
+      </PublicShell>
     );
   }
 
   // ─── Loading ───
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background flex items-center justify-center">
-        <div className="text-center">
+      <PublicShell subtitle="تتبع الطلبات" maxWidth="lg">
+        <div className="text-center py-20">
           <div className="relative">
             <div className="absolute inset-0 animate-ping opacity-20 bg-primary rounded-full w-16 h-16 mx-auto" />
             <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto relative" />
           </div>
           <p className="text-muted-foreground mt-6 text-lg">جاري تحميل بيانات الطلب...</p>
         </div>
-      </div>
+      </PublicShell>
     );
   }
 
   // ─── Error ───
   if (error || !request) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background flex items-center justify-center p-4" dir="rtl">
-        <Card className="max-w-md w-full border-destructive/20">
+      <PublicShell subtitle="تتبع الطلبات" maxWidth="md">
+        <Card className="border-destructive/20 mt-8">
           <CardContent className="pt-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 mb-4">
               <AlertCircle className="h-8 w-8 text-destructive" />
@@ -271,16 +267,9 @@ export default function TrackOrder() {
                 {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               </Button>
             </div>
-
-            <Link to="/">
-              <Button variant="ghost" className="text-muted-foreground">
-                <Home className="ml-2 h-4 w-4" />
-                العودة للرئيسية
-              </Button>
-            </Link>
           </CardContent>
         </Card>
-      </div>
+      </PublicShell>
     );
   }
 
@@ -293,28 +282,8 @@ export default function TrackOrder() {
   const priorityConfig = PRIORITY_CONFIG[request.priority || 'medium'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background" dir="rtl">
-      {/* ─── Branded Header ─── */}
-      <div className="bg-primary text-primary-foreground">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Shield className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg leading-tight">UberFix</h1>
-              <p className="text-xs opacity-80">نظام تتبع الطلبات</p>
-            </div>
-          </div>
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/10">
-              <Home className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+    <PublicShell subtitle="تتبع الطلب" maxWidth="2xl">
+      <div className="space-y-4">
         {/* ─── Phone Results Selector ─── */}
         {phoneResults.length > 1 && (
           <Card className="border-0 shadow-lg">
@@ -543,11 +512,20 @@ export default function TrackOrder() {
               </Button>
             </Link>
 
-            {(request.workflow_stage === 'completed' || request.workflow_stage === 'closed') && !request.rating && (
-              <Button className="w-full mt-3 h-12 bg-amber-500 hover:bg-amber-600 text-white font-semibold">
+            {['completed','billed','paid','handover_to_admin','closed'].includes(request.workflow_stage) && !request.rating && (
+              <Button
+                onClick={() => setRatingOpen(true)}
+                className="w-full mt-3 h-12 bg-[#FFB900] hover:bg-[#FFB900]/90 text-[#030957] font-bold shadow-md"
+              >
                 <Star className="ml-2 h-5 w-5" />
                 قيّم الخدمة
               </Button>
+            )}
+            {request.rating && (
+              <div className="w-full mt-3 h-12 rounded-md flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-700 font-semibold">
+                <Star className="h-5 w-5 fill-[#FFB900] text-[#FFB900]" />
+                <span>تم تقييم الخدمة بـ {request.rating} نجوم</span>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -572,17 +550,15 @@ export default function TrackOrder() {
           </CardContent>
         </Card>
 
-        {/* ─── Footer ─── */}
-        <div className="text-center py-4 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            شكراً لثقتك في <span className="font-bold text-primary">UberFix</span>
-          </p>
-          <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-            <Shield className="h-3 w-3" />
-            <span>بياناتك محمية ومشفرة</span>
-          </div>
-        </div>
       </div>
-    </div>
+
+      <RatingDialog
+        open={ratingOpen}
+        onOpenChange={setRatingOpen}
+        requestKey={request.id}
+        requestNumber={request.request_number}
+        onRated={(r) => setRequest({ ...request, rating: r })}
+      />
+    </PublicShell>
   );
 }
