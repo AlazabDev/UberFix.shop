@@ -9594,6 +9594,14 @@ export type Database = {
         Args: { p_request_id: string }
         Returns: Json
       }
+      public_submit_rating: {
+        Args: {
+          comment_text?: string
+          query_text: string
+          rating_value: number
+        }
+        Returns: Json
+      }
       public_track_request: {
         Args: { query_text: string }
         Returns: {
