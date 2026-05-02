@@ -512,11 +512,20 @@ export default function TrackOrder() {
               </Button>
             </Link>
 
-            {(request.workflow_stage === 'completed' || request.workflow_stage === 'closed') && !request.rating && (
-              <Button className="w-full mt-3 h-12 bg-amber-500 hover:bg-amber-600 text-white font-semibold">
+            {['completed','billed','paid','handover_to_admin','closed'].includes(request.workflow_stage) && !request.rating && (
+              <Button
+                onClick={() => setRatingOpen(true)}
+                className="w-full mt-3 h-12 bg-[#FFB900] hover:bg-[#FFB900]/90 text-[#030957] font-bold shadow-md"
+              >
                 <Star className="ml-2 h-5 w-5" />
                 قيّم الخدمة
               </Button>
+            )}
+            {request.rating && (
+              <div className="w-full mt-3 h-12 rounded-md flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-700 font-semibold">
+                <Star className="h-5 w-5 fill-[#FFB900] text-[#FFB900]" />
+                <span>تم تقييم الخدمة بـ {request.rating} نجوم</span>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -541,17 +550,15 @@ export default function TrackOrder() {
           </CardContent>
         </Card>
 
-        {/* ─── Footer ─── */}
-        <div className="text-center py-4 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            شكراً لثقتك في <span className="font-bold text-primary">UberFix</span>
-          </p>
-          <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-            <Shield className="h-3 w-3" />
-            <span>بياناتك محمية ومشفرة</span>
-          </div>
-        </div>
       </div>
-    </div>
+
+      <RatingDialog
+        open={ratingOpen}
+        onOpenChange={setRatingOpen}
+        requestKey={request.id}
+        requestNumber={request.request_number}
+        onRated={(r) => setRequest({ ...request, rating: r })}
+      />
+    </PublicShell>
   );
 }
