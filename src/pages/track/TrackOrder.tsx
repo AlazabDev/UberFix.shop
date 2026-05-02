@@ -282,28 +282,8 @@ export default function TrackOrder() {
   const priorityConfig = PRIORITY_CONFIG[request.priority || 'medium'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background" dir="rtl">
-      {/* ─── Branded Header ─── */}
-      <div className="bg-primary text-primary-foreground">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Shield className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg leading-tight">UberFix</h1>
-              <p className="text-xs opacity-80">نظام تتبع الطلبات</p>
-            </div>
-          </div>
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/10">
-              <Home className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+    <PublicShell subtitle="تتبع الطلب" maxWidth="2xl">
+      <div className="space-y-4">
         {/* ─── Phone Results Selector ─── */}
         {phoneResults.length > 1 && (
           <Card className="border-0 shadow-lg">
