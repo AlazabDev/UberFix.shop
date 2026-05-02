@@ -83,6 +83,13 @@ export type Database = {
             referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "message_logs_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       _legacy_messages: {
@@ -979,6 +986,13 @@ export type Database = {
             referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bot_sessions_last_request_id_fkey"
+            columns: ["last_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       branch_locations: {
@@ -1185,6 +1199,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
             referencedColumns: ["id"]
           },
           {
@@ -1486,6 +1507,13 @@ export type Database = {
             columns: ["maintenance_request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daftra_sync_logs_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
             referencedColumns: ["id"]
           },
         ]
@@ -2063,6 +2091,13 @@ export type Database = {
             referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "facebook_leads_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       facebook_users: {
@@ -2364,6 +2399,13 @@ export type Database = {
             referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invoices_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       maintenance_contracts: {
@@ -2507,6 +2549,8 @@ export type Database = {
           client_email: string | null
           client_name: string | null
           client_phone: string | null
+          closed_at: string | null
+          closure_reason: string | null
           company_id: string
           contract_id: string | null
           created_at: string
@@ -2518,6 +2562,10 @@ export type Database = {
           daftra_synced_at: string | null
           description: string | null
           estimated_cost: number | null
+          feedback_comment: string | null
+          handover_signature: string | null
+          handover_to_admin_at: string | null
+          handover_to_admin_by: string | null
           id: string
           last_modified_by: string | null
           latitude: number | null
@@ -2526,6 +2574,7 @@ export type Database = {
           opened_by_role: string | null
           priority: string | null
           property_id: string | null
+          rated_at: string | null
           rating: number | null
           request_number: string | null
           request_status_derived:
@@ -2558,6 +2607,8 @@ export type Database = {
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
+          closed_at?: string | null
+          closure_reason?: string | null
           company_id: string
           contract_id?: string | null
           created_at?: string
@@ -2569,6 +2620,10 @@ export type Database = {
           daftra_synced_at?: string | null
           description?: string | null
           estimated_cost?: number | null
+          feedback_comment?: string | null
+          handover_signature?: string | null
+          handover_to_admin_at?: string | null
+          handover_to_admin_by?: string | null
           id?: string
           last_modified_by?: string | null
           latitude?: number | null
@@ -2577,6 +2632,7 @@ export type Database = {
           opened_by_role?: string | null
           priority?: string | null
           property_id?: string | null
+          rated_at?: string | null
           rating?: number | null
           request_number?: string | null
           request_status_derived?:
@@ -2609,6 +2665,8 @@ export type Database = {
           client_email?: string | null
           client_name?: string | null
           client_phone?: string | null
+          closed_at?: string | null
+          closure_reason?: string | null
           company_id?: string
           contract_id?: string | null
           created_at?: string
@@ -2620,6 +2678,10 @@ export type Database = {
           daftra_synced_at?: string | null
           description?: string | null
           estimated_cost?: number | null
+          feedback_comment?: string | null
+          handover_signature?: string | null
+          handover_to_admin_at?: string | null
+          handover_to_admin_by?: string | null
           id?: string
           last_modified_by?: string | null
           latitude?: number | null
@@ -2628,6 +2690,7 @@ export type Database = {
           opened_by_role?: string | null
           priority?: string | null
           property_id?: string | null
+          rated_at?: string | null
           rating?: number | null
           request_number?: string | null
           request_status_derived?:
@@ -3400,6 +3463,13 @@ export type Database = {
             referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payment_transactions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       pending_technician_registrations: {
@@ -4024,6 +4094,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_review_request"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
             referencedColumns: ["id"]
           },
           {
@@ -5704,6 +5781,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_task_request"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_task_technician"
             columns: ["technician_id"]
             isOneToOne: false
@@ -5736,6 +5820,13 @@ export type Database = {
             columns: ["maintenance_request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_tasks_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
             referencedColumns: ["id"]
           },
           {
@@ -5971,6 +6062,13 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_transactions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
             referencedColumns: ["id"]
           },
           {
@@ -6849,6 +6947,13 @@ export type Database = {
             columns: ["current_request_id"]
             isOneToOne: false
             referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wa_conversations_current_request_id_fkey"
+            columns: ["current_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
             referencedColumns: ["id"]
           },
           {
@@ -8211,6 +8316,13 @@ export type Database = {
             referencedRelation: "maintenance_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "message_logs_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_completed_requests_dashboard"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages: {
@@ -8708,6 +8820,189 @@ export type Database = {
           total_reviews?: number | null
         }
         Relationships: []
+      }
+      v_completed_requests_dashboard: {
+        Row: {
+          actual_cost: number | null
+          assigned_technician_id: string | null
+          assigned_vendor_id: string | null
+          branch_id: string | null
+          client_name: string | null
+          closed_at: string | null
+          closure_reason: string | null
+          company_id: string | null
+          created_at: string | null
+          estimated_cost: number | null
+          feedback_comment: string | null
+          handover_to_admin_at: string | null
+          handover_to_admin_by: string | null
+          id: string | null
+          lifecycle_hours: number | null
+          location: string | null
+          priority: string | null
+          property_id: string | null
+          rated_at: string | null
+          rating: number | null
+          request_number: string | null
+          service_type: string | null
+          sla_met: boolean | null
+          stage: Database["public"]["Enums"]["workflow_stage_t"] | null
+          title: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          assigned_technician_id?: string | null
+          assigned_vendor_id?: string | null
+          branch_id?: string | null
+          client_name?: string | null
+          closed_at?: string | null
+          closure_reason?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          estimated_cost?: number | null
+          feedback_comment?: string | null
+          handover_to_admin_at?: string | null
+          handover_to_admin_by?: string | null
+          id?: string | null
+          lifecycle_hours?: never
+          location?: string | null
+          priority?: string | null
+          property_id?: string | null
+          rated_at?: string | null
+          rating?: number | null
+          request_number?: string | null
+          service_type?: string | null
+          sla_met?: never
+          stage?: Database["public"]["Enums"]["workflow_stage_t"] | null
+          title?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          assigned_technician_id?: string | null
+          assigned_vendor_id?: string | null
+          branch_id?: string | null
+          client_name?: string | null
+          closed_at?: string | null
+          closure_reason?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          estimated_cost?: number | null
+          feedback_comment?: string | null
+          handover_to_admin_at?: string | null
+          handover_to_admin_by?: string | null
+          id?: string | null
+          lifecycle_hours?: never
+          location?: string | null
+          priority?: string | null
+          property_id?: string | null
+          rated_at?: string | null
+          rating?: number | null
+          request_number?: string | null
+          service_type?: string | null
+          sla_met?: never
+          stage?: Database["public"]["Enums"]["workflow_stage_t"] | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_maintenance_requests_assigned_vendor"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_maintenance_requests_assigned_vendor"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_branch"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_mr_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_map_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians_public_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_qr_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendors_public_safe: {
         Row: {
@@ -9382,6 +9677,7 @@ export type Database = {
         | "completed"
         | "billed"
         | "paid"
+        | "handover_to_admin"
         | "closed"
         | "cancelled"
         | "rejected"
@@ -9683,6 +9979,7 @@ export const Constants = {
         "completed",
         "billed",
         "paid",
+        "handover_to_admin",
         "closed",
         "cancelled",
         "rejected",
