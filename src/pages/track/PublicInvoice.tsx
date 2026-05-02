@@ -425,7 +425,7 @@ export default function PublicInvoice() {
       </div>
 
       {/* Invoice Document */}
-      <div className="max-w-3xl mx-auto">
+      <div>
         <div ref={invoiceRef} className="bg-white text-gray-900 p-8 rounded-lg shadow-lg relative overflow-hidden" style={{ fontFamily: 'Cairo, sans-serif' }}>
           {/* Paid stamp overlay */}
           {invoice.status === 'paid' && (
